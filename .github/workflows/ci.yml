@@ -1,0 +1,106 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - "claude/**"
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip pytest fastapi httpx
+
+      - name: Run pytest tutorial suites
+        # One invocation per suite: parametrize/ and custom_markers/ both
+        # contain test_mathlib.py and mathlib.py without __init__.py, so a
+        # single collection pass over unittesting_pytest/ aborts with an
+        # import-file-mismatch error.
+        run: |
+          pytest unittesting_pytest/parametrize
+          pytest unittesting_pytest/fixtures
+          pytest unittesting_pytest/custom_markers
+
+      - name: Run FastAPI smoke tests
+        run: pytest Advanced/FastAPI
+
+  repo-checks:
+    name: repo checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip numpy pandas
+
+      - name: Syntax-check all Python files
+        # Excludes the two deliberately-broken teaching files: a REPL
+        # transcript saved as .py and an intentionally incomplete stub.
+        run: >
+          python -m compileall -q .
+          -x 'Basics/variable_numbers_strings\.py|Multiprocessing/multithreading_producer_consumer\.py'
+
+      - name: Check notebooks are valid JSON
+        run: |
+          python - <<'EOF'
+          import json
+          import pathlib
+
+          notebooks = sorted(pathlib.Path(".").rglob("*.ipynb"))
+          for notebook in notebooks:
+              json.loads(notebook.read_text(encoding="utf-8"))
+          print(f"{len(notebooks)} notebooks OK")
+          EOF
+
+      - name: Smoke-run stdlib tutorial scripts
+        # Allowlist only — many tutorial scripts call input(), start Flask
+        # servers, or hit the network, so never generalize this to every file.
+        run: |
+          for f in \
+            Advanced/decorators.py \
+            Debugging/conditional_breakpoint.py \
+            Debugging/watches_callstack.py \
+            Multiprocessing/multiprocessing_introduction.py \
+            Multiprocessing/multiprocessing_pool.py \
+            Multiprocessing/multiprocessing_lock.py \
+            Multiprocessing/multiprocessing_value_array.py \
+            Multiprocessing/multiprocessing_queue_pipe.py \
+            Multiprocessing/multthreading_introduction.py; do
+            echo "::group::$f"
+            timeout 60 python "$f"
+            echo "::endgroup::"
+          done
+          python Modules/argparse_tutorial.py --number1 2 --number2 3 --operation add
+
+      - name: Smoke-run numpy/pandas tutorial scripts
+        run: |
+          python numpy/numpy_tutorial.py
+          python numpy/numpy_tutorail_2.py
+          python ML/3_gradient_descent/gradient_descent.py
+          python DeepLearningML/8_sgd_vs_gd/gradient_descent.py
+          python Modules/pandas_tutorial.py
