@@ -1,0 +1,4 @@
+requests>=2.25
+
+# For running the tests only:
+pytest>=7.0
