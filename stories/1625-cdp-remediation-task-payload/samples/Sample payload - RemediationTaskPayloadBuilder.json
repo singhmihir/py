@@ -1,0 +1,37 @@
+{
+  "envelope": {
+    "type": "record",
+    "topic_name": "sn_usem_remtask_outbound",
+    "namespace": "com.bofa.usem",
+    "core_version": "1.0.0",
+    "outbound_version": "1.0.0",
+    "event_id": "9641d02a-93c3-c310-e3ae-f0aefaba1013",
+    "event_timestamp": "2026-09-03T12:00:59Z",
+    "element_count": 1,
+    "element_activity": "UPDATE"
+  },
+  "rem_tasks": [
+    {
+      "remediation_task": {
+        "assigned_to": "Sean Adams",
+        "number": "VUL0004576",
+        "opened_at": "06-26-2026 13:24:36",
+        "opened_by": "VR System",
+        "reassignment_count": "0",
+        "risk_score": "85",
+        "short_description": "!!! Critical !!! Vulnerabilities with known exploits, CVE-2014-6287:The findMacroMarker function in parserLib.pas in Rejetto HTTP File Server (aks HFS or HttpF",
+        "state": "Under Investigation",
+        "status_updated_on": "07-27-2026 06:11:52",
+        "sys_created_by": "VR.System",
+        "sys_created_on": "06-26-2026 13:24:36",
+        "sys_updated_by": "ZK5LG9V",
+        "sys_updated_on": "09-03-2026 12:00:32",
+        "total_cis": "1",
+        "ttr_status": "Target Missed",
+        "ttr_target_date": "07-04-2026 15:24:06",
+        "total_vis": "1",
+        "u_avul_record_url": "https://instance.example.com/now/vr-analysis/record/sn_vul_vulnerability/ad21d45d13bc3300a23a7f176144b055"
+      }
+    }
+  ]
+}

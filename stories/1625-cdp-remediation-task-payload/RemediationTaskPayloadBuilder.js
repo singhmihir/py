@@ -5,66 +5,61 @@ RemediationTaskPayloadBuilder.prototype = {
         this.NAMESPACE = 'com.bofa.usem';
         this.CORE_VERSION = '1.0.0';
         this.OUTBOUND_VERSION = '1.0.0';
-        this.DEFAULT_ACTIVITY = 'INSERT';
         this.WORKSPACE_PATH = 'now/vr-analysis/record/';
-        this.DATE_TIME_FORMAT = 'MM-dd-yyyy HH:mm:ss';
         this.DATE_FORMAT = 'MM-dd-yyyy';
-        // field order and handling follow the agreed remediation task payload
+        this.TIME_FORMAT = 'HH:mm:ss';
+        this.URL_FIELD = 'u_avul_record_url';
+        // field types rendered with their display value; dates, journals and
+        // everything else are handled in _renderElement
+        this.DISPLAY_TYPES = ['reference', 'glide_list', 'boolean', 'glide_duration', 'timer', 'domain_id', 'sys_class_name', 'integer', 'string'];
         this.FIELDS = [
-            { name: 'assigned_to',           kind: 'display' },
-            { name: 'assignment_type',       kind: 'display' },
-            { name: 'closed_at',             kind: 'datetime' },
-            { name: 'closed_by',             kind: 'display' },
-            { name: 'defer_extend_count',    kind: 'value' },
-            { name: 'number',                kind: 'value' },
-            { name: 'opened_at',             kind: 'datetime' },
-            { name: 'opened_by',             kind: 'display' },
-            { name: 'reassignment_count',    kind: 'value' },
-            { name: 'resolution_date',       kind: 'date' },
-            { name: 'resolved_by',           kind: 'display' },
-            { name: 'risk_score',            kind: 'value' },
-            { name: 'short_description',     kind: 'value' },
-            { name: 'state',                 kind: 'display' },
-            { name: 'status_updated_on',     kind: 'datetime' },
-            { name: 'sys_created_by',        kind: 'value' },
-            { name: 'sys_created_on',        kind: 'datetime' },
-            { name: 'sys_updated_by',        kind: 'value' },
-            { name: 'sys_updated_on',        kind: 'datetime' },
-            { name: 'total_cis',             kind: 'value' },
-            { name: 'ttr_status',            kind: 'display' },
-            { name: 'ttr_target_date',       kind: 'datetime' },
-            { name: 'defer_count',           kind: 'value' },
-            { name: 'total_vis',             kind: 'value' },
-            { name: 'u_avul_record_url',     kind: 'url' },
-            { name: 'u_verification_status', kind: 'display' }
+            'assigned_to', 'assignment_type', 'closed_at', 'closed_by', 'defer_extend_count', 'number',
+            'opened_at', 'opened_by', 'reassignment_count', 'resolution_date', 'resolved_by', 'risk_score',
+            'short_description', 'state', 'status_updated_on', 'sys_created_by', 'sys_created_on',
+            'sys_updated_by', 'sys_updated_on', 'total_cis', 'ttr_status', 'ttr_target_date', 'defer_count',
+            'total_vis', 'u_verification_status'
         ];
     },
 
     /**
-     * Builds the outbound Kafka payload for one remediation task.
-     * @param {GlideRecord} remediationTask - a remediation task record
-     * @param {String} activity - INSERT or UPDATE, defaults to INSERT
+     * Builds the outbound Kafka payload for one remediation task. The activity
+     * comes from the record itself: the operation in progress when called from
+     * a business rule, otherwise INSERT for a record that has never been
+     * updated and UPDATE for any other.
+     * @param {GlideRecord} record - a remediation task record
      * @returns {String} JSON payload, or an empty string when the payload cannot be built
      */
-    buildPayload: function(remediationTask, activity) {
+    buildPayload: function(record) {
         try {
-            if (!this._isRecord(remediationTask))
-                throw new Error('a valid remediation task record is required');
+            if (!this._isRecord(record))
+                throw new Error('record is not a valid GlideRecord');
             var payload = {
-                envelope: this._buildEnvelope(activity),
+                envelope: this._buildEnvelope(this._activity(record)),
                 rem_tasks: [{
-                    remediation_task: this._buildRemediationTask(remediationTask)
+                    remediation_task: this._buildRemediationTask(record)
                 }]
             };
             return JSON.stringify(payload);
         } catch (e) {
-            gs.error('RemediationTaskPayloadBuilder: payload not built - ' + e.message);
+            gs.error(this._errorMessage(record, e));
             return '';
         }
     },
 
-    _isRecord: function(gr) {
-        return gr !== null && typeof gr === 'object' && typeof gr.isValidRecord === 'function' && gr.isValidRecord();
+    _isRecord: function(record) {
+        return record !== null && typeof record === 'object' && typeof record.isValidRecord === 'function' && record.isValidRecord();
+    },
+
+    _errorMessage: function(record, e) {
+        var subject = this._isRecord(record) ? ' for ' + record.getTableName() + ' ' + record.getUniqueValue() : '';
+        return this.type + ': payload not built' + subject + ' - ' + e.message;
+    },
+
+    _activity: function(record) {
+        var operation = String(record.operation() || '').toUpperCase();
+        if (operation)
+            return operation;
+        return parseInt(record.getValue('sys_mod_count')) > 0 ? 'UPDATE' : 'INSERT';
     },
 
     _buildEnvelope: function(activity) {
@@ -77,39 +72,40 @@ RemediationTaskPayloadBuilder.prototype = {
             event_id: this._newEventId(),
             event_timestamp: this._utcTimestamp(),
             element_count: 1,
-            element_activity: gs.nil(activity) ? this.DEFAULT_ACTIVITY : String(activity).toUpperCase()
+            element_activity: activity
         };
     },
 
-    _buildRemediationTask: function(gr) {
+    _buildRemediationTask: function(record) {
         var task = {};
         for (var i = 0; i < this.FIELDS.length; i++) {
-            var field = this.FIELDS[i];
-            if (field.kind === 'url') {
-                task[field.name] = this._workspaceUrl(gr);
+            var name = this.FIELDS[i];
+            if (!record.isValidField(name) || record.getElement(name).nil())
                 continue;
-            }
-            if (!gr.isValidField(field.name) || gs.nil(gr.getValue(field.name)))
-                continue;
-            task[field.name] = this._render(gr, field);
+            task[name] = this._renderElement(record.getElement(name));
         }
+        task[this.URL_FIELD] = this._workspaceUrl(record);
         return task;
     },
 
-    _render: function(gr, field) {
-        var value = gr.getValue(field.name);
-        if (field.kind === 'display')
-            return String(gr.getDisplayValue(field.name) || value);
-        if (field.kind === 'datetime')
-            return this._formatDateTime(value);
-        if (field.kind === 'date')
-            return this._formatDate(value);
-        return String(value);
+    _renderElement: function(element) {
+        if (element.nil())
+            return '';
+        var type = String(element.getED().getInternalType());
+        if (type === 'glide_date_time')
+            return this._formatDateTime(element.getValue());
+        if (type === 'glide_date')
+            return this._formatDate(element.getValue());
+        if (type === 'journal_input')
+            return String(element.getJournalEntry(1)).trim();
+        if (this.DISPLAY_TYPES.indexOf(type) > -1)
+            return String(element.getDisplayValue());
+        return String(element.getValue());
     },
 
     _formatDateTime: function(value) {
         var gdt = new GlideDateTime(value);
-        return gdt.getDate().getByFormat(this.DATE_FORMAT) + ' ' + gdt.getTime().getByFormat('HH:mm:ss');
+        return gdt.getDate().getByFormat(this.DATE_FORMAT) + ' ' + gdt.getTime().getByFormat(this.TIME_FORMAT);
     },
 
     _formatDate: function(value) {
@@ -118,11 +114,11 @@ RemediationTaskPayloadBuilder.prototype = {
         return gd.getByFormat(this.DATE_FORMAT);
     },
 
-    _workspaceUrl: function(gr) {
+    _workspaceUrl: function(record) {
         var base = gs.getProperty('glide.servlet.uri', '');
         if (base.charAt(base.length - 1) !== '/')
             base += '/';
-        return base + this.WORKSPACE_PATH + gr.getTableName() + '/' + gr.getUniqueValue();
+        return base + this.WORKSPACE_PATH + record.getTableName() + '/' + record.getUniqueValue();
     },
 
     _newEventId: function() {
