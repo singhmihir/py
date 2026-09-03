@@ -1,6 +1,6 @@
 # SNOWUSEMTP-1625 — Kafka payload for remediation tasks (CDP)
 
-Global-scope update set V1.0 (2 script includes):
+Global-scope update set V1.2 (2 script includes + 10 system properties):
 
 - `RemediationTaskPayloadBuilder.js` — the fellow developer's background script
   (`generateRemediationTaskSCRIPT.txt`) as a class: `buildPayload(record, activity)` returns the
@@ -12,5 +12,17 @@ Global-scope update set V1.0 (2 script includes):
   `sn_vulc_result_group`, rendered by dictionary type, plus `change_requests` (association
   tables) and `exception_requests` (approved/expired exception approvals).
 
-Drivers: `build_1625.py`, `test_1625.py` (42 checks incl. negatives and a 50-record run),
-`export_1625.py`.
+Field lists live in system properties, so field customisation needs no code change:
+`usem.remtask.payload.fields` (first builder), `usem.cdp.remtask.fields.common`,
+`usem.cdp.remtask.fields.<table>` (a table is supported while its property exists) and
+`usem.cdp.remtask.changes.<table>` (`<association table>.<link field>`). Entries are comma
+separated field names, `json_name=field` where the payload key differs. Values are generated
+from the sheet into `properties.json` and created by `build_props_1625.py`.
+
+Rendering is type driven (dictionary internal type), errors use one format
+(`<builder>: payload not built for <table> <sys_id> - <reason>`), and `element_activity`
+comes from `current.operation()` in a business rule (never-updated -> INSERT, else UPDATE
+outside one).
+
+Drivers: `build_1625.py`, `build_props_1625.py`, `test_1625.py` (51 checks incl. negatives,
+a business-rule probe and property changes at run time), `export_1625.py`.

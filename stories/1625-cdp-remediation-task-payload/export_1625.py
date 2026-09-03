@@ -33,5 +33,5 @@ while (rs.next()) { var names = []; var ux = new GlideRecord('sys_update_xml'); 
 var local = new GlideAggregate('sys_update_xml'); local.addQuery('update_set', %s); local.addAggregate('COUNT'); local.query(); local.next(); o.local_rows_intact = parseInt(local.getAggregate('COUNT'));
 gs.print('X::' + JSON.stringify(o));''' % (json.dumps(NAME), json.dumps(SET)))
 print('UI import test:', json.dumps(d3))
-assert len(d3['sets']) == 1 and len(d3['sets'][0]['names']) == 2 and d3['local_rows_intact'] == 2
+assert len(d3['sets']) == 1 and len(d3['sets'][0]['names']) == 12 and d3['local_rows_intact'] == 12
 print('EXPORT OK')
