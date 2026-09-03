@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-03 11:35:03">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Exception Management for Unified Security Exposure Management">80a1334f8b9a48cba8b4f4c240c1a4de</application>
+<application_name>Exception Management for Unified Security Exposure Management</application_name>
+<application_scope>sn_sec_exception</application_scope>
+<application_version>30.5.1</application_version>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>Workspace Request Exception dialog: the Defer until date is now limited per reason - Risk Accepted allows at most 180 days from today, Fix Unavailable at most 90; a date past the limit shows "Select a date within N days from today." and Submit stays disabled. Enforced in three places on the Request Exception Unified modal (Security Exception Management app): the updateUntilDate client script (caps the allowed interval when the date changes), the validateFormFields client script (re-checks when the reason changes after a date was picked), and the "Request Exception action" data broker (server-side refusal, so the rule holds for any client). The configured interval (sn_sec_exception.config_max_duration / per-table request_exception_beyond) still applies when it is shorter.</description>
+<inserted/>
+<name>Request Exception - reason based deferral limits</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>03dff346933a0390e3aef0aefaba101d</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:03</sys_created_on>
+<sys_id>da5b846a9383c310e3aef0aefaba103a</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:03</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Exception Management for Unified Security Exposure Management">80a1334f8b9a48cba8b4f4c240c1a4de</application>
+<category>customer</category>
+<comments/>
+<name>sys_ux_client_script_9c4145a5ff656210d317ffffffffff15</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_ux_client_script"&gt;&lt;sys_ux_client_script action="INSERT_OR_UPDATE"&gt;&lt;controller_preset/&gt;&lt;includes/&gt;&lt;macroponent display_value="Request Exception Unified"&gt;b38e662833216a10fd9f96382e5c7b0c&lt;/macroponent&gt;&lt;name&gt;updateUntilDate&lt;/name&gt;&lt;preset/&gt;&lt;required_translations&gt;[
+    {
+        "message": "Please choose a valid future date in the format (yyyy-MM-dd)"
+    },
+    {
+        "message": "Select a date within {0} days from today."
+    }
+]&lt;/required_translations&gt;&lt;script&gt;&lt;![CDATA[/**
+ * @param {params} params
+ * @param {api} params.api
+ * @param {any} params.event
+ * @param {any} params.imports
+ */
+async function handler({
+    api,
+    event,
+    helpers,
+    imports,
+    params
+}) {
+    var dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    var validPayloadDate;
+    if (event.elementId === "date_input_text") {
+        validPayloadDate = (event.payload.fieldValue.match(dateRegex)) ? "" + event.payload.fieldValue : "";
+    } else {
+        validPayloadDate = event.payload.value;
+    }
+
+    function convertDateStr(date) {
+        var convertedDateYear = new Date(date).getFullYear();
+        var convertedDateMonth = pad(new Date(date).getMonth() + 1);
+        var convertedDateDay = pad(new Date(date).getDate());
+        var convertedDate = convertedDateYear + '-' + convertedDateMonth + '-' + convertedDateDay;
+        return convertedDate;
+    }
+    var currentDate = convertDateStr(new Date());
+
+    api.data.valid_until_date_1.refresh();
+    var options = api.data.valid_until_date_1.output;
+    var intervalValue = options[0].intervalValue;
+    // Reason-specific deferral limits: Risk Accepted (2) allows at
+    // most 180 days, Fix Unavailable (23) at most 90. The shorter of
+    // the configured interval and the reason limit wins.
+    var reasonCaps = { '2': 180, '23': 90 };
+    var reasonCap = reasonCaps['' + api.state.reason];
+    if (reasonCap &amp;&amp; reasonCap &lt; parseInt(intervalValue))
+        intervalValue = reasonCap;
+    var expectedUntilDate;
+    var expectedUntilDate = new Date(new Date().setDate(new Date().getDate() + parseInt(intervalValue)));
+    expectedUntilDate = convertDateStr(expectedUntilDate);
+
+    function pad(n) {
+        return n &lt; 10 ? '0' + n : n;
+    };
+    const localizedMessage = await helpers.translate("Please choose a valid future date in the format (yyyy-MM-dd)");
+    var alertMessage = [{
+        "status": "critical",
+        "content": localizedMessage,
+        "icon": "circle-exclamation-outline"
+    }];
+    api.setState("alertMessage", localizedMessage);
+    if (new Date(currentDate).valueOf() &lt; new Date(validPayloadDate).valueOf()) {
+        if (new Date(validPayloadDate).valueOf() &lt;= new Date(expectedUntilDate).valueOf()) {
+            api.setState("untilDate", validPayloadDate);
+            api.setState("errorMessage", []);
+            api.setState("isValidUntilDate", true);
+        } else {
+            api.setState("untilDate", validPayloadDate);
+            var validUntilMessageTemp = api.state.validUntilMessage;
+            helpers.translate("Select a date within {0} days from today.", intervalValue).then((value) =&gt; {
+                validUntilMessageTemp[0].content = value;
+                api.setState("validUntilMessage", validUntilMessageTemp);
+                api.setState("alertMessage", validUntilMessageTemp[0].content);
+            });
+            api.setState("errorMessage", api.state.validUntilMessage);
+            api.setState("isValidUntilDate", false);
+        }
+    } else if (new Date(currentDate).valueOf() === new Date(validPayloadDate).valueOf()) {
+        if (new Date(api.state.untilDate).valueOf() &lt; new Date(currentDate).valueOf()) {
+            api.setState("errorMessage", alertMessage);
+            api.setState("isValidUntilDate", false);
+            
+        }
+    } else {
+        api.setState("untilDate", validPayloadDate);
+        api.setState("errorMessage", alertMessage);
+        api.setState("isValidUntilDate", false);
+    }
+    api.emit('VALIDATE_FROM_FIELDS_2', {});
+}]]&gt;&lt;/script&gt;&lt;script_api_version&gt;2.0.0&lt;/script_api_version&gt;&lt;sys_class_name&gt;sys_ux_client_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2025-05-16 07:20:55&lt;/sys_created_on&gt;&lt;sys_id&gt;9c4145a5ff656210d317ffffffffff15&lt;/sys_id&gt;&lt;sys_mod_count&gt;46&lt;/sys_mod_count&gt;&lt;sys_name&gt;updateUntilDate&lt;/sys_name&gt;&lt;sys_package display_value="Exception Management for Unified Security Exposure Management" source="sn_sec_exception"&gt;80a1334f8b9a48cba8b4f4c240c1a4de&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Exception Management for Unified Security Exposure Management"&gt;80a1334f8b9a48cba8b4f4c240c1a4de&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_ux_client_script_9c4145a5ff656210d317ffffffffff15&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-21 05:50:39&lt;/sys_updated_on&gt;&lt;target&gt;macroponent&lt;/target&gt;&lt;type&gt;default&lt;/type&gt;&lt;/sys_ux_client_script&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-482817272</payload_hash>
+<remote_update_set display_value="Request Exception - reason based deferral limits">da5b846a9383c310e3aef0aefaba103a</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:03</sys_created_on>
+<sys_id>125b846a9383c310e3aef0aefaba103b</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a022df1c1d0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:03</sys_updated_on>
+<table/>
+<target_name>updateUntilDate</target_name>
+<type>UX Client Script</type>
+<update_domain>global</update_domain>
+<update_guid>97dff346003a03901502a46f36e96950</update_guid>
+<update_guid_history>97dff346003a03901502a46f36e96950:-482817272,7edfb346313a0390af6407cb498b25c7:-482817272,7adfb346f13a0390b1d90bb37d7337c2:-1099642640</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Exception Management for Unified Security Exposure Management">80a1334f8b9a48cba8b4f4c240c1a4de</application>
+<category>customer</category>
+<comments/>
+<name>sys_ux_client_script_dc4145a5ff656210d317ffffffffff15</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_ux_client_script"&gt;&lt;sys_ux_client_script action="INSERT_OR_UPDATE"&gt;&lt;controller_preset/&gt;&lt;includes/&gt;&lt;macroponent display_value="Request Exception Unified"&gt;b38e662833216a10fd9f96382e5c7b0c&lt;/macroponent&gt;&lt;name&gt;validateFormFields&lt;/name&gt;&lt;preset/&gt;&lt;required_translations&gt;[
+    {
+        "message": "Select a date within {0} days from today."
+    }
+]&lt;/required_translations&gt;&lt;script&gt;&lt;![CDATA[/**
+ * @param {params} params
+ * @param {api} params.api
+ * @param {any} params.event
+ * @param {any} params.imports
+ */
+function handler({
+    api,
+    event,
+    helpers,
+    imports
+}) {
+    var dateValid = true;
+    var infoValid = true;
+    var reasonValid = true;
+    var disableSubmitButton = true;
+    var arrayOfReasonValues = api.state.reasons.map(item =&gt; parseInt(item.value));
+    var reasonKey = api.state.reason;
+    //Validate reason and Add. Info.
+    reasonValid = arrayOfReasonValues.includes(parseInt(reasonKey));
+    infoValid = !(!api.state.addInformation || 0 === api.state.addInformation.length || api.state.addInformation === null);
+    // Validate Date
+    var currentYear = new Date().getFullYear();
+    var currentMonth = pad(new Date().getMonth() + 1);
+    var currentDay = pad(new Date().getDate());
+    var currentDate = currentYear + '-' + currentMonth + '-' + currentDay;
+    function pad(n) {
+        return n &lt; 10 ? '0' + n : n;
+    };
+    var untilDateValid = Date.parse(api.state.untilDate);
+    dateValid = new Date(currentDate).valueOf() &lt; new Date(api.state.untilDate).valueOf();
+    // Reason-specific deferral limits: Risk Accepted (2) allows at
+    // most 180 days, Fix Unavailable (23) at most 90 - also applied
+    // here so switching the reason after picking a date re-validates.
+    var reasonCaps = { '2': 180, '23': 90 };
+    var reasonCap = reasonCaps['' + reasonKey];
+    var withinReasonCap = true;
+    if (reasonCap &amp;&amp; api.state.untilDate) {
+        var maxDate = new Date(new Date().setDate(new Date().getDate() + reasonCap));
+        var maxDateStr = maxDate.getFullYear() + '-' + pad(maxDate.getMonth() + 1) + '-' + pad(maxDate.getDate());
+        if (new Date(api.state.untilDate).valueOf() &gt; new Date(maxDateStr).valueOf()) {
+            withinReasonCap = false;
+            helpers.translate("Select a date within {0} days from today.", '' + reasonCap).then(function(value) {
+                api.setState("errorMessage", [{
+                    "status": "critical",
+                    "content": value,
+                    "icon": "circle-exclamation-outline"
+                }]);
+                api.setState("alertMessage", value);
+            });
+        } else if (api.state.isValidUntilDate) {
+            api.setState("errorMessage", []);
+        }
+    }
+    if (dateValid &amp;&amp; reasonValid &amp;&amp; infoValid &amp;&amp; api.state.isValidUntilDate &amp;&amp; withinReasonCap) {
+        if (reasonKey == 25 &amp;&amp; !api.state.hasRequestedRiskReduction &amp;&amp; !api.state.hasRequestedDeferral)
+            api.setState("submitDisabled", true);
+        else if (api.state.hasRequestedRiskReduction &amp;&amp; (api.state.desiredRiskRating == 'null' || api.state.desiredRiskRating == api.state.currentRiskRating))
+            api.setState("submitDisabled", true);
+        else
+            api.setState("submitDisabled", false);
+    } else {
+        api.setState("submitDisabled", true);
+    }
+}]]&gt;&lt;/script&gt;&lt;script_api_version&gt;2.0.0&lt;/script_api_version&gt;&lt;sys_class_name&gt;sys_ux_client_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2025-05-16 07:23:42&lt;/sys_created_on&gt;&lt;sys_id&gt;dc4145a5ff656210d317ffffffffff15&lt;/sys_id&gt;&lt;sys_mod_count&gt;8&lt;/sys_mod_count&gt;&lt;sys_name&gt;validateFormFields&lt;/sys_name&gt;&lt;sys_package display_value="Exception Management for Unified Security Exposure Management" source="sn_sec_exception"&gt;80a1334f8b9a48cba8b4f4c240c1a4de&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Exception Management for Unified Security Exposure Management"&gt;80a1334f8b9a48cba8b4f4c240c1a4de&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_ux_client_script_dc4145a5ff656210d317ffffffffff15&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-21 05:50:40&lt;/sys_updated_on&gt;&lt;target&gt;macroponent&lt;/target&gt;&lt;type&gt;default&lt;/type&gt;&lt;/sys_ux_client_script&gt;&lt;/record_update&gt;</payload>
+<payload_hash>1294546529</payload_hash>
+<remote_update_set display_value="Request Exception - reason based deferral limits">da5b846a9383c310e3aef0aefaba103a</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:03</sys_created_on>
+<sys_id>565b846a9383c310e3aef0aefaba103b</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a022df1c310000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:03</sys_updated_on>
+<table/>
+<target_name>validateFormFields</target_name>
+<type>UX Client Script</type>
+<update_domain>global</update_domain>
+<update_guid>dbdff346203a0390f5c150b435b61252</update_guid>
+<update_guid_history>dbdff346203a0390f5c150b435b61252:1294546529,7adfb346e73a039044dc37a2bee1b4de:1294546529,f6dfb346503a039072426fde38666adb:251987181</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Exception Management for Unified Security Exposure Management">80a1334f8b9a48cba8b4f4c240c1a4de</application>
+<category>customer</category>
+<comments/>
+<name>sys_ux_data_broker_transform_a8ab23f43325aa10fd9f96382e5c7b79</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_ux_data_broker_transform"&gt;&lt;sys_ux_data_broker_transform action="INSERT_OR_UPDATE"&gt;&lt;acl_failure_result/&gt;&lt;api_name&gt;sn_sec_exception.Request Exception action&lt;/api_name&gt;&lt;batch_exclude&gt;false&lt;/batch_exclude&gt;&lt;description/&gt;&lt;mutates_server_data&gt;true&lt;/mutates_server_data&gt;&lt;name&gt;Request Exception action&lt;/name&gt;&lt;output_schema&gt;[
+  {
+    "name": "surveyDetails",
+    "label": "Survey Details",
+    "description": "Survey Details",
+    "readOnly": false,
+    "fieldType": "json"
+  }
+  ]&lt;/output_schema&gt;&lt;private&gt;false&lt;/private&gt;&lt;props&gt;[
+  {
+    "name": "table",
+    "label": "Table",
+    "description": "Table",
+    "readOnly": false,
+    "fieldType": "string",
+    "mandatory": true
+  },
+  {
+    "name": "recordSysID",
+    "label": "Record ID",
+    "description": "Record Sys ID",
+    "readOnly": false,
+    "fieldType": "string",
+    "mandatory": true
+  },
+  {
+    "name": "substate",
+    "label": "Reason",
+    "description": "Reason",
+    "readOnly": false,
+    "fieldType": "string",
+    "mandatory": true
+  },
+  {
+    "name": "until_date",
+    "label": "Until Date",
+    "description": "Until Date",
+    "readOnly": false,
+    "fieldType": "string",
+    "mandatory": true
+  },
+  {
+    "name": "additional_info",
+    "label": "Additional Information",
+    "description": "Additional Information",
+    "readOnly": false,
+    "fieldType": "string",
+    "mandatory":  true
+  },
+  {
+    "name": "await",
+    "label": "Wait to close",
+    "description": "Wait to close",
+    "readOnly": false,
+    "fieldType": "string",
+    "mandatory":  false
+  },
+  {
+    "name": "hasRequestedRiskReduction",
+    "label": "Request for Risk Reduction",
+    "description": "Request for Risk Reduction",
+    "readOnly": false,
+    "fieldType": "boolean",
+    "mandatory":  false
+  },
+  {
+    "name": "hasRequestedDeferral",
+    "label": "Request for Deferral",
+    "description": "Request for Deferral",
+    "readOnly": false,
+    "fieldType": "boolean",
+    "mandatory":  false
+  },
+  {
+    "name": "desiredRiskRating",
+    "label": "Desired risk rating",
+    "description": "Desired risk rating for Risk Reduction",
+    "readOnly": false,
+    "fieldType": "string",
+    "mandatory":  false
+  },
+  {
+    "name": "currentRiskRating",
+    "label": "Current risk rating",
+    "description": "Current risk rating",
+    "readOnly": false,
+    "fieldType": "string",
+    "mandatory":  false
+  },
+  {
+    "name": "selectedControls",
+    "label": "Selected Compensating Controls",
+    "description": "Selected Compensating Controls",
+    "readOnly": false,
+    "fieldType": "array",
+    "mandatory":  false
+  },
+  {
+    "name": "url",
+    "label": "url",
+    "description": "url",
+    "readOnly": false,
+    "fieldType": "string",
+    "mandatory": true
+  }
+  ]&lt;/props&gt;&lt;required_translations&gt;[ {
+  "message" : "Additional Information",
+  "comment" : ""
+}, {
+  "message" : "Current risk rating",
+  "comment" : ""
+}, {
+  "message" : "Desired risk rating",
+  "comment" : ""
+}, {
+  "message" : "Desired risk rating for Risk Reduction",
+  "comment" : ""
+}, {
+  "message" : "Reason",
+  "comment" : ""
+}, {
+  "message" : "Record ID",
+  "comment" : ""
+}, {
+  "message" : "Record Sys ID",
+  "comment" : ""
+}, {
+  "message" : "Request for Deferral",
+  "comment" : ""
+}, {
+  "message" : "Request for Risk Reduction",
+  "comment" : ""
+}, {
+  "message" : "Selected Compensating Controls",
+  "comment" : ""
+}, {
+  "message" : "Table",
+  "comment" : ""
+}, {
+  "message" : "Until Date",
+  "comment" : ""
+}, {
+  "message" : "Wait to close",
+  "comment" : ""
+}, {
+  "message" : "url",
+  "comment" : ""
+} ]&lt;/required_translations&gt;&lt;schema_version&gt;1.0.0&lt;/schema_version&gt;&lt;script&gt;&lt;![CDATA[function transform(input) {
+
+    var TABLE_NAMES = sn_sec_exception.Constants.TABLE_NAMES;
+    var FEATURE_CONFIG_KEYS = sn_sec_exception.Constants.FEATURE_CONFIG_KEYS;
+
+    var SUB_STATES = sn_vul_cmn.VRConstants.SUB_STATES;
+    var DESIRED_STATES = sn_vul_cmn.VRConstants.DESIRED_STATES;
+
+    var stateChangeManager = new sn_sec_exception.StateChangeManager();
+    var stateUtils = new sn_sec_exception.StateUtils();
+    var exceptionSettings = new sn_sec_exception.ExceptionSettings();
+    var questionnaireConfiguration = new sn_sec_exception.QuestionnaireConfiguration();
+    var featureConfigurationUtil = new sn_sec_exception.FeatureConfigurationUtil();
+
+    var surveyDetails = null;
+    var canDefer = false;
+    var currentValues;
+    var compensatingControlValues;
+    var configTableName;
+    var assessmentSysId;
+    var survey = '';
+    var hasRequestedRiskReduction = input.hasRequestedRiskReduction;
+
+    if (!gs.nil(input.desiredRiskRating)) {
+        compensatingControlValues = {
+            hasRequestedDeferral: input.hasRequestedDeferral,
+            hasRequestedRiskReduction: input.hasRequestedRiskReduction,
+            desiredRiskRating: input.desiredRiskRating,
+            selectedControls: input.selectedControls
+        };
+        currentValues = {
+            currentRiskRating: input.currentRiskRating
+        };
+    }
+
+    var gr = new GlideRecord(input.table);
+    if (!gr.get(input.recordSysID))
+        return surveyDetails;
+    if (!exceptionSettings.checkAccess(input.table))
+        throw gs.getMessage("Unauthorized access. Please make sure you have access to relevent record");
+    if (!(stateUtils.canDefer(gr)))
+        canDefer = true;
+
+    // Reason-specific deferral limits: Risk Accepted 180 days,
+    // Fix Unavailable 90 days. Requests past the limit are refused
+    // here as well, so the rule holds no matter which client calls in.
+    var reasonCaps = {};
+    reasonCaps[SUB_STATES.RISK_ACCEPTED] = 180;
+    reasonCaps[SUB_STATES.FIX_UNAVAILABLE] = 90;
+    var capDays = reasonCaps[parseInt(input.substate)];
+    if (capDays &amp;&amp; !gs.nil(input.until_date)) {
+        var maxDt = new GlideDateTime();
+        maxDt.addDaysLocalTime(capDays);
+        var maxDateStr = '' + maxDt.getLocalDate();
+        if (('' + input.until_date) &gt; maxDateStr) {
+            gs.addErrorMessage(gs.getMessage(
+                'The defer until date exceeds the limit for this reason. Select a date within {0} days from today.',
+                ['' + capDays]));
+            return { msg: "No record created" };
+        }
+    }
+
+    if (!gs.nil(gr.change_approval) &amp;&amp; gr.change_approval.active &amp;&amp; canDefer) {
+        var chgId = gr.getValue("change_approval");
+        var chgItem = new GlideRecord(TABLE_NAMES.SN_SEC_EXCEPTION_CHANGE_APPROVAL);
+        chgItem.get(chgId);
+        var vcaRecord = chgItem.getValue("number");
+        var link = '';
+        // Identify the workspace using appId
+        if (input.url == 'b166c7b5e736201068c30b63c2f6a952') {
+            link = gs.getProperty('glide.servlet.uri') + 'now/vr-analysis/record/' + TABLE_NAMES.SN_SEC_EXCEPTION_CHANGE_APPROVAL + '/' + chgId;
+        } else if (input.url == '415be2aeb7422010b8fdb064ce11a973') {
+            link = gs.getProperty('glide.servlet.uri') + 'now/vr/record/' + TABLE_NAMES.SN_SEC_EXCEPTION_CHANGE_APPROVAL + '/' + chgId;
+        }
+        var jobLink = '&lt;a href="' + link + '"&gt;' + vcaRecord + '&lt;/a&gt;';
+        msg = gs.getMessage('An active Exception Request with {0} already exists for this Remediation Task. A new Exception Request cannot be submitted for the same item at this time.', [jobLink]);
+        gs.addErrorMessage(msg);
+        gs.warn("Unable to raise request. Please check record is in open, under investigation, awaiting implementation or resolved state.");
+        surveyDetails = {
+            msg: "No record created"
+        };
+        return surveyDetails;
+    } else {
+        var field = (input.substate == SUB_STATES.MITIGATING_CONTROL_IN_PLACE &amp;&amp; hasRequestedRiskReduction) ? 'questionnaire_for_compensating_control' : 'questionnaire_to_request_exception';
+        var isSmartAssessmentNeeded = false;
+
+        var changeDetails = stateChangeManager.handleStateChangeRequest(gr, DESIRED_STATES.DEFERRED, input.substate, input.additional_info, input.until_date, input.await == "wait", currentValues, compensatingControlValues);
+
+        configTableName = featureConfigurationUtil.getFeatureConfigDetails(FEATURE_CONFIG_KEYS.EXCEPTION_CONFIG_TABLE, input.table);
+
+        var ruleType = JSON.parse(featureConfigurationUtil.getFeatureConfigDetails(FEATURE_CONFIG_KEYS.APPROVAL_RULE_TYPE, input.table))["DEFERRAL_REQUESTS"];
+
+        var exceptionConfigGr = new GlideRecord(TABLE_NAMES.SN_SEC_EXCEPTION_CONFIG);
+        exceptionConfigGr.addQuery('table', configTableName);
+        exceptionConfigGr.query();
+        if (exceptionConfigGr.next())
+            var hasNext = true;
+
+        var isQuestionnaireEnabled = false;
+        if (input.substate == SUB_STATES.MITIGATING_CONTROL_IN_PLACE &amp;&amp; hasRequestedRiskReduction) {
+            if (!gs.nil(exceptionConfigGr.getValue('assessment_for_compensating_control')))
+                isQuestionnaireEnabled = true;
+        } else if (!gs.nil(exceptionConfigGr.getValue('assessment_to_request_exception'))) {
+            isQuestionnaireEnabled = true;
+        }
+
+        if (hasNext &amp;&amp; isQuestionnaireEnabled &amp;&amp; GlidePluginManager.isActive("com.sn_smart_assessment_designer")) {
+            field = (input.substate == SUB_STATES.MITIGATING_CONTROL_IN_PLACE &amp;&amp; hasRequestedRiskReduction) ? 'assessment_for_compensating_control' : 'assessment_to_request_exception';
+            isSmartAssessmentNeeded = true;
+
+            var surveyId = questionnaireConfiguration.getQuestionnaireForRequestException(gr, input.substate, exceptionConfigGr, field, hasRequestedRiskReduction);
+            if (gs.nil(surveyId))
+                return surveyDetails;
+
+            var changeSysId = changeDetails.changeSysId;
+            if (gs.nil(changeSysId))
+                changeSysId = changeDetails.riskReductionChangeSysId;
+
+            if (isSmartAssessmentNeeded == true) {
+                assessmentSysId = exceptionSettings.createSmartAssessment(changeSysId, surveyId);
+            } else {
+                assessmentSysId = exceptionSettings.createAssessment(changeSysId, surveyId);
+            }
+            if (!gs.nil(compensatingControlValues) &amp;&amp; compensatingControlValues.hasRequestedDeferral &amp;&amp; compensatingControlValues.hasRequestedRiskReduction) {
+                exceptionSettings.attachSmartAssessment(changeDetails.riskReductionChangeSysId, assessmentSysId);
+            }
+
+            surveyDetails = {
+                surveyId: surveyId,
+                assessmentSysId: assessmentSysId,
+                isSmartAssessmentNeeded: isSmartAssessmentNeeded
+            };
+        }
+
+        return surveyDetails;
+    }
+}]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_ux_data_broker_transform&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2025-05-14 11:33:33&lt;/sys_created_on&gt;&lt;sys_id&gt;a8ab23f43325aa10fd9f96382e5c7b79&lt;/sys_id&gt;&lt;sys_mod_count&gt;32&lt;/sys_mod_count&gt;&lt;sys_name&gt;Request Exception action&lt;/sys_name&gt;&lt;sys_package display_value="Exception Management for Unified Security Exposure Management" source="sn_sec_exception"&gt;80a1334f8b9a48cba8b4f4c240c1a4de&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Exception Management for Unified Security Exposure Management"&gt;80a1334f8b9a48cba8b4f4c240c1a4de&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_ux_data_broker_transform_a8ab23f43325aa10fd9f96382e5c7b79&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-21 05:50:40&lt;/sys_updated_on&gt;&lt;/sys_ux_data_broker_transform&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=a8ab23f43325aa10fd9f96382e5c7b79"/&gt;&lt;sys_es_latest_script action="INSERT_OR_UPDATE"&gt;&lt;id&gt;a8ab23f43325aa10fd9f96382e5c7b79&lt;/id&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2025-05-14 11:33:32&lt;/sys_created_on&gt;&lt;sys_id&gt;59aca3b43325aa10fd9f96382e5c7bfc&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2025-09-11 13:02:05&lt;/sys_updated_on&gt;&lt;table&gt;sys_ux_data_broker_transform&lt;/table&gt;&lt;use_es_latest&gt;true&lt;/use_es_latest&gt;&lt;/sys_es_latest_script&gt;&lt;/record_update&gt;</payload>
+<payload_hash>519043214</payload_hash>
+<remote_update_set display_value="Request Exception - reason based deferral limits">da5b846a9383c310e3aef0aefaba103a</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:03</sys_created_on>
+<sys_id>9a5b846a9383c310e3aef0aefaba103b</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a022df1c4a0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:03</sys_updated_on>
+<table/>
+<target_name>Request Exception action</target_name>
+<type>Data Broker Server Script</type>
+<update_domain>global</update_domain>
+<update_guid>57dff346323a039054caf3b0911d8755</update_guid>
+<update_guid_history>57dff346323a039054caf3b0911d8755:519043214,43dff346a23a0390087451b7220e740f:519043214,87dfb346673a03901be4af9f221224e6:1697993644</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>
