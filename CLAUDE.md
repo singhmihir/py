@@ -104,8 +104,8 @@ Follow it without being asked again.
   approvals are `sn_sec_exception_change_approval` (`record` + `table`, `approval_state` 1 Approved 4 Expired).
 - Kafka outbound (SNOWUSEMTP-1625): topic `sn_usem_remtask_outbound`, namespace `com.bofa.usem`,
   envelope + `rem_tasks[].remediation_task`, dates `MM-dd-yyyy HH:mm:ss`, mapping sheet
-  *Outbound to CDP (RemTask)* — only rows with *CDP Required? = Yes*; one property per table with
-  `servicenow_field=json_field` pairs; a field missing on the table or empty is sent as `""`.
+  *Outbound to CDP (RemTask)* — only rows with *CDP Required? = Yes*; one property per table with one
+  `servicenow_field=json_field` pair per line; a field missing on the table or empty is sent as `""`.
   One script include only (`RemediationTaskPayloadBuilder`).
 
 ## Repository layout

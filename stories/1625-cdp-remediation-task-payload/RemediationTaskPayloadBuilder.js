@@ -21,8 +21,8 @@ RemediationTaskPayloadBuilder.prototype = {
 
     /**
      * Builds the outbound Kafka payload for one remediation task. The fields
-     * come from the system property usem.cdp.remtask.fields.<table> as
-     * servicenow_field=json_field pairs; a field missing on the table or
+     * come from the system property usem.cdp.remtask.fields.<table>, one
+     * servicenow_field=json_field pair per line; a field missing on the table or
      * empty is sent as "". The activity is the operation in progress when
      * called from a business rule, otherwise INSERT for a record that has
      * never been updated and UPDATE for any other.
@@ -88,8 +88,8 @@ RemediationTaskPayloadBuilder.prototype = {
     },
 
     /**
-     * Reads the table's property: comma separated servicenow_field=json_field
-     * pairs (a bare field name keeps its own name in the payload).
+     * Reads the table's property: one servicenow_field=json_field pair per
+     * line (a bare field name keeps its own name in the payload).
      * @returns {Array} [{field, json}, ...] in property order
      */
     _fieldMapping: function(table) {
@@ -98,7 +98,7 @@ RemediationTaskPayloadBuilder.prototype = {
         if (!value)
             throw new Error('table ' + table + ' is not configured in property ' + property);
         var mapping = [];
-        var entries = value.split(',');
+        var entries = value.split(/\r?\n|,/);
         for (var i = 0; i < entries.length; i++) {
             var pair = entries[i].split('=');
             var field = pair[0].trim();
