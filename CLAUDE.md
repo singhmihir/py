@@ -61,6 +61,13 @@ Follow it without being asked again.
   formatted dates, strings). Dates via `GlideDateTime` / `GlideDate.getByFormat`.
 - No custom tables for reporting logic; aggregate-first designs (collect owners with one grouped query per
   table, then one grouped query per owner per module).
+- Anything an admin may need to customise (field lists per table, association tables, lists of
+  supported tables) lives in **system properties** (`usem.<area>.<purpose>`, comma separated,
+  `json_name=field` for renames), read at run time; scripts hold no such lists and no per-field
+  "kind" flags - render by the dictionary internal type instead. Ship the properties in the same
+  update set.
+- One error message format per feature (`<class>: <what failed> for <table> <sys_id> - <reason>`);
+  derive facts from the record (e.g. `current.operation()` for insert/update) instead of parameters.
 - Comments only where genuinely needed (a config block header, a JSDoc on the public method). Clean,
   thorough, precise; no chatty comments.
 - Business rules: prefer **one rule** with the whole lifecycle; condition selector limited to exactly the
