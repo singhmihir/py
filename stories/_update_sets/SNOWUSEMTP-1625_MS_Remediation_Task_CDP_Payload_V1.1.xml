@@ -1,4 +1,41 @@
-var CdpRemediationTaskPayloadBuilder = Class.create();
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-03 12:01:44">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Global">global</application>
+<application_name>Global</application_name>
+<application_scope>global</application_scope>
+<application_version/>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>Kafka payload builders for remediation tasks sent to the sn_usem_remtask_outbound topic. RemediationTaskPayloadBuilder builds the agreed payload (envelope + rem_tasks) for one remediation task record. CdpRemediationTaskPayloadBuilder extends it and builds the full mapping-driven payload from the sheet Outbound to CDP (RemTask) for sn_vul_vulnerability, sn_vul_app_vulnerability, sn_vul_container_vulnerability and sn_vulc_result_group, including change_requests and exception_requests.</description>
+<inserted/>
+<name>SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V1.1</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>e7d840e29383c310e3aef0aefaba106e</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 12:01:44</sys_created_on>
+<sys_id>c971582a93c3c310e3aef0aefaba10e6</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 12:01:44</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_7bd840e29383c310e3aef0aefaba10b8</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;global.CdpRemediationTaskPayloadBuilder&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;SNOWUSEMTP-1625 - extends RemediationTaskPayloadBuilder with the full CDP mapping (sheet Outbound to CDP (RemTask)) for every remediation task table, rendered by field type, plus change_requests and exception_requests.&lt;/description&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;CdpRemediationTaskPayloadBuilder&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[var CdpRemediationTaskPayloadBuilder = Class.create();
 CdpRemediationTaskPayloadBuilder.prototype = Object.extendsObject(RemediationTaskPayloadBuilder, {
     initialize: function() {
         RemediationTaskPayloadBuilder.prototype.initialize.call(this);
@@ -209,7 +246,7 @@ CdpRemediationTaskPayloadBuilder.prototype = Object.extendsObject(RemediationTas
     },
 
     _addFields: function(task, record, fields) {
-        for (var i = 0; i < fields.length; i++) {
+        for (var i = 0; i &lt; fields.length; i++) {
             var jsonName = fields[i][0];
             var fieldName = fields[i][1];
             task[jsonName] = record.isValidField(fieldName) ? this._renderElement(record.getElement(fieldName)) : '';
@@ -243,3 +280,185 @@ CdpRemediationTaskPayloadBuilder.prototype = Object.extendsObject(RemediationTas
 
     type: 'CdpRemediationTaskPayloadBuilder'
 });
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-03 11:24:14&lt;/sys_created_on&gt;&lt;sys_id&gt;7bd840e29383c310e3aef0aefaba10b8&lt;/sys_id&gt;&lt;sys_mod_count&gt;2&lt;/sys_mod_count&gt;&lt;sys_name&gt;CdpRemediationTaskPayloadBuilder&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_7bd840e29383c310e3aef0aefaba10b8&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-03 11:58:21&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-971903234</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V1.1">c971582a93c3c310e3aef0aefaba10e6</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 12:01:44</sys_created_on>
+<sys_id>0171582a93c3c310e3aef0aefaba10e7</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0672263d50000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 12:01:44</sys_updated_on>
+<table/>
+<target_name>CdpRemediationTaskPayloadBuilder</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_guid>bba018a66bc3c31075655c36f1647f47</update_guid>
+<update_guid_history>bba018a66bc3c31075655c36f1647f47:-971903234,9d294ce2be83c3102df8aa67ed6d6b0e:2027416365,73d840e21583c3107cbb48c461dc8dbb:1418676414</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_a7d840e29383c310e3aef0aefaba10b0</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;global.RemediationTaskPayloadBuilder&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;SNOWUSEMTP-1625 - builds the outbound Kafka payload (topic sn_usem_remtask_outbound) for one remediation task record: envelope plus rem_tasks with the agreed remediation task fields.&lt;/description&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;RemediationTaskPayloadBuilder&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[var RemediationTaskPayloadBuilder = Class.create();
+RemediationTaskPayloadBuilder.prototype = {
+    initialize: function() {
+        this.TOPIC_NAME = 'sn_usem_remtask_outbound';
+        this.NAMESPACE = 'com.bofa.usem';
+        this.CORE_VERSION = '1.0.0';
+        this.OUTBOUND_VERSION = '1.0.0';
+        this.WORKSPACE_PATH = 'now/vr-analysis/record/';
+        this.DATE_FORMAT = 'MM-dd-yyyy';
+        this.TIME_FORMAT = 'HH:mm:ss';
+        this.URL_FIELD = 'u_avul_record_url';
+        // field types rendered with their display value; dates, journals and
+        // everything else are handled in _renderElement
+        this.DISPLAY_TYPES = ['reference', 'glide_list', 'boolean', 'glide_duration', 'timer', 'domain_id', 'sys_class_name', 'integer', 'string'];
+        this.FIELDS = [
+            'assigned_to', 'assignment_type', 'closed_at', 'closed_by', 'defer_extend_count', 'number',
+            'opened_at', 'opened_by', 'reassignment_count', 'resolution_date', 'resolved_by', 'risk_score',
+            'short_description', 'state', 'status_updated_on', 'sys_created_by', 'sys_created_on',
+            'sys_updated_by', 'sys_updated_on', 'total_cis', 'ttr_status', 'ttr_target_date', 'defer_count',
+            'total_vis', 'u_verification_status'
+        ];
+    },
+
+    /**
+     * Builds the outbound Kafka payload for one remediation task. The activity
+     * comes from the record itself: the operation in progress when called from
+     * a business rule, otherwise INSERT for a record that has never been
+     * updated and UPDATE for any other.
+     * @param {GlideRecord} record - a remediation task record
+     * @returns {String} JSON payload, or an empty string when the payload cannot be built
+     */
+    buildPayload: function(record) {
+        try {
+            if (!this._isRecord(record))
+                throw new Error('record is not a valid GlideRecord');
+            var payload = {
+                envelope: this._buildEnvelope(this._activity(record)),
+                rem_tasks: [{
+                    remediation_task: this._buildRemediationTask(record)
+                }]
+            };
+            return JSON.stringify(payload);
+        } catch (e) {
+            gs.error(this._errorMessage(record, e));
+            return '';
+        }
+    },
+
+    _isRecord: function(record) {
+        return record !== null &amp;&amp; typeof record === 'object' &amp;&amp; typeof record.isValidRecord === 'function' &amp;&amp; record.isValidRecord();
+    },
+
+    _errorMessage: function(record, e) {
+        var subject = this._isRecord(record) ? ' for ' + record.getTableName() + ' ' + record.getUniqueValue() : '';
+        return this.type + ': payload not built' + subject + ' - ' + e.message;
+    },
+
+    _activity: function(record) {
+        var operation = String(record.operation() || '').toUpperCase();
+        if (operation)
+            return operation;
+        return parseInt(record.getValue('sys_mod_count')) &gt; 0 ? 'UPDATE' : 'INSERT';
+    },
+
+    _buildEnvelope: function(activity) {
+        return {
+            type: 'record',
+            topic_name: this.TOPIC_NAME,
+            namespace: this.NAMESPACE,
+            core_version: this.CORE_VERSION,
+            outbound_version: this.OUTBOUND_VERSION,
+            event_id: this._newEventId(),
+            event_timestamp: this._utcTimestamp(),
+            element_count: 1,
+            element_activity: activity
+        };
+    },
+
+    _buildRemediationTask: function(record) {
+        var task = {};
+        for (var i = 0; i &lt; this.FIELDS.length; i++) {
+            var name = this.FIELDS[i];
+            if (!record.isValidField(name) || record.getElement(name).nil())
+                continue;
+            task[name] = this._renderElement(record.getElement(name));
+        }
+        task[this.URL_FIELD] = this._workspaceUrl(record);
+        return task;
+    },
+
+    _renderElement: function(element) {
+        if (element.nil())
+            return '';
+        var type = String(element.getED().getInternalType());
+        if (type === 'glide_date_time')
+            return this._formatDateTime(element.getValue());
+        if (type === 'glide_date')
+            return this._formatDate(element.getValue());
+        if (type === 'journal_input')
+            return String(element.getJournalEntry(1)).trim();
+        if (this.DISPLAY_TYPES.indexOf(type) &gt; -1)
+            return String(element.getDisplayValue());
+        return String(element.getValue());
+    },
+
+    _formatDateTime: function(value) {
+        var gdt = new GlideDateTime(value);
+        return gdt.getDate().getByFormat(this.DATE_FORMAT) + ' ' + gdt.getTime().getByFormat(this.TIME_FORMAT);
+    },
+
+    _formatDate: function(value) {
+        var gd = new GlideDate();
+        gd.setValue(value);
+        return gd.getByFormat(this.DATE_FORMAT);
+    },
+
+    _workspaceUrl: function(record) {
+        var base = gs.getProperty('glide.servlet.uri', '');
+        if (base.charAt(base.length - 1) !== '/')
+            base += '/';
+        return base + this.WORKSPACE_PATH + record.getTableName() + '/' + record.getUniqueValue();
+    },
+
+    _newEventId: function() {
+        var guid = gs.generateGUID();
+        return guid.substring(0, 8) + '-' + guid.substring(8, 12) + '-' + guid.substring(12, 16) + '-' +
+            guid.substring(16, 20) + '-' + guid.substring(20, 32);
+    },
+
+    _utcTimestamp: function() {
+        return new GlideDateTime().getValue().replace(' ', 'T') + 'Z';
+    },
+
+    type: 'RemediationTaskPayloadBuilder'
+};
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-03 11:24:13&lt;/sys_created_on&gt;&lt;sys_id&gt;a7d840e29383c310e3aef0aefaba10b0&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name&gt;RemediationTaskPayloadBuilder&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_a7d840e29383c310e3aef0aefaba10b0&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-03 11:58:21&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-577220184</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V1.1">c971582a93c3c310e3aef0aefaba10e6</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 12:01:44</sys_created_on>
+<sys_id>c171982a93c3c310e3aef0aefaba100d</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0672263060000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 12:01:44</sys_updated_on>
+<table/>
+<target_name>RemediationTaskPayloadBuilder</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_guid>f3a018a664c3c31017822868860e6342</update_guid>
+<update_guid_history>f3a018a664c3c31017822868860e6342:-577220184,b3d840e22a83c31096a0399dcca669b4:1489101505</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>

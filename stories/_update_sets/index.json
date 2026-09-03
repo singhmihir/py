@@ -135,11 +135,11 @@
   "scrub": []
  },
  {
-  "name": "SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V1.0",
+  "name": "SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V1.1",
   "app": "global",
   "rows": 2,
   "exported": 2,
-  "file": "SNOWUSEMTP-1625_MS_Remediation_Task_CDP_Payload_V1.0.xml",
+  "file": "SNOWUSEMTP-1625_MS_Remediation_Task_CDP_Payload_V1.1.xml",
   "created": "2026-09-03 11:24:13",
   "scrub": []
  }
