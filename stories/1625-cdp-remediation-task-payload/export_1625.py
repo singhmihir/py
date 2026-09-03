@@ -8,11 +8,11 @@ except ImportError:
     import xml.etree.ElementTree as ET
 ui = SNUI(); ui.app('global')
 ST = json.load(open(BASE + '/stories/1625-cdp-remediation-task-payload/state.json')); SET = ST['set']
-NAME = 'SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V1.1'
+NAME = 'SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V1.2'
 OUT = BASE + '/stories/1625-cdp-remediation-task-payload/Remediation Task CDP Payload - Update Set.xml'
 d = ui.js('''
 var o = {};
-var us = new GlideRecord('sys_update_set'); us.get(%s); us.setValue('name', 'SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V1.1'); us.setValue('state', 'complete'); us.update();
+var us = new GlideRecord('sys_update_set'); us.get(%s); us.setValue('name', 'SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V1.2'); us.setValue('state', 'complete'); us.update();
 var us2 = new GlideRecord('sys_update_set'); us2.get(%s); o.remote_id = '' + new UpdateSetExport().exportUpdateSet(us2);
 gs.print('X::' + JSON.stringify(o));''' % (json.dumps(SET), json.dumps(SET)))
 r = ui.s.get(INST + '/export_update_set.do', params={'sysparm_sys_id': d['remote_id'], 'sysparm_delete_when_done': 'true', 'sysparm_is_remote': 'false', 'sysparm_ck': ui.ck()})

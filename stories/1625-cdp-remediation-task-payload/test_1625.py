@@ -71,7 +71,7 @@ for (var t in recs) {
     o.payloads[t] = b.buildPayload(g);
     o.facts[t] = {state: '' + g.getDisplayValue('state'), cls: '' + g.getDisplayValue('sys_class_name'), group: '' + g.getDisplayValue('assignment_group'), sys_id: g.getUniqueValue(), mod: '' + g.getValue('sys_mod_count'), knowledge: '' + g.getValue('knowledge'), ttr: '' + g.getDisplayValue('ttr_status')};
 }
-o.common_count = b.COMMON_FIELDS.length; o.specific = {}; for (var k in b.TABLES) o.specific[k] = b.TABLES[k].fields.length;
+o.common_count = b._fieldList('usem.cdp.remtask.fields.common').length; o.specific = {}; var tabs = ['sn_vul_vulnerability', 'sn_vul_app_vulnerability', 'sn_vul_container_vulnerability', 'sn_vulc_result_group']; for (var ti = 0; ti < tabs.length; ti++) o.specific[tabs[ti]] = b._tableFields(tabs[ti]).length;
 var exc = rec('sn_vul_vulnerability', 'VUL0010547'); o.exc_payload = b.buildPayload(exc);
 var inc = new GlideRecord('incident'); inc.setLimit(1); inc.query(); inc.next(); o.inc_id = inc.getUniqueValue();
 o.unsupported = b.buildPayload(inc);
@@ -82,7 +82,7 @@ while (many.next()) { if (b.buildPayload(many)) n++; }
 o.perf = {built: n, ms: new Date().getTime() - t0};
 gs.print('X::' + JSON.stringify(o));''')
 common = 78; spec = {'sn_vul_vulnerability': 27, 'sn_vul_app_vulnerability': 25, 'sn_vul_container_vulnerability': 19, 'sn_vulc_result_group': 16}
-check('S2-0 mapping loaded from the sheet (78 common + table specific)', d2['common_count'] == common and d2['specific'] == spec)
+check('S2-0 field lists read from the properties (78 common + table specific)', d2['common_count'] == common and d2['specific'] == spec)
 for t, n in spec.items():
     p = json.loads(d2['payloads'][t]); task = p['rem_tasks'][0]['remediation_task']; f = d2['facts'][t]
     check('S2-1 %s: every mapped key present (%d), all strings' % (t, common + n + 2), len(task) == common + n + 2 and all(isinstance(v, str) for v in task.values()))
@@ -95,7 +95,7 @@ check('S2-5 change_requests from the association table', vul['change_requests'] 
 exc = json.loads(d2['exc_payload'])['rem_tasks'][0]['remediation_task']
 check('S2-6 exception_requests lists approved/expired exception approvals', 'VCA0010007' in exc['exception_requests'].split(','), exc['exception_requests'])
 msgs = errors_since(3)
-expected_unsupported = 'CdpRemediationTaskPayloadBuilder: payload not built for incident %s - table incident is not a supported remediation task table' % d2['inc_id']
+expected_unsupported = 'CdpRemediationTaskPayloadBuilder: payload not built for incident %s - table incident is not configured in property usem.cdp.remtask.fields.incident' % d2['inc_id']
 check('S2-7 unsupported table and invalid inputs: empty string, single error format', d2['unsupported'] == '' and d2['neg'] == ['', ''] and len(msgs) == 3 and all(ERR.match(x) for x in msgs) and expected_unsupported in msgs, ' || '.join(msgs))
 check('S2-8 50 payloads built', d2['perf']['built'] == 50, '%d ms for 50 records' % d2['perf']['ms'])
 
@@ -122,6 +122,36 @@ gs.print('X::' + JSON.stringify(probeResult));''')
 upd = [x for x in d3['lines'] if d3['updated'] in x]; ins = [x for x in d3['lines'] if d3['inserted'] in x]
 check('S3-1 business rule on update: activity UPDATE from current.operation()', bool(upd) and upd[0].endswith(' update UPDATE UPDATE'), upd[0] if upd else 'no line')
 check('S3-2 business rule on insert: activity INSERT from current.operation()', bool(ins) and ins[0].endswith(' insert INSERT INSERT'), ins[0] if ins else 'no line')
+# ---------- properties drive the field lists ----------
+d4 = ui.js(r'''
+var probe = {};
+function rec(table, number) { var g = new GlideRecord(table); g.addQuery('number', number); g.query(); g.next(); return g; }
+var vul = rec('sn_vul_vulnerability', 'VUL0004576');
+var name = 'usem.cdp.remtask.fields.sn_vul_vulnerability';
+var original = gs.getProperty(name);
+gs.setProperty(name, original + ',mod_count=sys_mod_count,active_flag=active');
+probe.extended = new CdpRemediationTaskPayloadBuilder().buildPayload(vul);
+gs.setProperty(name, '');
+probe.removed = new CdpRemediationTaskPayloadBuilder().buildPayload(vul);
+gs.setProperty(name, original);
+probe.restored = new CdpRemediationTaskPayloadBuilder().buildPayload(vul);
+var first = 'usem.remtask.payload.fields'; var firstOriginal = gs.getProperty(first);
+gs.setProperty(first, 'number,state');
+probe.first_two = new RemediationTaskPayloadBuilder().buildPayload(vul);
+gs.setProperty(first, firstOriginal);
+probe.active_display = '' + vul.getDisplayValue('active'); probe.mod_count = '' + vul.getValue('sys_mod_count');
+probe.props = [];
+var sp = new GlideRecord('sys_properties'); sp.addQuery('name', 'STARTSWITH', 'usem.'); sp.orderBy('name'); sp.query();
+while (sp.next()) probe.props.push('' + sp.getValue('name'));
+gs.print('X::' + JSON.stringify(probe));''')
+ext = json.loads(d4['extended'])['rem_tasks'][0]['remediation_task']
+check('S4-1 property extended at run time adds keys (rename syntax honoured)', ext.get('mod_count') == d4['mod_count'] and ext.get('active_flag') == d4['active_display'] and len(ext) == common + 27 + 2 + 2, '%s / %s / %d keys' % (ext.get('mod_count'), ext.get('active_flag'), len(ext)))
+msgs = errors_since(1)
+check('S4-2 table without its property is refused in the single format', d4['removed'] == '' and msgs and msgs[0].endswith('- table sn_vul_vulnerability is not configured in property usem.cdp.remtask.fields.sn_vul_vulnerability'), msgs[0] if msgs else '')
+check('S4-3 property restored, payload back to the sheet layout', len(json.loads(d4['restored'])['rem_tasks'][0]['remediation_task']) == common + 27 + 2)
+ft = json.loads(d4['first_two'])['rem_tasks'][0]['remediation_task']
+check('S4-4 first builder follows its own property', list(ft.keys()) == ['number', 'state', 'u_avul_record_url'])
+check('S4-5 all ten properties present', len([x for x in d4['props'] if x.startswith('usem.cdp.remtask.') or x == 'usem.remtask.payload.fields']) == 10, str(d4['props']))
 print('---'); print('RESULT:', 'ALL PASS' if not FAILS else 'FAILURES: ' + ', '.join(FAILS))
 os.makedirs(os.path.join(BASE, 'stories', '1625-cdp-remediation-task-payload', 'samples'), exist_ok=True)
 for name, payload in [('RemediationTaskPayloadBuilder', d['vul_payload']), ('CdpRemediationTaskPayloadBuilder', d2['payloads']['sn_vul_vulnerability'])]:

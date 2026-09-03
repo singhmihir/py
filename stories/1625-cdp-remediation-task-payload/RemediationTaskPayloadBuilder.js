@@ -9,20 +9,15 @@ RemediationTaskPayloadBuilder.prototype = {
         this.DATE_FORMAT = 'MM-dd-yyyy';
         this.TIME_FORMAT = 'HH:mm:ss';
         this.URL_FIELD = 'u_avul_record_url';
+        this.FIELDS_PROPERTY = 'usem.remtask.payload.fields';
         // field types rendered with their display value; dates, journals and
         // everything else are handled in _renderElement
         this.DISPLAY_TYPES = ['reference', 'glide_list', 'boolean', 'glide_duration', 'timer', 'domain_id', 'sys_class_name', 'integer', 'string'];
-        this.FIELDS = [
-            'assigned_to', 'assignment_type', 'closed_at', 'closed_by', 'defer_extend_count', 'number',
-            'opened_at', 'opened_by', 'reassignment_count', 'resolution_date', 'resolved_by', 'risk_score',
-            'short_description', 'state', 'status_updated_on', 'sys_created_by', 'sys_created_on',
-            'sys_updated_by', 'sys_updated_on', 'total_cis', 'ttr_status', 'ttr_target_date', 'defer_count',
-            'total_vis', 'u_verification_status'
-        ];
     },
 
     /**
-     * Builds the outbound Kafka payload for one remediation task. The activity
+     * Builds the outbound Kafka payload for one remediation task. The fields
+     * come from the system property usem.remtask.payload.fields; the activity
      * comes from the record itself: the operation in progress when called from
      * a business rule, otherwise INSERT for a record that has never been
      * updated and UPDATE for any other.
@@ -78,19 +73,45 @@ RemediationTaskPayloadBuilder.prototype = {
 
     _buildRemediationTask: function(record) {
         var task = {};
-        for (var i = 0; i < this.FIELDS.length; i++) {
-            var name = this.FIELDS[i];
-            if (!record.isValidField(name) || record.getElement(name).nil())
-                continue;
-            task[name] = this._renderElement(record.getElement(name));
-        }
+        this._addFields(task, record, this._fieldList(this.FIELDS_PROPERTY), false);
         task[this.URL_FIELD] = this._workspaceUrl(record);
         return task;
     },
 
+    /**
+     * Reads a comma separated field list from a system property. Each entry is
+     * a field name, or json_name=field when the payload key differs.
+     * @returns {Array} [[jsonName, fieldName], ...]
+     */
+    _fieldList: function(property) {
+        var value = gs.getProperty(property, '');
+        if (!value)
+            throw new Error('property ' + property + ' is not set');
+        var list = [];
+        var entries = value.split(',');
+        for (var i = 0; i < entries.length; i++) {
+            var entry = entries[i].trim();
+            if (!entry)
+                continue;
+            var parts = entry.split('=');
+            list.push(parts.length > 1 ? [parts[0].trim(), parts[1].trim()] : [entry, entry]);
+        }
+        return list;
+    },
+
+    _addFields: function(task, record, fields, keepEmpty) {
+        for (var i = 0; i < fields.length; i++) {
+            var jsonName = fields[i][0];
+            var fieldName = fields[i][1];
+            var present = record.isValidField(fieldName) && !record.getElement(fieldName).nil();
+            if (present)
+                task[jsonName] = this._renderElement(record.getElement(fieldName));
+            else if (keepEmpty)
+                task[jsonName] = '';
+        }
+    },
+
     _renderElement: function(element) {
-        if (element.nil())
-            return '';
         var type = String(element.getED().getInternalType());
         if (type === 'glide_date_time')
             return this._formatDateTime(element.getValue());
