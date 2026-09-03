@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-03 11:35:02">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<application_name>Configuration Compliance</application_name>
+<application_scope>sn_vulc</application_scope>
+<application_version>30.6.0</application_version>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>Peer review runs on the TEST record (SNOWUSEMTP-1003). The test table carries a "Peer reviewed" checkbox (boolean, audited, shown with the other review fields on the form and in the default list). Ticking it fires the business rule "USEM Test Peer Review Trigger", which re-runs the configuration rules for every test result of that test, and for each remediation task holding those results - a task fed by results from several tests only re-runs once ALL of those tests are peer reviewed (a held-back task gets a work note saying so, and releases when the last test is reviewed). Contents: the checkbox column with form and list layout; the trigger business rule; and the script include USEMPeerReviewRuleRunner - onTestPeerReviewed drives the flow, allTestsPeerReviewed is the gate, per-rule entry points and runAllRulesInOrder re-run the rule chain in business rule order. Validation records on this instance: tests CT0001038, CT0001039, CT0001040, CT0001041, CT0001042; results CTR0001054 - CTR0001060; remediation tasks CRG0001019, CRG0001020, CRG0001021, CRG0001025 (single test), CRG0001026 (two tests, held back until both were reviewed).</description>
+<inserted/>
+<name>SNOWUSEMTP-1003 Peer review on test records</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>fcc9f7b593fe4f50e3aef0aefaba10f4</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>065b4ce29383c310e3aef0aefaba1044</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_4623df349376c350e3aef0aefaba10a3</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;sn_vulc.USEMPeerReviewRuleRunner&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;Re-runs the Configuration Compliance rules when a test is peer reviewed: every result of the test, and each remediation task once all tests behind its results are peer reviewed. Provides per-rule methods and the combined runner used by the trigger business rule.&lt;/description&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;USEMPeerReviewRuleRunner&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[var USEMPeerReviewRuleRunner = Class.create();
+USEMPeerReviewRuleRunner.prototype = {
+
+    initialize: function() {
+        this.NOTE_TAG = '[peer-review-trigger]';
+        this.TEST_FLAG = 'u_peer_reviewed';
+    },
+
+    /* Re-run the configuration rules for ONE result: recalculate the risk
+     * score, then update() so the result's own rule chain (risk rating,
+     * remediation target rules, rollup manifest, task linking) re-fires
+     * exactly as it does on import. */
+    runForResult: function(resultId) {
+        var res = new GlideRecord('sn_vulc_result');
+        if (!res.get(resultId))
+            return false;
+        new sn_sec_calculator.CalculatorUtils().executeRiskScoreCalculator(res);
+        res.update();
+        return true;
+    },
+
+    /* Peer review is recorded on the TEST. When one test is marked
+     * reviewed:
+     *  - every result of that test re-runs its configuration rules
+     *  - each remediation task holding those results re-runs its rules
+     *    only when ALL tests behind its member results are peer reviewed.
+     *    A task fed by several tests waits for the last one. */
+    onTestPeerReviewed: function(test, opts) {
+        opts = opts || {};
+        var tgr;
+        if (typeof test == 'object' &amp;&amp; test.getUniqueValue) {
+            tgr = test;
+        } else {
+            tgr = new GlideRecord('sn_vulc_test');
+            if (!tgr.get('' + test))
+                return {ok: false, error: 'test not found: ' + test};
+        }
+        var stats = {ok: true, test: '' + tgr.number, results: 0,
+            groups_run: 0, groups_waiting: 0, failures: 0};
+        var groupIds = {};
+        var res = new GlideRecord('sn_vulc_result');
+        res.addQuery('control', tgr.getUniqueValue());
+        res.query();
+        while (res.next()) {
+            try {
+                if (this.runForResult(res.getUniqueValue()))
+                    stats.results++;
+            } catch (e) {
+                // one bad result must never abort the rest
+                stats.failures++;
+                stats.last_error = '' + e;
+                gs.error('USEMPeerReviewRuleRunner: result ' +
+                    res.getUniqueValue() + ' failed: ' + e);
+            }
+            var m2m = new GlideRecord('sn_vulc_m2m_result_result_group');
+            m2m.addQuery('result', res.getUniqueValue());
+            m2m.query();
+            while (m2m.next())
+                groupIds['' + m2m.getValue('group')] = true;
+        }
+        for (var gid in groupIds) {
+            if (this.allTestsPeerReviewed(gid)) {
+                this.runAllRulesInOrder(gid, {
+                    source: opts.source || 'test trigger'
+                });
+                stats.groups_run++;
+            } else {
+                stats.groups_waiting++;
+                this._noteWaiting(gid, '' + tgr.number);
+            }
+        }
+        return stats;
+    },
+
+    /* A remediation task can hold results from several tests. Its rules
+     * may only run when every one of those tests is peer reviewed. */
+    allTestsPeerReviewed: function(group) {
+        var gid = (typeof group == 'object' &amp;&amp; group.getUniqueValue) ?
+            group.getUniqueValue() : '' + group;
+        var tests = {};
+        var m2m = new GlideRecord('sn_vulc_m2m_result_result_group');
+        m2m.addQuery('group', gid);
+        m2m.query();
+        while (m2m.next()) {
+            var res = new GlideRecord('sn_vulc_result');
+            if (res.get(m2m.getValue('result')) &amp;&amp;
+                    !gs.nil(res.getValue('control')))
+                tests['' + res.getValue('control')] = true;
+        }
+        for (var tid in tests) {
+            var t = new GlideRecord('sn_vulc_test');
+            if (t.get(tid) &amp;&amp; t.getValue(this.TEST_FLAG) != '1')
+                return false;
+        }
+        return true;
+    },
+
+    _noteWaiting: function(gid, testNumber) {
+        var gr = new GlideRecord('sn_vulc_result_group');
+        if (!gr.get(gid))
+            return;
+        gr.work_notes = this.NOTE_TAG + ' test ' + testNumber +
+            ' peer reviewed; rules held back - other tests on this task ' +
+            'are not peer reviewed yet';
+        gr.setWorkflow(false);
+        gr.autoSysFields(false);
+        gr.update();
+    },
+
+    /* ------------------------------------------------------------------
+     * Per-rule entry points. Each method re-runs one rule engine for
+     * every test result on a remediation task. runAllRulesInOrder runs
+     * all of them in business rule order.
+     * ------------------------------------------------------------------ */
+
+    /* Loop the task's test results through fn. fn returns true when it
+     * changed something; errors are counted and logged per result. */
+    _eachResult: function(group, fn, label) {
+        var gid = (typeof group == 'object' &amp;&amp; group.getUniqueValue) ?
+            group.getUniqueValue() : '' + group;
+        var stats = {rule: label, group: gid, results: 0, changed: 0, failures: 0};
+        var m2m = new GlideRecord('sn_vulc_m2m_result_result_group');
+        m2m.addQuery('group', gid);
+        m2m.query();
+        while (m2m.next()) {
+            var res = new GlideRecord('sn_vulc_result');
+            if (!res.get(m2m.getValue('result')))
+                continue;
+            stats.results++;
+            try {
+                if (fn.call(this, res))
+                    stats.changed++;
+            } catch (e) {
+                stats.failures++;
+                stats.last_error = '' + e;
+                gs.error('USEMPeerReviewRuleRunner.' + label + ': result ' +
+                    res.getUniqueValue() + ' failed: ' + e);
+            }
+        }
+        return stats;
+    },
+
+    _persistQuietly: function(res) {
+        res.setWorkflow(false);
+        res.autoSysFields(false);
+        res.update();
+    },
+
+    /* Recalculate the risk score. The quiet update keeps downstream
+     * business rules from firing. */
+    runRiskScoreOnly: function(group) {
+        return this._eachResult(group, function(res) {
+            var before = res.getValue('risk_score');
+            new sn_sec_calculator.CalculatorUtils().executeRiskScoreCalculator(res);
+            this._persistQuietly(res);
+            return before != res.getValue('risk_score');
+        }, 'risk_score');
+    },
+
+    /* Map the risk rating from the current risk score using the weight
+     * table configured for this table. */
+    runRiskRatingOnly: function(group) {
+        return this._eachResult(group, function(res) {
+            var before = res.getValue('risk_rating');
+            res.setValue('risk_rating',
+                new sn_sec_calculator.CalculatorUtils().getRiskRatingFromRiskScore(
+                    res.getValue('risk_score'), res.getTableName()));
+            this._persistQuietly(res);
+            return before != res.getValue('risk_rating');
+        }, 'risk_rating');
+    },
+
+    /* Re-evaluate assignment rules. Manually assigned records
+     * (assignment_type 2) are left alone. */
+    runAssignmentOnly: function(group) {
+        return this._eachResult(group, function(res) {
+            if (res.getValue('assignment_type') == '2')
+                return false;
+            var ad = new sn_sec_wf.AssignmentUtils().getAssignmentInfo(res);
+            if (!ad || gs.nil(ad['assignment_group']))
+                return false;
+            var before = res.getValue('assignment_group');
+            res.setValue('assignment_group', ad['assignment_group']);
+            res.setValue('assignment_rule', ad['assignment_rule']);
+            res.setValue('assignment_type', 1);
+            this._persistQuietly(res);
+            return before != res.getValue('assignment_group');
+        }, 'assignment');
+    },
+
+    /* Re-run remediation target rules. Rules match by condition,
+     * typically on risk rating. Deferred/resolved results return null. */
+    runRemediationTargetOnly: function(group) {
+        return this._eachResult(group, function(res) {
+            var rd = new sn_sec_wf.TTRUtil().getRemediationInfo(res);
+            if (!rd)
+                return false;
+            var before = res.getValue('ttr_target_date') + '|' +
+                res.getValue('ttr_status');
+            res.setValue('ttr_target_date', rd['ttr_target_date']);
+            res.setValue('ttr_applied_rule', rd['ttr_applied_rule']);
+            res.setValue('ttr_status', rd['ttr_status']);
+            this._persistQuietly(res);
+            return before != (res.getValue('ttr_target_date') + '|' +
+                res.getValue('ttr_status'));
+        }, 'remediation_target');
+    },
+
+    /* Re-run remediation task rules. groupFindingByRule writes the m2m
+     * link itself; multiUpdate=true is the full regroup. */
+    runTaskGroupingOnly: function(group) {
+        return this._eachResult(group, function(res) {
+            new sn_vulc.CCRemediationTaskRule().groupFindingByRule(
+                res, false, false, true);
+            return true;
+        }, 'task_grouping');
+    },
+
+    /* Refresh task rollups and seed control manifests for the background
+     * job. RollupCalculatorUtil is package-private to this scope, so
+     * these calls have to run from an in-scope script include. Each step
+     * has its own try/catch so one failure does not stop the rest.
+     * processTestResultManifest() is not called: it references
+     * sn_vulc.TestResultsGrouping, which is not present on this instance,
+     * and its control metrics path fails for CC tables in
+     * sn_vul_cmn.RollupCalculatorUtil.rollupAggregatedCountToRT. */
+    runRollup: function(group) {
+        var gid = (typeof group == 'object' &amp;&amp; group.getUniqueValue) ?
+            group.getUniqueValue() : '' + group;
+        var controls = {};
+        var stats = this._eachResult(gid, function(res) {
+            controls['' + res.getValue('control')] = true;
+            var reg = new GlideRecord('sn_vulc_test_result_manifest');
+            reg.addQuery('result', res.getUniqueValue());
+            reg.setLimit(1);
+            reg.query();
+            if (reg.next())
+                return false;
+            reg.initialize();
+            reg.setValue('result', res.getUniqueValue());
+            reg.insert();
+            return true;
+        }, 'rollup');
+        var rcu = new sn_vulc.RollupCalculatorUtil();
+        stats.steps = {};
+        try {
+            rcu.countForTRGSync(gid);
+            stats.steps.ticket_counters = 'ok';
+        } catch (e) {
+            stats.steps.ticket_counters = '' + e;
+        }
+        try {
+            rcu.calculateRiskScoreForResultGroups(gid);
+            stats.steps.ticket_rollup = 'ok';
+        } catch (e) {
+            stats.steps.ticket_rollup = '' + e;
+        }
+        stats.controls_seeded = 0;
+        for (var cid in controls) {
+            try {
+                rcu.addTestToManifest(cid, true);
+                stats.controls_seeded++;
+            } catch (e) {
+                stats.steps['seed_' + cid] = '' + e;
+            }
+        }
+        return stats;
+    },
+
+    /* Run exception rules. Approved rules inside their validity window
+     * defer matching results (state 12). */
+    runExceptionRulesOnly: function(group) {
+        return this._eachResult(group, function(res) {
+            var ret = new sn_sec_exception.ExceptionRule(true)
+                .runExceptionRulesAndUpdateState(res);
+            if (!ret || !ret.isExceptionRuleMatched)
+                return false;
+            this._persistQuietly(res);
+            return true;
+        }, 'exception_rules');
+    },
+
+    /* Run every rule for one task in business rule order: score, rating,
+     * assignment, target, exceptions, then grouping and rollup. Writes a
+     * work note on the task. */
+    runAllRulesInOrder: function(group, opts) {
+        opts = opts || {};
+        var gr;
+        if (typeof group == 'object' &amp;&amp; group.getUniqueValue) {
+            gr = group;
+        } else {
+            gr = new GlideRecord('sn_vulc_result_group');
+            if (!gr.get('' + group))
+                return {ok: false, error: 'group not found: ' + group};
+        }
+        var out = {ok: true, group: '' + gr.number, sequence: []};
+        out.sequence.push(this.runRiskScoreOnly(gr));
+        out.sequence.push(this.runRiskRatingOnly(gr));
+        out.sequence.push(this.runAssignmentOnly(gr));
+        out.sequence.push(this.runRemediationTargetOnly(gr));
+        out.sequence.push(this.runExceptionRulesOnly(gr));
+        out.sequence.push(this.runTaskGroupingOnly(gr));
+        out.sequence.push(this.runRollup(gr));
+
+        var note = new GlideRecord('sn_vulc_result_group');
+        if (note.get(gr.getUniqueValue())) {
+            note.work_notes = this.NOTE_TAG + ' ' + (opts.source || 'engine') +
+                ': all configuration rules re-run in order (1-7)';
+            note.setWorkflow(false);
+            note.autoSysFields(false);
+            note.update();
+        }
+        return out;
+    },
+
+    type: 'USEMPeerReviewRuleRunner'
+};]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-17 05:22:57&lt;/sys_created_on&gt;&lt;sys_id&gt;4623df349376c350e3aef0aefaba10a3&lt;/sys_id&gt;&lt;sys_mod_count&gt;9&lt;/sys_mod_count&gt;&lt;sys_name&gt;USEMPeerReviewRuleRunner&lt;/sys_name&gt;&lt;sys_package display_value="Configuration Compliance" source="sn_vulc"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Configuration Compliance"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_4623df349376c350e3aef0aefaba10a3&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-20 11:29:35&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<payload_hash>1576634410</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1003 Peer review on test records">065b4ce29383c310e3aef0aefaba1044</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>0a5b4ce29383c310e3aef0aefaba1045</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a01eef04530000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table/>
+<target_name>USEMPeerReviewRuleRunner</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_guid>79d3884223728f5003e6bab555c9c03c</update_guid>
+<update_guid_history>79d3884223728f5003e6bab555c9c03c:1576634410,f5d38842bc728f504a3e1ac7e1c2c533:1576634410,0db340421b728f503d56084ebaba5694:-743876606,3ef8b3354bfe4f502323f30631e5f235:-1767102665,e94618c1c03207509a88083f750ac186:-1836060406,83a7633cd23ac350acb36af6ff87c4b0:644129676,57cc5730f4f6c350eebbeee29c24d020:-405396772,d94c17f879b6c35052593c7385373749:2074857337,c15bd7b8b5b6c350d0ccf1399cddc758:-1399208174,bbb3dfb4a176c35008ddbcb4bc4ad09c:2108191670,5a23df348276c35020c25cdf98961fa6:-1257159277</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_dictionary_sn_vulc_test_u_peer_reviewed</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update&gt;&lt;sys_dictionary action="INSERT_OR_UPDATE" element="u_peer_reviewed" table="sn_vulc_test"&gt;&lt;active&gt;true&lt;/active&gt;&lt;array&gt;false&lt;/array&gt;&lt;attributes/&gt;&lt;audit&gt;true&lt;/audit&gt;&lt;calculation&gt;&lt;![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]&gt;&lt;/calculation&gt;&lt;choice/&gt;&lt;choice_field/&gt;&lt;choice_table/&gt;&lt;column_label&gt;Peer reviewed&lt;/column_label&gt;&lt;comments/&gt;&lt;create_roles/&gt;&lt;default_value&gt;false&lt;/default_value&gt;&lt;defaultsort/&gt;&lt;delete_roles/&gt;&lt;dependent/&gt;&lt;dependent_on_field/&gt;&lt;display&gt;false&lt;/display&gt;&lt;dynamic_creation&gt;false&lt;/dynamic_creation&gt;&lt;dynamic_creation_script/&gt;&lt;dynamic_default_value/&gt;&lt;dynamic_ref_qual/&gt;&lt;element&gt;u_peer_reviewed&lt;/element&gt;&lt;element_reference&gt;false&lt;/element_reference&gt;&lt;foreign_database/&gt;&lt;formula/&gt;&lt;function_definition/&gt;&lt;function_field&gt;false&lt;/function_field&gt;&lt;internal_type display_value=""&gt;boolean&lt;/internal_type&gt;&lt;mandatory&gt;false&lt;/mandatory&gt;&lt;max_length&gt;40&lt;/max_length&gt;&lt;name&gt;sn_vulc_test&lt;/name&gt;&lt;next_element/&gt;&lt;primary&gt;false&lt;/primary&gt;&lt;read_only&gt;false&lt;/read_only&gt;&lt;read_only_option/&gt;&lt;read_roles/&gt;&lt;reference/&gt;&lt;reference_cascade_rule/&gt;&lt;reference_floats&gt;false&lt;/reference_floats&gt;&lt;reference_key/&gt;&lt;reference_qual/&gt;&lt;reference_qual_condition/&gt;&lt;reference_type/&gt;&lt;spell_check&gt;false&lt;/spell_check&gt;&lt;staged&gt;false&lt;/staged&gt;&lt;sys_class_name&gt;sys_dictionary&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-20 10:42:09&lt;/sys_created_on&gt;&lt;sys_id&gt;0ff8b33593fe4f50e3aef0aefaba1059&lt;/sys_id&gt;&lt;sys_name&gt;Peer reviewed&lt;/sys_name&gt;&lt;sys_package display_value="Configuration Compliance" source="sn_vulc"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Configuration Compliance"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_dictionary_sn_vulc_test_u_peer_reviewed&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-20 10:42:09&lt;/sys_updated_on&gt;&lt;table_reference&gt;false&lt;/table_reference&gt;&lt;text_index&gt;false&lt;/text_index&gt;&lt;unique&gt;false&lt;/unique&gt;&lt;use_dependent_field&gt;false&lt;/use_dependent_field&gt;&lt;use_dynamic_default&gt;false&lt;/use_dynamic_default&gt;&lt;use_reference_qualifier&gt;simple&lt;/use_reference_qualifier&gt;&lt;virtual&gt;false&lt;/virtual&gt;&lt;virtual_type&gt;script&lt;/virtual_type&gt;&lt;widget/&gt;&lt;write_roles/&gt;&lt;xml_view&gt;false&lt;/xml_view&gt;&lt;/sys_dictionary&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-326293258</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1003 Peer review on test records">065b4ce29383c310e3aef0aefaba1044</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>4a5b4ce29383c310e3aef0aefaba1044</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a01eee8a700000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table>sn_vulc_test</table>
+<target_name>Configuration Test.Peer reviewed</target_name>
+<type>Dictionary</type>
+<update_domain>global</update_domain>
+<update_guid>4eb3044201728f50c9fbd878a9cded77</update_guid>
+<update_guid_history>4eb3044201728f50c9fbd878a9cded77:-326293258,17f8b3352dfe4f50ee9598115a34b3b0:-326293258</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_ui_list_sn_vulc_test_null</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_ui_list parent="" relationship="" sys_domain="global" table="sn_vulc_test" version="2" view=""><sys_ui_list_element action="INSERT_OR_UPDATE"><average_value>false</average_value><element>number</element><list_id display_value="sn_vulc_test" element="NULL" name="sn_vulc_test" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">595911775b14201097e8c43e0a81c7ca</list_id><max_value>false</max_value><min_value>false</min_value><position>0</position><sum>false</sum><sys_created_by>admin</sys_created_by><sys_created_on>2020-11-12 11:43:58</sys_created_on><sys_id>155911775b14201097e8c43e0a81c7cb</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>admin</sys_updated_by><sys_updated_on>2020-11-12 11:43:58</sys_updated_on></sys_ui_list_element><sys_ui_list_element action="INSERT_OR_UPDATE"><average_value>false</average_value><element>short_description</element><list_id display_value="sn_vulc_test" element="NULL" name="sn_vulc_test" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">595911775b14201097e8c43e0a81c7ca</list_id><max_value>false</max_value><min_value>false</min_value><position>1</position><sum>false</sum><sys_created_by>admin</sys_created_by><sys_created_on>2020-11-12 11:43:58</sys_created_on><sys_id>955911775b14201097e8c43e0a81c7cb</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>admin</sys_updated_by><sys_updated_on>2020-11-12 11:43:58</sys_updated_on></sys_ui_list_element><sys_ui_list_element action="INSERT_OR_UPDATE"><average_value>false</average_value><element>risk_score</element><list_id display_value="sn_vulc_test" element="NULL" name="sn_vulc_test" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">595911775b14201097e8c43e0a81c7ca</list_id><max_value>false</max_value><min_value>false</min_value><position>2</position><sum>false</sum><sys_created_by>admin</sys_created_by><sys_created_on>2020-11-12 11:43:58</sys_created_on><sys_id>195911775b14201097e8c43e0a81c7cb</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>admin</sys_updated_by><sys_updated_on>2020-11-12 11:43:58</sys_updated_on></sys_ui_list_element><sys_ui_list_element action="INSERT_OR_UPDATE"><average_value>false</average_value><element>risk_rating</element><list_id display_value="sn_vulc_test" element="NULL" name="sn_vulc_test" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">595911775b14201097e8c43e0a81c7ca</list_id><max_value>false</max_value><min_value>false</min_value><position>3</position><sum>false</sum><sys_created_by>admin</sys_created_by><sys_created_on>2020-11-12 11:43:58</sys_created_on><sys_id>995911775b14201097e8c43e0a81c7cb</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>admin</sys_updated_by><sys_updated_on>2020-11-12 11:43:58</sys_updated_on></sys_ui_list_element><sys_ui_list_element action="INSERT_OR_UPDATE"><average_value>false</average_value><element>source_category</element><list_id display_value="sn_vulc_test" element="NULL" name="sn_vulc_test" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">595911775b14201097e8c43e0a81c7ca</list_id><max_value>false</max_value><min_value>false</min_value><position>4</position><sum>false</sum><sys_created_by>admin</sys_created_by><sys_created_on>2020-11-12 11:43:58</sys_created_on><sys_id>1d5911775b14201097e8c43e0a81c7cb</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>admin</sys_updated_by><sys_updated_on>2020-11-12 11:43:58</sys_updated_on></sys_ui_list_element><sys_ui_list_element action="INSERT_OR_UPDATE"><average_value>false</average_value><element>criticality</element><list_id display_value="sn_vulc_test" element="NULL" name="sn_vulc_test" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">595911775b14201097e8c43e0a81c7ca</list_id><max_value>false</max_value><min_value>false</min_value><position>5</position><sum>false</sum><sys_created_by>admin</sys_created_by><sys_created_on>2020-11-12 11:43:58</sys_created_on><sys_id>9d5911775b14201097e8c43e0a81c7cb</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>admin</sys_updated_by><sys_updated_on>2020-11-12 11:43:58</sys_updated_on></sys_ui_list_element><sys_ui_list_element action="INSERT_OR_UPDATE"><average_value>false</average_value><element>percent_nd_tr_complete</element><list_id display_value="sn_vulc_test" element="NULL" name="sn_vulc_test" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">595911775b14201097e8c43e0a81c7ca</list_id><max_value>false</max_value><min_value>false</min_value><position>6</position><sum>false</sum><sys_created_by>admin</sys_created_by><sys_created_on>2020-11-12 11:43:58</sys_created_on><sys_id>115911775b14201097e8c43e0a81c7cc</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>admin</sys_updated_by><sys_updated_on>2020-11-12 11:43:58</sys_updated_on></sys_ui_list_element><sys_ui_list_element action="INSERT_OR_UPDATE"><average_value>false</average_value><element>u_peer_reviewed</element><list_id display_value="sn_vulc_test" element="NULL" name="sn_vulc_test" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">595911775b14201097e8c43e0a81c7ca</list_id><max_value>false</max_value><min_value>false</min_value><position>7</position><sum>false</sum><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-20 11:01:13</sys_created_on><sys_id>da5d3bfd93fe4f50e3aef0aefaba105a</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-20 11:01:13</sys_updated_on></sys_ui_list_element><sys_ui_list action="INSERT_OR_UPDATE"><average_value>false</average_value><element/><max_value>false</max_value><min_value>false</min_value><name>sn_vulc_test</name><parent/><position/><relationship/><sum>false</sum><sys_class_name>sys_ui_list</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2020-11-12 11:43:58</sys_created_on><sys_domain>global</sys_domain><sys_domain_path>/</sys_domain_path><sys_id>595911775b14201097e8c43e0a81c7ca</sys_id><sys_mod_count>0</sys_mod_count><sys_name>sn_vulc_test</sys_name><sys_package display_value="Configuration Compliance" source="sn_vulc">29691e1f0212471dad08668c1e39932b</sys_package><sys_policy/><sys_scope display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</sys_scope><sys_update_name>sys_ui_list_sn_vulc_test_null</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2020-11-12 11:43:58</sys_updated_on><sys_user/><view display_value="Default view" name="NULL">Default view</view><view_name/></sys_ui_list></sys_ui_list></record_update>]]></payload>
+<payload_hash>435671756</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1003 Peer review on test records">065b4ce29383c310e3aef0aefaba1044</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>4e5b4ce29383c310e3aef0aefaba1045</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a01eee8b4a0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table>sn_vulc_test</table>
+<target_name>Configuration Test</target_name>
+<type>List Layout</type>
+<update_domain>global</update_domain>
+<update_guid>1eb304429b728f5023dac94c3e44f688</update_guid>
+<update_guid_history>1eb304429b728f5023dac94c3e44f688:435671756,669d373103328f50d62f07dac296e813:435671756</update_guid_history>
+<update_set display_value=""/>
+<view>Default view</view>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_ui_section_fc1eb38b0b323200cbf38ee337673a8b</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_ui_section caption="" section_id="fc1eb38b0b323200cbf38ee337673a8b" sys_domain="global" table="sn_vulc_test" version="3" view=""><sys_ui_annotation action="INSERT_OR_UPDATE"><is_plain_text>false</is_plain_text><name/><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>1cb427fdc78259107393ec22c7c26037</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><text/><type display_value="Text">863e446c0fd30000b12e6903cfe012ce</type></sys_ui_annotation><sys_ui_annotation action="INSERT_OR_UPDATE"><is_plain_text>false</is_plain_text><name/><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>58b427fdc78259107393ec22c7c26038</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><text/><type display_value="Text">863e446c0fd30000b12e6903cfe012ce</type></sys_ui_annotation><sys_ui_annotation action="INSERT_OR_UPDATE"><is_plain_text>false</is_plain_text><name/><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>94b427fdc78259107393ec22c7c26038</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><text/><type display_value="Text">863e446c0fd30000b12e6903cfe012ce</type></sys_ui_annotation><sys_ui_element action="INSERT_OR_UPDATE"><element>number</element><position>0</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>10b427fdc78259107393ec22c7c26050</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>source</element><position>1</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>94b427fdc78259107393ec22c7c26050</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>source_id</element><position>2</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>18b427fdc78259107393ec22c7c26050</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>risk_score</element><position>3</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>98b427fdc78259107393ec22c7c26050</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>risk_rating</element><position>4</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>1cb427fdc78259107393ec22c7c26050</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>.split</element><position>5</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>9cb427fdc78259107393ec22c7c26050</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type>.split</type></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>result</element><position>6</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>10b427fdc78259107393ec22c7c26051</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>criticality</element><position>7</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>90b427fdc78259107393ec22c7c26051</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>source_category</element><position>8</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>14b427fdc78259107393ec22c7c26051</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>source_sub_category</element><position>9</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>94b427fdc78259107393ec22c7c26051</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>technologies</element><position>10</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>18b427fdc78259107393ec22c7c26051</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>source_created</element><position>11</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>98b427fdc78259107393ec22c7c26051</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>source_updated</element><position>12</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>1cb427fdc78259107393ec22c7c26051</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>.end_split</element><position>13</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>9cb427fdc78259107393ec22c7c26051</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type>.end_split</type></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>short_description</element><position>14</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>10b427fdc78259107393ec22c7c26052</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>1cb427fdc78259107393ec22c7c26037</element><position>15</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>90b427fdc78259107393ec22c7c26052</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type>annotation</type></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>94b427fdc78259107393ec22c7c26038</element><position>16</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>14b427fdc78259107393ec22c7c26052</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type>annotation</type></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>58b427fdc78259107393ec22c7c26038</element><position>17</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>94b427fdc78259107393ec22c7c26052</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type>annotation</type></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>status_updated_on</element><position>18</position><sys_created_by>admin</sys_created_by><sys_created_on>2022-09-21 05:08:20</sys_created_on><sys_id>18b427fdc78259107393ec22c7c26052</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2022-09-21 05:08:20</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>u_nist_function</element><position>19</position><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-03 06:12:21</sys_created_on><sys_id>8d389798932ac354e3aef0aefaba10b1</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-03 06:12:21</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>u_gap</element><position>20</position><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-03 06:12:21</sys_created_on><sys_id>8138d798932ac354e3aef0aefaba1004</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-03 06:12:21</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>u_rated_date</element><position>21</position><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-03 06:12:22</sys_created_on><sys_id>0538d798932ac354e3aef0aefaba102c</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-03 06:12:22</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>u_reviewed</element><position>22</position><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-03 06:12:22</sys_created_on><sys_id>5138d798932ac354e3aef0aefaba106d</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-03 06:12:22</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>u_reviewed_by</element><position>23</position><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-03 06:12:23</sys_created_on><sys_id>1538d798932ac354e3aef0aefaba10a2</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-03 06:12:23</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>u_reviewed_date</element><position>24</position><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-03 06:12:24</sys_created_on><sys_id>e138d798932ac354e3aef0aefaba10f4</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-03 06:12:24</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>u_peer_reviewed</element><position>25</position><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-20 10:42:10</sys_created_on><sys_id>4ff8b33593fe4f50e3aef0aefaba1069</sys_id><sys_mod_count>1</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-20 11:01:13</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>u_manual_adjustment</element><position>26</position><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-03 06:12:24</sys_created_on><sys_id>79381b98932ac354e3aef0aefaba101c</sys_id><sys_mod_count>1</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-20 11:01:13</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>u_adjust_by</element><position>27</position><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-03 06:12:25</sys_created_on><sys_id>b5381b98932ac354e3aef0aefaba1039</sys_id><sys_mod_count>1</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-20 11:01:13</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>u_adjusted_date</element><position>28</position><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-03 06:12:25</sys_created_on><sys_id>ce381b98932ac354e3aef0aefaba107e</sys_id><sys_mod_count>1</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-20 11:01:13</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>u_manual_adjustment_reason</element><position>29</position><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-03 06:12:25</sys_created_on><sys_id>06381b98932ac354e3aef0aefaba109b</sys_id><sys_mod_count>1</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="sn_vulc_test" sys_domain="global" view="Default view">fc1eb38b0b323200cbf38ee337673a8b</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-20 11:01:13</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_section action="INSERT_OR_UPDATE"><caption/><header>false</header><name>sn_vulc_test</name><roles/><sys_class_name>sys_ui_section</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2017-05-23 01:07:12</sys_created_on><sys_domain>global</sys_domain><sys_domain_path>/</sys_domain_path><sys_id>fc1eb38b0b323200cbf38ee337673a8b</sys_id><sys_mod_count>0</sys_mod_count><sys_name>sn_vulc_test</sys_name><sys_overrides/><sys_package display_value="Configuration Compliance" source="sn_vulc">29691e1f0212471dad08668c1e39932b</sys_package><sys_policy/><sys_scope display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</sys_scope><sys_update_name>sys_ui_section_fc1eb38b0b323200cbf38ee337673a8b</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2017-05-23 01:07:12</sys_updated_on><sys_user/><title>true</title><view display_value="Default view" name="NULL">Default view</view><view_name/></sys_ui_section></sys_ui_section></record_update>]]></payload>
+<payload_hash>707061215</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1003 Peer review on test records">065b4ce29383c310e3aef0aefaba1044</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>825b4ce29383c310e3aef0aefaba1046</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a01eee8b0f0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table>sn_vulc_test</table>
+<target_name>Configuration Test</target_name>
+<type>Form Layout</type>
+<update_domain>global</update_domain>
+<update_guid>12b3044264728f50d12076fb1cdeb684</update_guid>
+<update_guid_history>12b3044264728f50d12076fb1cdeb684:707061215,e69d3731ef328f5090ab1aa5ba29130e:707061215,53f8b3353ffe4f505daaa1f12763998c:1940583345,06381b98392ac354bf59e327af6280a1:1166392857,4e381b98382ac3541c7709c34b305784:162483721,f5381b98b92ac3543efa6fb68076a464:1424115642,f1381b98112ac3549da7efa16dcb9322:162917106,e938d798852ac35477f7ba22f498e9f9:789722024,9938d798182ac354a5d0f9263e7b56a7:176894189,5538d798e32ac3547eb3bf147baa2972:111502490,9538d798942ac354c47bf2b595d53431:-2140203244,8138d798762ac354a369c1f48f113a09:1643291145,0d389798fe2ac354b5d86c34e9d047b8:-957231318</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_documentation_sn_vulc_test_u_peer_reviewed_en</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_documentation element="u_peer_reviewed" label="Peer reviewed" language="en" table="sn_vulc_test"><sys_documentation action="INSERT_OR_UPDATE"><element>u_peer_reviewed</element><help/><hint/><label>Peer reviewed</label><language>en</language><name>sn_vulc_test</name><plural>Peer reviewed</plural><sys_class_name>sys_documentation</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-20 10:42:10</sys_created_on><sys_id>93f8b33593fe4f50e3aef0aefaba108f</sys_id><sys_mod_count>0</sys_mod_count><sys_name>Peer reviewed</sys_name><sys_package display_value="Configuration Compliance" source="sn_vulc">29691e1f0212471dad08668c1e39932b</sys_package><sys_policy/><sys_scope display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</sys_scope><sys_update_name>sys_documentation_sn_vulc_test_u_peer_reviewed_en</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-20 10:42:10</sys_updated_on><url/><url_target/></sys_documentation></sys_documentation></record_update>]]></payload>
+<payload_hash>-418886749</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1003 Peer review on test records">065b4ce29383c310e3aef0aefaba1044</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>8e5b4ce29383c310e3aef0aefaba1044</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a01eee8a920000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table>sn_vulc_test</table>
+<target_name>Configuration Test.Peer reviewed</target_name>
+<type>Field Label</type>
+<update_domain>global</update_domain>
+<update_guid>86b30442c3728f50be7ac6f296b2c37a</update_guid>
+<update_guid_history>86b30442c3728f50be7ac6f296b2c37a:-418886749,d7f8b335cdfe4f50ebe2833a2242e0f2:-418886749</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_9bf8b33593fe4f50e3aef0aefaba10f4</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;false&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vulc_test&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="sn_vulc_test"&gt;u_peer_reviewedCHANGESTOtrue^EQ&lt;item endquery="false" field="u_peer_reviewed" goto="false" newquery="false" operator="CHANGESTO" or="false" value="true"/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;USEM Test Peer Review Trigger&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous /*null when async*/) {
+    // Peer review is recorded on the test. Re-run the configuration rules
+    // for its results, and for each remediation task once every test on
+    // that task is peer reviewed.
+    new USEMPeerReviewRuleRunner().onTestPeerReviewed(current, {
+        source: 'test trigger'
+    });
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-20 10:42:11&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;9bf8b33593fe4f50e3aef0aefaba10f4&lt;/sys_id&gt;&lt;sys_mod_count&gt;2&lt;/sys_mod_count&gt;&lt;sys_name&gt;USEM Test Peer Review Trigger&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Configuration Compliance" source="sn_vulc"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Configuration Compliance"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_9bf8b33593fe4f50e3aef0aefaba10f4&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-20 10:44:41&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=9bf8b33593fe4f50e3aef0aefaba10f4"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-783666309</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1003 Peer review on test records">065b4ce29383c310e3aef0aefaba1044</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>c25b4ce29383c310e3aef0aefaba1045</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a01eee8a480000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table>sn_vulc_test</table>
+<target_name>USEM Test Peer Review Trigger</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>82b30442ec728f500db20fe05bf67475</update_guid>
+<update_guid_history>82b30442ec728f500db20fe05bf67475:-783666309,4899fb755afe4f506d8e34cb2f6bf2ca:-783666309,c499fb7546fe4f50dad0accf6717939c:1719936564,1ff8b33535fe4f5026aae032feb4defc:-783666309</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>

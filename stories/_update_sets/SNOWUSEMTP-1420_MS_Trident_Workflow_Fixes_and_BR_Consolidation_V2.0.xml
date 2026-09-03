@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-03 11:35:04">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<application_name>Configuration Compliance</application_name>
+<application_scope>sn_vulc</application_scope>
+<application_version>30.6.0</application_version>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>Consolidation of the Trident closure business rules for sn_vulc_result_group and sn_vulc_result. The four result-group rules (Trident Recopen From Resolved, BOFA Trident closure approval gate, BOFA Trident reopen window, BOFA Trident start workflow) are replaced by one rule, BOFA Trident closure lifecycle (before update, state changes, order 100), which runs the same governance in a fixed order: close gate (attachment required + approved closure request), reopen window check, closure request staging on Resolved, and cancellation of open approvals when a pending request is backed out. Root cause of the duplicated approvals: the old start workflow rule called TridentClosureUtil.requestClosure(current), which runs current.update() inside a before rule - the record was written twice per Resolve (nested write plus the original save) and the Trident Closure Approval flow trigger matched both writes, creating two approval sets. The new rule stages substate/approval on the current write only, so the record is written once and the flow runs once. Also fixed: missing Trident guard on the resolve path (non-Trident tasks are no longer touched), action.setRedirectURL removed from rule context, reopen window arithmetic in TridentClosureUtil.reopenAllowed (the window was added to today instead of counted back from the closure date, so reopening was never blocked), closure stamps now cleared when a Trident test result is reopened to any state, and approvals are cancelled on backout for non-interactive updates as well. TridentClosureUtil gains applyClosureRequest() (stage without update) and cancelOpenApprovals(); requestClosure() is kept for UI action use. Contains 7 updates: 4 business rule deletions, 1 new business rule, 1 business rule update (Trident reopen window (test result)), 1 script include update.</description>
+<inserted/>
+<name>SNOWUSEMTP-1420_MS_Trident Workflow Fixes and BR Consolidation_V2.0</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>929b2abb93f243d0e3aef0aefaba10da</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:03</sys_created_on>
+<sys_id>ae5b846a9383c310e3aef0aefaba1082</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:03</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_669be2b7933643d0e3aef0aefaba107b</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;false&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vulc_result_group&lt;/collection&gt;&lt;condition/&gt;&lt;description&gt;Single governance rule for Trident remediation tasks. Replaces: Trident Recopen From Resolved, BOFA Trident closure approval gate, BOFA Trident reopen window, BOFA Trident start workflow. Branches in a fixed order: close gate (evidence + approved request), reopen window, closure request on resolve (staged on the current write, no nested update), and cancellation of open approvals when a pending request is backed out.&lt;/description&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="sn_vulc_result_group"&gt;stateVALCHANGES^EQ&lt;item endquery="false" field="state" goto="false" newquery="false" operator="VALCHANGES" or="false" value=""/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;BOFA Trident closure lifecycle&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous) {
+    var util = new sn_vulc.TridentClosureUtil();
+    if (!util.isTridentTask(current))
+        return;
+
+    var closing   = current.getValue('state') == util.STATE_CLOSED &amp;&amp; previous.getValue('state') != util.STATE_CLOSED;
+    var reopening = previous.getValue('state') == util.STATE_CLOSED &amp;&amp; current.getValue('state') != util.STATE_CLOSED;
+    var resolving = current.getValue('state') == util.STATE_RESOLVED &amp;&amp; previous.getValue('state') != util.STATE_RESOLVED;
+
+    // 1. Closing: only an approved closure request with evidence may close.
+    if (closing) {
+        if (!util.hasEvidence(current)) {
+            gs.addErrorMessage(util.MSG_NO_EVIDENCE);
+            current.setAbortAction(true);
+            return;
+        }
+        if (!util.closeApproved(current, previous)) {
+            gs.addErrorMessage(util.MSG_NEEDS_APPROVAL);
+            current.setAbortAction(true);
+            return;
+        }
+        return;
+    }
+
+    // 2. Reopening a closed task: only within the reopen window.
+    if (reopening) {
+        if (!util.reopenAllowed(previous)) {
+            gs.addErrorMessage('Reopening of Trident findings is only allowed up to ' + util.reopenWindowDays + ' days after closure.');
+            current.setAbortAction(true);
+            return;
+        }
+        current.setValue('approval', 'not requested');
+        current.setValue('substate', '');
+    }
+
+    // 3. Resolving: stage the closure request; the flow picks it up from
+    //    this one write. Without evidence the resolve is refused.
+    if (resolving) {
+        var outcome = util.applyClosureRequest(current);
+        if (outcome == 'no_evidence') {
+            gs.addErrorMessage(util.MSG_NO_EVIDENCE);
+            current.setAbortAction(true);
+        } else if (outcome == 'pending') {
+            gs.addInfoMessage('A closure request is already awaiting approval for this remediation task.');
+        } else {
+            gs.addInfoMessage('Closure requested, the remediation task is now pending approval from the governance team.');
+        }
+        return;
+    }
+
+    // 4. Any other move away from a pending closure request cancels the
+    //    open approvals so governance never votes on a stale request.
+    if (previous.getValue('substate') == util.PENDING_APPROVAL) {
+        var cancelled = util.cancelOpenApprovals(current,
+            'Approval cancelled: the remediation task was reopened before the governance decision was made.');
+        current.setValue('substate', '');
+        current.setValue('approval', 'not requested');
+        if (cancelled &gt; 0)
+            gs.addInfoMessage('The pending governance approval was cancelled because the remediation task was reopened.');
+    }
+})(current, previous);
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-26 10:11:55&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;669be2b7933643d0e3aef0aefaba107b&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA Trident closure lifecycle&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Configuration Compliance" source="sn_vulc"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Configuration Compliance"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_669be2b7933643d0e3aef0aefaba107b&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-26 10:11:55&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;before&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=669be2b7933643d0e3aef0aefaba107b"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>616003028</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1420_MS_Trident Workflow Fixes and BR Consolidation_V2.0">ae5b846a9383c310e3aef0aefaba1082</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:03</sys_created_on>
+<sys_id>2a5b846a9383c310e3aef0aefaba1083</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a03d8e11bb0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:03</sys_updated_on>
+<table>sn_vulc_result_group</table>
+<target_name>BOFA Trident closure lifecycle</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>6e9be2b71d3643d093486e755cfb6982</update_guid>
+<update_guid_history>6e9be2b71d3643d093486e755cfb6982:616003028</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_e7263527473a0350a1a9295b416d4318</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="DELETE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;false&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vulc_result_group&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="sn_vulc_result_group"&gt;stateCHANGESTO101^EQ&lt;item display_value="Resolved" endquery="false" field="state" goto="false" newquery="false" operator="CHANGESTO" or="false" value="101"/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;BOFA Trident start workflow&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous /*null when async*/ ) {
+    //SNOWUSEMTP-1420 - 24th August 2026
+    var util = new sn_vulc.TridentClosureUtil();
+    var outcome = util.requestClosure(current);
+    if (outcome == 'no_evidence')
+        gs.addErrorMessage(util.MSG_NO_EVIDENCE);
+    else if (outcome == 'closed')
+        gs.addErrorMessage('This remediation task is already closed.');
+    else if (outcome == 'pending')
+        gs.addInfoMessage('A closure request is already awaiting approval for this remediation task.');
+    else
+        gs.addInfoMessage('Closure requested, the remediation task is now pending approval from the governance team.');
+    action.setRedirectURL(current);
+    // SNOWUSEMTP-1420 ends here
+
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-25 11:41:48&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;e7263527473a0350a1a9295b416d4318&lt;/sys_id&gt;&lt;sys_mod_count&gt;3&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA Trident start workflow&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Configuration Compliance" source="sn_vulc"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Configuration Compliance"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_e7263527473a0350a1a9295b416d4318&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-26 09:31:54&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;before&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=e7263527473a0350a1a9295b416d4318"/&gt;&lt;sys_es_latest_script action="INSERT_OR_UPDATE"&gt;&lt;id&gt;e7263527473a0350a1a9295b416d4318&lt;/id&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-25 11:41:48&lt;/sys_created_on&gt;&lt;sys_id&gt;d596f527473a0350a1a9295b416d435c&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-25 11:41:48&lt;/sys_updated_on&gt;&lt;table&gt;sys_script&lt;/table&gt;&lt;use_es_latest&gt;true&lt;/use_es_latest&gt;&lt;/sys_es_latest_script&gt;&lt;/record_update&gt;</payload>
+<payload_hash>988744346</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1420_MS_Trident Workflow Fixes and BR Consolidation_V2.0">ae5b846a9383c310e3aef0aefaba1082</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:03</sys_created_on>
+<sys_id>2e5b846a9383c310e3aef0aefaba1084</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a03d8e115b0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:03</sys_updated_on>
+<table>sn_vulc_result_group</table>
+<target_name>BOFA Trident start workflow</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>ee9be2b7713643d01c67ea3a7073be78</update_guid>
+<update_guid_history>ee9be2b7713643d01c67ea3a7073be78:988744346,d072eebf57b243d0670f78d3b54211d9:-2110304626,e9626ebfdbb243d0bda7f5851b6a4bc4:840663623,21626ebfc2b243d0875a68a87d13a9bf:-2110304626</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_079eeba43b060710e973496ea5e45a7b</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;sn_vulc.TridentClosureUtil&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description/&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;TridentClosureUtil&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[var TridentClosureUtil = Class.create();
+TridentClosureUtil.prototype = {
+    initialize: function() {
+        this.governanceGroup = gs.getProperty('trident.closure.governance_group', '');
+        this.tridentSource = gs.getProperty('trident.finding.source', 'Trident');
+        this.reopenWindowDays = parseInt(gs.getProperty('trident.reopen.window_days', '30'), 10);
+    },
+
+    PENDING_APPROVAL: 100,
+    STATE_RESOLVED: 101,
+    STATE_OPEN: 1,
+    STATE_CLOSED: 3,
+    STATE_AWAITING_IMPLEMENTATION: 10,
+
+    MSG_NO_EVIDENCE: 'Evidence has not been attached to this remediation task. Please use the paperclip icon to attach relevant evidence before attempting to submit the remediation task for closure.',
+    MSG_NEEDS_APPROVAL: 'Trident remediation tasks can only be closed through a governance approval. Use Request Closure to submit the task for review.',
+
+    isTridentTask: function(taskGr) {
+        var m2m = new GlideRecord('sn_vulc_m2m_result_result_group');
+        m2m.addQuery('group', taskGr.getUniqueValue());
+        m2m.addQuery('result.source', this.tridentSource);
+        m2m.setLimit(1);
+        m2m.query();
+        return m2m.hasNext();
+    },
+
+    isTridentResult: function(resultGr) {
+        return resultGr.getValue('source') == this.tridentSource;
+    },
+
+    hasEvidence: function(taskGr) {
+        var att = new GlideRecord('sys_attachment');
+        att.addQuery('table_name', taskGr.getTableName());
+        att.addQuery('table_sys_id', taskGr.getUniqueValue());
+        att.setLimit(1);
+        att.query();
+        return att.hasNext();
+    },
+
+    isGovernanceMember: function(userId) {
+        if (!this.governanceGroup)
+            return false;
+        var gm = new GlideRecord('sys_user_grmember');
+        gm.addQuery('group', this.governanceGroup);
+        gm.addQuery('user', userId || gs.getUserID());
+        gm.setLimit(1);
+        gm.query();
+        return gm.hasNext();
+    },
+
+    /**
+     * Stage a closure request on the record WITHOUT calling update().
+     * Safe to use from a before business rule: the outer save persists the
+     * values, so the record is written exactly once and any record-triggered
+     * flow fires exactly once.
+     */
+    applyClosureRequest: function(taskGr) {
+        if (taskGr.getValue('substate') == this.PENDING_APPROVAL)
+            return 'pending';
+        if (!this.hasEvidence(taskGr))
+            return 'no_evidence';
+        taskGr.setValue('approval', 'not requested');
+        taskGr.setValue('substate', this.PENDING_APPROVAL);
+        taskGr.work_notes = 'Closure requested for governance review. Evidence attached: ' + this._evidenceNames(taskGr);
+        return 'ok';
+    },
+
+    /**
+     * Full closure request for callers that own the write (UI action, fix
+     * scripts). Never call from a before rule on the same record.
+     */
+    requestClosure: function(taskGr) {
+        if (taskGr.getValue('state') == this.STATE_CLOSED)
+            return 'closed';
+        var outcome = this.applyClosureRequest(taskGr);
+        if (outcome == 'ok')
+            taskGr.update();
+        return outcome;
+    },
+
+    cancelOpenApprovals: function(taskGr, note) {
+        var appr = new GlideRecord('sysapproval_approver');
+        appr.addQuery('sysapproval', taskGr.getUniqueValue());
+        appr.addQuery('state', 'requested');
+        appr.query();
+        var cancelled = 0;
+        while (appr.next()) {
+            appr.setValue('state', 'cancelled');
+            if (note)
+                appr.comments = note;
+            appr.update();
+            cancelled++;
+        }
+        return cancelled;
+    },
+
+    closeApproved: function(current, previous) {
+        return previous.getValue('substate') == this.PENDING_APPROVAL &amp;&amp; current.getValue('approval') == 'approved';
+    },
+
+    reopenAllowed: function(gr) {
+        var closedAt = gr.getValue('closed_at') || gr.getValue('resolution_dt_tm');
+        if (!closedAt)
+            return false;
+        var cutoff = new GlideDateTime();
+        cutoff.addDaysUTC(-this.reopenWindowDays);
+        return new GlideDateTime(closedAt).compareTo(cutoff) &gt;= 0;
+    },
+
+    _evidenceNames: function(taskGr) {
+        var names = [];
+        var att = new GlideRecord('sys_attachment');
+        att.addQuery('table_name', taskGr.getTableName());
+        att.addQuery('table_sys_id', taskGr.getUniqueValue());
+        att.query();
+        while (att.next())
+            names.push(att.getValue('file_name'));
+        return names.join(', ');
+    },
+
+    type: 'TridentClosureUtil'
+};
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-07-10 05:57:36&lt;/sys_created_on&gt;&lt;sys_id&gt;079eeba43b060710e973496ea5e45a7b&lt;/sys_id&gt;&lt;sys_mod_count&gt;7&lt;/sys_mod_count&gt;&lt;sys_name&gt;TridentClosureUtil&lt;/sys_name&gt;&lt;sys_package display_value="Configuration Compliance" source="sn_vulc"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Configuration Compliance"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_079eeba43b060710e973496ea5e45a7b&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-26 10:11:56&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;sys_es_latest_script action="INSERT_OR_UPDATE"&gt;&lt;id&gt;079eeba43b060710e973496ea5e45a7b&lt;/id&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-07-10 05:57:36&lt;/sys_created_on&gt;&lt;sys_id&gt;4faee3e43b060710e973496ea5e45a7c&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-07-17 09:30:23&lt;/sys_updated_on&gt;&lt;table&gt;sys_script_include&lt;/table&gt;&lt;use_es_latest&gt;false&lt;/use_es_latest&gt;&lt;/sys_es_latest_script&gt;&lt;/record_update&gt;</payload>
+<payload_hash>473481246</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1420_MS_Trident Workflow Fixes and BR Consolidation_V2.0">ae5b846a9383c310e3aef0aefaba1082</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:03</sys_created_on>
+<sys_id>625b846a9383c310e3aef0aefaba1085</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a03d8e13050000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:03</sys_updated_on>
+<table/>
+<target_name>TridentClosureUtil</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_guid>7a9be2b7823643d068a98ae4d516f4af</update_guid>
+<update_guid_history>7a9be2b7823643d068a98ae4d516f4af:473481246,7e9be2b7383643d0082025ea3d4dfdaa:-711311016</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_8d7ae3643b060710e973496ea5e45ac5</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="DELETE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;false&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vulc_result_group&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="sn_vulc_result_group"&gt;stateCHANGESTO3^EQ&lt;item display_value="Closed" endquery="false" field="state" goto="false" newquery="false" operator="CHANGESTO" or="false" value="3"/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;BOFA Trident closure approval gate&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous) {
+    var util = new sn_vulc.TridentClosureUtil();
+    if (!util.isTridentTask(current))
+        return;
+    if (!util.hasEvidence(current)) {
+        gs.addErrorMessage(util.MSG_NO_EVIDENCE);
+        current.setAbortAction(true);
+        return;
+    }
+    if (!util.closeApproved(current, previous)) {
+        gs.addErrorMessage(util.MSG_NEEDS_APPROVAL);
+        current.setAbortAction(true);
+		return;
+    }
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-07-10 05:40:28&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;8d7ae3643b060710e973496ea5e45ac5&lt;/sys_id&gt;&lt;sys_mod_count&gt;3&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA Trident closure approval gate&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Configuration Compliance" source="sn_vulc"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Configuration Compliance"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_8d7ae3643b060710e973496ea5e45ac5&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-24 08:44:33&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;before&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=8d7ae3643b060710e973496ea5e45ac5"/&gt;&lt;sys_es_latest_script action="INSERT_OR_UPDATE"&gt;&lt;id&gt;8d7ae3643b060710e973496ea5e45ac5&lt;/id&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-07-10 05:40:28&lt;/sys_created_on&gt;&lt;sys_id&gt;4ccaaf243b060710e973496ea5e45a19&lt;/sys_id&gt;&lt;sys_mod_count&gt;3&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-07-17 09:30:18&lt;/sys_updated_on&gt;&lt;table&gt;sys_script&lt;/table&gt;&lt;use_es_latest&gt;false&lt;/use_es_latest&gt;&lt;/sys_es_latest_script&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-1700346343</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1420_MS_Trident Workflow Fixes and BR Consolidation_V2.0">ae5b846a9383c310e3aef0aefaba1082</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:03</sys_created_on>
+<sys_id>6e5b846a9383c310e3aef0aefaba1083</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a03d8e105e0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:03</sys_updated_on>
+<table>sn_vulc_result_group</table>
+<target_name>BOFA Trident closure approval gate</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>a29be2b7ad3643d0546bf7d896421758</update_guid>
+<update_guid_history>a29be2b7ad3643d0546bf7d896421758:-1700346343,2a9be2b7a43643d0bf1c3307fefff34b:-309803763</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_9a4b2b243b060710e973496ea5e45aa9</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;false&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vulc_result&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="sn_vulc_result"&gt;stateCHANGESFROM3^EQ&lt;item display_value="Closed" endquery="false" field="state" goto="false" newquery="false" operator="CHANGESFROM" or="false" value="3"/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;Trident reopen window (test result)&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous) {
+    var util = new sn_vulc.TridentClosureUtil();
+    if (!util.isTridentResult(current))
+        return;
+    if (!util.reopenAllowed(previous)) {
+        gs.addErrorMessage('Reopening of Trident findings is only allowed up to ' + util.reopenWindowDays + ' days after closure.');
+        current.setAbortAction(true);
+        return;
+    }
+    // a reopened result must not carry closure stamps
+    current.setValue('closed_at', '');
+    current.setValue('closed_by', '');
+})(current, previous);
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-07-10 05:43:15&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;9a4b2b243b060710e973496ea5e45aa9&lt;/sys_id&gt;&lt;sys_mod_count&gt;7&lt;/sys_mod_count&gt;&lt;sys_name&gt;Trident reopen window (test result)&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Configuration Compliance" source="sn_vulc"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Configuration Compliance"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_9a4b2b243b060710e973496ea5e45aa9&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-26 10:11:55&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;before&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=9a4b2b243b060710e973496ea5e45aa9"/&gt;&lt;sys_es_latest_script action="INSERT_OR_UPDATE"&gt;&lt;id&gt;9a4b2b243b060710e973496ea5e45aa9&lt;/id&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-07-10 05:43:29&lt;/sys_created_on&gt;&lt;sys_id&gt;5c7be3643b060710e973496ea5e45ada&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-07-10 05:43:29&lt;/sys_updated_on&gt;&lt;table&gt;sys_script&lt;/table&gt;&lt;use_es_latest&gt;false&lt;/use_es_latest&gt;&lt;/sys_es_latest_script&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-610287202</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1420_MS_Trident Workflow Fixes and BR Consolidation_V2.0">ae5b846a9383c310e3aef0aefaba1082</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:03</sys_created_on>
+<sys_id>a25b846a9383c310e3aef0aefaba1084</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a03d8e129c0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:03</sys_updated_on>
+<table>sn_vulc_result</table>
+<target_name>Trident reopen window (test result)</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>e29be2b7753643d0c605f5c3c165eda5</update_guid>
+<update_guid_history>e29be2b7753643d0c605f5c3c165eda5:-610287202,ae9be2b73c3643d096eaec96c5de9e87:2132615544</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_4c7f23372b82c31019acfed6f291bf71</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="DELETE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;false&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vulc_result_group&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="sn_vulc_result_group"&gt;stateVALCHANGES^EQ&lt;item endquery="false" field="state" goto="false" newquery="false" operator="VALCHANGES" or="false" value=""/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;Trident Recopen From Resolved&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous) {
+    if (!gs.isInteractive())
+        return;
+    var util = new sn_vulc.TridentClosureUtil();
+    if (previous.getValue('substate') != util.PENDING_APPROVAL)
+        return;
+    if (current.getValue('state') == util.STATE_CLOSED)
+        return;
+    if (!util.isTridentTask(current))
+        return;
+    var appr = new GlideRecord('sysapproval_approver');
+    appr.addQuery('sysapproval', current.getUniqueValue());
+    appr.addQuery('state', 'requested');
+    appr.query();
+    var cancelled = 0;
+    while (appr.next()) {
+        appr.setValue('state', 'cancelled');
+        appr.comments = 'Approval cancelled: the remediation task was reopened before the governance decision was made.';
+        appr.update();
+        cancelled++;
+    }
+    current.setValue('substate', '');
+    current.setValue('approval', 'not requested');
+    if (cancelled &gt; 0)
+        gs.addInfoMessage('The pending governance approval was cancelled because the remediation task was reopened.');
+})(current, previous);
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-07-20 12:26:38&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;4c7f23372b82c31019acfed6f291bf71&lt;/sys_id&gt;&lt;sys_mod_count&gt;9&lt;/sys_mod_count&gt;&lt;sys_name&gt;Trident Recopen From Resolved&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Configuration Compliance" source="sn_vulc"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Configuration Compliance"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_4c7f23372b82c31019acfed6f291bf71&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-07-21 03:59:32&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;before&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=4c7f23372b82c31019acfed6f291bf71"/&gt;&lt;sys_es_latest_script action="INSERT_OR_UPDATE"&gt;&lt;id&gt;4c7f23372b82c31019acfed6f291bf71&lt;/id&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-07-20 12:26:37&lt;/sys_created_on&gt;&lt;sys_id&gt;8f976c8c2bd2c31019acfed6f291bff8&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-07-20 12:26:37&lt;/sys_updated_on&gt;&lt;table&gt;sys_script&lt;/table&gt;&lt;use_es_latest&gt;true&lt;/use_es_latest&gt;&lt;/sys_es_latest_script&gt;&lt;/record_update&gt;</payload>
+<payload_hash>1708414641</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1420_MS_Trident Workflow Fixes and BR Consolidation_V2.0">ae5b846a9383c310e3aef0aefaba1082</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:03</sys_created_on>
+<sys_id>e25b846a9383c310e3aef0aefaba1083</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a03d8e0fc30000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:03</sys_updated_on>
+<table>sn_vulc_result_group</table>
+<target_name>Trident Recopen From Resolved</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>e69be2b7cc3643d028600c43f5978246</update_guid>
+<update_guid_history>e69be2b7cc3643d028600c43f5978246:1708414641,e29be2b79d3643d0a1d074092874961f:1525869373</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_9b9b2f643b060710e973496ea5e45ae7</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="DELETE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;false&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vulc_result_group&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="sn_vulc_result_group"&gt;stateCHANGESFROM3^EQ&lt;item display_value="Closed" endquery="false" field="state" goto="false" newquery="false" operator="CHANGESFROM" or="false" value="3"/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;BOFA Trident reopen window&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous) {
+    var util = new sn_vulc.TridentClosureUtil();
+    if (!util.isTridentTask(current))
+        return;
+    if (!util.reopenAllowed(previous)) {
+        gs.addErrorMessage('Reopening of Trident findings is only allowed up to ' + util.reopenWindowDays + ' days after closure.');
+        current.setAbortAction(true);
+        return;
+    }
+    // fresh cycle: a reopened task must not carry the previous approval decision
+    current.setValue('approval', 'not requested');
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-07-10 05:44:52&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;9b9b2f643b060710e973496ea5e45ae7&lt;/sys_id&gt;&lt;sys_mod_count&gt;12&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA Trident reopen window&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Configuration Compliance" source="sn_vulc"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Configuration Compliance"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_9b9b2f643b060710e973496ea5e45ae7&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-24 08:44:37&lt;/sys_updated_on&gt;&lt;template&gt;substate=^EQ&lt;/template&gt;&lt;when&gt;before&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=9b9b2f643b060710e973496ea5e45ae7"/&gt;&lt;sys_es_latest_script action="INSERT_OR_UPDATE"&gt;&lt;id&gt;9b9b2f643b060710e973496ea5e45ae7&lt;/id&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-07-10 05:44:52&lt;/sys_created_on&gt;&lt;sys_id&gt;64cb23a43b060710e973496ea5e45a2e&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-07-10 05:49:25&lt;/sys_updated_on&gt;&lt;table&gt;sys_script&lt;/table&gt;&lt;use_es_latest&gt;false&lt;/use_es_latest&gt;&lt;/sys_es_latest_script&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-1500724724</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1420_MS_Trident Workflow Fixes and BR Consolidation_V2.0">ae5b846a9383c310e3aef0aefaba1082</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:03</sys_created_on>
+<sys_id>e65b846a9383c310e3aef0aefaba1084</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a03d8e10e80000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:03</sys_updated_on>
+<table>sn_vulc_result_group</table>
+<target_name>BOFA Trident reopen window</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>6e9be2b7d13643d0c87f3714e4074e69</update_guid>
+<update_guid_history>6e9be2b7d13643d0c87f3714e4074e69:-1500724724,e29be2b7ed3643d084468486adaeee5d:-2030506752</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>

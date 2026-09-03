@@ -1,0 +1,556 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-03 11:35:02">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Global">global</application>
+<application_name>Global</application_name>
+<application_scope>global</application_scope>
+<application_version/>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>Create New Scanned Application When No AIT Match Exists - manual Excel import implemented with CI lookup rules, no business rules. The workbook (findings on the third sheet, Upload Findings) is attached to the "AVIT Manual Import Excel" data source, loaded into the u_avit_manual_import staging table and transformed onto sn_vul_app_vulnerable_item. The transform CI field only asks the CI identification engine; every matching decision is made by the CI lookup rule "AIT to application CI (VAMP)" bound to the VAMP source: governed AIT table (x_boar_bofa_techad_ait) when installed, then business application correlation id, then one placeholder scanned application per AIT, created once and reused on re-import so no duplicates appear. AIT-0 or empty AITs land on the CI named in the usem.ait.placeholder_ci property (a single shared placeholder is created and reused when the property is empty). To run an import: attach the workbook to the data source, Load All Records, then run the AVIT Manual Import transform. The lookup rule and the VAMP source are data records, captured with GlideUpdateManager2.</description>
+<inserted/>
+<name>SNOWUSEMTP-581 AIT manual ingestion - Global</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>0b759ee993b68b50e3aef0aefaba10db</remote_sys_id>
+<state>in_hierarchy</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>ca5b446a9383c310e3aef0aefaba10bb</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sn_sec_cmn_ci_lookup_rule_6fbaf919937ac750e3aef0aefaba1029</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sn_sec_cmn_ci_lookup_rule"&gt;&lt;sn_sec_cmn_ci_lookup_rule action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;applies_to/&gt;&lt;condition/&gt;&lt;description/&gt;&lt;lookup_script/&gt;&lt;lookup_target&gt;ci&lt;/lookup_target&gt;&lt;method&gt;script&lt;/method&gt;&lt;name&gt;AIT to application CI (VAMP)&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;reapply&gt;false&lt;/reapply&gt;&lt;reapply_version&gt;0&lt;/reapply_version&gt;&lt;script&gt;&lt;![CDATA[(function process(rule, sourceValue, sourcePayload) {
+    var ait = ('' + (sourceValue || '')).trim();
+    if (!ait || ait.toUpperCase() == 'AIT-0')
+        return noAit();
+
+    // governed AIT table, when the application is installed
+    var gov = new GlideRecord('x_boar_bofa_techad_ait');
+    if (gov.isValid()) {
+        gov.addQuery('u_ait_number', ait);
+        gov.query();
+        if (gov.next() &amp;&amp; !gs.nil(gov.getValue('u_business_application')))
+            return gov.getValue('u_business_application');
+    }
+
+    // business application carrying the AIT as its correlation id
+    var ba = new GlideRecord('cmdb_ci_business_app');
+    ba.addQuery('correlation_id', ait);
+    ba.query();
+    if (ba.next())
+        return ba.getUniqueValue();
+
+    // no match: one placeholder scanned application per AIT
+    var name = '';
+    if (sourcePayload &amp;&amp; sourcePayload.app_name)
+        name = ('' + sourcePayload.app_name).trim();
+    return getOrCreate(ait, name || ait);
+
+    /* AIT-0 / empty: the CI named in the usem.ait.placeholder_ci
+     * property, or one shared placeholder when the property is empty. */
+    function noAit() {
+        var configured = gs.getProperty('usem.ait.placeholder_ci', '');
+        if (configured) {
+            var ci = new GlideRecord('cmdb_ci');
+            if (ci.get(configured))
+                return configured;
+        }
+        return getOrCreate('AIT-0', 'Unmatched Application (No AIT)');
+    }
+
+    /* At most one placeholder per AIT: look up by source_app_id before
+     * creating, so re-imports always reuse the existing record. */
+    function getOrCreate(id, nm) {
+        var gr = new GlideRecord('sn_vul_app_scanned_application');
+        gr.addQuery('source_app_id', id);
+        gr.orderBy('sys_created_on');
+        gr.query();
+        if (gr.next())
+            return gr.getUniqueValue();
+        gr.initialize();
+        gr.setValue('name', nm);
+        gr.setValue('source_app_id', id);
+        gr.setValue('source', 'VAMP');
+        gr.setValue('short_description',
+            'Placeholder created automatically - no matching AIT record for ' + id);
+        return gr.insert();
+    }
+})(rule, sourceValue, sourcePayload);
+]]&gt;&lt;/script&gt;&lt;source display_value="VAMP"&gt;afbaf919937ac750e3aef0aefaba1007&lt;/source&gt;&lt;source_field&gt;source_app_id&lt;/source_field&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-18 12:13:39&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;6fbaf919937ac750e3aef0aefaba1029&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-18 12:13:39&lt;/sys_updated_on&gt;&lt;table/&gt;&lt;target_field/&gt;&lt;target_field_product_model/&gt;&lt;target_table/&gt;&lt;target_table_product_model&gt;cmdb_application_product_model&lt;/target_table_product_model&gt;&lt;type&gt;custom&lt;/type&gt;&lt;/sn_sec_cmn_ci_lookup_rule&gt;&lt;/record_update&gt;</payload>
+<payload_hash>1271891270</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-581 AIT manual ingestion - Global">ca5b446a9383c310e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>025b446a9383c310e3aef0aefaba10bc</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a014d1b7c80000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table/>
+<target_name>AIT to application CI (VAMP)</target_name>
+<type>Lookup Rule</type>
+<update_domain>global</update_domain>
+<update_guid>098c395d7e7ac7509403dcc7bfe0793c</update_guid>
+<update_guid_history>098c395d7e7ac7509403dcc7bfe0793c:1271891270</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_db_object_3dea7159937ac750e3aef0aefaba10a0</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_db_object"><sys_db_object action="INSERT_OR_UPDATE"><access/><actions_access>false</actions_access><alter_access>false</alter_access><caller_access/><client_scripts_access>false</client_scripts_access><configuration_access>false</configuration_access><create_access>false</create_access><create_access_controls>false</create_access_controls><delete_access>false</delete_access><filter_extension/><is_data_interface>false</is_data_interface><is_df_table>false</is_df_table><is_extendable>false</is_extendable><label>Avit Manual Import</label><live_feed_enabled>false</live_feed_enabled><name>u_avit_manual_import</name><number_ref/><provider_class/><read_access>true</read_access><scriptable_table>false</scriptable_table><super_class display_value="Import Set Row" name="sys_import_set_row">a2541c68f50003100a22c0b3dfa15106</super_class><sys_class_name>sys_db_object</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-18 12:14:20</sys_created_on><sys_id>3dea7159937ac750e3aef0aefaba10a0</sys_id><sys_mod_count>0</sys_mod_count><sys_name>Avit Manual Import</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_db_object_3dea7159937ac750e3aef0aefaba10a0</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-18 12:14:20</sys_updated_on><update_access>false</update_access><user_role/><ws_access>true</ws_access></sys_db_object></record_update>]]></payload>
+<payload_hash>-1357142789</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-581 AIT manual ingestion - Global">ca5b446a9383c310e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>065b446a9383c310e3aef0aefaba10bd</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a014d217560000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table>u_avit_manual_import</table>
+<target_name>Avit Manual Import</target_name>
+<type>Table</type>
+<update_domain>global</update_domain>
+<update_guid>cf9cf95d057ac750cbff23b25784c4dd</update_guid>
+<update_guid_history>cf9cf95d057ac750cbff23b25784c4dd:-1357142789,ceeab1595c7ac750474cd386d34c3d48:-1357142789</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_documentation_u_avit_manual_import_u_ait_en</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_documentation element="u_ait" label="AIT" language="en" table="u_avit_manual_import"><sys_documentation action="INSERT_OR_UPDATE"><element>u_ait</element><help/><hint/><label>AIT</label><language>en</language><name>u_avit_manual_import</name><plural>AITs</plural><sys_class_name>sys_documentation</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-18 12:14:20</sys_created_on><sys_id>b1ea7159937ac750e3aef0aefaba10ee</sys_id><sys_mod_count>0</sys_mod_count><sys_name>AIT</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_documentation_u_avit_manual_import_u_ait_en</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-18 12:14:20</sys_updated_on><url/><url_target/></sys_documentation></sys_documentation></record_update>]]></payload>
+<payload_hash>-19337603</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-581 AIT manual ingestion - Global">ca5b446a9383c310e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>0a5b446a9383c310e3aef0aefaba10be</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a014d217c70000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table>u_avit_manual_import</table>
+<target_name>AVIT Manual Import.AIT</target_name>
+<type>Field Label</type>
+<update_domain>global</update_domain>
+<update_guid>839cf95d567ac750d7bf2699b3626ae0</update_guid>
+<update_guid_history>839cf95d567ac750d7bf2699b3626ae0:-19337603,8d8c395d097ac750c28c86f9d8b81833:1919550712</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_transform_entry_1f0b3959937ac750e3aef0aefaba10f6</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_transform_entry"&gt;&lt;sys_transform_entry action="INSERT_OR_UPDATE"&gt;&lt;choice_action&gt;ignore&lt;/choice_action&gt;&lt;coalesce&gt;false&lt;/coalesce&gt;&lt;coalesce_case_sensitive&gt;false&lt;/coalesce_case_sensitive&gt;&lt;coalesce_empty_fields&gt;false&lt;/coalesce_empty_fields&gt;&lt;date_format/&gt;&lt;map display_value="AVIT Manual Import"&gt;9b0b3959937ac750e3aef0aefaba10ef&lt;/map&gt;&lt;reference_value_field/&gt;&lt;source_field&gt;[Script]&lt;/source_field&gt;&lt;source_script&gt;&lt;![CDATA[answer = (function transformEntry(source) {
+    // Empty AIT cells mean "no AIT": normalize to AIT-0 so the lookup
+    // rule handles both the same way. All matching logic lives in the
+    // CI lookup rule bound to the VAMP source.
+    var ait = ('' + (source.u_ait || '')).trim() || 'AIT-0';
+    var m = new sn_sec_cmn.CIIdentify().identify('afbaf919937ac750e3aef0aefaba1007', {
+        source_app_id: ait,
+        app_name: '' + source.u_application
+    }, true);
+    if (m &amp;&amp; m.ci &amp;&amp; m.ci.mainCi)
+        return m.ci.mainCi;
+    return '';
+})(source);]]&gt;&lt;/source_script&gt;&lt;source_table/&gt;&lt;sys_class_name&gt;sys_transform_entry&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-18 12:14:59&lt;/sys_created_on&gt;&lt;sys_id&gt;1f0b3959937ac750e3aef0aefaba10f6&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;[Script]&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_transform_entry_1f0b3959937ac750e3aef0aefaba10f6&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-18 12:14:59&lt;/sys_updated_on&gt;&lt;target_field&gt;cmdb_ci&lt;/target_field&gt;&lt;target_table/&gt;&lt;use_source_script&gt;true&lt;/use_source_script&gt;&lt;/sys_transform_entry&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-272668510</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-581 AIT manual ingestion - Global">ca5b446a9383c310e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>0e5b446a9383c310e3aef0aefaba10bf</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a014d1b6b10000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table/>
+<target_name>[Script]</target_name>
+<type>Field Map</type>
+<update_domain>global</update_domain>
+<update_guid>498c395d9a7ac7508f46379e0294d724</update_guid>
+<update_guid_history>498c395d9a7ac7508f46379e0294d724:-272668510,130b3959667ac75011d337254b0306fc:-272668510</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_transform_entry_d70b7959937ac750e3aef0aefaba1006</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_transform_entry"&gt;&lt;sys_transform_entry action="INSERT_OR_UPDATE"&gt;&lt;choice_action&gt;ignore&lt;/choice_action&gt;&lt;coalesce&gt;false&lt;/coalesce&gt;&lt;coalesce_case_sensitive&gt;false&lt;/coalesce_case_sensitive&gt;&lt;coalesce_empty_fields&gt;false&lt;/coalesce_empty_fields&gt;&lt;date_format/&gt;&lt;map display_value="AVIT Manual Import"&gt;9b0b3959937ac750e3aef0aefaba10ef&lt;/map&gt;&lt;reference_value_field/&gt;&lt;source_field&gt;[Script]&lt;/source_field&gt;&lt;source_script&gt;&lt;![CDATA[answer = 'VAMP';]]&gt;&lt;/source_script&gt;&lt;source_table/&gt;&lt;sys_class_name&gt;sys_transform_entry&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-18 12:14:59&lt;/sys_created_on&gt;&lt;sys_id&gt;d70b7959937ac750e3aef0aefaba1006&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;[Script]&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_transform_entry_d70b7959937ac750e3aef0aefaba1006&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-18 12:14:59&lt;/sys_updated_on&gt;&lt;target_field&gt;source&lt;/target_field&gt;&lt;target_table/&gt;&lt;use_source_script&gt;true&lt;/use_source_script&gt;&lt;/sys_transform_entry&gt;&lt;/record_update&gt;</payload>
+<payload_hash>956834264</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-581 AIT manual ingestion - Global">ca5b446a9383c310e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>425b446a9383c310e3aef0aefaba10c0</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a014d1b6c90000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table/>
+<target_name>[Script]</target_name>
+<type>Field Map</type>
+<update_domain>global</update_domain>
+<update_guid>cd8c395d4a7ac7509f7a098d51d8ac26</update_guid>
+<update_guid_history>cd8c395d4a7ac7509f7a098d51d8ac26:956834264,df0b79591f7ac750c5e928f49eef2208:956834264</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sn_sec_int_integration_afbaf919937ac750e3aef0aefaba1007</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sn_sec_int_integration"><sn_sec_int_integration action="INSERT_OR_UPDATE"><asset_type>infra</asset_type><banner_logo/><categories/><configurable>true</configurable><description>Source for AIT data arriving through manual Excel import. CI lookup rules bound to this source resolve AITs to application CIs.</description><external_link/><help_link/><host_attributes_table/><id/><include_proof_in_vi_key>false</include_proof_in_vi_key><instance_setup_script/><integration_type/><ire_source_name/><is_auto_close_supported>true</is_auto_close_supported><is_chaining_required>false</is_chaining_required><is_multi_source_supported>false</is_multi_source_supported><is_reapply_ci_lookup_supported>false</is_reapply_ci_lookup_supported><lookup_by_network>false</lookup_by_network><name>VAMP</name><order>100</order><pre_validation_script/><short_description/><source/><sys_class_name>sn_sec_int_integration</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-18 12:13:38</sys_created_on><sys_id>afbaf919937ac750e3aef0aefaba1007</sys_id><sys_mod_count>0</sys_mod_count><sys_name>VAMP</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sn_sec_int_integration_afbaf919937ac750e3aef0aefaba1007</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-18 12:13:38</sys_updated_on><validation_script/></sn_sec_int_integration></record_update>]]></payload>
+<payload_hash>817830702</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-581 AIT manual ingestion - Global">ca5b446a9383c310e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>465b446a9383c310e3aef0aefaba10bc</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a014d1b7f30000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table/>
+<target_name>VAMP</target_name>
+<type>Third Party Integration</type>
+<update_domain>global</update_domain>
+<update_guid>898c395dc27ac750357b4eefe0c60a3f</update_guid>
+<update_guid_history>898c395dc27ac750357b4eefe0c60a3f:817830702,abbaf9190e7ac750670897dd3b650727:817830702</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_dictionary_u_avit_manual_import_null</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_dictionary action="INSERT_OR_UPDATE" element="" extends="sys_import_set_row" table="u_avit_manual_import"><active>true</active><array>false</array><attributes>enforce_dot_walk_cross_scope_access=true</attributes><audit>false</audit><calculation/><choice>0</choice><choice_field/><choice_table/><column_label/><comments/><create_roles/><default_value/><defaultsort/><delete_roles/><dependent/><dependent_on_field/><display>false</display><dynamic_creation>false</dynamic_creation><dynamic_creation_script/><dynamic_default_value/><dynamic_ref_qual/><element/><element_reference>false</element_reference><foreign_database/><formula/><function_definition/><function_field>false</function_field><internal_type display_value="Collection">collection</internal_type><mandatory>false</mandatory><max_length>40</max_length><name>u_avit_manual_import</name><next_element/><primary>false</primary><read_only>false</read_only><read_only_option/><read_roles/><reference/><reference_cascade_rule/><reference_floats>false</reference_floats><reference_key/><reference_qual/><reference_qual_condition/><reference_type/><spell_check>false</spell_check><staged>false</staged><sys_class_name>sys_dictionary</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-18 12:14:20</sys_created_on><sys_id>f5ea7159937ac750e3aef0aefaba10ca</sys_id><sys_name>u_avit_manual_import</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_dictionary_u_avit_manual_import_null</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-18 12:14:20</sys_updated_on><table_reference>false</table_reference><text_index>false</text_index><unique>false</unique><use_dependent_field>false</use_dependent_field><use_dynamic_default>false</use_dynamic_default><use_reference_qualifier>simple</use_reference_qualifier><virtual>false</virtual><virtual_type>script</virtual_type><widget/><write_roles/><xml_view>false</xml_view></sys_dictionary></record_update>]]></payload>
+<payload_hash>-969600135</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-581 AIT manual ingestion - Global">ca5b446a9383c310e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>4a5b446a9383c310e3aef0aefaba10bd</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a014d1b7550000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table>u_avit_manual_import</table>
+<target_name>AVIT Manual Import</target_name>
+<type>Dictionary</type>
+<update_domain>global</update_domain>
+<update_guid>098c395da47ac7503edb78948fcb2e31</update_guid>
+<update_guid_history>098c395da47ac7503edb78948fcb2e31:-969600135,4aeab159e97ac7505863b523ab58cd45:-969600135</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_documentation_u_avit_manual_import_u_application_en</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_documentation element="u_application" label="Application" language="en" table="u_avit_manual_import"><sys_documentation action="INSERT_OR_UPDATE"><element>u_application</element><help/><hint/><label>Application</label><language>en</language><name>u_avit_manual_import</name><plural>Applications</plural><sys_class_name>sys_documentation</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-18 12:14:20</sys_created_on><sys_id>f9eab159937ac750e3aef0aefaba1011</sys_id><sys_mod_count>0</sys_mod_count><sys_name>Application</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_documentation_u_avit_manual_import_u_application_en</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-18 12:14:20</sys_updated_on><url/><url_target/></sys_documentation></sys_documentation></record_update>]]></payload>
+<payload_hash>82841325</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-581 AIT manual ingestion - Global">ca5b446a9383c310e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>4e5b446a9383c310e3aef0aefaba10be</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a014d218590000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table>u_avit_manual_import</table>
+<target_name>AVIT Manual Import.Application</target_name>
+<type>Field Label</type>
+<update_domain>global</update_domain>
+<update_guid>8b9cf95d737ac750b025f1a0f513a4fe</update_guid>
+<update_guid_history>8b9cf95d737ac750b025f1a0f513a4fe:82841325,858c395d8a7ac750b6b6aaea73842c39:-1331282584</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_documentation_u_avit_manual_import__en</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_documentation element="" label="AVIT Manual Import" language="en" table="u_avit_manual_import"><sys_documentation action="INSERT_OR_UPDATE"><element/><help/><hint/><label>AVIT Manual Import</label><language>en</language><name>u_avit_manual_import</name><plural>AVIT Manual Imports</plural><sys_class_name>sys_documentation</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-18 12:14:20</sys_created_on><sys_id>b9ea7159937ac750e3aef0aefaba10d1</sys_id><sys_mod_count>0</sys_mod_count><sys_name>AVIT Manual Import</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_documentation_u_avit_manual_import__en</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-18 12:14:20</sys_updated_on><url/><url_target/></sys_documentation></sys_documentation></record_update>]]></payload>
+<payload_hash>1506972235</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-581 AIT manual ingestion - Global">ca5b446a9383c310e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>825b446a9383c310e3aef0aefaba10bf</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a014d218390000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table>u_avit_manual_import</table>
+<target_name>AVIT Manual Import</target_name>
+<type>Field Label</type>
+<update_domain>global</update_domain>
+<update_guid>c39cf95d907ac7500a0ca74da5598efc</update_guid>
+<update_guid_history>c39cf95d907ac7500a0ca74da5598efc:1506972235,418c395d947ac750e0dc47617b896537:-988304442</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_transform_map_9b0b3959937ac750e3aef0aefaba10ef</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_transform_map"&gt;&lt;sys_transform_map action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;copy_empty_fields&gt;false&lt;/copy_empty_fields&gt;&lt;create_new_record_on_empty_coalesce_fields&gt;false&lt;/create_new_record_on_empty_coalesce_fields&gt;&lt;enforce_mandatory_fields&gt;No&lt;/enforce_mandatory_fields&gt;&lt;name&gt;AVIT Manual Import&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;run_business_rules&gt;true&lt;/run_business_rules&gt;&lt;run_script&gt;false&lt;/run_script&gt;&lt;script&gt;&lt;![CDATA[(function transformRow(source, target, map, log, isUpdate) {
+
+	// Add your code here
+
+})(source, target, map, log, action==="update");]]&gt;&lt;/script&gt;&lt;source_table&gt;u_avit_manual_import&lt;/source_table&gt;&lt;sys_class_name&gt;sys_transform_map&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-18 12:14:59&lt;/sys_created_on&gt;&lt;sys_id&gt;9b0b3959937ac750e3aef0aefaba10ef&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;AVIT Manual Import&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_transform_map_9b0b3959937ac750e3aef0aefaba10ef&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-18 12:14:59&lt;/sys_updated_on&gt;&lt;target_table&gt;sn_vul_app_vulnerable_item&lt;/target_table&gt;&lt;/sys_transform_map&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-166147167</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-581 AIT manual ingestion - Global">ca5b446a9383c310e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>865b446a9383c310e3aef0aefaba10c0</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a014d1b68b0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table/>
+<target_name>AVIT Manual Import</target_name>
+<type>Table Transform Map</type>
+<update_domain>global</update_domain>
+<update_guid>f08cf55de27ac750d8a4c312694413fc</update_guid>
+<update_guid_history>f08cf55de27ac750d8a4c312694413fc:-166147167,5b0b39594f7ac750c92b14e4cd895ff4:-166147167</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_app_module_16eaf159937ac750e3aef0aefaba105c</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_app_module"><sys_app_module action="INSERT_OR_UPDATE"><active>true</active><application display_value="System Import Sets">import_sets</application><assessment/><device_type/><filter/><hint/><homepage/><image/><link_type>LIST</link_type><map_page/><mobile_title>AVIT Manual Import</mobile_title><mobile_view_name>Mobile</mobile_view_name><name>u_avit_manual_import</name><order>1100</order><override_menu_roles>false</override_menu_roles><query/><report/><require_confirmation>true</require_confirmation><roles/><route/><screen/><sys_class_name>sys_app_module</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-18 12:14:22</sys_created_on><sys_domain>global</sys_domain><sys_domain_path>/</sys_domain_path><sys_id>16eaf159937ac750e3aef0aefaba105c</sys_id><sys_mod_count>0</sys_mod_count><sys_name>AVIT Manual Import</sys_name><sys_overrides/><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_app_module_16eaf159937ac750e3aef0aefaba105c</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-18 12:14:22</sys_updated_on><timeline_page/><title>AVIT Manual Import</title><uncancelable>false</uncancelable><ux_list/><view_name/><window_name/></sys_app_module></record_update>]]></payload>
+<payload_hash>-245828060</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-581 AIT manual ingestion - Global">ca5b446a9383c310e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>8a5b446a9383c310e3aef0aefaba10bc</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a01934885c0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table>u_avit_manual_import</table>
+<target_name>AVIT Manual Import</target_name>
+<type>Module</type>
+<update_domain>global</update_domain>
+<update_guid>823516e9c1b68b50d3556c9320da6518</update_guid>
+<update_guid_history>823516e9c1b68b50d3556c9320da6518:-245828060,acf45aa904b68b50e6d8da829b2bc739:-245828060,96eaf1597e7ac750ac0ca5904f43b362:-767106423</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_dictionary_u_avit_manual_import_u_ait</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_dictionary action="INSERT_OR_UPDATE" element="u_ait" table="u_avit_manual_import"><active>true</active><array>false</array><attributes>edge_encryption_enabled=true,import_attribute_name=AIT</attributes><audit>false</audit><calculation/><choice>0</choice><choice_field/><choice_table/><column_label>AIT</column_label><comments/><create_roles/><default_value/><defaultsort/><delete_roles/><dependent/><dependent_on_field/><display>false</display><dynamic_creation>false</dynamic_creation><dynamic_creation_script/><dynamic_default_value/><dynamic_ref_qual/><element>u_ait</element><element_reference>false</element_reference><foreign_database/><formula/><function_definition/><function_field>false</function_field><internal_type display_value="String">string</internal_type><mandatory>false</mandatory><max_length>40</max_length><name>u_avit_manual_import</name><next_element/><primary>false</primary><read_only>false</read_only><read_only_option/><read_roles/><reference/><reference_cascade_rule/><reference_floats>false</reference_floats><reference_key/><reference_qual/><reference_qual_condition/><reference_type/><spell_check>false</spell_check><staged>false</staged><sys_class_name>sys_dictionary</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-18 12:14:20</sys_created_on><sys_id>39ea7159937ac750e3aef0aefaba10ed</sys_id><sys_name>AIT</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_dictionary_u_avit_manual_import_u_ait</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-18 12:14:20</sys_updated_on><table_reference>false</table_reference><text_index>false</text_index><unique>false</unique><use_dependent_field>false</use_dependent_field><use_dynamic_default>false</use_dynamic_default><use_reference_qualifier>simple</use_reference_qualifier><virtual>false</virtual><virtual_type>script</virtual_type><widget/><write_roles/><xml_view>false</xml_view></sys_dictionary></record_update>]]></payload>
+<payload_hash>1711177511</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-581 AIT manual ingestion - Global">ca5b446a9383c310e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>8e5b446a9383c310e3aef0aefaba10bd</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a014d1b71a0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table>u_avit_manual_import</table>
+<target_name>AVIT Manual Import.AIT</target_name>
+<type>Dictionary</type>
+<update_domain>global</update_domain>
+<update_guid>cd8c395d677ac750741fe1ede6c1602c</update_guid>
+<update_guid_history>cd8c395d677ac750741fe1ede6c1602c:1711177511,c6eab1597b7ac750c89eca02f0b591be:1711177511</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_dictionary_u_avit_manual_import_u_application</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_dictionary action="INSERT_OR_UPDATE" element="u_application" table="u_avit_manual_import"><active>true</active><array>false</array><attributes>edge_encryption_enabled=true,import_attribute_name=Application</attributes><audit>false</audit><calculation/><choice>0</choice><choice_field/><choice_table/><column_label>Application</column_label><comments/><create_roles/><default_value/><defaultsort/><delete_roles/><dependent/><dependent_on_field/><display>false</display><dynamic_creation>false</dynamic_creation><dynamic_creation_script/><dynamic_default_value/><dynamic_ref_qual/><element>u_application</element><element_reference>false</element_reference><foreign_database/><formula/><function_definition/><function_field>false</function_field><internal_type display_value="String">string</internal_type><mandatory>false</mandatory><max_length>40</max_length><name>u_avit_manual_import</name><next_element/><primary>false</primary><read_only>false</read_only><read_only_option/><read_roles/><reference/><reference_cascade_rule/><reference_floats>false</reference_floats><reference_key/><reference_qual/><reference_qual_condition/><reference_type/><spell_check>false</spell_check><staged>false</staged><sys_class_name>sys_dictionary</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-18 12:14:20</sys_created_on><sys_id>71eab159937ac750e3aef0aefaba1011</sys_id><sys_name>Application</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_dictionary_u_avit_manual_import_u_application</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-18 12:14:20</sys_updated_on><table_reference>false</table_reference><text_index>false</text_index><unique>false</unique><use_dependent_field>false</use_dependent_field><use_dynamic_default>false</use_dynamic_default><use_reference_qualifier>simple</use_reference_qualifier><virtual>false</virtual><virtual_type>script</virtual_type><widget/><write_roles/><xml_view>false</xml_view></sys_dictionary></record_update>]]></payload>
+<payload_hash>533722683</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-581 AIT manual ingestion - Global">ca5b446a9383c310e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>c25b446a9383c310e3aef0aefaba10be</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a014d1b73b0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table>u_avit_manual_import</table>
+<target_name>AVIT Manual Import.Application</target_name>
+<type>Dictionary</type>
+<update_domain>global</update_domain>
+<update_guid>c18c395d537ac7505fc6615e85c4c02f</update_guid>
+<update_guid_history>c18c395d537ac7505fc6615e85c4c02f:533722683,4eeab1594c7ac7500d20fb1ae5d37ff2:533722683</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_eacc21d193f6c750e3aef0aefaba109f</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>CI applied to application vulnerable items that arrive with AIT-0 or no AIT. Empty: a single shared placeholder scanned application is created and reused instead.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.ait.placeholder_ci</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-18 11:12:40</sys_created_on><sys_id>eacc21d193f6c750e3aef0aefaba109f</sys_id><sys_mod_count>8</sys_mod_count><sys_name>usem.ait.placeholder_ci</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_eacc21d193f6c750e3aef0aefaba109f</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-18 12:20:37</sys_updated_on><type>string</type><value>16d414dcc7d810107393ec22c7c260dd</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=eacc21d193f6c750e3aef0aefaba109f"/></record_update>]]></payload>
+<payload_hash>334175934</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-581 AIT manual ingestion - Global">ca5b446a9383c310e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>c65b446a9383c310e3aef0aefaba10bf</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a014d1b8190000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table/>
+<target_name>usem.ait.placeholder_ci</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>058c395d267ac75055b5bb08d1739142</update_guid>
+<update_guid_history>058c395d267ac75055b5bb08d1739142:334175934,5a5cfd1d437ac7505e603241fee40f90:334175934,fd5c7d1d6b7ac750672f2d421bd3dcf7:48628391,82547dd56f3ac750c215002c815815f7:334175934,ed547dd5ea3ac750f234527d6608e82a:48628391,9f7eedd56bf6c750c1b928067168da5d:334175934,1f5e69d5e5f6c750a20a9c24bde7be84:48628391,3a5e29d5c8f6c750aa96f0b168d1604b:73821196,f12e6d95e8f6c750b0ef8d273b1881cb:48628391,383d25159ff6c750bfdccaa5f8e291e1:815288780,80dc61d1eff6c750c97bb9f172efbaac:-1767784455</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_transform_script_47b4de2993b68b50e3aef0aefaba107b</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_transform_script"&gt;&lt;sys_transform_script action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;map display_value="AVIT Manual Import"&gt;9b0b3959937ac750e3aef0aefaba10ef&lt;/map&gt;&lt;order&gt;100&lt;/order&gt;&lt;script&gt;&lt;![CDATA[(function runTransformScript(source, map, log, target /*undefined onStart*/ ) {
+    // When the applied CI is a placeholder scanned application created by
+    // the AIT lookup rule, record on it which item it stands in for. The
+    // scanned application class has no description column, so the note is
+    // kept in short_description and the full history in comments.
+    var ciId = '' + target.getValue('cmdb_ci');
+    if (!ciId)
+        return;
+    var app = new GlideRecord('sn_vul_app_scanned_application');
+    if (!app.get(ciId) || ('' + app.getValue('source')) != 'VAMP')
+        return;
+    var stamp = 'A dummy CI has been applied to ' + target.getValue('number');
+    var comments = '' + (app.getValue('comments') || '');
+    if (comments.indexOf(stamp) &gt; -1)
+        return;
+    app.setValue('comments', comments ? comments + '\n' + stamp : stamp);
+    var sd = '' + (app.getValue('short_description') || '');
+    var line = stamp + '.';
+    if (sd.indexOf('A dummy CI has been applied to') == -1) {
+        if ((sd + ' ' + line).length &lt;= 1000)
+            app.setValue('short_description', sd ? sd + '. ' + line : line);
+    } else if ((sd + ' ' + stamp.replace('A dummy CI has been applied to ', ', ')).length &lt;= 1000) {
+        app.setValue('short_description',
+            sd.replace(/\.$/, '') + stamp.replace('A dummy CI has been applied to', ',') + '.');
+    }
+    app.autoSysFields(false);
+    app.update();
+})(source, map, log, target);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_transform_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-19 08:45:41&lt;/sys_created_on&gt;&lt;sys_id&gt;47b4de2993b68b50e3aef0aefaba107b&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name&gt;onAfter&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_transform_script_47b4de2993b68b50e3aef0aefaba107b&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-19 08:53:52&lt;/sys_updated_on&gt;&lt;when&gt;onAfter&lt;/when&gt;&lt;/sys_transform_script&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-1222142276</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-581 AIT manual ingestion - Global">ca5b446a9383c310e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>ca5b446a9383c310e3aef0aefaba10c0</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0193a16ff0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table/>
+<target_name>onAfter</target_name>
+<type>Transform Script</type>
+<update_domain>global</update_domain>
+<update_guid>47969ead72b68b50703d84e6a7754ac8</update_guid>
+<update_guid_history>47969ead72b68b50703d84e6a7754ac8:-1222142276,3a969eadb6b68b50cad48cd3c425cda5:-1222142276,cfb412a9c8b68b50ed5264f8a75e0068:1421311114</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_data_source_23baf919937ac750e3aef0aefaba102c</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_data_source"&gt;&lt;sys_data_source action="INSERT_OR_UPDATE"&gt;&lt;batch_size&gt;1000&lt;/batch_size&gt;&lt;category/&gt;&lt;connection_override_last_success_time/&gt;&lt;connection_timeout&gt;0&lt;/connection_timeout&gt;&lt;connection_url&gt;attachment://sys_data_source:23baf919937ac750e3aef0aefaba102c/&lt;/connection_url&gt;&lt;connection_url_parameters/&gt;&lt;csv_delimiter/&gt;&lt;data_in_single_column&gt;false&lt;/data_in_single_column&gt;&lt;data_loader&gt;&lt;![CDATA[(function loadData(import_set_table, data_source, import_log, last_success_import_time, partition_info) {
+
+ // Add your code here to insert data to import_set_table 
+
+})(import_set_table, data_source, import_log, last_success_import_time, partition_info);]]&gt;&lt;/data_loader&gt;&lt;database_name/&gt;&lt;database_port/&gt;&lt;discard_arrays&gt;true&lt;/discard_arrays&gt;&lt;enable_parallel_loading&gt;false&lt;/enable_parallel_loading&gt;&lt;expand_node_children&gt;false&lt;/expand_node_children&gt;&lt;file_path/&gt;&lt;file_retrieval_method&gt;Attachment&lt;/file_retrieval_method&gt;&lt;format&gt;Excel&lt;/format&gt;&lt;glide_keystore&gt;false&lt;/glide_keystore&gt;&lt;header_row&gt;1&lt;/header_row&gt;&lt;import_connection_alias/&gt;&lt;import_set_table_label&gt;AVIT Manual Import&lt;/import_set_table_label&gt;&lt;import_set_table_name&gt;u_avit_manual_import&lt;/import_set_table_name&gt;&lt;instance_name/&gt;&lt;jdbc_password/&gt;&lt;jdbc_server/&gt;&lt;jdbc_user_name/&gt;&lt;jpath_root_node/&gt;&lt;last_run_database_field/&gt;&lt;last_run_datetime/&gt;&lt;last_success_import_time/&gt;&lt;ldap_target/&gt;&lt;ldapprobe_result_set_rows&gt;200&lt;/ldapprobe_result_set_rows&gt;&lt;limit/&gt;&lt;maximum_rows/&gt;&lt;mid_server/&gt;&lt;name&gt;AVIT Manual Import Excel&lt;/name&gt;&lt;offset&gt;0&lt;/offset&gt;&lt;oracle_port&gt;1521&lt;/oracle_port&gt;&lt;oracle_sid&gt;orcl&lt;/oracle_sid&gt;&lt;parallel_loading_script&gt;&lt;![CDATA[(function loadTasks(parallel_job_loader, data_source, import_log, last_success_import_time) {
+
+	// Invoke third party API, create partitions and insert partitions info in parallel job table
+
+})(parallel_job_loader, data_source, import_log, last_success_import_time);]]&gt;&lt;/parallel_loading_script&gt;&lt;parsing_script&gt;&lt;![CDATA[// The input value can be accessed through the variables named "line", "lineNumber" and "result"// The function uses result variable to return parse result back. (function(line,lineNumber,result) {	// add code here})(line,lineNumber,result);]]&gt;&lt;/parsing_script&gt;&lt;properties/&gt;&lt;query&gt;All Rows from Table&lt;/query&gt;&lt;query_timeout&gt;0&lt;/query_timeout&gt;&lt;request_action/&gt;&lt;scp_authentication&gt;Username and Password&lt;/scp_authentication&gt;&lt;scp_password/&gt;&lt;scp_port/&gt;&lt;scp_server/&gt;&lt;scp_user_name/&gt;&lt;sheet_name&gt;3&lt;/sheet_name&gt;&lt;sheet_number&gt;3&lt;/sheet_number&gt;&lt;sql_statement/&gt;&lt;ssh_keyfile_path/&gt;&lt;support_pagination&gt;false&lt;/support_pagination&gt;&lt;sys_class_name&gt;sys_data_source&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-18 12:13:39&lt;/sys_created_on&gt;&lt;sys_id&gt;23baf919937ac750e3aef0aefaba102c&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;AVIT Manual Import Excel&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_data_source_23baf919937ac750e3aef0aefaba102c&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-18 12:13:39&lt;/sys_updated_on&gt;&lt;table_name/&gt;&lt;type&gt;File&lt;/type&gt;&lt;use_batch_import&gt;false&lt;/use_batch_import&gt;&lt;use_import_connection_alias&gt;false&lt;/use_import_connection_alias&gt;&lt;use_integrated_authentication&gt;false&lt;/use_integrated_authentication&gt;&lt;use_last_run_datetime&gt;false&lt;/use_last_run_datetime&gt;&lt;xpath_root_node/&gt;&lt;zipped&gt;false&lt;/zipped&gt;&lt;/sys_data_source&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-1663110767</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-581 AIT manual ingestion - Global">ca5b446a9383c310e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:02</sys_created_on>
+<sys_id>ce5b446a9383c310e3aef0aefaba10bc</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a014d1b6630000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:02</sys_updated_on>
+<table/>
+<target_name>AVIT Manual Import Excel</target_name>
+<type>Data Source</type>
+<update_domain>global</update_domain>
+<update_guid>348cf55d3d7ac750819e92e0b3e251f9</update_guid>
+<update_guid_history>348cf55d3d7ac750819e92e0b3e251f9:-1663110767,a7baf919747ac7505bd5f27f67de9a34:-1663110767</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>

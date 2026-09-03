@@ -1,0 +1,146 @@
+[
+ {
+  "name": "Trident Closure Governance - Global",
+  "app": "global",
+  "rows": 3,
+  "exported": 3,
+  "file": "Trident_Closure_Governance_-_Global.xml",
+  "created": "2026-07-09 15:47:57",
+  "scrub": []
+ },
+ {
+  "name": "Trident Closure Governance - Configuration Compliance",
+  "app": "sn_vulc",
+  "rows": 10,
+  "exported": 10,
+  "file": "Trident_Closure_Governance_-_Configuration_Compliance.xml",
+  "created": "2026-07-09 19:20:53",
+  "scrub": []
+ },
+ {
+  "name": "Trident Closure Governance ",
+  "app": "sn_vulc",
+  "rows": 1,
+  "exported": 1,
+  "file": "Trident_Closure_Governance.xml",
+  "created": "2026-07-10 13:43:23",
+  "scrub": []
+ },
+ {
+  "name": "Trident Closure Governance V2 - Configuration Compliance",
+  "app": "sn_vulc",
+  "rows": 11,
+  "exported": 11,
+  "file": "Trident_Closure_Governance_V2_-_Configuration_Compliance.xml",
+  "created": "2026-07-20 06:52:05",
+  "scrub": []
+ },
+ {
+  "name": "Trident Closure Governance V2 - Global",
+  "app": "global",
+  "rows": 3,
+  "exported": 3,
+  "file": "Trident_Closure_Governance_V2_-_Global.xml",
+  "created": "2026-07-20 06:52:05",
+  "scrub": []
+ },
+ {
+  "name": "Remediation Task Rollup Calculator - SNOWUSEMTP-670",
+  "app": "sn_sec_wf",
+  "rows": 1,
+  "exported": 1,
+  "file": "Remediation_Task_Rollup_Calculator_-_SNOWUSEMTP-670.xml",
+  "created": "2026-07-27 06:10:00",
+  "scrub": []
+ },
+ {
+  "name": "SNOWUSEMTP-581 AIT manual ingestion - Vulnerability Response",
+  "app": "sn_vul",
+  "rows": 1,
+  "exported": 1,
+  "file": "SNOWUSEMTP-581_AIT_manual_ingestion_-_Vulnerability_Response.xml",
+  "created": "2026-08-19 08:45:41",
+  "scrub": []
+ },
+ {
+  "name": "SNOWUSEMTP-581 AIT manual ingestion - Global",
+  "app": "global",
+  "rows": 16,
+  "exported": 16,
+  "file": "SNOWUSEMTP-581_AIT_manual_ingestion_-_Global.xml",
+  "created": "2026-08-19 08:48:58",
+  "scrub": []
+ },
+ {
+  "name": "SNOWUSEMTP-1003 Peer review on test records",
+  "app": "sn_vulc",
+  "rows": 6,
+  "exported": 6,
+  "file": "SNOWUSEMTP-1003_Peer_review_on_test_records.xml",
+  "created": "2026-08-20 10:45:34",
+  "scrub": []
+ },
+ {
+  "name": "Request Exception - reason based deferral limits",
+  "app": "sn_sec_exception",
+  "rows": 3,
+  "exported": 3,
+  "file": "Request_Exception_-_reason_based_deferral_limits.xml",
+  "created": "2026-08-21 05:50:41",
+  "scrub": []
+ },
+ {
+  "name": "Remediation Task CC - Trident resolve requires attachment",
+  "app": "sn_vulc",
+  "rows": 3,
+  "exported": 3,
+  "file": "Remediation_Task_CC_-_Trident_resolve_requires_attachment.xml",
+  "created": "2026-08-25 07:26:28",
+  "scrub": []
+ },
+ {
+  "name": "SNOWUSEMTP-1420_MS_Trident Workflow Fixes and BR Consolidation_V2.0",
+  "app": "sn_vulc",
+  "rows": 7,
+  "exported": 7,
+  "file": "SNOWUSEMTP-1420_MS_Trident_Workflow_Fixes_and_BR_Consolidation_V2.0.xml",
+  "created": "2026-08-26 10:11:54",
+  "scrub": []
+ },
+ {
+  "name": "SNOWUSEMTP-1420_MS_Trident Re-request Approval Fix_V2.1",
+  "app": "sn_vulc",
+  "rows": 2,
+  "exported": 2,
+  "file": "SNOWUSEMTP-1420_MS_Trident_Re-request_Approval_Fix_V2.1.xml",
+  "created": "2026-08-27 04:32:52",
+  "scrub": []
+ },
+ {
+  "name": "SNOWUSEMTP-1420_MS_Trident Resolve Approval Retrigger_V2.3",
+  "app": "sn_vulc",
+  "rows": 4,
+  "exported": 4,
+  "file": "SNOWUSEMTP-1420_MS_Trident_Resolve_Approval_Retrigger_V2.3.xml",
+  "created": "2026-09-02 12:46:14",
+  "scrub": []
+ },
+ {
+  "name": "SNOWUSEMTP.26.P3.17_MS_Vulnerability Summary Weekly Notification_V1.1",
+  "app": "global",
+  "rows": 5,
+  "exported": 5,
+  "file": "SNOWUSEMTP.26.P3.17_MS_Vulnerability_Summary_Weekly_Notification_V1.1.xml",
+  "created": "2026-09-03 07:09:17",
+  "scrub": []
+ },
+ {
+  "name": "SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.0",
+  "app": "global",
+  "rows": 12,
+  "exported": 12,
+  "file": "SNOWUSEMTP-1625_MS_Remediation_Task_CDP_Payload_V2.0.xml",
+  "created": "2026-09-03 11:24:13",
+  "scrub": []
+ }
+]
