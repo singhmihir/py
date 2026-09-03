@@ -22,8 +22,8 @@ while (l.next()) o.msgs.push('' + l.getValue('message'));
 gs.print('X::' + JSON.stringify(o));''' % n)['msgs']
 def expected_keys(table):
     keys = []
-    for entry in P['usem.cdp.remtask.fields.' + table].split(','):
-        f, j = entry.split('=')
+    for entry in P['usem.cdp.remtask.fields.' + table].split('\n'):
+        f, j = entry.strip().split('=')
         keys.append(j)
     return keys + ['change_requests', 'exception_requests']
 RECS = {'sn_vul_vulnerability': 'VUL0004576', 'sn_vul_app_vulnerability': 'AVUL0010008', 'sn_vul_container_vulnerability': 'CVUL0010001', 'sn_vulc_result_group': 'CRG0001133'}
@@ -78,7 +78,7 @@ var probe = {};
 var b = new RemediationTaskPayloadBuilder();
 var g = new GlideRecord('sn_vul_vulnerability'); g.addQuery('number', 'VUL0004576'); g.query(); g.next();
 var name = 'usem.cdp.remtask.fields.sn_vul_vulnerability'; var original = gs.getProperty(name);
-gs.setProperty(name, ' number = task_number , short_description,, bogus_field=bogus , assigned_to.name=owner_name , sys_mod_count = updates ');
+gs.setProperty(name, ' number = task_number \n short_description\n\n bogus_field=bogus , assigned_to.name=owner_name \r\n sys_mod_count = updates ');
 probe.custom = new RemediationTaskPayloadBuilder().buildPayload(g);
 probe.mod = '' + g.getValue('sys_mod_count');
 gs.setProperty(name, '');
@@ -97,7 +97,7 @@ var left = new GlideRecord('sys_script_include'); left.addQuery('name', 'IN', 'R
 var props = new GlideRecord('sys_properties'); props.addQuery('name', 'STARTSWITH', 'usem.cdp.remtask.').addOrCondition('name', 'usem.remtask.payload.fields'); props.query(); probe.props = []; while (props.next()) probe.props.push('' + props.name);
 gs.print('X::' + JSON.stringify(probe));''')
 custom = json.loads(d2['custom'])['rem_tasks'][0]['remediation_task']
-check('2a property parsing: rename, bare name, blanks, whitespace', list(custom.keys()) == ['task_number', 'short_description', 'bogus', 'owner_name', 'updates', 'change_requests', 'exception_requests'] and custom['task_number'] == 'VUL0004576' and custom['updates'] == d2['mod'], str(list(custom.keys())))
+check('2a property parsing: one pair per line (commas tolerated), rename, bare name, blank lines, whitespace', list(custom.keys()) == ['task_number', 'short_description', 'bogus', 'owner_name', 'updates', 'change_requests', 'exception_requests'] and custom['task_number'] == 'VUL0004576' and custom['updates'] == d2['mod'], str(list(custom.keys())))
 check('2b unknown field and dot-walk entries yield "" without error', custom['bogus'] == '' and custom['owner_name'] == '')
 msgs = errors(6)
 check('2c blank table property -> "" with the single error format', d2['blank'] == '' and any(m.endswith('- table sn_vul_vulnerability is not configured in property usem.cdp.remtask.fields.sn_vul_vulnerability') for m in msgs))
