@@ -5,19 +5,27 @@ RemediationTaskPayloadBuilder.prototype = {
         this.NAMESPACE = 'com.bofa.usem';
         this.CORE_VERSION = '1.0.0';
         this.OUTBOUND_VERSION = '1.0.0';
-        this.WORKSPACE_PATH = 'now/vr-analysis/record/';
         this.DATE_FORMAT = 'MM-dd-yyyy';
         this.TIME_FORMAT = 'HH:mm:ss';
-        this.URL_FIELD = 'u_avul_record_url';
-        this.FIELDS_PROPERTY = 'usem.remtask.payload.fields';
+        this.FIELDS_PROPERTY_PREFIX = 'usem.cdp.remtask.fields.';
+        this.EXCEPTION_TABLE = 'sn_sec_exception_change_approval';
+        this.EXCEPTION_STATES = '1,4';
+        // change requests are associated to each remediation task table through its own m2m table
+        this.CHANGE_LINKS = {
+            sn_vul_vulnerability:           { table: 'sn_vul_m2m_vg_change_request',                          field: 'sn_vul_vulnerability' },
+            sn_vul_app_vulnerability:       { table: 'sn_vul_app_m2m_vg_change_request',                      field: 'sn_vul_app_vulnerability' },
+            sn_vul_container_vulnerability: { table: 'sn_vul_container_m2m_remediation_task_change_request',  field: 'sn_vul_container_vulnerability' },
+            sn_vulc_result_group:           { table: 'sn_vulc_m2m_trg_change_request',                        field: 'result_group' }
+        };
     },
 
     /**
      * Builds the outbound Kafka payload for one remediation task. The fields
-     * come from the system property usem.remtask.payload.fields; the activity
-     * comes from the record itself: the operation in progress when called from
-     * a business rule, otherwise INSERT for a record that has never been
-     * updated and UPDATE for any other.
+     * come from the system property usem.cdp.remtask.fields.<table> as
+     * servicenow_field=json_field pairs; a field missing on the table or
+     * empty is sent as "". The activity is the operation in progress when
+     * called from a business rule, otherwise INSERT for a record that has
+     * never been updated and UPDATE for any other.
      * @param {GlideRecord} record - a remediation task record
      * @returns {String} JSON payload, or an empty string when the payload cannot be built
      */
@@ -69,43 +77,45 @@ RemediationTaskPayloadBuilder.prototype = {
     },
 
     _buildRemediationTask: function(record) {
+        var table = record.getTableName();
+        var mapping = this._fieldMapping(table);
         var task = {};
-        this._addFields(task, record, this._fieldList(this.FIELDS_PROPERTY), false);
-        task[this.URL_FIELD] = this._workspaceUrl(record);
+        for (var i = 0; i < mapping.length; i++)
+            task[mapping[i].json] = this._fieldValue(record, mapping[i].field);
+        task.change_requests = this._changeRequests(record, this.CHANGE_LINKS[table]);
+        task.exception_requests = this._exceptionRequests(record);
         return task;
     },
 
     /**
-     * Reads a comma separated field list from a system property. Each entry is
-     * a field name, or json_name=field when the payload key differs.
-     * @returns {Array} [[jsonName, fieldName], ...]
+     * Reads the table's property: comma separated servicenow_field=json_field
+     * pairs (a bare field name keeps its own name in the payload).
+     * @returns {Array} [{field, json}, ...] in property order
      */
-    _fieldList: function(property) {
+    _fieldMapping: function(table) {
+        var property = this.FIELDS_PROPERTY_PREFIX + table;
         var value = gs.getProperty(property, '');
         if (!value)
-            throw new Error('property ' + property + ' is not set');
-        var list = [];
+            throw new Error('table ' + table + ' is not configured in property ' + property);
+        var mapping = [];
         var entries = value.split(',');
         for (var i = 0; i < entries.length; i++) {
-            var entry = entries[i].trim();
-            if (!entry)
+            var pair = entries[i].split('=');
+            var field = pair[0].trim();
+            if (!field)
                 continue;
-            var parts = entry.split('=');
-            list.push(parts.length > 1 ? [parts[0].trim(), parts[1].trim()] : [entry, entry]);
+            mapping.push({ field: field, json: pair.length > 1 && pair[1].trim() ? pair[1].trim() : field });
         }
-        return list;
+        return mapping;
     },
 
-    _addFields: function(task, record, fields, keepEmpty) {
-        for (var i = 0; i < fields.length; i++) {
-            var jsonName = fields[i][0];
-            var fieldName = fields[i][1];
-            var present = record.isValidField(fieldName) && !record.getElement(fieldName).nil();
-            if (present)
-                task[jsonName] = this._renderElement(record.getElement(fieldName));
-            else if (keepEmpty)
-                task[jsonName] = '';
-        }
+    _fieldValue: function(record, field) {
+        if (!record.isValidField(field))
+            return '';
+        var element = record.getElement(field);
+        if (element === null || element.nil())
+            return '';
+        return this._renderElement(element);
     },
 
     /**
@@ -149,11 +159,31 @@ RemediationTaskPayloadBuilder.prototype = {
         return gd.getByFormat(this.DATE_FORMAT);
     },
 
-    _workspaceUrl: function(record) {
-        var base = gs.getProperty('glide.servlet.uri', '');
-        if (base.charAt(base.length - 1) !== '/')
-            base += '/';
-        return base + this.WORKSPACE_PATH + record.getTableName() + '/' + record.getUniqueValue();
+    _changeRequests: function(record, link) {
+        var numbers = [];
+        if (!link)
+            return '';
+        var m2m = new GlideRecord(link.table);
+        m2m.addQuery(link.field, record.getUniqueValue());
+        m2m.addNotNullQuery('change_request');
+        m2m.orderBy('change_request.number');
+        m2m.query();
+        while (m2m.next())
+            numbers.push(m2m.getDisplayValue('change_request'));
+        return numbers.join(',');
+    },
+
+    _exceptionRequests: function(record) {
+        var numbers = [];
+        var exception = new GlideRecord(this.EXCEPTION_TABLE);
+        exception.addQuery('table', record.getTableName());
+        exception.addQuery('record', record.getUniqueValue());
+        exception.addQuery('approval_state', 'IN', this.EXCEPTION_STATES);
+        exception.orderBy('number');
+        exception.query();
+        while (exception.next())
+            numbers.push(exception.getValue('number'));
+        return numbers.join(',');
     },
 
     _newEventId: function() {

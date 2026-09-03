@@ -1,28 +1,25 @@
 # SNOWUSEMTP-1625 — Kafka payload for remediation tasks (CDP)
 
-Global-scope update set V1.3 (2 script includes + 10 system properties):
+Global-scope update set V2.0: one script include, `RemediationTaskPayloadBuilder`, plus four
+system properties. `buildPayload(record)` returns the JSON string (envelope +
+`rem_tasks[0].remediation_task`) for one remediation task record, or an empty string after a
+single error in the format `RemediationTaskPayloadBuilder: payload not built for <table>
+<sys_id> - <reason>`.
 
-- `RemediationTaskPayloadBuilder.js` — the fellow developer's background script
-  (`generateRemediationTaskSCRIPT.txt`) as a class: `buildPayload(record, activity)` returns the
-  JSON string (envelope + `rem_tasks[0].remediation_task`) for one remediation task, empty string
-  after a single `gs.error` on invalid input.
-- `CdpRemediationTaskPayloadBuilder.js` — extends the first; body driven by the mapping sheet
-  "Outbound to CDP (RemTask)" (`remtask_mapping.json`): 78 common keys plus table-specific keys
-  for `sn_vul_vulnerability`, `sn_vul_app_vulnerability`, `sn_vul_container_vulnerability`,
-  `sn_vulc_result_group`, rendered by dictionary type, plus `change_requests` (association
-  tables) and `exception_requests` (approved/expired exception approvals).
+- Fields per table come from `usem.cdp.remtask.fields.<table>` — comma separated
+  `servicenow_field=json_field` pairs holding the CDP-required rows of the sheet
+  "Outbound to CDP (RemTask)" (40 common + the table's own). Generated into `properties.json`
+  from `remtask_mapping.json`. A table is supported only while its property exists.
+- A field is sent as `""` when it does not exist on the table or is empty; otherwise it is
+  rendered by dictionary type (dates `MM-dd-yyyy HH:mm:ss` / `MM-dd-yyyy`, journals latest
+  entry, references / choices / lists / booleans / durations as display values, the rest raw).
+- `change_requests` (per-table association tables) and `exception_requests` (approved or
+  expired exception approvals) are derived; the sheet marks both required without a field.
+- `element_activity` is `current.operation()` inside a business rule; outside one, `INSERT`
+  for a never-updated record and `UPDATE` otherwise.
 
-Field lists live in system properties, so field customisation needs no code change:
-`usem.remtask.payload.fields` (first builder), `usem.cdp.remtask.fields.common`,
-`usem.cdp.remtask.fields.<table>` (a table is supported while its property exists) and
-`usem.cdp.remtask.changes.<table>` (`<association table>.<link field>`). Entries are comma
-separated field names, `json_name=field` where the payload key differs. Values are generated
-from the sheet into `properties.json` and created by `build_props_1625.py`.
-
-Rendering branches inline on the dictionary internal type (dates formatted, journals latest entry, key-like types as display values, the rest stored values), errors use one format
-(`<builder>: payload not built for <table> <sys_id> - <reason>`), and `element_activity`
-comes from `current.operation()` in a business rule (never-updated -> INSERT, else UPDATE
-outside one).
-
-Drivers: `build_1625.py`, `build_props_1625.py`, `test_1625.py` (51 checks incl. negatives,
-a business-rule probe and property changes at run time), `export_1625.py`.
+Drivers: `build_1625.py` (set, deletions of the superseded script include and properties,
+properties, script include), `test_1625.py` (43 checks: field-by-field rendering for all four
+tables, missing/empty fields, property parsing, errors, activity in insert/update rules, 50
+record run), `export_1625.py`. `generateRemediationTaskSCRIPT.txt` is the original background
+script this replaced.
