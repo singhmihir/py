@@ -111,5 +111,7 @@ Follow it without being asked again.
 ## Repository layout
 - `tools/snui.py` – harness. `stories/<story>/` – scripts, build/fixture/test/export drivers, README.
   `stories/_update_sets/` – native exports of every delivered update set (index.json).
-- Git: work on branch `claude/bofa-user-stories-build-l390e9`; commit story folders when asked; never
-  commit secrets or AI/model identifiers in file contents.
+- Git: the PDI is the system of record. Do **not** push to GitHub, open or update pull requests, or
+  watch PRs on your own; Mihir says explicitly when to push. When asked, use branch
+  `claude/bofa-user-stories-build-l390e9`, commit story folders, and never commit secrets or
+  AI/model identifiers in file contents.
