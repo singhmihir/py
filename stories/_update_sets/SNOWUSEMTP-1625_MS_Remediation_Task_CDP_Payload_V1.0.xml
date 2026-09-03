@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-03 11:35:05">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Global">global</application>
+<application_name>Global</application_name>
+<application_scope>global</application_scope>
+<application_version/>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>Kafka payload builders for remediation tasks sent to the sn_usem_remtask_outbound topic. RemediationTaskPayloadBuilder builds the agreed payload (envelope + rem_tasks) for one remediation task record. CdpRemediationTaskPayloadBuilder extends it and builds the full mapping-driven payload from the sheet Outbound to CDP (RemTask) for sn_vul_vulnerability, sn_vul_app_vulnerability, sn_vul_container_vulnerability and sn_vulc_result_group, including change_requests and exception_requests.</description>
+<inserted/>
+<name>SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V1.0</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>e7d840e29383c310e3aef0aefaba106e</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:05</sys_created_on>
+<sys_id>7a5bc46a9383c310e3aef0aefaba1020</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:05</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_7bd840e29383c310e3aef0aefaba10b8</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;global.CdpRemediationTaskPayloadBuilder&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;SNOWUSEMTP-1625 - extends RemediationTaskPayloadBuilder with the full CDP mapping (sheet Outbound to CDP (RemTask)) for every remediation task table, rendered by field type, plus change_requests and exception_requests.&lt;/description&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;CdpRemediationTaskPayloadBuilder&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[var CdpRemediationTaskPayloadBuilder = Class.create();
+CdpRemediationTaskPayloadBuilder.prototype = Object.extendsObject(RemediationTaskPayloadBuilder, {
+    initialize: function() {
+        RemediationTaskPayloadBuilder.prototype.initialize.call(this);
+        this.EXCEPTION_TABLE = 'sn_sec_exception_change_approval';
+        this.EXCEPTION_STATES = '1,4';
+        this.DISPLAY_TYPES = ['reference', 'glide_list', 'boolean', 'glide_duration', 'timer', 'domain_id', 'sys_class_name', 'integer'];
+        // [JSON field name, ServiceNow field] from the mapping sheet 'Outbound to CDP (RemTask)'
+        this.COMMON_FIELDS = [
+            ['assigned_to',                                'assigned_to'],
+            ['assignment_group',                           'assignment_group'],
+            ['assignment_type',                            'assignment_type'],
+            ['backup_state',                               'backup_state'],
+            ['business_duration',                          'business_duration'],
+            ['business_service',                           'business_service'],
+            ['calendar_duration',                          'calendar_duration'],
+            ['close_notes',                                'close_notes'],
+            ['closed_at',                                  'closed_at'],
+            ['closed_by',                                  'closed_by'],
+            ['cmdb_ci',                                    'cmdb_ci'],
+            ['comments',                                   'comments'],
+            ['company',                                    'company'],
+            ['contact_type',                               'contact_type'],
+            ['contract',                                   'contract'],
+            ['correlation_display',                        'correlation_display'],
+            ['correlation_id',                             'correlation_id'],
+            ['defer_extend_count',                         'defer_extend_count'],
+            ['delivery_plan',                              'delivery_plan'],
+            ['delivery_task',                              'delivery_task'],
+            ['description',                                'description'],
+            ['due_date',                                   'due_date'],
+            ['effort',                                     'effort'],
+            ['escalation',                                 'escalation'],
+            ['expected_start',                             'expected_start'],
+            ['follow_up',                                  'follow_up'],
+            ['group_key',                                  'group_key'],
+            ['group_list',                                 'group_list'],
+            ['ignore_date',                                'ignore_date'],
+            ['ignore_expiration',                          'ignore_expiration'],
+            ['until',                                      'ignore_expiration_dt_tm'],
+            ['ignore_expiration_for_risk_reduction',       'ignore_expiration_for_risk_reduction'],
+            ['ignore_expiration_for_risk_reduction_dt_tm', 'ignore_expiration_for_risk_reduction_dt_tm'],
+            ['ignored_by',                                 'ignored_by'],
+            ['impact',                                     'impact'],
+            ['knowledge',                                  'knowledge'],
+            ['location',                                   'location'],
+            ['number',                                     'number'],
+            ['opened_at',                                  'opened_at'],
+            ['opened_by',                                  'opened_by'],
+            ['order',                                      'order'],
+            ['parent',                                     'parent'],
+            ['priority',                                   'priority'],
+            ['reassignment_count',                         'reassignment_count'],
+            ['rejection_goto',                             'rejection_goto'],
+            ['remediation_commitment_dt_tm',               'remediation_commitment_dt_tm'],
+            ['remediation_plan',                           'remediation_plan'],
+            ['resolution_date',                            'resolution_date'],
+            ['resolution_reason',                          'resolution_reason'],
+            ['resolved_by',                                'resolved_by'],
+            ['risk_rating',                                'risk_rating'],
+            ['risk_score',                                 'risk_score'],
+            ['route_reason',                               'route_reason'],
+            ['service_offering',                           'service_offering'],
+            ['short_description',                          'short_description'],
+            ['state',                                      'state'],
+            ['status_updated_on',                          'status_updated_on'],
+            ['substate',                                   'substate'],
+            ['class_name',                                 'sys_class_name'],
+            ['created_by',                                 'sys_created_by'],
+            ['created_on',                                 'sys_created_on'],
+            ['sys_domain',                                 'sys_domain'],
+            ['sys_domain_path',                            'sys_domain_path'],
+            ['sys_id',                                     'sys_id'],
+            ['sys_mod_count',                              'sys_mod_count'],
+            ['updated_by',                                 'sys_updated_by'],
+            ['updated_on',                                 'sys_updated_on'],
+            ['table',                                      'table'],
+            ['task_effective_number',                      'task_effective_number'],
+            ['time_worked',                                'time_worked'],
+            ['total_cis',                                  'total_cis'],
+            ['ttr_status',                                 'ttr_status'],
+            ['ttr_target_date',                            'ttr_target_date'],
+            ['u_confidential',                             'u_confidential'],
+            ['urgency',                                    'urgency'],
+            ['watch_list',                                 'watch_list'],
+            ['work_end',                                   'work_end'],
+            ['work_start',                                 'work_start']
+        ];
+        this.TABLES = {
+            sn_vul_vulnerability: {
+                fields: [
+                    ['active_nd_vis',            'active_nd_vis'],
+                    ['auto_vi_refresh',          'auto_vi_refresh'],
+                    ['business_criticality',     'business_criticality'],
+                    ['cisa_exists',              'cisa_exists'],
+                    ['count_active_vi',          'count_active_vi'],
+                    ['cr_count',                 'cr_count'],
+                    ['defer_count',              'defer_count'],
+                    ['duplicate_vi_exists',      'duplicate_vi_exists'],
+                    ['duplicate_vi_refresh',     'duplicate_vi_refresh'],
+                    ['duplicate_vi_updated',     'duplicate_vi_updated'],
+                    ['epss_percentile',          'epss_percentile'],
+                    ['filter_group',             'filter_group'],
+                    ['filter_type',              'filter_type'],
+                    ['ignore_reason',            'ignore_reason'],
+                    ['max_risk_score',           'max_risk_score'],
+                    ['patch_miss_target',        'patch_miss_target'],
+                    ['patch_not_sch',            'patch_not_sch'],
+                    ['patch_sch',                'patch_sch'],
+                    ['percent_nd_vi_complete',   'percent_nd_vi_complete'],
+                    ['percent_vi_complete',      'percent_vi_complete'],
+                    ['ransomware',               'ransomware'],
+                    ['sn_vul_entry',             'sn_vul_entry'],
+                    ['total_nd_vis',             'total_nd_vis'],
+                    ['total_vis',                'total_vis'],
+                    ['total_vulnerabilities',    'total_vulnerabilities'],
+                    ['vi_condition',             'vi_condition'],
+                    ['vulnerability_group_rule', 'vulnerability_group_rule']
+                ],
+                changes: { table: 'sn_vul_m2m_vg_change_request', field: 'sn_vul_vulnerability' }
+            },
+            sn_vul_app_vulnerability: {
+                fields: [
+                    ['active_nd_vis',               'active_nd_vis'],
+                    ['application_release',         'application_release'],
+                    ['auto_vi_refresh',             'auto_vi_refresh'],
+                    ['business_criticality',        'business_criticality'],
+                    ['cisa_exists',                 'cisa_exists'],
+                    ['count_active_vi',             'count_active_vi'],
+                    ['cr_count',                    'cr_count'],
+                    ['defer_count',                 'defer_count'],
+                    ['epss_percentile',             'epss_percentile'],
+                    ['filter_group',                'filter_group'],
+                    ['filter_type',                 'filter_type'],
+                    ['ignore_reason',               'ignore_reason'],
+                    ['max_risk_score',              'max_risk_score'],
+                    ['percent_nd_vi_complete',      'percent_nd_vi_complete'],
+                    ['percent_vi_complete',         'percent_vi_complete'],
+                    ['ransomware',                  'ransomware'],
+                    ['remediation_commitment_date', 'remediation_commitment_date'],
+                    ['sn_vul_entry',                'sn_vul_entry'],
+                    ['total_nd_vis',                'total_nd_vis'],
+                    ['total_vis',                   'total_vis'],
+                    ['total_vulnerabilities',       'total_vulnerabilities'],
+                    ['u_avul_record_url',           'u_avul_record_url'],
+                    ['u_verification_status',       'u_verification_status'],
+                    ['vi_condition',                'vi_condition'],
+                    ['vulnerability_group_rule',    'vulnerability_group_rule']
+                ],
+                changes: { table: 'sn_vul_app_m2m_vg_change_request', field: 'sn_vul_app_vulnerability' }
+            },
+            sn_vul_container_vulnerability: {
+                fields: [
+                    ['active_nd_vis',            'active_nd_vis'],
+                    ['auto_vi_refresh',          'auto_vi_refresh'],
+                    ['business_criticality',     'business_criticality'],
+                    ['cisa_exists',              'cisa_exists'],
+                    ['count_active_vi',          'count_active_vi'],
+                    ['cr_count',                 'cr_count'],
+                    ['epss_percentile',          'epss_percentile'],
+                    ['filter_type',              'filter_type'],
+                    ['ignore_reason',            'ignore_reason'],
+                    ['max_risk_score',           'max_risk_score'],
+                    ['percent_nd_vi_complete',   'percent_nd_vi_complete'],
+                    ['percent_vi_complete',      'percent_vi_complete'],
+                    ['ransomware',               'ransomware'],
+                    ['sn_vul_entry',             'sn_vul_entry'],
+                    ['total_nd_vis',             'total_nd_vis'],
+                    ['total_vis',                'total_vis'],
+                    ['total_vulnerabilities',    'total_vulnerabilities'],
+                    ['vi_condition',             'vi_condition'],
+                    ['vulnerability_group_rule', 'vulnerability_group_rule']
+                ],
+                changes: { table: 'sn_vul_container_m2m_remediation_task_change_request', field: 'sn_vul_container_vulnerability' }
+            },
+            sn_vulc_result_group: {
+                fields: [
+                    ['active_nd_test_results', 'active_nd_test_results'],
+                    ['active_test_results',    'active_test_results'],
+                    ['change_request',         'change_request'],
+                    ['condition',              'condition'],
+                    ['control',                'control'],
+                    ['defer_count',            'defer_count'],
+                    ['defer_reason',           'defer_reason'],
+                    ['historical_risk_score',  'historical_risk_score'],
+                    ['manually_modified',      'manually_modified'],
+                    ['method',                 'method'],
+                    ['percent_nd_tr_complete', 'percent_nd_tr_complete'],
+                    ['percent_tr_complete',    'percent_tr_complete'],
+                    ['total_nd_test_results',  'total_nd_test_results'],
+                    ['total_test_results',     'total_test_results'],
+                    ['total_tests',            'total_tests'],
+                    ['vulc_group_rule',        'vulc_group_rule']
+                ],
+                changes: { table: 'sn_vulc_m2m_trg_change_request', field: 'result_group' }
+            }
+        };
+    },
+
+    _buildRemediationTask: function(gr) {
+        var config = this.TABLES[gr.getTableName()];
+        if (!config)
+            throw new Error('table ' + gr.getTableName() + ' is not a remediation task table');
+        var task = {};
+        this._addFields(task, gr, this.COMMON_FIELDS);
+        this._addFields(task, gr, config.fields);
+        task.change_requests = this._changeRequests(gr, config.changes);
+        task.exception_requests = this._exceptionRequests(gr);
+        return task;
+    },
+
+    _addFields: function(task, gr, fields) {
+        for (var i = 0; i &lt; fields.length; i++) {
+            var jsonName = fields[i][0];
+            var fieldName = fields[i][1];
+            task[jsonName] = gr.isValidField(fieldName) ? this._renderElement(gr.getElement(fieldName)) : '';
+        }
+    },
+
+    _renderElement: function(element) {
+        if (element.nil())
+            return '';
+        var type = String(element.getED().getInternalType());
+        if (type === 'glide_date_time')
+            return this._formatDateTime(element.getValue());
+        if (type === 'glide_date')
+            return this._formatDate(element.getValue());
+        if (type === 'journal_input')
+            return String(element.getJournalEntry(1)).trim();
+        if (this.DISPLAY_TYPES.indexOf(type) &gt; -1)
+            return String(element.getDisplayValue());
+        return String(element.getValue());
+    },
+
+    _changeRequests: function(gr, link) {
+        var numbers = [];
+        var m2m = new GlideRecord(link.table);
+        m2m.addQuery(link.field, gr.getUniqueValue());
+        m2m.addNotNullQuery('change_request');
+        m2m.orderBy('change_request.number');
+        m2m.query();
+        while (m2m.next())
+            numbers.push(m2m.getDisplayValue('change_request'));
+        return numbers.join(',');
+    },
+
+    _exceptionRequests: function(gr) {
+        var numbers = [];
+        var exception = new GlideRecord(this.EXCEPTION_TABLE);
+        exception.addQuery('table', gr.getTableName());
+        exception.addQuery('record', gr.getUniqueValue());
+        exception.addQuery('approval_state', 'IN', this.EXCEPTION_STATES);
+        exception.orderBy('number');
+        exception.query();
+        while (exception.next())
+            numbers.push(exception.getValue('number'));
+        return numbers.join(',');
+    },
+
+    type: 'CdpRemediationTaskPayloadBuilder'
+});
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-03 11:24:14&lt;/sys_created_on&gt;&lt;sys_id&gt;7bd840e29383c310e3aef0aefaba10b8&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name&gt;CdpRemediationTaskPayloadBuilder&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_7bd840e29383c310e3aef0aefaba10b8&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-03 11:25:25&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<payload_hash>2027416365</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V1.0">7a5bc46a9383c310e3aef0aefaba1020</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:05</sys_created_on>
+<sys_id>be5bc46a9383c310e3aef0aefaba1020</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a067043b790000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:05</sys_updated_on>
+<table/>
+<target_name>CdpRemediationTaskPayloadBuilder</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_guid>9d294ce2be83c3102df8aa67ed6d6b0e</update_guid>
+<update_guid_history>9d294ce2be83c3102df8aa67ed6d6b0e:2027416365,73d840e21583c3107cbb48c461dc8dbb:1418676414</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_a7d840e29383c310e3aef0aefaba10b0</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;global.RemediationTaskPayloadBuilder&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;SNOWUSEMTP-1625 - builds the outbound Kafka payload (topic sn_usem_remtask_outbound) for one remediation task record: envelope plus rem_tasks with the agreed remediation task fields.&lt;/description&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;RemediationTaskPayloadBuilder&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[var RemediationTaskPayloadBuilder = Class.create();
+RemediationTaskPayloadBuilder.prototype = {
+    initialize: function() {
+        this.TOPIC_NAME = 'sn_usem_remtask_outbound';
+        this.NAMESPACE = 'com.bofa.usem';
+        this.CORE_VERSION = '1.0.0';
+        this.OUTBOUND_VERSION = '1.0.0';
+        this.DEFAULT_ACTIVITY = 'INSERT';
+        this.WORKSPACE_PATH = 'now/vr-analysis/record/';
+        this.DATE_TIME_FORMAT = 'MM-dd-yyyy HH:mm:ss';
+        this.DATE_FORMAT = 'MM-dd-yyyy';
+        // field order and handling follow the agreed remediation task payload
+        this.FIELDS = [
+            { name: 'assigned_to',           kind: 'display' },
+            { name: 'assignment_type',       kind: 'display' },
+            { name: 'closed_at',             kind: 'datetime' },
+            { name: 'closed_by',             kind: 'display' },
+            { name: 'defer_extend_count',    kind: 'value' },
+            { name: 'number',                kind: 'value' },
+            { name: 'opened_at',             kind: 'datetime' },
+            { name: 'opened_by',             kind: 'display' },
+            { name: 'reassignment_count',    kind: 'value' },
+            { name: 'resolution_date',       kind: 'date' },
+            { name: 'resolved_by',           kind: 'display' },
+            { name: 'risk_score',            kind: 'value' },
+            { name: 'short_description',     kind: 'value' },
+            { name: 'state',                 kind: 'display' },
+            { name: 'status_updated_on',     kind: 'datetime' },
+            { name: 'sys_created_by',        kind: 'value' },
+            { name: 'sys_created_on',        kind: 'datetime' },
+            { name: 'sys_updated_by',        kind: 'value' },
+            { name: 'sys_updated_on',        kind: 'datetime' },
+            { name: 'total_cis',             kind: 'value' },
+            { name: 'ttr_status',            kind: 'display' },
+            { name: 'ttr_target_date',       kind: 'datetime' },
+            { name: 'defer_count',           kind: 'value' },
+            { name: 'total_vis',             kind: 'value' },
+            { name: 'u_avul_record_url',     kind: 'url' },
+            { name: 'u_verification_status', kind: 'display' }
+        ];
+    },
+
+    /**
+     * Builds the outbound Kafka payload for one remediation task.
+     * @param {GlideRecord} remediationTask - a remediation task record
+     * @param {String} activity - INSERT or UPDATE, defaults to INSERT
+     * @returns {String} JSON payload, or an empty string when the payload cannot be built
+     */
+    buildPayload: function(remediationTask, activity) {
+        try {
+            if (!this._isRecord(remediationTask))
+                throw new Error('a valid remediation task record is required');
+            var payload = {
+                envelope: this._buildEnvelope(activity),
+                rem_tasks: [{
+                    remediation_task: this._buildRemediationTask(remediationTask)
+                }]
+            };
+            return JSON.stringify(payload);
+        } catch (e) {
+            gs.error('RemediationTaskPayloadBuilder: payload not built - ' + e.message);
+            return '';
+        }
+    },
+
+    _isRecord: function(gr) {
+        return gr !== null &amp;&amp; typeof gr === 'object' &amp;&amp; typeof gr.isValidRecord === 'function' &amp;&amp; gr.isValidRecord();
+    },
+
+    _buildEnvelope: function(activity) {
+        return {
+            type: 'record',
+            topic_name: this.TOPIC_NAME,
+            namespace: this.NAMESPACE,
+            core_version: this.CORE_VERSION,
+            outbound_version: this.OUTBOUND_VERSION,
+            event_id: this._newEventId(),
+            event_timestamp: this._utcTimestamp(),
+            element_count: 1,
+            element_activity: gs.nil(activity) ? this.DEFAULT_ACTIVITY : String(activity).toUpperCase()
+        };
+    },
+
+    _buildRemediationTask: function(gr) {
+        var task = {};
+        for (var i = 0; i &lt; this.FIELDS.length; i++) {
+            var field = this.FIELDS[i];
+            if (field.kind === 'url') {
+                task[field.name] = this._workspaceUrl(gr);
+                continue;
+            }
+            if (!gr.isValidField(field.name) || gs.nil(gr.getValue(field.name)))
+                continue;
+            task[field.name] = this._render(gr, field);
+        }
+        return task;
+    },
+
+    _render: function(gr, field) {
+        var value = gr.getValue(field.name);
+        if (field.kind === 'display')
+            return String(gr.getDisplayValue(field.name) || value);
+        if (field.kind === 'datetime')
+            return this._formatDateTime(value);
+        if (field.kind === 'date')
+            return this._formatDate(value);
+        return String(value);
+    },
+
+    _formatDateTime: function(value) {
+        var gdt = new GlideDateTime(value);
+        return gdt.getDate().getByFormat(this.DATE_FORMAT) + ' ' + gdt.getTime().getByFormat('HH:mm:ss');
+    },
+
+    _formatDate: function(value) {
+        var gd = new GlideDate();
+        gd.setValue(value);
+        return gd.getByFormat(this.DATE_FORMAT);
+    },
+
+    _workspaceUrl: function(gr) {
+        var base = gs.getProperty('glide.servlet.uri', '');
+        if (base.charAt(base.length - 1) !== '/')
+            base += '/';
+        return base + this.WORKSPACE_PATH + gr.getTableName() + '/' + gr.getUniqueValue();
+    },
+
+    _newEventId: function() {
+        var guid = gs.generateGUID();
+        return guid.substring(0, 8) + '-' + guid.substring(8, 12) + '-' + guid.substring(12, 16) + '-' +
+            guid.substring(16, 20) + '-' + guid.substring(20, 32);
+    },
+
+    _utcTimestamp: function() {
+        return new GlideDateTime().getValue().replace(' ', 'T') + 'Z';
+    },
+
+    type: 'RemediationTaskPayloadBuilder'
+};
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-03 11:24:13&lt;/sys_created_on&gt;&lt;sys_id&gt;a7d840e29383c310e3aef0aefaba10b0&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;RemediationTaskPayloadBuilder&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_a7d840e29383c310e3aef0aefaba10b0&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-03 11:24:13&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<payload_hash>1489101505</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V1.0">7a5bc46a9383c310e3aef0aefaba1020</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:05</sys_created_on>
+<sys_id>f25bc46a9383c310e3aef0aefaba1021</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a06703244e0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:05</sys_updated_on>
+<table/>
+<target_name>RemediationTaskPayloadBuilder</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_guid>73d840e2ad83c310ffcfc988aa4a49b7</update_guid>
+<update_guid_history>73d840e2ad83c310ffcfc988aa4a49b7:1489101505,b3d840e22a83c31096a0399dcca669b4:1489101505</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>

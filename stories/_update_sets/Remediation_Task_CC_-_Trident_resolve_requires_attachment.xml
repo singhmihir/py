@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-03 11:35:03">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<application_name>Configuration Compliance</application_name>
+<application_scope>sn_vulc</application_scope>
+<application_version>30.6.0</application_version>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>Workspace Resolve dialog for Configuration Compliance remediation tasks (sn_vulc_result_group): a Trident remediation task can only reach Resolved when at least one attachment is present on it. On Submit, the "Resolve action" data broker uses sn_vulc.TridentClosureUtil - isTridentTask() decides whether the task has any result from the Trident source (trident.finding.source property, default Trident) and hasEvidence() checks for attachments. A Trident task without an attachment is not updated; the dialog closes and the "Close modal and reload form" client script shows the message "There is no attachment to this VIT; please attach using the paper clip icon before resolving." as a critical notification on the record page. Trident tasks with an attachment, and all non-Trident tasks, resolve exactly as before. Applies wherever the Resolve action is used - form and list. Three records: the data broker, the client script on the "Resolve task default" dialog, and the error message. Verified with CRG0001002 (Trident: blocked without attachment, resolved with attachment) and CRG0001027 (non-Trident: resolves without attachment).</description>
+<inserted/>
+<name>Remediation Task CC - Trident resolve requires attachment</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>012c742793ba4f90e3aef0aefaba1019</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:03</sys_created_on>
+<sys_id>d65b846a9383c310e3aef0aefaba1071</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:03</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_ui_message_b461ddef937e4f90e3aef0aefaba100f</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_message"><sys_ui_message action="INSERT_OR_UPDATE"><application/><code/><commented_message/><key>There is no attachment to this VIT; please attach using the paper clip icon before resolving.</key><language>en</language><message>There is no attachment to this VIT; please attach using the paper clip icon before resolving.</message><sys_class_name>sys_ui_message</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-08-25 08:59:17</sys_created_on><sys_id>b461ddef937e4f90e3aef0aefaba100f</sys_id><sys_mod_count>0</sys_mod_count><sys_name>There is no attachment to this VIT; please attach using the paper clip icon before resolving.</sys_name><sys_package display_value="Configuration Compliance" source="sn_vulc">29691e1f0212471dad08668c1e39932b</sys_package><sys_policy/><sys_scope display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</sys_scope><sys_update_name>sys_ui_message_b461ddef937e4f90e3aef0aefaba100f</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-08-25 08:59:17</sys_updated_on></sys_ui_message></record_update>]]></payload>
+<payload_hash>143566762</payload_hash>
+<remote_update_set display_value="Remediation Task CC - Trident resolve requires attachment">d65b846a9383c310e3aef0aefaba1071</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:03</sys_created_on>
+<sys_id>1e5b846a9383c310e3aef0aefaba1071</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0382533870000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:03</sys_updated_on>
+<table/>
+<target_name>There is no attachment to this VIT; please attach using the paper clip icon before resolving.</target_name>
+<type>Message</type>
+<update_domain>global</update_domain>
+<update_guid>b461ddefc07e4f905a170f0a6ac7a714</update_guid>
+<update_guid_history>b461ddefc07e4f905a170f0a6ac7a714:143566762</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_ux_client_script_e778d8f6ecff2110f877f682422bfe49</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_ux_client_script"&gt;&lt;sys_ux_client_script action="INSERT_OR_UPDATE"&gt;&lt;controller_preset/&gt;&lt;includes/&gt;&lt;macroponent display_value="Resolve task default"&gt;96f904aa85bb6110f877851fa4b43a4b&lt;/macroponent&gt;&lt;name&gt;Close modal and reload form&lt;/name&gt;&lt;preset/&gt;&lt;required_translations&gt;[
+    {
+        "message": "Successfully resolved task"
+    }
+]&lt;/required_translations&gt;&lt;script&gt;&lt;![CDATA[/**
+* @param {params} params
+* @param {api} params.api
+* @param {any} params.event
+* @param {any} params.imports
+* @param {ApiHelpers} params.helpers
+*/
+function handler({api, event, helpers, imports}) {
+    // The resolve action refuses to run when a Trident task has no
+    // attachment; close the dialog and surface its message on the page.
+    var output = event &amp;&amp; event.payload &amp;&amp; event.payload.data ? event.payload.data.output : null;
+    if (!output &amp;&amp; api.data &amp;&amp; api.data.resolve_task_action)
+        output = api.data.resolve_task_action.output;
+    if (output &amp;&amp; output.error) {
+        api.emit('ADD_NOTIFICATIONS', {
+            items: [{
+                "id": "alert-resolve-needs-attachment",
+                "status": "critical",
+                "icon": "circle-exclamation-outline",
+                "content": output.error,
+                "action": {
+                    "type": "dismiss"
+                }
+            }]
+        });
+        helpers.modal.close();
+        return;
+    }
+    helpers.translate('Successfully resolved task').then((value) =&gt; {
+    api.emit('ADD_NOTIFICATIONS', {
+        items: [{
+            "id": "alert-succeded-to-resolve",
+            "status": "info",
+            "icon": "info-circle-outline",
+            "content": value,
+            "action": {
+                "type": "dismiss"
+            }
+        }]
+    });
+    });
+    api.emit("PARENT_FORM_RELOAD_CC");
+    helpers.modal.close();
+}
+]]&gt;&lt;/script&gt;&lt;script_api_version&gt;2.0.0&lt;/script_api_version&gt;&lt;sys_class_name&gt;sys_ux_client_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2023-07-06 12:51:07&lt;/sys_created_on&gt;&lt;sys_id&gt;e778d8f6ecff2110f877f682422bfe49&lt;/sys_id&gt;&lt;sys_mod_count&gt;7&lt;/sys_mod_count&gt;&lt;sys_name&gt;Close modal and reload form&lt;/sys_name&gt;&lt;sys_package display_value="Configuration Compliance" source="sn_vulc"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Configuration Compliance"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_ux_client_script_e778d8f6ecff2110f877f682422bfe49&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-25 10:52:43&lt;/sys_updated_on&gt;&lt;target&gt;macroponent&lt;/target&gt;&lt;type&gt;default&lt;/type&gt;&lt;/sys_ux_client_script&gt;&lt;/record_update&gt;</payload>
+<payload_hash>888675814</payload_hash>
+<remote_update_set display_value="Remediation Task CC - Trident resolve requires attachment">d65b846a9383c310e3aef0aefaba1071</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:03</sys_created_on>
+<sys_id>525b846a9383c310e3aef0aefaba1072</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0388d0eba0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:03</sys_updated_on>
+<table/>
+<target_name>Close modal and reload form</target_name>
+<type>UX Client Script</type>
+<update_domain>global</update_domain>
+<update_guid>ae5bede3d7b28f9068ab03c96c91c4fc</update_guid>
+<update_guid_history>ae5bede3d7b28f9068ab03c96c91c4fc:888675814,cf93a1eb0f328f90f23acc36f5d8fa4d:1266060983,09d4d96b23be4f90943aff2a7c5d7e92:-508555070,d5c0c5e31bfa4f9069c22e28fe6484cf:1266060983,a530c5639bfa4f902ce3a4c46e0d1703:794353452,092c342782ba4f90ea9364b76bc4acf3:-793879266,052c3427dcba4f9049be559c7f6890ef:-508555070</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_ux_data_broker_transform_c9a714f6ecff2110f877f682422bfe14</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_ux_data_broker_transform"&gt;&lt;sys_ux_data_broker_transform action="INSERT_OR_UPDATE"&gt;&lt;acl_failure_result/&gt;&lt;api_name&gt;sn_vulc.Resolve action&lt;/api_name&gt;&lt;batch_exclude&gt;false&lt;/batch_exclude&gt;&lt;description/&gt;&lt;mutates_server_data&gt;true&lt;/mutates_server_data&gt;&lt;name&gt;Resolve action&lt;/name&gt;&lt;output_schema/&gt;&lt;private&gt;false&lt;/private&gt;&lt;props&gt;[
+      {
+      "name": "table",
+      "label": "Table",
+      "description": "Table",
+      "readOnly": false,
+      "fieldType": "string",
+      "mandatory": true
+      },
+      {
+      "name": "recordSysID",
+      "label": "Record ID",
+      "description": "Record Sys ID",
+      "readOnly": false,
+      "fieldType": "string",
+      "mandatory": true
+      },
+      {
+      "name": "resolution_notes",
+      "label": "Resolution notes",
+      "description": "Resolution notes",
+      "readOnly": false,
+      "fieldType": "string",
+      "mandatory": true
+      },
+      {
+      "name": "substate",
+      "label": "Substate",
+      "description": "Resolution state",
+      "readOnly": false,
+      "fieldType": "string",
+      "mandatory": true
+      }
+      ]
+    &lt;/props&gt;&lt;required_translations&gt;[ {
+      "message" : "Record ID",
+      "comment" : ""
+      }, {
+      "message" : "Record Sys ID",
+      "comment" : ""
+      }, {
+      "message" : "Substate",
+      "comment" : ""
+      }, {
+      "message" : "Resolution notes",
+      "comment" : ""
+      }, {
+      "message" : "Resolution state",
+      "comment" : ""
+      }, {
+      "message" : "Table",
+      "comment" : ""
+      } ]
+    &lt;/required_translations&gt;&lt;schema_version&gt;1.0.0&lt;/schema_version&gt;&lt;script&gt;&lt;![CDATA[function transform(input) {
+    var recordSysID = input.recordSysID;
+	var resolution_notes = input.resolution_notes;	
+    var gr = new GlideRecord(input.table);
+	gr.get(recordSysID);
+	// Trident remediation tasks may only be resolved with evidence attached.
+	if (input.table == "sn_vulc_result_group") {
+		var util = new sn_vulc.TridentClosureUtil();
+		if (util.isTridentTask(gr) &amp;&amp; !util.hasEvidence(gr)) {
+			return {
+				resolved: false,
+				error: gs.getMessage("There is no attachment to this VIT; please attach using the paper clip icon before resolving.")
+			};
+		}
+	}
+	gr.setValue("state", 101);
+	gr.setValue("resolution_reason", resolution_notes);	
+	if(input.table == "sn_vulc_result_group")
+		gr.setValue("substate",input.substate);
+    return { resolved: true, sys_id: gr.update() };
+}
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_ux_data_broker_transform&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2023-07-06 12:48:02&lt;/sys_created_on&gt;&lt;sys_id&gt;c9a714f6ecff2110f877f682422bfe14&lt;/sys_id&gt;&lt;sys_mod_count&gt;9&lt;/sys_mod_count&gt;&lt;sys_name&gt;Resolve action&lt;/sys_name&gt;&lt;sys_package display_value="Configuration Compliance" source="sn_vulc"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Configuration Compliance"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_ux_data_broker_transform_c9a714f6ecff2110f877f682422bfe14&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-08-25 10:24:31&lt;/sys_updated_on&gt;&lt;/sys_ux_data_broker_transform&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=c9a714f6ecff2110f877f682422bfe14"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>1596425361</payload_hash>
+<remote_update_set display_value="Remediation Task CC - Trident resolve requires attachment">d65b846a9383c310e3aef0aefaba1071</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:03</sys_created_on>
+<sys_id>965b846a9383c310e3aef0aefaba1072</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a038733e8a0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:03</sys_updated_on>
+<table/>
+<target_name>Resolve action</target_name>
+<type>Data Broker Server Script</type>
+<update_domain>global</update_domain>
+<update_guid>55e4a5e338728f903427c836a1bba5d3</update_guid>
+<update_guid_history>55e4a5e338728f903427c836a1bba5d3:1596425361,7c9469a3bc728f9005b9a0cde4a8c10a:-1775537411,2aa3a1ebe2328f90b11238091c0bb26a:301460947,91a4516b77be4f90ece7dad217fdde3f:-86266079,b82c3427b9ba4f903436845cb90390e7:301460947,302c342704ba4f901722519f5bc65ee4:-86266079</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>

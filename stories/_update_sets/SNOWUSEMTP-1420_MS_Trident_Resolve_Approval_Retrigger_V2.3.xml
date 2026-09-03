@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-03 11:35:04">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<application_name>Configuration Compliance</application_name>
+<application_scope>sn_vulc</application_scope>
+<application_version>30.6.0</application_version>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>Single business rule fix so every move of a Trident remediation task into Resolved raises a fresh governance approval cycle, including after a rejection. BOFA Trident closure lifecycle now stages the closure request on the same write that resolves the task (leftover approvals cancelled, approval reset to Not Yet Requested, Reason set to Pending Approval - at least one trigger field of the Trident Closure Approval flow changes value every time), and its filter conditions are limited to the transitions the logic acts on: State changes to or from Closed, State changes to or from Resolved, Reason changes to or from Pending Approval. TridentClosureUtil.applyClosureRequest only skips staging while an approval set is genuinely awaiting a decision. The helper rule BOFA Trident closure request is deleted - its job is folded into the lifecycle rule; if a hand-created copy of that rule still exists after commit, delete it as well. After commit, run the fix script "Normalize Trident closure requests" once to repair tasks left behind by the earlier versions.</description>
+<inserted/>
+<name>SNOWUSEMTP-1420_MS_Trident Resolve Approval Retrigger_V2.3</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>9302570293430310e3aef0aefaba1033</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:04</sys_created_on>
+<sys_id>665b846a9383c310e3aef0aefaba10b9</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:04</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_fix_2b02570293430310e3aef0aefaba1069</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_fix"&gt;&lt;sys_script_fix action="INSERT_OR_UPDATE"&gt;&lt;before&gt;false&lt;/before&gt;&lt;description&gt;Run once after committing SNOWUSEMTP-1420_MS_Trident Resolve Approval Retrigger_V2.2. Clears stale Pending Approval markers on tasks that are no longer Resolved and stages the closure request again on Resolved tasks whose request never produced an approval set.&lt;/description&gt;&lt;name&gt;Normalize Trident closure requests&lt;/name&gt;&lt;record_for_rollback&gt;true&lt;/record_for_rollback&gt;&lt;script&gt;&lt;![CDATA[// One-time normalization to run once after committing the Trident single
+// business rule fix. It repairs remediation tasks left behind by earlier
+// versions of the closure logic:
+//  1) Tasks carrying Reason = Pending Approval while no longer Resolved get
+//     the marker cleared and leftover approval rows cancelled.
+//  2) Resolved tasks whose closure request never produced an approval set
+//     get the request raised again so the approval flow triggers.
+var util = new sn_vulc.TridentClosureUtil();
+var cleared = 0, restaged = 0;
+
+var stale = new GlideRecord('sn_vulc_result_group');
+stale.addQuery('substate', util.PENDING_APPROVAL);
+stale.addQuery('state', '!=', util.STATE_RESOLVED);
+stale.addQuery('state', '!=', util.STATE_CLOSED);
+stale.query();
+while (stale.next()) {
+    if (!util.isTridentTask(stale))
+        continue;
+    util.cancelOpenApprovals(stale, 'Cancelled while normalizing Trident closure requests.');
+    stale.setValue('substate', '');
+    stale.setValue('approval', 'not requested');
+    stale.update();
+    cleared++;
+}
+
+var stuck = new GlideRecord('sn_vulc_result_group');
+stuck.addQuery('state', util.STATE_RESOLVED);
+stuck.addQuery('substate', util.PENDING_APPROVAL);
+stuck.addQuery('approval', '!=', 'requested');
+stuck.query();
+while (stuck.next()) {
+    if (!util.isTridentTask(stuck))
+        continue;
+    var open = new GlideRecord('sysapproval_approver');
+    open.addQuery('sysapproval', stuck.getUniqueValue());
+    open.addQuery('state', 'requested');
+    open.setLimit(1);
+    open.query();
+    if (open.hasNext())
+        continue;
+    var pulse = new GlideRecord('sn_vulc_result_group');
+    if (!pulse.get(stuck.getUniqueValue()))
+        continue;
+    pulse.setValue('substate', '');
+    pulse.update();
+    var again = new GlideRecord('sn_vulc_result_group');
+    if (!again.get(stuck.getUniqueValue()))
+        continue;
+    again.setValue('substate', util.PENDING_APPROVAL);
+    again.update();
+    restaged++;
+}
+gs.info('Trident closure normalization: ' + cleared + ' stale request(s) cleared, ' + restaged + ' resolved task(s) staged again for approval.');
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_fix&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-02 12:46:15&lt;/sys_created_on&gt;&lt;sys_id&gt;2b02570293430310e3aef0aefaba1069&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;Normalize Trident closure requests&lt;/sys_name&gt;&lt;sys_package display_value="Configuration Compliance" source="sn_vulc"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Configuration Compliance"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_fix_2b02570293430310e3aef0aefaba1069&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-02 12:46:15&lt;/sys_updated_on&gt;&lt;unloadable&gt;false&lt;/unloadable&gt;&lt;/sys_script_fix&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-179736101</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1420_MS_Trident Resolve Approval Retrigger_V2.3">665b846a9383c310e3aef0aefaba10b9</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:04</sys_created_on>
+<sys_id>365b846a9383c310e3aef0aefaba10ba</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a06242450a0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:04</sys_updated_on>
+<table/>
+<target_name>Normalize Trident closure requests</target_name>
+<type>Fix Script</type>
+<update_domain>global</update_domain>
+<update_guid>71a8d7067a8303105da41e07f929022b</update_guid>
+<update_guid_history>71a8d7067a8303105da41e07f929022b:-179736101,2f025702c24303108ed1f0f70f98336d:-179736101</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_079eeba43b060710e973496ea5e45a7b</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;sn_vulc.TridentClosureUtil&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description/&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;TridentClosureUtil&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[var TridentClosureUtil = Class.create();
+TridentClosureUtil.prototype = {
+    initialize: function() {
+        this.governanceGroup = gs.getProperty('trident.closure.governance_group', '');
+        this.tridentSource = gs.getProperty('trident.finding.source', 'Trident');
+        this.reopenWindowDays = parseInt(gs.getProperty('trident.reopen.window_days', '30'), 10);
+    },
+
+    PENDING_APPROVAL: 100,
+    STATE_RESOLVED: 101,
+    STATE_OPEN: 1,
+    STATE_CLOSED: 3,
+    STATE_AWAITING_IMPLEMENTATION: 10,
+
+    MSG_NO_EVIDENCE: 'Evidence has not been attached to this remediation task. Please use the paperclip icon to attach relevant evidence before attempting to submit the remediation task for closure.',
+    MSG_NEEDS_APPROVAL: 'Trident remediation tasks can only be closed through a governance approval. Use Request Closure to submit the task for review.',
+
+    isTridentTask: function(taskGr) {
+        var m2m = new GlideRecord('sn_vulc_m2m_result_result_group');
+        m2m.addQuery('group', taskGr.getUniqueValue());
+        m2m.addQuery('result.source', this.tridentSource);
+        m2m.setLimit(1);
+        m2m.query();
+        return m2m.hasNext();
+    },
+
+    isTridentResult: function(resultGr) {
+        return resultGr.getValue('source') == this.tridentSource;
+    },
+
+    hasEvidence: function(taskGr) {
+        var att = new GlideRecord('sys_attachment');
+        att.addQuery('table_name', taskGr.getTableName());
+        att.addQuery('table_sys_id', taskGr.getUniqueValue());
+        att.setLimit(1);
+        att.query();
+        return att.hasNext();
+    },
+
+    isGovernanceMember: function(userId) {
+        if (!this.governanceGroup)
+            return false;
+        var gm = new GlideRecord('sys_user_grmember');
+        gm.addQuery('group', this.governanceGroup);
+        gm.addQuery('user', userId || gs.getUserID());
+        gm.setLimit(1);
+        gm.query();
+        return gm.hasNext();
+    },
+
+    /**
+     * Stage a closure request on the record WITHOUT calling update().
+     * Safe to use from a before business rule: the outer save persists the
+     * values, so the record is written exactly once and any record-triggered
+     * flow fires exactly once.
+     */
+    applyClosureRequest: function(taskGr) {
+        if (!this.hasEvidence(taskGr))
+            return 'no_evidence';
+        // only skip when an approval set is genuinely out for a decision;
+        // a task merely carrying a stale Pending Approval marker (e.g. after
+        // a rejection) is restaged so the approval flow can trigger again
+        if (taskGr.getValue('substate') == this.PENDING_APPROVAL &amp;&amp;
+            taskGr.getValue('approval') == 'requested')
+            return 'pending';
+        // a new request always starts from a clean slate: no dangling
+        // approval rows from an earlier cycle, and an approval value the
+        // flow trigger can match
+        this.cancelOpenApprovals(taskGr, 'Superseded by a new closure request.');
+        taskGr.setValue('approval', 'not requested');
+        taskGr.setValue('substate', this.PENDING_APPROVAL);
+        taskGr.work_notes = 'Closure requested for governance review. Evidence attached: ' + this._evidenceNames(taskGr);
+        return 'ok';
+    },
+
+    /**
+     * Full closure request for callers that own the write (UI action, fix
+     * scripts). Never call from a before rule on the same record.
+     */
+    requestClosure: function(taskGr) {
+        if (taskGr.getValue('state') == this.STATE_CLOSED)
+            return 'closed';
+        var outcome = this.applyClosureRequest(taskGr);
+        if (outcome == 'ok')
+            taskGr.update();
+        return outcome;
+    },
+
+    cancelOpenApprovals: function(taskGr, note) {
+        var appr = new GlideRecord('sysapproval_approver');
+        appr.addQuery('sysapproval', taskGr.getUniqueValue());
+        appr.addQuery('state', 'requested');
+        appr.query();
+        var cancelled = 0;
+        while (appr.next()) {
+            appr.setValue('state', 'cancelled');
+            if (note)
+                appr.comments = note;
+            appr.update();
+            cancelled++;
+        }
+        return cancelled;
+    },
+
+    closeApproved: function(current, previous) {
+        return previous.getValue('substate') == this.PENDING_APPROVAL &amp;&amp; current.getValue('approval') == 'approved';
+    },
+
+    reopenAllowed: function(gr) {
+        var closedAt = gr.getValue('closed_at') || gr.getValue('resolution_dt_tm');
+        if (!closedAt)
+            return false;
+        var cutoff = new GlideDateTime();
+        cutoff.addDaysUTC(-this.reopenWindowDays);
+        return new GlideDateTime(closedAt).compareTo(cutoff) &gt;= 0;
+    },
+
+    _evidenceNames: function(taskGr) {
+        var names = [];
+        var att = new GlideRecord('sys_attachment');
+        att.addQuery('table_name', taskGr.getTableName());
+        att.addQuery('table_sys_id', taskGr.getUniqueValue());
+        att.query();
+        while (att.next())
+            names.push(att.getValue('file_name'));
+        return names.join(', ');
+    },
+
+    type: 'TridentClosureUtil'
+};
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-07-10 05:57:36&lt;/sys_created_on&gt;&lt;sys_id&gt;079eeba43b060710e973496ea5e45a7b&lt;/sys_id&gt;&lt;sys_mod_count&gt;9&lt;/sys_mod_count&gt;&lt;sys_name&gt;TridentClosureUtil&lt;/sys_name&gt;&lt;sys_package display_value="Configuration Compliance" source="sn_vulc"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Configuration Compliance"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_079eeba43b060710e973496ea5e45a7b&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-02 12:46:14&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;sys_es_latest_script action="INSERT_OR_UPDATE"&gt;&lt;id&gt;079eeba43b060710e973496ea5e45a7b&lt;/id&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-07-10 05:57:36&lt;/sys_created_on&gt;&lt;sys_id&gt;4faee3e43b060710e973496ea5e45a7c&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-07-17 09:30:23&lt;/sys_updated_on&gt;&lt;table&gt;sys_script_include&lt;/table&gt;&lt;use_es_latest&gt;false&lt;/use_es_latest&gt;&lt;/sys_es_latest_script&gt;&lt;/record_update&gt;</payload>
+<payload_hash>156058695</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1420_MS_Trident Resolve Approval Retrigger_V2.3">665b846a9383c310e3aef0aefaba10b9</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:04</sys_created_on>
+<sys_id>7a5b846a9383c310e3aef0aefaba10ba</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0624244ed0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:04</sys_updated_on>
+<table/>
+<target_name>TridentClosureUtil</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_guid>39a8d706d5830310ee09fdc30511cf28</update_guid>
+<update_guid_history>39a8d706d5830310ee09fdc30511cf28:156058695,67025702a4430310548eb7015f8fa73d:156058695,c697264c2fcbc3d003b1942d931b0c32:-1970227671,7a9be2b7823643d068a98ae4d516f4af:473481246,7e9be2b7383643d0082025ea3d4dfdaa:-711311016</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_669be2b7933643d0e3aef0aefaba107b</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;false&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vulc_result_group&lt;/collection&gt;&lt;condition/&gt;&lt;description&gt;Single rule for the whole Trident closure lifecycle. Runs only on the transitions it acts on: State changes to/from Closed, State changes to/from Resolved, Reason changes to/from Pending Approval. Every move into Resolved stages a governance closure request in the same write (approval reset to Not Yet Requested, Reason set to Pending Approval) so the Trident Closure Approval flow raises a fresh approval cycle every time, including after a rejection. Also gates Close on an approved request with an attachment, enforces the reopen window, and clears stale requests and leftover approvals whenever the task leaves Pending Approval.&lt;/description&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="sn_vulc_result_group"&gt;stateCHANGESTO3^ORstateCHANGESFROM3^ORstateCHANGESTO101^ORstateCHANGESFROM101^ORsubstateCHANGESTO100^ORsubstateCHANGESFROM100^EQ&lt;item display_value="Closed" endquery="false" field="state" goto="false" newquery="false" operator="CHANGESTO" or="false" value="3"/&gt;&lt;item display_value="Closed" endquery="false" field="state" goto="false" newquery="false" operator="CHANGESFROM" or="true" value="3"/&gt;&lt;item display_value="Resolved" endquery="false" field="state" goto="false" newquery="false" operator="CHANGESTO" or="true" value="101"/&gt;&lt;item display_value="Resolved" endquery="false" field="state" goto="false" newquery="false" operator="CHANGESFROM" or="true" value="101"/&gt;&lt;item display_value="Pending Approval" endquery="false" field="substate" goto="false" newquery="false" operator="CHANGESTO" or="true" value="100"/&gt;&lt;item display_value="Pending Approval" endquery="false" field="substate" goto="false" newquery="false" operator="CHANGESFROM" or="true" value="100"/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;BOFA Trident closure lifecycle&lt;/name&gt;&lt;order&gt;1000&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous) {
+    // runs last among the before rules (order 1000): if an earlier rule has
+    // already refused this write, do nothing - no approval rows are touched
+    // for a save that will not happen
+    if (current.isActionAborted())
+        return;
+    var util = new sn_vulc.TridentClosureUtil();
+    if (!util.isTridentTask(current))
+        return;
+
+    var closing    = current.getValue('state') == util.STATE_CLOSED &amp;&amp; previous.getValue('state') != util.STATE_CLOSED;
+    var reopening  = previous.getValue('state') == util.STATE_CLOSED &amp;&amp; current.getValue('state') != util.STATE_CLOSED;
+    var resolving  = current.getValue('state') == util.STATE_RESOLVED &amp;&amp; previous.getValue('state') != util.STATE_RESOLVED;
+    var requesting = current.getValue('substate') == util.PENDING_APPROVAL &amp;&amp;
+                     previous.getValue('substate') != util.PENDING_APPROVAL;
+
+    // 1. Closing: only an approved closure request with evidence may close.
+    if (closing) {
+        if (!util.hasEvidence(current)) {
+            gs.addErrorMessage(util.MSG_NO_EVIDENCE);
+            current.setAbortAction(true);
+            return;
+        }
+        if (!util.closeApproved(current, previous)) {
+            gs.addErrorMessage(util.MSG_NEEDS_APPROVAL);
+            current.setAbortAction(true);
+            return;
+        }
+        return;
+    }
+
+    // 2. Reopening a closed task: only within the reopen window.
+    if (reopening) {
+        if (!util.reopenAllowed(previous)) {
+            gs.addErrorMessage('Reopening of Trident findings is only allowed up to ' + util.reopenWindowDays + ' days after closure.');
+            current.setAbortAction(true);
+            return;
+        }
+        current.setValue('approval', 'not requested');
+        if (!current.substate.changes())
+            current.setValue('substate', '');
+    }
+
+    // 3. Every move into Resolved (and any direct change of Reason to
+    //    Pending Approval) stages a fresh closure request on this same
+    //    write: leftover approvals are cancelled, the approval value is
+    //    reset to Not Yet Requested and Reason is set to Pending Approval.
+    //    At least one of the approval flow's trigger fields changes value
+    //    in the write, so the flow raises a new approval cycle every time,
+    //    including after a rejection.
+    if (resolving || requesting) {
+        var outcome = util.applyClosureRequest(current);
+        if (outcome == 'no_evidence') {
+            gs.addErrorMessage(util.MSG_NO_EVIDENCE);
+            current.setAbortAction(true);
+        } else if (outcome == 'pending') {
+            gs.addInfoMessage('A closure request is already awaiting approval for this remediation task.');
+        } else {
+            gs.addInfoMessage('Closure requested, the remediation task is now pending approval from the governance team.');
+        }
+        return;
+    }
+
+    // 4. Any other move away from a pending request (a governance rejection
+    //    sending the task to Awaiting Implementation, a reopen, a deferral)
+    //    clears the request marker and cancels leftover approvals, so the
+    //    record always raises a clean request on its next resolve. A Reason
+    //    chosen in the same write (e.g. a deferral reason) is kept.
+    if (previous.getValue('substate') == util.PENDING_APPROVAL) {
+        var cancelled = util.cancelOpenApprovals(current,
+            'Approval cancelled: the remediation task left Pending Approval before the governance decision was made.');
+        if (!current.substate.changes())
+            current.setValue('substate', '');
+        current.setValue('approval', 'not requested');
+        if (cancelled &gt; 0)
+            gs.addInfoMessage('The pending governance approval was cancelled because the remediation task left Pending Approval.');
+    }
+})(current, previous);
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-26 10:11:55&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;669be2b7933643d0e3aef0aefaba107b&lt;/sys_id&gt;&lt;sys_mod_count&gt;9&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA Trident closure lifecycle&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Configuration Compliance" source="sn_vulc"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Configuration Compliance"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_669be2b7933643d0e3aef0aefaba107b&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-02 14:47:13&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;before&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=669be2b7933643d0e3aef0aefaba107b"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-1326356948</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1420_MS_Trident Resolve Approval Retrigger_V2.3">665b846a9383c310e3aef0aefaba10b9</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:04</sys_created_on>
+<sys_id>aa5b846a9383c310e3aef0aefaba10b9</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a062969f440000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:04</sys_updated_on>
+<table>sn_vulc_result_group</table>
+<target_name>BOFA Trident closure lifecycle</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>67bd630e904703109863d85d2ba1284d</update_guid>
+<update_guid_history>67bd630e904703109863d85d2ba1284d:-1326356948,2349af8ece0703108ea2cf9b52ed8df0:2079005405,9d496f8e7e07031065546d597026f937:-200753514,3f38afca83070310ce7d1db76f601527:2079005405,0067a74a9007031069c043e9f5b14d63:2097938930,270257024f4303107c511ed3c2684945:-1789130161,8697264c87cbc3d0fd3b21861ecb102b:-582572897,70848fb7173a43d0d0fe576d485810de:616003028,e2148b77093a43d08f10d17c0939bfb0:951879099,6e9be2b71d3643d093486e755cfb6982:616003028</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="Configuration Compliance">29691e1f0212471dad08668c1e39932b</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_f9a8970693830310e3aef0aefaba10ed</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="DELETE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;false&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vulc_result_group&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="sn_vulc_result_group"&gt;stateCHANGESTO101^EQ&lt;item display_value="Resolved" endquery="false" field="state" goto="false" newquery="false" operator="CHANGESTO" or="false" value="101"/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;BOFA Trident closure request&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous) {
+    // After a Trident task has been written as Resolved (Reason cleared by
+    // the lifecycle rule), set Reason to Pending Approval in a separate write.
+    // That write is what the Trident Closure Approval flow triggers on, so
+    // every move to Resolved starts exactly one approval cycle.
+    var util = new sn_vulc.TridentClosureUtil();
+    if (!util.isTridentTask(current) || !util.hasEvidence(current))
+        return;
+    var task = new GlideRecord('sn_vulc_result_group');
+    if (!task.get(current.getUniqueValue()))
+        return;
+    if (task.getValue('substate') == util.PENDING_APPROVAL)
+        return;
+    task.setValue('substate', util.PENDING_APPROVAL);
+    task.update();
+})(current, previous);
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-02 13:15:04&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;f9a8970693830310e3aef0aefaba10ed&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA Trident closure request&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Configuration Compliance" source="sn_vulc"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Configuration Compliance"&gt;29691e1f0212471dad08668c1e39932b&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_f9a8970693830310e3aef0aefaba10ed&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-02 13:15:04&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=f9a8970693830310e3aef0aefaba10ed"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-1107209545</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1420_MS_Trident Resolve Approval Retrigger_V2.3">665b846a9383c310e3aef0aefaba10b9</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:04</sys_created_on>
+<sys_id>ee5b846a9383c310e3aef0aefaba10b9</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a06242461e0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:04</sys_updated_on>
+<table>sn_vulc_result_group</table>
+<target_name>BOFA Trident closure request</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>c6a8d70646830310ed4105004d558546</update_guid>
+<update_guid_history>c6a8d70646830310ed4105004d558546:-1107209545,79a8d706aa830310d26fc257fe724802:1099214915</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>
