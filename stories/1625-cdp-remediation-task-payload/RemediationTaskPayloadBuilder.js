@@ -10,9 +10,6 @@ RemediationTaskPayloadBuilder.prototype = {
         this.TIME_FORMAT = 'HH:mm:ss';
         this.URL_FIELD = 'u_avul_record_url';
         this.FIELDS_PROPERTY = 'usem.remtask.payload.fields';
-        // field types rendered with their display value; dates, journals and
-        // everything else are handled in _renderElement
-        this.DISPLAY_TYPES = ['reference', 'glide_list', 'boolean', 'glide_duration', 'timer', 'domain_id', 'sys_class_name', 'integer', 'string'];
     },
 
     /**
@@ -111,17 +108,34 @@ RemediationTaskPayloadBuilder.prototype = {
         }
     },
 
+    /**
+     * Renders one field as the string CDP expects, decided by the field's
+     * dictionary type: dates are formatted, journals give their latest entry,
+     * fields whose stored value is a key (references, choices, lists,
+     * booleans, durations) give their display value, everything else its
+     * stored value.
+     */
     _renderElement: function(element) {
-        var type = String(element.getED().getInternalType());
-        if (type === 'glide_date_time')
-            return this._formatDateTime(element.getValue());
-        if (type === 'glide_date')
-            return this._formatDate(element.getValue());
-        if (type === 'journal_input')
-            return String(element.getJournalEntry(1)).trim();
-        if (this.DISPLAY_TYPES.indexOf(type) > -1)
-            return String(element.getDisplayValue());
-        return String(element.getValue());
+        switch (String(element.getED().getInternalType())) {
+            case 'glide_date_time':
+                return this._formatDateTime(element.getValue());
+            case 'glide_date':
+                return this._formatDate(element.getValue());
+            case 'journal_input':
+                return String(element.getJournalEntry(1)).trim();
+            case 'reference':
+            case 'glide_list':
+            case 'boolean':
+            case 'glide_duration':
+            case 'timer':
+            case 'domain_id':
+            case 'sys_class_name':
+            case 'integer':
+            case 'string':
+                return String(element.getDisplayValue());
+            default:
+                return String(element.getValue());
+        }
     },
 
     _formatDateTime: function(value) {

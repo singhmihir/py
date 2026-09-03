@@ -1,6 +1,6 @@
 # SNOWUSEMTP-1625 — Kafka payload for remediation tasks (CDP)
 
-Global-scope update set V1.2 (2 script includes + 10 system properties):
+Global-scope update set V1.3 (2 script includes + 10 system properties):
 
 - `RemediationTaskPayloadBuilder.js` — the fellow developer's background script
   (`generateRemediationTaskSCRIPT.txt`) as a class: `buildPayload(record, activity)` returns the
@@ -19,7 +19,7 @@ Field lists live in system properties, so field customisation needs no code chan
 separated field names, `json_name=field` where the payload key differs. Values are generated
 from the sheet into `properties.json` and created by `build_props_1625.py`.
 
-Rendering is type driven (dictionary internal type), errors use one format
+Rendering branches inline on the dictionary internal type (dates formatted, journals latest entry, key-like types as display values, the rest stored values), errors use one format
 (`<builder>: payload not built for <table> <sys_id> - <reason>`), and `element_activity`
 comes from `current.operation()` in a business rule (never-updated -> INSERT, else UPDATE
 outside one).
