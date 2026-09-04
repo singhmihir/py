@@ -1,13 +1,13 @@
 # SNOWUSEMTP-1625 — Kafka payload for remediation tasks (CDP)
 
-Global-scope update set V2.1: one script include, `RemediationTaskPayloadBuilder`, plus four
+Global-scope update set V2.2: one script include, `RemediationTaskPayloadBuilder`, plus four
 system properties. `buildPayload(record)` returns the JSON string (envelope +
 `rem_tasks[0].remediation_task`) for one remediation task record, or an empty string after a
 single error in the format `RemediationTaskPayloadBuilder: payload not built for <table>
 <sys_id> - <reason>`.
 
 - Fields per table come from `usem.cdp.remtask.fields.<table>` — one
-  `servicenow_field=json_field` pair per line holding the CDP-required rows of the sheet
+  `servicenow_field=json_field,` pair per line (comma terminated) holding the CDP-required rows of the sheet
   "Outbound to CDP (RemTask)" (40 common + the table's own). Generated into `properties.json`
   from `remtask_mapping.json`. A table is supported only while its property exists.
 - A field is sent as `""` when it does not exist on the table or is empty; otherwise it is
