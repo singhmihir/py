@@ -37,8 +37,9 @@ Follow it without being asked again.
   retrieved set shows every update (`SNUI.ui_import_test`), and delete the retrieved copy.
 - **Never load an export back with `GlideUpdateManager2.loadXML` when the rows carry the local sys_ids** —
   that re-points the local set's own rows and empties it. Native exports carry fresh ids and are safe.
-- Scheduled jobs (`sysauto_script`) are not update-set tracked on this release (`update_synch=false`):
-  capture them with `new GlideUpdateManager2().saveRecord(gr)`. Same trick re-captures any unchanged
+- Scheduled jobs (`sysauto_script`) and CI lookup rules (`sn_sec_cmn_ci_lookup_rule`, no `update_synch`
+  attribute) are not update-set tracked on this release: capture them with
+  `new GlideUpdateManager2().saveRecord(gr)` after the update. Same trick re-captures any unchanged
   record into a new set. Records edited with no change are not captured.
 - A notification created by script must set `generation_type = 'event'` or the event processor ignores it.
 - Pin the current update set with `new GlideUpdateSet().set(id)`; the pin persists per user across
@@ -102,6 +103,9 @@ Follow it without being asked again.
   `sn_vul_m2m_vg_change_request`, `sn_vul_app_m2m_vg_change_request`,
   `sn_vul_container_m2m_remediation_task_change_request`, `sn_vulc_m2m_trg_change_request`; exception
   approvals are `sn_sec_exception_change_approval` (`record` + `table`, `approval_state` 1 Approved 4 Expired).
+- Qualys CI lookup rules (SNOWUSEMTP-895): 16 custom USEM rules, orders 175-850, Global, script method
+  `process(rule, sourceValue, sourcePayload)`; exactly-one-match via `next()` / `hasNext()`, no `setLimit`;
+  the OOB `CIIdentify._queryMatch` helper is private and returns the first duplicate, so it is not used.
 - Kafka outbound (SNOWUSEMTP-1625): topic `sn_usem_remtask_outbound`, namespace `com.bofa.usem`,
   envelope + `rem_tasks[].remediation_task`, dates `MM-dd-yyyy HH:mm:ss`, mapping sheet
   *Outbound to CDP (RemTask)* — only rows with *CDP Required? = Yes*; one property per table with one
