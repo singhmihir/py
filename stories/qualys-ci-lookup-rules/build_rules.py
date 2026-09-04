@@ -1,0 +1,62 @@
+"""Deploy the rewritten Qualys CI lookup rule scripts into a new Global update set.
+
+Reads rules/<order>_<name>.js, updates the script field of the matching
+sn_sec_cmn_ci_lookup_rule record (matched by sys_id, name and order) and
+audits that every captured update landed in the Global application.
+
+sn_sec_cmn_ci_lookup_rule is not update-set tracked (no update_synch attribute
+on its collection), so every rule is captured explicitly with
+GlideUpdateManager2.saveRecord after the update.
+"""
+import os, sys, json, glob
+BASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root
+sys.path.insert(0, os.path.join(BASE, 'tools'))
+from snui import SNUI
+HERE = os.path.join(BASE, 'stories', 'qualys-ci-lookup-rules')
+NAME = 'SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V2.0'
+DESC = ('Qualys CI lookup rules (USEM custom chain, orders 175 to 850) rewritten for readability. '
+        'Each rule script opens with the sample Qualys Host Detection payload it handles, explains why the rule '
+        'sits at its order and which hosts reach it, and walks the logic line by line with example values. '
+        'Result sets are no longer capped with setLimit: a rule accepts a CI only when exactly one candidate '
+        'remains, or, for the tie-break rules, when the scanned IP confirms one of several candidates. '
+        'Matching behaviour is otherwise unchanged.')
+live = json.load(open(os.path.join(HERE, 'live_rules.json')))['rules']
+rules = []
+for fn in sorted(glob.glob(os.path.join(HERE, 'rules', '*.js'))):
+    order, rest = os.path.basename(fn)[:-3].split('_', 1)
+    name = rest.replace('_', ' ')
+    match = [r for r in live if r['name'] == name and r['order'] == order and r['source'].startswith('Qualys')]
+    assert len(match) == 1, (name, order, len(match))
+    rules.append({'id': match[0]['id'], 'name': name, 'order': order, 'script': open(fn).read()})
+assert len(rules) == 16
+ui = SNUI(); ui.app('global')
+d = ui.js('''
+var o = {rows: [], updated: [], mismatch: []};
+var rules = %s;
+var us = new GlideRecord('sys_update_set'); us.addQuery('name', %s); us.query();
+if (us.next()) { o.set = us.getUniqueValue(); o.existing = true; }
+else {
+    us.initialize(); us.setValue('name', %s); us.setValue('application', 'global'); us.setValue('state', 'in progress');
+    us.setValue('description', %s); o.set = '' + us.insert(); o.existing = false;
+}
+new GlideUpdateSet().set(o.set);
+var um = new GlideUpdateManager2();
+var pinned = new GlideRecord('sys_update_set'); pinned.get('' + new GlideUpdateSet().get());
+o.pinned = '' + pinned.getValue('name') + ' | ' + pinned.application.getDisplayValue();
+for (var i = 0; i < rules.length; i++) {
+    var r = new GlideRecord('sn_sec_cmn_ci_lookup_rule');
+    if (!r.get(rules[i].id) || ('' + r.getValue('name')) != rules[i].name || ('' + r.getValue('order')) != rules[i].order) { o.mismatch.push(rules[i].name); continue; }
+    r.setValue('script', rules[i].script); r.update(); um.saveRecord(r);
+    var chk = new GlideRecord('sn_sec_cmn_ci_lookup_rule'); chk.get(rules[i].id);
+    o.updated.push(rules[i].order + ' ' + rules[i].name + (('' + chk.getValue('script')) == rules[i].script ? ' | stored' : ' | STORED TEXT DIFFERS'));
+}
+var ux = new GlideRecord('sys_update_xml'); ux.addQuery('update_set', o.set); ux.orderBy('target_name'); ux.query();
+while (ux.next()) o.rows.push('' + ux.getValue('target_name') + ' | ' + ux.getValue('action') + ' | ' + ux.application.getDisplayValue() + ' | ' + ux.getValue('name'));
+gs.print('X::' + JSON.stringify(o));''' % (json.dumps(rules), json.dumps(NAME), json.dumps(NAME), json.dumps(DESC)))
+print('set:', d['set'], '(existing)' if d['existing'] else '(new)', '| pinned:', d['pinned'])
+print('\n'.join(d['updated'])); print('mismatch:', d['mismatch'])
+print('\n'.join(d['rows']))
+json.dump({'set': d['set'], 'name': NAME, 'rules': {r['order']: r['id'] for r in rules}}, open(os.path.join(HERE, 'state.json'), 'w'), indent=1)
+assert not d['mismatch'] and len(d['updated']) == 16 and all(u.endswith('| stored') for u in d['updated'])
+assert len(d['rows']) == 16 and all(' | Global | sn_sec_cmn_ci_lookup_rule_' in r for r in d['rows'])
+print('DEPLOYED: 16 rule scripts captured, all Global')

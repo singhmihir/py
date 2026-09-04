@@ -142,5 +142,14 @@
   "file": "SNOWUSEMTP-1625_MS_Remediation_Task_CDP_Payload_V2.2.xml",
   "created": "2026-09-03 11:24:13",
   "scrub": []
+ },
+ {
+  "name": "SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V2.0",
+  "app": "global",
+  "rows": 16,
+  "exported": 16,
+  "file": "SNOWUSEMTP-895_MS_Qualys_CI_Lookup_Rules_V2.0.xml",
+  "created": "2026-09-04 12:00:07",
+  "scrub": []
  }
 ]
