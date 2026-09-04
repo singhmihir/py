@@ -31,7 +31,7 @@ first of several matching CIs after only logging the duplication, it mutates the
 result object (`returnObj.ciIds`, capped at 10) and it only performs a query the rules already
 express in two lines. The rules need "exactly one match or decline", which it does not offer.
 
-Files: `gen_rules.py` (generator), `rules/<order>_<name>.js` (delivered scripts), `current/` (scripts as they were before,
+Files: `gen_rules.py` (generator), `build_workbook.py` (the code-line explanations workbook: an Overview sheet plus one sheet per rule with every code line, its stage and its explanation), `rules/<order>_<name>.js` (delivered scripts), `current/` (scripts as they were before,
 with a metadata line on top), `live_rules.json` (all lookup rules and the helper script include as
 read from the instance), `build_rules.py` (set, script update, explicit capture of every rule with
 `GlideUpdateManager2.saveRecord` because `sn_sec_cmn_ci_lookup_rule` is not update-set tracked,
