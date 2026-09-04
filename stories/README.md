@@ -10,7 +10,7 @@ name, scope and update count).
 | `trident-1420` | SNOWUSEMTP-1420 Trident closure governance (CRG approvals) | single lifecycle business rule, `TridentClosureUtil`, fix script; sets V2.0 → V2.3 |
 | `p317-vulnerability-summary` | SNOWUSEMTP.26.P3.17 weekly Vulnerability Summary per app owner | `VulnSummaryDigestUtil`, event, mail script, notification, weekly job; set V1.1 |
 | `1625-cdp-remediation-task-payload` | SNOWUSEMTP-1625 Kafka payload for remediation tasks (CDP) | `RemediationTaskPayloadBuilder` + four field properties; set V2.2 |
-| `qualys-ci-lookup-rules` | SNOWUSEMTP-895 Qualys CI lookup rules (readable rewrite, no setLimit) | 16 rule scripts on `sn_sec_cmn_ci_lookup_rule`; set V2.0 |
+| `qualys-ci-lookup-rules` | SNOWUSEMTP-895 Qualys CI lookup rules (readable rewrite, no setLimit) | 16 rule scripts on `sn_sec_cmn_ci_lookup_rule`; sets V2.0, V2.1 |
 
 Older sets in `_update_sets/` (SNOWUSEMTP-581, -670, -1003, exception deferral limits,
 Trident closure governance V1/V2, CRG resolve-requires-attachment) were delivered in

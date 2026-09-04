@@ -13,14 +13,17 @@ BASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 sys.path.insert(0, os.path.join(BASE, 'tools'))
 from snui import SNUI
 HERE = os.path.join(BASE, 'stories', 'qualys-ci-lookup-rules')
-NAME = 'SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V2.0'
-DESC = ('Qualys CI lookup rules (USEM custom chain, orders 175 to 850) rewritten for readability. '
-        'Each rule script opens with the sample Qualys Host Detection payload it handles, explains why the rule '
-        'sits at its order and which hosts reach it, and walks the logic line by line with example values. '
-        'Result sets are no longer capped with setLimit: a rule accepts a CI only when exactly one candidate '
-        'remains, or, for the tie-break rules, when the scanned IP confirms one of several candidates. '
+NAME = 'SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V2.1'
+DESC = ('Qualys CI lookup rules (USEM custom chain, orders 175 to 850) rewritten so that any reader can follow them. '
+        'Each rule script opens with its purpose, the sample Qualys Host Detection payload it handles, why the rule sits '
+        'at its order and which hosts reach it, and the list of its stages. The code is split into numbered stages that '
+        'state what happens, why the stage exists and what the sample data looks like, and every code line is followed '
+        'by the data it produces. Result sets are no longer capped with setLimit: a rule accepts a CI only when exactly '
+        'one candidate remains, or, for the tie-break rules, when the scanned IP confirms one of several candidates. '
         'Matching behaviour is otherwise unchanged.')
 live = json.load(open(os.path.join(HERE, 'live_rules.json')))['rules']
+STATE = os.path.join(HERE, 'state.json')
+PRIOR = json.load(open(STATE))['set'] if os.path.exists(STATE) else ''
 rules = []
 for fn in sorted(glob.glob(os.path.join(HERE, 'rules', '*.js'))):
     order, rest = os.path.basename(fn)[:-3].split('_', 1)
@@ -33,8 +36,9 @@ ui = SNUI(); ui.app('global')
 d = ui.js('''
 var o = {rows: [], updated: [], mismatch: []};
 var rules = %s;
-var us = new GlideRecord('sys_update_set'); us.addQuery('name', %s); us.query();
-if (us.next()) { o.set = us.getUniqueValue(); o.existing = true; }
+var us = new GlideRecord('sys_update_set'); var prior = %s;
+if (prior && us.get(prior)) { o.set = us.getUniqueValue(); o.existing = true; us.setValue('state', 'in progress'); us.update();
+    var us1 = new GlideRecord('sys_update_set'); us1.get(o.set); us1.setValue('name', %s); us1.setValue('description', %s); us1.update(); }
 else {
     us.initialize(); us.setValue('name', %s); us.setValue('application', 'global'); us.setValue('state', 'in progress');
     us.setValue('description', %s); o.set = '' + us.insert(); o.existing = false;
@@ -52,11 +56,11 @@ for (var i = 0; i < rules.length; i++) {
 }
 var ux = new GlideRecord('sys_update_xml'); ux.addQuery('update_set', o.set); ux.orderBy('target_name'); ux.query();
 while (ux.next()) o.rows.push('' + ux.getValue('target_name') + ' | ' + ux.getValue('action') + ' | ' + ux.application.getDisplayValue() + ' | ' + ux.getValue('name'));
-gs.print('X::' + JSON.stringify(o));''' % (json.dumps(rules), json.dumps(NAME), json.dumps(NAME), json.dumps(DESC)))
+gs.print('X::' + JSON.stringify(o));''' % (json.dumps(rules), json.dumps(PRIOR), json.dumps(NAME), json.dumps(DESC), json.dumps(NAME), json.dumps(DESC)))
 print('set:', d['set'], '(existing)' if d['existing'] else '(new)', '| pinned:', d['pinned'])
 print('\n'.join(d['updated'])); print('mismatch:', d['mismatch'])
 print('\n'.join(d['rows']))
-json.dump({'set': d['set'], 'name': NAME, 'rules': {r['order']: r['id'] for r in rules}}, open(os.path.join(HERE, 'state.json'), 'w'), indent=1)
+json.dump({'set': d['set'], 'name': NAME, 'rules': {r['order']: r['id'] for r in rules}}, open(STATE, 'w'), indent=1)
 assert not d['mismatch'] and len(d['updated']) == 16 and all(u.endswith('| stored') for u in d['updated'])
 assert len(d['rows']) == 16 and all(' | Global | sn_sec_cmn_ci_lookup_rule_' in r for r in d['rows'])
 print('DEPLOYED: 16 rule scripts captured, all Global')
