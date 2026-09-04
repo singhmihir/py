@@ -13,14 +13,14 @@ BASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 sys.path.insert(0, os.path.join(BASE, 'tools'))
 from snui import SNUI
 HERE = os.path.join(BASE, 'stories', 'qualys-ci-lookup-rules')
-NAME = 'SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V2.1'
+NAME = 'SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V2.2'
 DESC = ('Qualys CI lookup rules (USEM custom chain, orders 175 to 850) rewritten so that any reader can follow them. '
-        'Each rule script opens with its purpose, the sample Qualys Host Detection payload it handles, why the rule sits '
-        'at its order and which hosts reach it, and the list of its stages. The code is split into numbered stages that '
-        'state what happens, why the stage exists and what the sample data looks like, and every code line is followed '
-        'by the data it produces. Result sets are no longer capped with setLimit: a rule accepts a CI only when exactly '
-        'one candidate remains, or, for the tie-break rules, when the scanned IP confirms one of several candidates. '
-        'Matching behaviour is otherwise unchanged.')
+        'Each rule script opens with its purpose, the sample Qualys Host Detection payload it handles and why the rule '
+        'sits at its order. The stages that do the matching (class from the scanned OS, the search, the exactly-one '
+        'decision, the IP tie-break, the load balancer and class-contradiction checks) carry a banner stating what '
+        'happens, why the stage is in place and the sample data; the remaining lines carry a short comment. Result '
+        'sets are no longer capped with setLimit: a rule accepts a CI only when exactly one candidate remains, or, for '
+        'the tie-break rules, when the scanned IP confirms one of several. Matching behaviour is otherwise unchanged.')
 live = json.load(open(os.path.join(HERE, 'live_rules.json')))['rules']
 STATE = os.path.join(HERE, 'state.json')
 PRIOR = json.load(open(STATE))['set'] if os.path.exists(STATE) else ''
