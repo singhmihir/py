@@ -169,5 +169,14 @@
   "file": "SNOWUSEMTP-895_MS_Qualys_CI_Lookup_Rules_V2.2.xml",
   "created": "2026-09-04 12:28:07",
   "scrub": []
+ },
+ {
+  "name": "SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V3.0",
+  "app": "global",
+  "rows": 9,
+  "exported": 9,
+  "file": "SNOWUSEMTP-895_MS_Qualys_CI_Lookup_Rules_V3.0.xml",
+  "created": "2026-09-07 13:43:03",
+  "scrub": []
  }
 ]
