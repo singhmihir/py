@@ -103,7 +103,11 @@ Follow it without being asked again.
   `sn_vul_m2m_vg_change_request`, `sn_vul_app_m2m_vg_change_request`,
   `sn_vul_container_m2m_remediation_task_change_request`, `sn_vulc_m2m_trg_change_request`; exception
   approvals are `sn_sec_exception_change_approval` (`record` + `table`, `approval_state` 1 Approved 4 Expired).
-- Qualys CI lookup rules (SNOWUSEMTP-895): 16 custom USEM rules, orders 175-850, Global, script method
+- Discovered Items (`sn_sec_cmn_src_ci`) hold each scanned host's payload (`source_data` JSON), the resolved CI and
+  `state` matched/unmatched; the PDI holds 281,700 unmatched items from the client. VITs reach them through `src_ci`.
+  `cmdb_ci_lb` (load balancer device) extends Server, not Network Gear; VIPs are `cmdb_ci_lb_service` (extends cmdb_ci).
+- Qualys CI lookup rules (SNOWUSEMTP-895): 16 custom USEM rules, orders 175-850, plus V3.0 rules 420/430/460
+  (management controllers, network interfaces, load balancer services; lists in `usem.ci_lookup.*`), Global, script method
   `process(rule, sourceValue, sourcePayload)`; exactly-one-match via `next()` / `hasNext()`, no `setLimit`;
   the OOB `CIIdentify._queryMatch` helper is private and returns the first duplicate, so it is not used.
 - Kafka outbound (SNOWUSEMTP-1625): topic `sn_usem_remtask_outbound`, namespace `com.bofa.usem`,

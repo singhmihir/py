@@ -1,0 +1,669 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-07 13:43:04">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Global">global</application>
+<application_name>Global</application_name>
+<application_scope>global</application_scope>
+<application_version/>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>Three CI lookup rules added to the USEM Qualys chain for hosts the existing chain cannot resolve: 420 Management Interface Match (iLO, ILOM, iDRAC, IMM, CIMC, BMC controllers matched to their server), 430 Network Interface Name Match (interface and VLAN addresses of switches, routers, firewalls and load balancer devices matched to the device), 460 Load Balancer Service Match (virtual IPs matched to the Load Balancer Service CI). Every list the rules rely on (controller suffixes and OS words, interface domains and markers, VIP words and markers) lives in a usem.ci_lookup.* system property. Each rule accepts a CI only when exactly one candidate remains. Applies on top of V2.2.</description>
+<inserted/>
+<name>SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V3.0</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>677e453393430310e3aef0aefaba10cf</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-07 13:43:03</sys_created_on>
+<sys_id>180f09b393430310e3aef0aefaba103b</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-07 13:43:03</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_4a8e893393430310e3aef0aefaba1064</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>USEM CI lookup rule 430 (Network Interface Name Match). Comma separated label segments (the word itself or the word followed by digits) that mark an interface or VLAN address of a network device.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.ci_lookup.interface_markers</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-07 13:40:59</sys_created_on><sys_id>4a8e893393430310e3aef0aefaba1064</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.ci_lookup.interface_markers</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_4a8e893393430310e3aef0aefaba1064</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-07 13:40:59</sys_updated_on><type>string</type><value>vlan,v,hsrp,vrrp,po,eth,gi,te,lo,mgmt,aom,vs,fab</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=4a8e893393430310e3aef0aefaba1064"/></record_update>]]></payload>
+<payload_hash>-1518162535</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V3.0">180f09b393430310e3aef0aefaba103b</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-07 13:43:03</sys_created_on>
+<sys_id>100f09b393430310e3aef0aefaba103e</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a07c1b57e50000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-07 13:43:03</sys_updated_on>
+<table/>
+<target_name>usem.ci_lookup.interface_markers</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>43ee05b3ed43031022c560cf360bd113</update_guid>
+<update_guid_history>43ee05b3ed43031022c560cf360bd113:-1518162535,aa8e8933ed43031079c57192e76aa89e:-1518162535</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_f98e493393430310e3aef0aefaba105d</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>USEM CI lookup rule 430 (Network Interface Name Match). Comma separated DNS domain fragments under which network devices are scanned per interface; a label under such a domain is walked prefix by prefix against Network Gear.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.ci_lookup.interface_domains</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-07 13:40:58</sys_created_on><sys_id>f98e493393430310e3aef0aefaba105d</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.ci_lookup.interface_domains</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_f98e493393430310e3aef0aefaba105d</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-07 13:40:58</sys_updated_on><type>string</type><value>.network.</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=f98e493393430310e3aef0aefaba105d"/></record_update>]]></payload>
+<payload_hash>1780941238</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V3.0">180f09b393430310e3aef0aefaba103b</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-07 13:43:03</sys_created_on>
+<sys_id>140f09b393430310e3aef0aefaba103f</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a07c1b57cf0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-07 13:43:03</sys_updated_on>
+<table/>
+<target_name>usem.ci_lookup.interface_domains</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>c7ee05b38543031023354ebd939c6010</update_guid>
+<update_guid_history>c7ee05b38543031023354ebd939c6010:1780941238,868e8933c24303109dc2bca07f71f15e:1780941238</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sn_sec_cmn_ci_lookup_rule_2c9e8d3393430310e3aef0aefaba10fb</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sn_sec_cmn_ci_lookup_rule"&gt;&lt;sn_sec_cmn_ci_lookup_rule action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;applies_to/&gt;&lt;condition/&gt;&lt;description&gt;Virtual IP matched to its Load Balancer Service CI: load balancer OS word or VIP label marker required, service found by fqdn, then name, then address, exactly one at each step. Lists in usem.ci_lookup.vip_os_markers and usem.ci_lookup.vip_markers.&lt;/description&gt;&lt;lookup_script/&gt;&lt;lookup_target&gt;ci&lt;/lookup_target&gt;&lt;method&gt;script&lt;/method&gt;&lt;name&gt;USEM Load Balancer Service Match&lt;/name&gt;&lt;order&gt;460&lt;/order&gt;&lt;reapply&gt;true&lt;/reapply&gt;&lt;reapply_version&gt;1&lt;/reapply_version&gt;&lt;script&gt;&lt;![CDATA[/* =================================================================================================
+   RULE 460 - USEM Load Balancer Service Match
+   =================================================================================================
+   Match a virtual IP answered by a load balancer to the Load Balancer Service CI that models it.
+   The hardware rules deliberately refuse the balancer device, because a VIP is not the balancer;
+   this rule gives such hosts their proper CI instead of leaving them unmatched. It runs on the IP
+   field so that VIPs without a DNS name are covered too.
+
+   SAMPLE PAYLOAD (one Qualys Host Detection record, used in every example below)
+   {
+     "ID": "1202267231",
+     "IP": "171.203.142.26",
+     "TRACKING_METHOD": "IP",
+     "OS": "F5 Big IP",
+     "DNS": "crisp-tx.bankofamerica.com"
+   }
+
+   sourceValue   = the IP field -&gt; "171.203.142.26"
+   sourcePayload = the whole record; the rule also reads the OS and the DNS name from it
+   Expected for the sample: the Load Balancer Service CI whose fqdn is "crisp-tx.bankofamerica.com"
+   (or, failing that, whose name is the DNS name or its label, or whose ip_address is
+   "171.203.142.26"); null without VIP evidence, without a service, or when two services carry the
+   value.
+
+   WHY THIS RULE SITS AT ORDER 460
+   Rules run from the lowest order to the highest; the first rule that returns a CI wins and the
+   later rules are skipped. A rule that returns null passes the host on.
+   - Before it : 175 to 450 searched the hardware tree and declined: a VIP has no serial, its name
+                 is not a server name, and the address belongs to a load balancer device, which
+                 those rules refuse.
+   - Reaches it: hosts with VIP evidence: an OS text naming a load balancer product (property
+                 usem.ci_lookup.vip_os_markers) or a DNS label with a VIP marker segment such as
+                 "-vip", "vs1" (property usem.ci_lookup.vip_markers).
+   - After it  : 700 and above (IP address rules) for hosts that are not VIPs.
+   ================================================================================================= */
+(function process(rule, sourceValue, sourcePayload) {
+    if (!sourceValue)                             // nothing to look up -&gt; null = "no match from this rule"
+        return null;
+    var ip = ('' + sourceValue).trim();           // "171.203.142.26"
+    if (!ip || ip.indexOf('127.') == 0 || ip.indexOf('169.254.') == 0)   // loopback and link-local identify nothing
+        return null;
+    var dns = ('' + (sourcePayload.DNS || '')).trim().toLowerCase();   // "crisp-tx.bankofamerica.com" or ""
+    var label = dns.split('.')[0];                // "crisp-tx"
+    var os = ('' + (sourcePayload.OS || '')).toLowerCase();   // "f5 big ip"
+    // CI classes that must never be matched (placeholder and technical classes). Administrators
+    // keep the list in the property sn_sec_cmn.ignoreCIClass; the framework may pass the same list
+    // in as _ignoreClass.
+    var ignore = (typeof _ignoreClass != 'undefined' &amp;&amp; _ignoreClass) ?
+        ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
+    // -&gt; ignore =
+    //    "sn_sec_cmn_unmatched_ci,sn_vul_qualys_ci,cmdb_ci_unclassed_hardware,cmdb_ci_incomplete_ip,cmdb_ci_dns_name"
+    // list() reads a comma separated system property into a lower-cased list, falling back to the
+    // default shipped with the rule. Administrators tune the rule by editing the property, not the
+    // script.
+    function list(name, fallback) {
+        var parts = ('' + gs.getProperty(name, fallback)).split(',');
+        var out = [];
+        for (var i = 0; i &lt; parts.length; i++) {
+            var item = parts[i].trim().toLowerCase();
+            if (item)
+                out.push(item);
+        }
+        return out;
+    }
+    // isMarker() reports whether one hyphen segment of the label is a listed marker: the word
+    // itself ("vlan"), the word followed by digits only ("vlan705", "v201"), or, for words of three
+    // letters or more, a segment ending in the word ("multihostvip").
+    function isMarker(segment, words) {
+        for (var i = 0; i &lt; words.length; i++) {
+            var w = words[i];
+            if (segment == w)
+                return true;
+            if (segment.indexOf(w) == 0 &amp;&amp; /^[0-9]+$/.test(segment.substring(w.length)))
+                return true;
+            if (w.length &gt;= 3 &amp;&amp; segment.length &gt; w.length &amp;&amp; segment.substring(segment.length - w.length) == w)
+                return true;
+        }
+        return false;
+    }
+    // ====== STAGE 1: Require VIP evidence ========================================================
+    // What   : the rule goes on only when the OS text contains a listed load balancer product word,
+    //          or one of the label segments is a listed VIP marker.
+    // Why    : a Load Balancer Service must never be returned for an ordinary server that happens
+    //          to share an address with a VIP; the evidence keeps this rule to the hosts that
+    //          really are VIPs.
+    // Sample : "f5 big ip" contains "f5" -&gt; evidence. "rbps-dev3-sve-vip.ecommnp.rpg" with OS
+    //          "Linux 2.6" -&gt; segment "vip" -&gt; evidence. "ah-1047132-001" with OS "Red Hat
+    //          Enterprise Linux 9.8" -&gt; neither -&gt; decline.
+    // =============================================================================================
+    var osMarkers = list('usem.ci_lookup.vip_os_markers', 'f5,big-ip,big ip,netscaler');
+    var labelMarkers = list('usem.ci_lookup.vip_markers', 'vip,vs');
+    var evidence = false;
+    for (var m = 0; m &lt; osMarkers.length; m++)
+        if (os.indexOf(osMarkers[m]) != -1)
+            evidence = true;
+    var segments = label ? label.split('-') : [];
+    for (var s = 0; s &lt; segments.length; s++)
+        if (isMarker(segments[s], labelMarkers))
+            evidence = true;
+    // -&gt; evidence = true for the sample
+    if (!evidence)
+        return null;
+    // ====== STAGE 2: Find the one Load Balancer Service by fqdn, then by name, then by address ===
+    // What   : searches cmdb_ci_lb_service (and its sub-classes) for the scanned DNS name in the
+    //          fqdn field, then in the name field, then for the label in the name field, then for
+    //          the scanned address in ip_address. Each step accepts exactly one service; a step
+    //          that finds two services ends the rule with null, a step that finds nothing hands
+    //          over to the next step.
+    // Why    : the most specific evidence is tried first, and an ambiguous answer is never skipped
+    //          over to a weaker one, because the weaker evidence could pick a different service.
+    // Sample : fqdn = "crisp-tx.bankofamerica.com" finds the Load Balancer Service "crisp-tx" -&gt;
+    //          return "3f2a9c7e1b8d4a5f9e6c0d2b7a4f8e1c". A VIP with two services on the same
+    //          address and no DNS -&gt; null.
+    // =============================================================================================
+    function one(field, value) {
+        if (!value)
+            return undefined;                     // no value to search -&gt; next step
+        var gr = new GlideRecord('cmdb_ci_lb_service');
+        if (!gr.isValid())
+            return null;                          // class not installed -&gt; decline
+        gr.addQuery(field, value);
+        if (ignore)
+            gr.addQuery('sys_class_name', 'NOT IN', ignore);
+        gr.query();
+        if (!gr.next())
+            return undefined;                     // nothing found -&gt; next step
+        var id = gr.getUniqueValue();
+        if (gr.hasNext())
+            return null;                          // two services -&gt; never guess
+        return id;
+    }
+    var steps = [['fqdn', dns], ['name', dns], ['name', label], ['ip_address', ip]];
+    for (var t = 0; t &lt; steps.length; t++) {
+        var found = one(steps[t][0], steps[t][1]);
+        if (found === null)                       // ambiguous at this step -&gt; decline
+            return null;
+        if (found)                                // exactly one service -&gt; match
+            return found;
+    }
+    return null;
+    // -&gt; no service for any of the evidence -&gt; decline; the host continues to rule 700
+})(rule, sourceValue, sourcePayload);
+]]&gt;&lt;/script&gt;&lt;source display_value="Qualys Cloud Platform"&gt;ed44bdc453220300e8f9f745911c0801&lt;/source&gt;&lt;source_field&gt;IP&lt;/source_field&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-07 13:41:10&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;2c9e8d3393430310e3aef0aefaba10fb&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-07 13:41:10&lt;/sys_updated_on&gt;&lt;table&gt;sn_vul_qualys_host_attrb&lt;/table&gt;&lt;target_field/&gt;&lt;target_field_product_model/&gt;&lt;target_table/&gt;&lt;target_table_product_model&gt;cmdb_application_product_model&lt;/target_table_product_model&gt;&lt;type&gt;custom&lt;/type&gt;&lt;/sn_sec_cmn_ci_lookup_rule&gt;&lt;/record_update&gt;</payload>
+<payload_hash>63380897</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V3.0">180f09b393430310e3aef0aefaba103b</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-07 13:43:03</sys_created_on>
+<sys_id>500f09b393430310e3aef0aefaba103c</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a07c1b58980000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-07 13:43:03</sys_updated_on>
+<table>sn_vul_qualys_host_attrb</table>
+<target_name>USEM Load Balancer Service Match</target_name>
+<type>Lookup Rule</type>
+<update_domain>global</update_domain>
+<update_guid>83ee05b3b0430310a4922854e5d39123</update_guid>
+<update_guid_history>83ee05b3b0430310a4922854e5d39123:63380897,689e8d331c430310476fa70801bf8ffd:63380897</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sn_sec_cmn_ci_lookup_rule_ac9e8d3393430310e3aef0aefaba10f7</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sn_sec_cmn_ci_lookup_rule"&gt;&lt;sn_sec_cmn_ci_lookup_rule action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;applies_to/&gt;&lt;condition/&gt;&lt;description&gt;Interface or VLAN address of a network device matched to the device: interface domain or marker segment required, label walked from the longest prefix to the shortest against Network Gear, unique owner required. Lists in usem.ci_lookup.interface_domains and usem.ci_lookup.interface_markers.&lt;/description&gt;&lt;lookup_script/&gt;&lt;lookup_target&gt;ci&lt;/lookup_target&gt;&lt;method&gt;script&lt;/method&gt;&lt;name&gt;USEM Network Interface Name Match&lt;/name&gt;&lt;order&gt;430&lt;/order&gt;&lt;reapply&gt;true&lt;/reapply&gt;&lt;reapply_version&gt;2&lt;/reapply_version&gt;&lt;script&gt;&lt;![CDATA[/* =================================================================================================
+   RULE 430 - USEM Network Interface Name Match
+   =================================================================================================
+   Match a network device scanned through one of its interface or VLAN addresses. Such addresses
+   carry a DNS label made of the device name plus an interface tail ("-cz04-hsrp-vlan705",
+   "-atm1-v201", "-aom"), and the device CI is named by the leading part only. The rule walks the
+   label from the longest prefix to the shortest and accepts the first prefix that names exactly one
+   Network Gear CI.
+
+   SAMPLE PAYLOAD (one Qualys Host Detection record, used in every example below)
+   {
+     "ID": "1187423005",
+     "IP": "171.149.3.49",
+     "TRACKING_METHOD": "IP",
+     "OS": "Linux 2.6",
+     "DNS": "uspaltwrr01drm0119-cz04-hsrp-vlan705.network.bankofamerica.com"
+   }
+
+   sourceValue   = the DNS field -&gt; "uspaltwrr01drm0119-cz04-hsrp-vlan705.network.bankofamerica.com"
+   sourcePayload = the whole record; the rule also reads the OS from it
+   Expected for the sample: the network device named "uspaltwrr01drm0119" (an IP Switch, router,
+   firewall or load balancer device); null when no prefix names a device or when a prefix names two.
+
+   WHY THIS RULE SITS AT ORDER 430
+   Rules run from the lowest order to the highest; the first rule that returns a CI wins and the
+   later rules are skipped. A rule that returns null passes the host on.
+   - Before it : 400/410 tried the whole label as a hostname; 420 looked for a management controller
+                 suffix.
+   - Reaches it: hosts whose DNS domain is an interface domain (".network." by default, property
+                 usem.ci_lookup.interface_domains) or whose label contains an interface marker
+                 segment such as "vlan705", "v201", "hsrp", "aom" (property
+                 usem.ci_lookup.interface_markers).
+   - After it  : 450 (CI named with the full FQDN) and 460 (load balancer services).
+   ================================================================================================= */
+(function process(rule, sourceValue, sourcePayload) {
+    if (!sourceValue)                             // nothing to look up -&gt; null = "no match from this rule"
+        return null;
+    var full = ('' + sourceValue).trim().toLowerCase();   // "uspaltwrr01drm0119-cz04-hsrp-vlan705.network.bankofamerica.com"
+    var label = full.split('.')[0];               // "uspaltwrr01drm0119-cz04-hsrp-vlan705"
+    var segments = label.split('-');              // ["uspaltwrr01drm0119", "cz04", "hsrp", "vlan705"]
+    if (segments.length &lt; 2)                      // no hyphen -&gt; no interface tail -&gt; decline
+        return null;
+    // CI classes that must never be matched (placeholder and technical classes). Administrators
+    // keep the list in the property sn_sec_cmn.ignoreCIClass; the framework may pass the same list
+    // in as _ignoreClass.
+    var ignore = (typeof _ignoreClass != 'undefined' &amp;&amp; _ignoreClass) ?
+        ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
+    // -&gt; ignore =
+    //    "sn_sec_cmn_unmatched_ci,sn_vul_qualys_ci,cmdb_ci_unclassed_hardware,cmdb_ci_incomplete_ip,cmdb_ci_dns_name"
+    // list() reads a comma separated system property into a lower-cased list, falling back to the
+    // default shipped with the rule. Administrators tune the rule by editing the property, not the
+    // script.
+    function list(name, fallback) {
+        var parts = ('' + gs.getProperty(name, fallback)).split(',');
+        var out = [];
+        for (var i = 0; i &lt; parts.length; i++) {
+            var item = parts[i].trim().toLowerCase();
+            if (item)
+                out.push(item);
+        }
+        return out;
+    }
+    // isMarker() reports whether one hyphen segment of the label is a listed marker: the word
+    // itself ("vlan"), the word followed by digits only ("vlan705", "v201"), or, for words of three
+    // letters or more, a segment ending in the word ("multihostvip").
+    function isMarker(segment, words) {
+        for (var i = 0; i &lt; words.length; i++) {
+            var w = words[i];
+            if (segment == w)
+                return true;
+            if (segment.indexOf(w) == 0 &amp;&amp; /^[0-9]+$/.test(segment.substring(w.length)))
+                return true;
+            if (w.length &gt;= 3 &amp;&amp; segment.length &gt; w.length &amp;&amp; segment.substring(segment.length - w.length) == w)
+                return true;
+        }
+        return false;
+    }
+    // ====== STAGE 1: Require interface evidence ==================================================
+    // What   : the rule goes on only when the DNS domain contains a listed interface domain, or one
+    //          of the segments after the first is a listed interface marker.
+    // Why    : plenty of ordinary server names contain hyphens ("ah-1047132-001"); without the
+    //          interface evidence the prefix walk would strip real hostnames and could land on an
+    //          unrelated device.
+    // Sample : ".network." is found in the sample name -&gt; evidence.
+    //          "gtcmmrlpa05a-vlan10.corp.bankofamerica.com" -&gt; segment "vlan10" is a marker -&gt;
+    //          evidence. "ah-1047132-001.corp.bankofamerica.com" -&gt; neither -&gt; decline.
+    // =============================================================================================
+    var domains = list('usem.ci_lookup.interface_domains', '.network.');
+    var markers = list('usem.ci_lookup.interface_markers', 'vlan,v,hsrp,vrrp,po,eth,gi,te,lo,mgmt,aom,vs,fab');
+    var evidence = false;
+    for (var d = 0; d &lt; domains.length; d++)
+        if (full.indexOf(domains[d]) != -1)
+            evidence = true;
+    for (var s = 1; s &lt; segments.length; s++)
+        if (isMarker(segments[s], markers))
+            evidence = true;
+    // -&gt; evidence = true for the sample (the domain contains ".network." and "vlan705" is a marker)
+    if (!evidence)
+        return null;
+    // ====== STAGE 2: Walk the prefixes from the longest to the shortest against Network Gear =====
+    // What   : drops one segment at a time from the right and searches Network Gear (switches,
+    //          routers, firewalls) and Load Balancer devices for a CI with exactly that name. The
+    //          first prefix that finds anything decides: one CI is the match, two CIs mean the rule
+    //          declines.
+    // Why    : the device name is the leading part of the label but its length varies by site;
+    //          trying the longest prefix first keeps "site-device-01" from being cut down to "site"
+    //          when a CI named with the longer form exists.
+    // Sample : prefixes tried: "uspaltwrr01drm0119-cz04-hsrp" (none), "uspaltwrr01drm0119-cz04"
+    //          (none), "uspaltwrr01drm0119" (the IP Switch "uspaltwrr01drm0119") -&gt; return
+    //          "3f2a9c7e1b8d4a5f9e6c0d2b7a4f8e1c". Two switches named "ustxrdnwl01rsm004z" -&gt; null.
+    // =============================================================================================
+    // Network devices live in two branches of the CMDB: Network Gear (switches, routers, firewalls)
+    // and Load Balancer, which the platform files under Server. Both are searched; the hits are
+    // counted together.
+    var tables = ['cmdb_ci_netgear', 'cmdb_ci_lb'];
+    for (var k = segments.length - 1; k &gt;= 1; k--) {
+        var base = segments.slice(0, k).join('-');   // "uspaltwrr01drm0119-cz04-hsrp", then "uspaltwrr01drm0119-cz04", then "uspaltwrr01drm0119"
+        var hits = [];                            // sys_ids of the devices named exactly like this prefix
+        for (var t = 0; t &lt; tables.length; t++) {
+            var gr = new GlideRecord(tables[t]);
+            if (!gr.isValid())
+                continue;
+            gr.addQuery('name', base);
+            if (ignore)
+                gr.addQuery('sys_class_name', 'NOT IN', ignore);
+            gr.query();
+            while (gr.next() &amp;&amp; hits.length &lt; 2)
+                hits.push(gr.getUniqueValue());
+        }
+        if (hits.length == 0)                     // nothing named like this -&gt; try a shorter prefix
+            continue;
+        if (hits.length &gt; 1)                      // two devices carry this name -&gt; never guess
+            return null;
+        return hits[0];
+    }
+    return null;
+    // -&gt; no prefix names a device -&gt; decline; the host continues to rule 450
+})(rule, sourceValue, sourcePayload);
+]]&gt;&lt;/script&gt;&lt;source display_value="Qualys Cloud Platform"&gt;ed44bdc453220300e8f9f745911c0801&lt;/source&gt;&lt;source_field&gt;DNS&lt;/source_field&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-07 13:41:10&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;ac9e8d3393430310e3aef0aefaba10f7&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-07 13:42:41&lt;/sys_updated_on&gt;&lt;table&gt;sn_vul_qualys_host_attrb&lt;/table&gt;&lt;target_field/&gt;&lt;target_field_product_model/&gt;&lt;target_table/&gt;&lt;target_table_product_model&gt;cmdb_application_product_model&lt;/target_table_product_model&gt;&lt;type&gt;custom&lt;/type&gt;&lt;/sn_sec_cmn_ci_lookup_rule&gt;&lt;/record_update&gt;</payload>
+<payload_hash>2082703665</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V3.0">180f09b393430310e3aef0aefaba103b</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-07 13:43:03</sys_created_on>
+<sys_id>500f09b393430310e3aef0aefaba103d</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a07c1b58720000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-07 13:43:03</sys_updated_on>
+<table>sn_vul_qualys_host_attrb</table>
+<target_name>USEM Network Interface Name Match</target_name>
+<type>Lookup Rule</type>
+<update_domain>global</update_domain>
+<update_guid>03ee05b35c430310061a060f36f79120</update_guid>
+<update_guid_history>03ee05b35c430310061a060f36f79120:2082703665,e89e8d339f430310fefb5d303ac1a3f9:979290080</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_ab7e453393430310e3aef0aefaba10f9</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>USEM CI lookup rule 420 (Management Interface Match). Comma separated DNS label suffixes that mark the management controller of a server; the rule strips the suffix and matches the server by the remaining name.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.ci_lookup.mgmt_suffixes</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-07 13:40:49</sys_created_on><sys_id>ab7e453393430310e3aef0aefaba10f9</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.ci_lookup.mgmt_suffixes</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_ab7e453393430310e3aef0aefaba10f9</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-07 13:40:49</sys_updated_on><type>string</type><value>ilo,ilom,idrac,drac,ipmi,bmc,oob,mgmt,imm,cimc,rmm,con</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=ab7e453393430310e3aef0aefaba10f9"/></record_update>]]></payload>
+<payload_hash>225532758</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V3.0">180f09b393430310e3aef0aefaba103b</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-07 13:43:03</sys_created_on>
+<sys_id>540f09b393430310e3aef0aefaba103e</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a07c1b57a90000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-07 13:43:03</sys_updated_on>
+<table/>
+<target_name>usem.ci_lookup.mgmt_suffixes</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>c3ee05b327430310fb3d0b98ddcd7f0b</update_guid>
+<update_guid_history>c3ee05b327430310fb3d0b98ddcd7f0b:225532758,118ec5334243031023c973294ff2d2f1:225532758</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sn_sec_cmn_ci_lookup_rule_e09e4d3393430310e3aef0aefaba10ed</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sn_sec_cmn_ci_lookup_rule"&gt;&lt;sn_sec_cmn_ci_lookup_rule action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;applies_to/&gt;&lt;condition/&gt;&lt;description&gt;Management controller of a server (iLO, ILOM, iDRAC, IMM, CIMC, BMC) matched to the server: listed label suffix or controller OS, server name unique in the hardware tree, load balancers refused. Lists in usem.ci_lookup.mgmt_suffixes and usem.ci_lookup.mgmt_os_markers.&lt;/description&gt;&lt;lookup_script/&gt;&lt;lookup_target&gt;ci&lt;/lookup_target&gt;&lt;method&gt;script&lt;/method&gt;&lt;name&gt;USEM Management Interface Match&lt;/name&gt;&lt;order&gt;420&lt;/order&gt;&lt;reapply&gt;true&lt;/reapply&gt;&lt;reapply_version&gt;1&lt;/reapply_version&gt;&lt;script&gt;&lt;![CDATA[/* =================================================================================================
+   RULE 420 - USEM Management Interface Match
+   =================================================================================================
+   Match the management controller of a server (HP iLO, Oracle ILOM, Dell iDRAC, IBM IMM, Cisco
+   CIMC, generic BMC or IPMI) to the server itself. Controllers are scanned under their own DNS
+   label, which is the server name plus a suffix ("-ilo", "-ilom", "-idrac"), so the name rules
+   never find them. The findings belong to the server owner.
+
+   SAMPLE PAYLOAD (one Qualys Host Detection record, used in every example below)
+   {
+     "ID": "1201534877",
+     "IP": "159.185.200.11",
+     "TRACKING_METHOD": "IP",
+     "OS": "HP iLO",
+     "DNS": "tx6dd630001-ilo.bankofamerica.com"
+   }
+
+   sourceValue   = the DNS field -&gt; "tx6dd630001-ilo.bankofamerica.com"
+   sourcePayload = the whole record; the rule also reads the OS from it
+   Expected for the sample: the hardware CI named "tx6dd630001" (the label without "-ilo"), for
+   example a Linux Server; null when no CI or two CIs carry that name, or when the CI is a load
+   balancer.
+
+   WHY THIS RULE SITS AT ORDER 420
+   Rules run from the lowest order to the highest; the first rule that returns a CI wins and the
+   later rules are skipped. A rule that returns null passes the host on.
+   - Before it : 400/410 tried the full label "tx6dd630001-ilo" as a hostname and found nothing,
+                 because no CI is named after the controller.
+   - Reaches it: hosts whose label ends with a listed controller suffix, or whose OS text names a
+                 controller (property lists usem.ci_lookup.mgmt_suffixes and
+                 usem.ci_lookup.mgmt_os_markers).
+   - After it  : 430 (network interface names) and 450 (CI named with the full FQDN).
+   ================================================================================================= */
+(function process(rule, sourceValue, sourcePayload) {
+    if (!sourceValue)                             // nothing to look up -&gt; null = "no match from this rule"
+        return null;
+    var full = ('' + sourceValue).trim().toLowerCase();   // "tx6dd630001-ilo.bankofamerica.com"
+    var label = full.split('.')[0];               // "tx6dd630001-ilo"
+    var dash = label.lastIndexOf('-');             // 11, position of the last hyphen
+    if (dash &lt; 1)                                 // no hyphen -&gt; nothing to strip -&gt; decline
+        return null;
+    var os = ('' + (sourcePayload.OS || '')).toLowerCase();   // "hp ilo"
+    // CI classes that must never be matched (placeholder and technical classes). Administrators
+    // keep the list in the property sn_sec_cmn.ignoreCIClass; the framework may pass the same list
+    // in as _ignoreClass.
+    var ignore = (typeof _ignoreClass != 'undefined' &amp;&amp; _ignoreClass) ?
+        ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
+    // -&gt; ignore =
+    //    "sn_sec_cmn_unmatched_ci,sn_vul_qualys_ci,cmdb_ci_unclassed_hardware,cmdb_ci_incomplete_ip,cmdb_ci_dns_name"
+    // list() reads a comma separated system property into a lower-cased list, falling back to the
+    // default shipped with the rule. Administrators tune the rule by editing the property, not the
+    // script.
+    function list(name, fallback) {
+        var parts = ('' + gs.getProperty(name, fallback)).split(',');
+        var out = [];
+        for (var i = 0; i &lt; parts.length; i++) {
+            var item = parts[i].trim().toLowerCase();
+            if (item)
+                out.push(item);
+        }
+        return out;
+    }
+    // ====== STAGE 1: Recognise a management controller and derive the server name ================
+    // What   : the segment after the last hyphen is compared with the suffix list; when it is
+    //          listed, the server name is the label without it. Otherwise the OS text is compared
+    //          with the controller markers; when one is found, the last segment is stripped
+    //          whatever it is, because controllers are named after their server with a
+    //          site-specific tail such as "-r".
+    // Why    : the two pieces of evidence cover both naming habits seen in the scans: an explicit
+    //          suffix with any OS, and a controller OS with an arbitrary tail. Without either the
+    //          host is not a controller and the rule must not touch it.
+    // Sample : "tx6dd630001-ilo" -&gt; tail "ilo" is listed -&gt; base = "tx6dd630001". "crpchictx103-r"
+    //          with OS "HP iLO" -&gt; tail "r" is not listed, but the OS names a controller -&gt; base =
+    //          "crpchictx103". "usposwks0042-x" with OS "Windows 10" -&gt; neither -&gt; decline.
+    // =============================================================================================
+    var suffixes = list('usem.ci_lookup.mgmt_suffixes', 'ilo,ilom,idrac,drac,ipmi,bmc,oob,mgmt,imm,cimc,rmm,con');
+    var markers = list('usem.ci_lookup.mgmt_os_markers', 'ilo,ilom,idrac,drac,remote access controller,imm,cimc,bmc,ipmi,lights out');
+    var tail = label.substring(dash + 1);         // "ilo"
+    var base = '';
+    if (suffixes.indexOf(tail) != -1)
+        base = label.substring(0, dash);          // listed suffix -&gt; "tx6dd630001"
+    else
+        for (var i = 0; i &lt; markers.length; i++)
+            if (os.indexOf(markers[i]) != -1) {
+                base = label.substring(0, dash);  // controller OS -&gt; strip the last segment
+                break;
+            }
+    // -&gt; base = "tx6dd630001" for the sample; "" when the host shows no controller evidence
+    if (!base)
+        return null;
+    // ====== STAGE 2: Search the hardware tree for the server name ================================
+    // What   : opens a search on cmdb_ci_hardware, keeps only CIs whose name equals the derived
+    //          server name, and leaves out the ignored classes.
+    // Why    : the controller can sit in front of a server, a storage node or a network device, so
+    //          the whole hardware tree is searched; safety comes from the uniqueness check that
+    //          follows.
+    // Sample : the search on cmdb_ci_hardware for name = "tx6dd630001" finds the Linux Server
+    //          "tx6dd630001".
+    // =============================================================================================
+    var gr = new GlideRecord('cmdb_ci_hardware');// Hardware and every class beneath it
+    gr.addQuery('name', base);
+    if (ignore)
+        gr.addQuery('sys_class_name', 'NOT IN', ignore);
+    // ====== STAGE 3: Decide: exactly one CI that is not a load balancer, or decline ==============
+    // What   : runs the search, accepts the CI only when it is the single one, and refuses a load
+    //          balancer.
+    // Why    : two CIs with the server name cannot be told apart from the controller label alone,
+    //          and a load balancer answering on a management address is still not the scanned host.
+    // Sample : one CI -&gt; return "3f2a9c7e1b8d4a5f9e6c0d2b7a4f8e1c". No CI -&gt; null and rule 430 gets
+    //          its turn. Two CIs named "crpchictx103" -&gt; null.
+    // =============================================================================================
+    gr.query();
+    if (!gr.next())                               // no CI carries the server name -&gt; decline
+        return null;
+    var match = gr.getUniqueValue();
+    if (gr.hasNext())                             // two CIs carry it -&gt; never guess
+        return null;
+    var lb = new GlideRecord('cmdb_ci_lb');
+    if (lb.isValid() &amp;&amp; lb.get(match))            // a load balancer is never the host
+        return null;
+    return match;
+    // -&gt; the framework links the vulnerable item to the server and stops evaluating later rules
+})(rule, sourceValue, sourcePayload);
+]]&gt;&lt;/script&gt;&lt;source display_value="Qualys Cloud Platform"&gt;ed44bdc453220300e8f9f745911c0801&lt;/source&gt;&lt;source_field&gt;DNS&lt;/source_field&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-07 13:41:09&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;e09e4d3393430310e3aef0aefaba10ed&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-07 13:41:09&lt;/sys_updated_on&gt;&lt;table&gt;sn_vul_qualys_host_attrb&lt;/table&gt;&lt;target_field/&gt;&lt;target_field_product_model/&gt;&lt;target_table/&gt;&lt;target_table_product_model&gt;cmdb_application_product_model&lt;/target_table_product_model&gt;&lt;type&gt;custom&lt;/type&gt;&lt;/sn_sec_cmn_ci_lookup_rule&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-1898199532</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V3.0">180f09b393430310e3aef0aefaba103b</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-07 13:43:03</sys_created_on>
+<sys_id>940f09b393430310e3aef0aefaba103d</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a07c1b581b0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-07 13:43:03</sys_updated_on>
+<table>sn_vul_qualys_host_attrb</table>
+<target_name>USEM Management Interface Match</target_name>
+<type>Lookup Rule</type>
+<update_domain>global</update_domain>
+<update_guid>cbee05b38d430310a3907467da6d571a</update_guid>
+<update_guid_history>cbee05b38d430310a3907467da6d571a:-1898199532,289e8d33fa4303106fddf038c5393ef5:-1898199532</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_ea8ec93393430310e3aef0aefaba1084</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>USEM CI lookup rule 460 (Load Balancer Service Match). Comma separated words that identify a load balancer product in the operating system text reported by the scanner; such a host is matched to its Load Balancer Service CI.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.ci_lookup.vip_os_markers</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-07 13:41:01</sys_created_on><sys_id>ea8ec93393430310e3aef0aefaba1084</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.ci_lookup.vip_os_markers</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_ea8ec93393430310e3aef0aefaba1084</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-07 13:41:01</sys_updated_on><type>string</type><value>f5,big-ip,big ip,netscaler</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=ea8ec93393430310e3aef0aefaba1084"/></record_update>]]></payload>
+<payload_hash>-128832185</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V3.0">180f09b393430310e3aef0aefaba103b</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-07 13:43:03</sys_created_on>
+<sys_id>980f09b393430310e3aef0aefaba103e</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a07c1b57f60000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-07 13:43:03</sys_updated_on>
+<table/>
+<target_name>usem.ci_lookup.vip_os_markers</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>cbee05b31f4303107a3ff1a4c2f30b15</update_guid>
+<update_guid_history>cbee05b31f4303107a3ff1a4c2f30b15:-128832185,7a8ec9333f4303102cf849362581cbe1:-128832185</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_158ec53393430310e3aef0aefaba10f8</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>USEM CI lookup rule 420 (Management Interface Match). Comma separated words that identify a management controller in the operating system text reported by the scanner; when one is present the last hyphen segment of the label is stripped whatever it is.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.ci_lookup.mgmt_os_markers</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-07 13:40:56</sys_created_on><sys_id>158ec53393430310e3aef0aefaba10f8</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.ci_lookup.mgmt_os_markers</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_158ec53393430310e3aef0aefaba10f8</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-07 13:40:56</sys_updated_on><type>string</type><value>ilo,ilom,idrac,drac,remote access controller,imm,cimc,bmc,ipmi,lights out</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=158ec53393430310e3aef0aefaba10f8"/></record_update>]]></payload>
+<payload_hash>552779763</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V3.0">180f09b393430310e3aef0aefaba103b</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-07 13:43:03</sys_created_on>
+<sys_id>d80f09b393430310e3aef0aefaba103d</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a07c1b57bd0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-07 13:43:03</sys_updated_on>
+<table/>
+<target_name>usem.ci_lookup.mgmt_os_markers</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>4fee05b3c4430310db237f8c4546dc0d</update_guid>
+<update_guid_history>4fee05b3c4430310db237f8c4546dc0d:552779763,bd8e493358430310409d15c388b08e57:552779763</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_f28e0d3393430310e3aef0aefaba1064</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>USEM CI lookup rule 460 (Load Balancer Service Match). Comma separated label segments (the word itself, the word followed by digits, or a segment ending in the word) that mark a virtual IP; such a host is matched to its Load Balancer Service CI.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.ci_lookup.vip_markers</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-07 13:41:02</sys_created_on><sys_id>f28e0d3393430310e3aef0aefaba1064</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.ci_lookup.vip_markers</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_f28e0d3393430310e3aef0aefaba1064</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-07 13:41:02</sys_updated_on><type>string</type><value>vip,vs</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=f28e0d3393430310e3aef0aefaba1064"/></record_update>]]></payload>
+<payload_hash>-1236409722</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V3.0">180f09b393430310e3aef0aefaba103b</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-07 13:43:03</sys_created_on>
+<sys_id>dc0f09b393430310e3aef0aefaba103e</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a07c1b58060000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-07 13:43:03</sys_updated_on>
+<table/>
+<target_name>usem.ci_lookup.vip_markers</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>47ee05b387430310e6d87a008a7d0018</update_guid>
+<update_guid_history>47ee05b387430310e6d87a008a7d0018:-1236409722,e89e4d33ab4303101b3065647c6f3ee6:-1236409722</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>
