@@ -34,6 +34,14 @@ cases twice through `CIIdentify.identify()` (positive, negative, ambiguity, regr
 state_v3.json` exports. Platform fact: Load Balancer devices (`cmdb_ci_lb`) sit under Server, not
 Network Gear, so 430 searches both branches.
 
+Pipeline proof (`rerun_v3.py`): nine real unmatched Discovered Items, with marked fixture CIs for the
+hosts they describe, re-run through the platform's own `CILookupUtil.reRunCILookupRules` (the call the
+on-demand reconcile job makes). All nine changed from *unmatched* to *matched* with
+`matching_type = matched_by_cilookup`: two via 420, two via 430 (one of them a load balancer device
+interface), two via 460, and one each via the existing 200, 400 and 410. Items whose source record is
+the client's (missing on this instance) cannot be re-run here; the direct `identify()` suite covers
+those shapes.
+
 Logic changes compared with the previous scripts (V2.x):
 
 - `setLimit` is gone. A rule now runs the exact-match search and accepts the CI only when the
