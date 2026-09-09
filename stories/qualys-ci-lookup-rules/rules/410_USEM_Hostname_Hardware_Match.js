@@ -4,14 +4,26 @@
    contradict the scanned OS. For CIs classed generically (Server, Computer, UNIX Server) or
    differently from the OS.
 
-   Input  : sourceValue is the DNS field; the rule also reads the OS from sourcePayload.
+   Sample payload (one Qualys host record, used in every note below)
+   {
+     "ID": "80217765",
+     "IP": "171.150.219.123",
+     "TRACKING_METHOD": "IP",
+     "OS": "AIX 7.3 TL3",
+     "DNS": "va2ausapabw0.bankofamerica.com",
+     "QG_HOSTID": "6337e0dc-007d-0002-c47d-005056a4fcd5"
+   }
+   Input  : sourceValue is the DNS field, "va2ausapabw0.bankofamerica.com"; the rule also reads the
+            OS from sourcePayload.
    Returns: the sys_id of the one hardware CI named with the short hostname, accepted when its class
             agrees with the scanned OS or is generic; null when the name is shared or the class
             contradicts the scan.
+   Sample : the CI named "va2ausapabw0" in the generic Server class; it would also be accepted as an
+            AIX Server, and rejected as, say, a Windows Server.
 
    Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
    Before : USEM Hostname Class Match required the short name to be unique inside the class the OS
-            implies.
+            implies (AIX Server) and found nothing there.
    Reaches: hosts whose CI is classed generically or whose OS gave no class.
    After  : USEM FQDN Name Hardware Match, then the IP address rules for hosts without a usable
             name.
@@ -19,7 +31,7 @@
 (function process(rule, sourceValue, sourcePayload) {
     if (!sourceValue)                             // nothing to look up
         return null;
-    var full = ('' + sourceValue).trim().toLowerCase();   // e.g. "va2ausapabw0.bankofamerica.com"
+    var full = ('' + sourceValue).trim().toLowerCase();   // "va2ausapabw0.bankofamerica.com"
     var host = full.split('.')[0];                // "va2ausapabw0"
     if (!host)
         return null;
@@ -29,8 +41,10 @@
         ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
     // -- Class the scanned OS implies, kept as a preference ---------------------------------------
     // This rule searches the whole hardware tree, so the class is not a filter here; it is checked
-    // at the end to reject a CI whose class contradicts the scan. "AIX 7.3 TL3" gives
-    // cmdb_ci_aix_server (AIX Server); an unknown OS gives no class and then no check is made.
+    // at the end to reject a CI whose class contradicts the scan. An unknown OS gives no class and
+    // then no check is made.
+    // Sample: classFor("AIX 7.3 TL3") gives AIX Server, so pref is cmdb_ci_aix_server; it is only
+    //         used in the last stage.
     // classFor() maps the OS text Qualys reports to the CMDB class the CI should be in, e.g. "Red
     // Hat Enterprise Linux 9.8" is a Linux Server, "Windows Server 2016 Standard" a Windows Server
     // and "VMware ESXi 7.0.3" an ESX Server. A string of guesses separated by "/" comes from an
@@ -62,6 +76,8 @@
         cmdb_ci_unix_server: 1};
     // -- Short name search across the hardware tree -----------------------------------------------
     // Nothing is filtered by class here; the two checks that follow provide the safety.
+    // Sample: the search on cmdb_ci_hardware for name "va2ausapabw0" finds the Server
+    //         "va2ausapabw0", class cmdb_ci_server.
     var gr = new GlideRecord('cmdb_ci_hardware');// Hardware and every class beneath it
     gr.addQuery('name', host);
     if (ignore)
@@ -70,6 +86,8 @@
     // The first row is remembered with its class; a second row means two hardware CIs with one
     // short name (a test and a production box, a retired and a rebuilt one), which the name alone
     // cannot tell apart and the rule declines.
+    // Sample: one row, so id is the sys_id of "va2ausapabw0" and cls is "cmdb_ci_server". A second
+    //         CI with that name would end the rule here.
     gr.query();
     if (!gr.next())
         return null;
@@ -81,6 +99,9 @@
     // When the OS gave a class, the CI found must sit inside it (sub-classes included) or be
     // generically classed. A host that lands on a Windows Server by name or address is a namesake
     // or a reused address, not the same machine, and its findings would go to the wrong owner.
+    // Sample: pref is cmdb_ci_aix_server; the CI is not an AIX Server, but cmdb_ci_server is in
+    //         generic, so it passes and its sys_id is returned. A Windows Server named
+    //         "va2ausapabw0" would fail both checks and the rule would decline.
     if (pref) {
         var chk = new GlideRecord(pref);
         if (!(chk.isValid() && chk.get(id)) && !generic[cls])

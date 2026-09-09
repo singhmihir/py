@@ -4,9 +4,21 @@
    get reused, so it is the strongest identifier Qualys gives us. This rule trusts it only inside
    the CMDB class the scanned OS points at.
 
-   Input  : sourceValue is the SERIAL_NUMBER field; the rule also reads the OS from sourcePayload.
+   Sample payload (one Qualys host record, used in every note below)
+   {
+     "ID": "35832680",
+     "IP": "171.128.225.96",
+     "TRACKING_METHOD": "AGENT",
+     "OS": "Red Hat Enterprise Linux 9.8",
+     "DNS": "ah-1047132-001.sdi.corp.bankofamerica.com",
+     "SERIAL_NUMBER": "VMware-42 1a 9c 3f 7d 2e 61 b8-55 04 e2 91 6a 27 c3 08"
+   }
+   Input  : sourceValue is the SERIAL_NUMBER field, "VMware-42 1a 9c 3f 7d 2e 61 b8-55 04 e2 91 6a
+            27 c3 08"; the rule also reads the OS from sourcePayload.
    Returns: the sys_id of the one CI of that class whose serial_number equals the scanned serial;
             null when none or more than one carries it.
+   Sample : the Linux Server CI "ah-1047132-001", whose serial_number holds the same serial; null
+            when no Linux Server carries it, or two do.
 
    Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
    Before : nothing custom runs before this rule.
@@ -18,10 +30,10 @@
 (function process(rule, sourceValue, sourcePayload) {
     if (!sourceValue)                             // nothing to look up
         return null;
-    var serial = ('' + sourceValue).trim();       // e.g. "VMware-42 1a 9c 3f 7d 2e 61 b8-55 04 e2 91 6a 27 c3 08"
+    var serial = ('' + sourceValue).trim();       // "VMware-42 1a 9c 3f 7d 2e 61 b8-55 04 e2 91 6a 27 c3 08"
     // Placeholder serials that vendors ship on thousands of machines ("To be filled by O.E.M.",
     // "0123456789") would match dozens of CIs, so they are refused, as is anything shorter than
-    // four characters.
+    // four characters. The sample serial is neither, so it goes through.
     var junk = ',0,none,n/a,na,unknown,empty,not specified,not available,no serial,' +
         'default string,to be filled by o.e.m.,system serial number,chassis serial number,' +
         '0123456789,1234567890,';
@@ -34,9 +46,10 @@
     // -- Class from the scanned OS ----------------------------------------------------------------
     // The search below stays inside the class the OS points at (sub-classes included), so a Red Hat
     // host can only land on a Linux Server and a Windows Server carrying the same value is never
-    // seen. "Red Hat Enterprise Linux 9.8" gives cmdb_ci_linux_server (Linux Server). An unknown or
-    // multi-guess OS gives no class and the rule declines; the hardware-wide serial match takes
-    // over.
+    // seen. An unknown or multi-guess OS gives no class and the rule declines; the hardware-wide
+    // serial match takes over.
+    // Sample: classFor("Red Hat Enterprise Linux 9.8") gives Linux Server, so pref is
+    //         cmdb_ci_linux_server and the search below runs on that class.
     // classFor() maps the OS text Qualys reports to the CMDB class the CI should be in, e.g. "Red
     // Hat Enterprise Linux 9.8" is a Linux Server, "Windows Server 2016 Standard" a Windows Server
     // and "VMware ESXi 7.0.3" an ESX Server. A string of guesses separated by "/" comes from an
@@ -69,6 +82,10 @@
     // it is the single row: two CIs sharing a serial do happen (a cloned virtual machine, a serial
     // typed on the wrong record) and nothing here can tell them apart, so the rule declines and a
     // later rule with different evidence gets its chance.
+    // Sample: the search on cmdb_ci_linux_server for serial_number "VMware-42 1a 9c 3f 7d 2e 61
+    //         b8-55 04 e2 91 6a 27 c3 08" finds the Linux Server "ah-1047132-001" and no second
+    //         row, so its sys_id is returned. A Windows Server with the same serial is outside the
+    //         class and never appears.
     var gr = new GlideRecord(pref);           // the class chosen and its sub-classes
     if (!gr.isValid())                            // class not installed here, decline
         return null;

@@ -5,15 +5,24 @@
    VIP, and this rule finds it. It runs on the IP field so that VIPs without a DNS name are covered
    too.
 
-   Input  : sourceValue is the IP field; the rule also reads the OS and the DNS name from
-            sourcePayload.
+   Sample payload (one Qualys host record, used in every note below)
+   {
+     "ID": "1202267231",
+     "IP": "171.203.142.26",
+     "TRACKING_METHOD": "IP",
+     "OS": "F5 Big IP",
+     "DNS": "crisp-tx.bankofamerica.com"
+   }
+   Input  : sourceValue is the IP field, "171.203.142.26"; the rule also reads the OS and the DNS
+            name from sourcePayload.
    Returns: the sys_id of the one Load Balancer Service CI found by fqdn, then by name, then by
             address; null when the host shows no VIP evidence, when no service matches, or when two
             services carry the value.
+   Sample : the Load Balancer Service CI "crisp-tx", whose fqdn is "crisp-tx.bankofamerica.com".
 
    Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
-   Before : the hardware rules declined: a VIP has no serial, its name is not a server name, and the
-            address belongs to a load balancer device.
+   Before : the hardware rules declined: a VIP has no serial, "crisp-tx" is not a server name, and
+            the address belongs to a load balancer device.
    Reaches: hosts with VIP evidence: an OS text naming a load balancer product, or a DNS label with
             a VIP marker segment such as "-vip" or "vs1"; both lists are declared in the script, at
             the top of the matching stage.
@@ -22,12 +31,12 @@
 (function process(rule, sourceValue, sourcePayload) {
     if (!sourceValue)                             // nothing to look up
         return null;
-    var ip = ('' + sourceValue).trim();           // e.g. "171.203.142.26"
+    var ip = ('' + sourceValue).trim();           // "171.203.142.26"
     if (!ip || ip.indexOf('127.') == 0 || ip.indexOf('169.254.') == 0)   // loopback and link-local identify nothing
         return null;
-    var dns = ('' + (sourcePayload.DNS || '')).trim().toLowerCase();   // e.g. "crisp-tx.bankofamerica.com", may be empty
-    var label = dns.split('.')[0];
-    var os = ('' + (sourcePayload.OS || '')).toLowerCase();   // e.g. "f5 big ip"
+    var dns = ('' + (sourcePayload.DNS || '')).trim().toLowerCase();   // "crisp-tx.bankofamerica.com", may be empty
+    var label = dns.split('.')[0];                // "crisp-tx"
+    var os = ('' + (sourcePayload.OS || '')).toLowerCase();   // "f5 big ip"
     // Classes that must never be matched (placeholder and technical CIs); the list lives in the
     // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
     var ignore = (typeof _ignoreClass != 'undefined' && _ignoreClass) ?
@@ -51,7 +60,10 @@
     // The rule goes on only when the OS text contains a listed load balancer word or one of the
     // label segments is a listed VIP marker. A Load Balancer Service must never be returned for an
     // ordinary server that happens to share an address with a VIP; this check keeps the rule to the
-    // hosts that really are VIPs ("f5 big ip", "rbps-dev3-sve-vip").
+    // hosts that really are VIPs.
+    // Sample: "f5 big ip" contains "f5", so evidence is true. "rbps-dev3-sve-vip.ecommnp.rpg" with
+    //         OS "Linux 2.6" would qualify through the segment "vip"; "ah-1047132-001" with OS "Red
+    //         Hat Enterprise Linux 9.8" has neither and the rule would decline.
     // The load balancer products looked for in the OS text, and the label segments that mark a
     // virtual IP. Extend these two lists when a site uses another naming habit.
     var osMarkers = ['f5', 'big-ip', 'big ip', 'netscaler'];
@@ -71,6 +83,9 @@
     // the name field, then the scanned address in ip_address. Each step accepts exactly one
     // service; a step that finds two ends the rule with null, because a weaker piece of evidence
     // could otherwise pick a different service; a step that finds nothing hands over to the next.
+    // Sample: the first step, fqdn "crisp-tx.bankofamerica.com", finds the Load Balancer Service
+    //         "crisp-tx" and no second row, so its sys_id is returned. A VIP without a DNS name and
+    //         two services on "171.203.142.26" would reach the last step and decline there.
     function one(field, value) {
         if (!value)
             return undefined;                     // nothing to search, next step

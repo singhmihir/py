@@ -5,12 +5,22 @@
    without a usable name, inside the class the scanned OS points at, and only when exactly one CI of
    that class carries it.
 
-   Input  : sourceValue is the IP field; the rule also reads the OS from sourcePayload.
+   Sample payload (one Qualys host record, used in every note below)
+   {
+     "ID": "83047621",
+     "IP": "30.162.178.21",
+     "TRACKING_METHOD": "IP",
+     "OS": "VMware ESXi 7.0.3 build 24723872"
+   }
+   Input  : sourceValue is the IP field, "30.162.178.21"; the rule also reads the OS from
+            sourcePayload.
    Returns: the sys_id of the one CI of that class whose ip_address equals the scanned address; null
             when none or two carry it.
+   Sample : the ESX Server CI "vsdnesxm21", whose ip_address is "30.162.178.21"; a load balancer or
+            a Windows CI on the same address is outside the class and cannot be picked.
 
    Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
-   Before : all serial and name rules. A host without a DNS name makes every name rule decline.
+   Before : all serial and name rules. The sample has no DNS name, so every name rule declined.
    Reaches: DNS-less hosts, a small group in the feed, mostly ESXi management interfaces and
             appliances.
    After  : USEM IP Hardware Match searches the address across all hardware with extra safety
@@ -19,7 +29,7 @@
 (function process(rule, sourceValue, sourcePayload) {
     if (!sourceValue)                             // nothing to look up
         return null;
-    var ip = ('' + sourceValue).trim();           // e.g. "30.162.178.21"
+    var ip = ('' + sourceValue).trim();           // "30.162.178.21"
     if (!ip || ip.indexOf('127.') == 0 || ip.indexOf('169.254.') == 0)   // loopback and link-local identify nothing
         return null;
     // Classes that must never be matched (placeholder and technical CIs); the list lives in the
@@ -29,9 +39,10 @@
     // -- Class from the scanned OS ----------------------------------------------------------------
     // The search below stays inside the class the OS points at (sub-classes included), so a Red Hat
     // host can only land on a Linux Server and a Windows Server carrying the same value is never
-    // seen. "VMware ESXi 7.0.3 build 24723872" gives cmdb_ci_esx_server (ESX Server). An unknown or
-    // multi-guess OS gives no class and the rule declines; the hardware-wide address match takes
-    // over.
+    // seen. An unknown or multi-guess OS gives no class and the rule declines; the hardware-wide
+    // address match takes over.
+    // Sample: classFor("VMware ESXi 7.0.3 build 24723872") gives ESX Server, so pref is
+    //         cmdb_ci_esx_server and the search below runs on that class.
     // classFor() maps the OS text Qualys reports to the CMDB class the CI should be in, e.g. "Red
     // Hat Enterprise Linux 9.8" is a Linux Server, "Windows Server 2016 Standard" a Windows Server
     // and "VMware ESXi 7.0.3" an ESX Server. A string of guesses separated by "/" comes from an
@@ -63,6 +74,8 @@
     // Inside the agreed class an address is reasonably safe: a virtual IP of a load balancer or a
     // Windows machine that inherited the address sits outside the class and never appears. Two CIs
     // of the class on one address (an address reused after a rebuild) still make the rule decline.
+    // Sample: the search on cmdb_ci_esx_server for ip_address "30.162.178.21" finds the ESX Server
+    //         "vsdnesxm21" and no second row, so its sys_id is returned.
     var gr = new GlideRecord(pref);           // the class chosen and its sub-classes
     if (!gr.isValid())                            // class not installed here, decline
         return null;

@@ -4,9 +4,21 @@
    short name and no domain information; the agreement between CI class and scanned OS stands in for
    the missing domain evidence.
 
-   Input  : sourceValue is the DNS field; the rule also reads the OS from sourcePayload.
+   Sample payload (one Qualys host record, used in every note below)
+   {
+     "ID": "35850078",
+     "IP": "30.143.70.11",
+     "TRACKING_METHOD": "IP",
+     "OS": "Windows Server 2016 Standard 64 bit Edition Version 1607",
+     "DNS": "wsaoi01zeapd1.sdi.corp.bankofamerica.com",
+     "NETBIOS": "WSAOI01ZEAPD1"
+   }
+   Input  : sourceValue is the DNS field, "wsaoi01zeapd1.sdi.corp.bankofamerica.com"; the rule also
+            reads the OS from sourcePayload.
    Returns: the sys_id of the one CI of that class named with the short hostname (names compare
             case-insensitively); null when none or two carry it.
+   Sample : the Windows Server CI named "WSAOI01ZEAPD1"; a second Windows Server with the same name
+            would make the rule decline.
 
    Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
    Before : every rule so far needed domain evidence on the CI (fqdn, dns_domain or the discovery
@@ -18,7 +30,7 @@
 (function process(rule, sourceValue, sourcePayload) {
     if (!sourceValue)                             // nothing to look up
         return null;
-    var full = ('' + sourceValue).trim().toLowerCase();   // e.g. "wsaoi01zeapd1.sdi.corp.bankofamerica.com"
+    var full = ('' + sourceValue).trim().toLowerCase();   // "wsaoi01zeapd1.sdi.corp.bankofamerica.com"
     var host = full.split('.')[0];                // "wsaoi01zeapd1"
     if (!host)
         return null;
@@ -29,9 +41,10 @@
     // -- Class from the scanned OS ----------------------------------------------------------------
     // The search below stays inside the class the OS points at (sub-classes included), so a Red Hat
     // host can only land on a Linux Server and a Windows Server carrying the same value is never
-    // seen. "Windows Server 2016 Standard 64 bit Edition Version 1607" gives cmdb_ci_win_server
-    // (Windows Server). An unknown or multi-guess OS gives no class and the rule declines; the
-    // hardware-wide hostname match takes over.
+    // seen. An unknown or multi-guess OS gives no class and the rule declines; the hardware-wide
+    // hostname match takes over.
+    // Sample: classFor("Windows Server 2016 Standard 64 bit Edition Version 1607") gives Windows
+    //         Server, so pref is cmdb_ci_win_server and the search below runs on that class.
     // classFor() maps the OS text Qualys reports to the CMDB class the CI should be in, e.g. "Red
     // Hat Enterprise Linux 9.8" is a Linux Server, "Windows Server 2016 Standard" a Windows Server
     // and "VMware ESXi 7.0.3" an ESX Server. A string of guesses separated by "/" comes from an
@@ -63,6 +76,8 @@
     // With no domain to confirm, the class is the only safeguard against a namesake, and inside the
     // class the name still has to be unique: two CIs with the same short name cannot be told apart
     // here and the rule declines.
+    // Sample: the search on cmdb_ci_win_server for name "wsaoi01zeapd1" finds the Windows Server
+    //         "WSAOI01ZEAPD1" and no second row, so its sys_id is returned.
     var gr = new GlideRecord(pref);           // the class chosen and its sub-classes
     if (!gr.isValid())                            // class not installed here, decline
         return null;

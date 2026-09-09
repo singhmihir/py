@@ -29,7 +29,7 @@ def parse(path):
         purpose.append(hl[i].strip()); i += 1
     labelled = {}; cur = None
     for l in hl[i:]:
-        m = re.match(r'(Input|Returns|Before|Reaches|After)\s*: (.*)', l)
+        m = re.match(r'(Input|Returns|Sample|Before|Reaches|After)\s*: (.*)', l)
         if m:
             cur = m.group(1); labelled[cur] = m.group(2).strip()
         elif cur and l.startswith('         ') and l.strip():
@@ -37,6 +37,8 @@ def parse(path):
         elif l.startswith('Place in the chain'):
             cur = None
     field = re.search(r'sourceValue is the (\S+) field', labelled.get('Input', '')).group(1)
+    pm = re.search(r'\{.*?\n   \}', head, re.S)
+    payload = '\n'.join(l[3:] if l.startswith('   ') else l for l in pm.group(0).split('\n')) if pm else ''
     # body: stage notes, plain comments, code lines
     lines = body.split('\n')
     rows = []; pending = []; i = 0
@@ -70,6 +72,7 @@ def parse(path):
             e = default_expl(c)
         out.append((k, c, e))
     return dict(order=order, name=name, purpose=' '.join(purpose), field=field, input=labelled.get('Input', ''), returns=labelled.get('Returns', ''),
+                sample=labelled.get('Sample', ''), payload=payload,
                 before=labelled.get('Before', ''), reaches=labelled.get('Reaches', ''), after=labelled.get('After', ''), rows=out)
 
 CONTROL = re.compile(r'^(if|for|while)\s*\(.*\)$')
@@ -291,13 +294,13 @@ def header_row(ws, cols, widths):
 
 rules = [parse(f) for f in sorted(glob.glob(os.path.join(HERE, 'rules', '*.js')))]
 wb = Workbook(); ov = wb.active; ov.title = 'Overview'
-header_row(ov, ['Order', 'Rule', 'Source field', 'Purpose', 'Input', 'Returns', 'Runs before it', 'Which hosts reach it', 'Runs after it'],
-           [8, 30, 14, 55, 40, 50, 40, 40, 40])
+header_row(ov, ['Order', 'Rule', 'Source field', 'Purpose', 'Sample payload', 'Input', 'Returns', 'Expected for the sample', 'Runs before it', 'Which hosts reach it', 'Runs after it'],
+           [8, 30, 14, 55, 48, 40, 50, 50, 40, 40, 40])
 for r, x in enumerate(rules, 2):
-    vals = [int(x['order']), x['name'], x['field'], x['purpose'], x['input'], x['returns'], x['before'], x['reaches'], x['after']]
+    vals = [int(x['order']), x['name'], x['field'], x['purpose'], x['payload'], x['input'], x['returns'], x['sample'], x['before'], x['reaches'], x['after']]
     for j, v in enumerate(vals, 1):
-        c = ov.cell(row=r, column=j, value=v); c.font = TEXT; c.alignment = WRAP; c.border = BORDER
-ov.auto_filter.ref = 'A1:I%d' % (len(rules) + 1)
+        c = ov.cell(row=r, column=j, value=v); c.font = CODE if j == 5 else TEXT; c.alignment = WRAP; c.border = BORDER
+ov.auto_filter.ref = 'A1:K%d' % (len(rules) + 1)
 for x in rules:
     ws = wb.create_sheet(('%s %s' % (x['order'], x['name'].replace('USEM ', '')))[:31])
     header_row(ws, ['#', 'Stage', 'Code', 'Explanation'], [5, 34, 70, 90])

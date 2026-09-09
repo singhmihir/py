@@ -6,14 +6,26 @@
    the longest prefix to the shortest and takes the first prefix that names exactly one network
    device.
 
-   Input  : sourceValue is the DNS field; the rule also reads the OS from sourcePayload.
+   Sample payload (one Qualys host record, used in every note below)
+   {
+     "ID": "1187423005",
+     "IP": "171.149.3.49",
+     "TRACKING_METHOD": "IP",
+     "OS": "Linux 2.6",
+     "DNS": "uspaltwrr01drm0119-cz04-hsrp-vlan705.network.bankofamerica.com"
+   }
+   Input  : sourceValue is the DNS field,
+            "uspaltwrr01drm0119-cz04-hsrp-vlan705.network.bankofamerica.com"; the rule also reads
+            the OS from sourcePayload.
    Returns: the sys_id of the one Network Gear or Load Balancer device CI named with a prefix of the
             label; null when the host shows no interface evidence, when no prefix names a device, or
             when a prefix names two.
+   Sample : the IP Switch CI "uspaltwrr01drm0119", the longest prefix of the label that names a
+            device.
 
    Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
    Before : the hostname rules tried the whole label and USEM Management Interface Match looked for
-            a controller suffix.
+            a controller suffix; "vlan705" is not one.
    Reaches: hosts whose DNS domain is an interface domain (".network." in our feed) or whose label
             contains an interface marker segment such as "vlan705", "v201", "hsrp", "aom"; both
             lists are declared in the script, at the top of the matching stage.
@@ -22,8 +34,8 @@
 (function process(rule, sourceValue, sourcePayload) {
     if (!sourceValue)                             // nothing to look up
         return null;
-    var full = ('' + sourceValue).trim().toLowerCase();   // e.g. "uspaltwrr01drm0119-cz04-hsrp-vlan705.network.bankofamerica.com"
-    var label = full.split('.')[0];
+    var full = ('' + sourceValue).trim().toLowerCase();   // "uspaltwrr01drm0119-cz04-hsrp-vlan705.network.bankofamerica.com"
+    var label = full.split('.')[0];               // "uspaltwrr01drm0119-cz04-hsrp-vlan705"
     var segments = label.split('-');              // ["uspaltwrr01drm0119", "cz04", "hsrp", "vlan705"]
     if (segments.length < 2)                      // no hyphen, no interface tail
         return null;
@@ -51,6 +63,9 @@
     // segments after the first is a listed marker. Plenty of ordinary server names contain hyphens
     // ("ah-1047132-001"); without this check the prefix walk would strip real hostnames and could
     // land on an unrelated device.
+    // Sample: the name contains ".network." and the segment "vlan705" is the marker "vlan" followed
+    //         by digits, so evidence is true on both counts.
+    //         "ah-1047132-001.corp.bankofamerica.com" has neither and the rule would decline.
     // The domains under which devices are scanned per interface, and the label segments that mark
     // an interface or VLAN address. Extend these two lists when a site uses another naming habit.
     var domains = ['.network.'];
@@ -72,6 +87,10 @@
     // two CIs mean the rule declines. Network devices live in two branches of the CMDB, Network
     // Gear (switches, routers, firewalls) and Load Balancer, which the platform files under Server;
     // both are searched and the hits are counted together.
+    // Sample: the prefixes tried are "uspaltwrr01drm0119-cz04-hsrp" (nothing),
+    //         "uspaltwrr01drm0119-cz04" (nothing) and "uspaltwrr01drm0119", which names the IP
+    //         Switch "uspaltwrr01drm0119" and nothing else, so its sys_id is returned. Two switches
+    //         named "ustxrdnwl01rsm004z" would make the rule decline at that prefix.
     var tables = ['cmdb_ci_netgear', 'cmdb_ci_lb'];
     for (var k = segments.length - 1; k >= 1; k--) {
         var base = segments.slice(0, k).join('-');   // longest prefix first, e.g. "uspaltwrr01drm0119-cz04-hsrp"

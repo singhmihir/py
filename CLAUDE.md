@@ -106,15 +106,17 @@ Follow it without being asked again.
 - Discovered Items (`sn_sec_cmn_src_ci`) hold each scanned host's payload (`source_data` JSON), the resolved CI and
   `state` matched/unmatched; the PDI holds 281,700 unmatched items from the client. VITs reach them through `src_ci`.
   `cmdb_ci_lb` (load balancer device) extends Server, not Network Gear; VIPs are `cmdb_ci_lb_service` (extends cmdb_ci).
-- Qualys CI lookup rules (SNOWUSEMTP-895): 16 custom USEM rules, orders 175-850 (set V2.3), plus rules 420/430/460 (set V3.3, which also deletes the six former usem.ci_lookup.* properties)
+- Qualys CI lookup rules (SNOWUSEMTP-895): 16 custom USEM rules, orders 175-850 (set V2.4), plus rules 420/430/460 (set V3.4, which also deletes the six former usem.ci_lookup.* properties)
   (management controllers, network interfaces, load balancer services). Mihir wants **no custom system properties** in these
   rules: every suffix / marker / product list is an inline array in the script (the general properties rule above does not
   apply here). Global, script method
   `process(rule, sourceValue, sourcePayload)`; exactly-one-match via `next()` / `hasNext()`, no `setLimit`;
   the OOB `CIIdentify._queryMatch` helper is private and returns the first duplicate, so it is not used.
-  Comment style Mihir wants in delivered scripts: short header (purpose, input, returns, place in the chain by rule
-  name, never by order number), notes only on the matching stages, no sample sys_ids or "data after this line"
-  trails, written as first-hand notes on the client system.
+  Comment style Mihir wants in delivered scripts: short header (purpose, **the sample payload**, input and returns
+  with the sample values, the sample's outcome, place in the chain by rule name, never by order number), notes only
+  on the matching stages and each ending with a `Sample:` sentence that walks the sample through the stage, inline
+  sample values on the prep lines, no sample sys_ids or "data after this line" trails, written as first-hand notes
+  on the client system.
 - Kafka outbound (SNOWUSEMTP-1625): topic `sn_usem_remtask_outbound`, namespace `com.bofa.usem`,
   envelope + `rem_tasks[].remediation_task`, dates `MM-dd-yyyy HH:mm:ss`, mapping sheet
   *Outbound to CDP (RemTask)* — only rows with *CDP Required? = Yes*; one property per table with one

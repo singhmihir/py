@@ -4,10 +4,22 @@
    or an fqdn that was never copied into the name). The short name and the domain are matched
    together, inside the class the scanned OS points at.
 
-   Input  : sourceValue is the DNS field; the rule also reads the OS and the IP from sourcePayload.
+   Sample payload (one Qualys host record, used in every note below)
+   {
+     "ID": "35832680",
+     "IP": "171.128.225.96",
+     "TRACKING_METHOD": "AGENT",
+     "OS": "Red Hat Enterprise Linux 9.8",
+     "DNS": "ah-1047132-001.sdi.corp.bankofamerica.com",
+     "QG_HOSTID": "633769a4-0139-0002-e352-005056bf41ea"
+   }
+   Input  : sourceValue is the DNS field, "ah-1047132-001.sdi.corp.bankofamerica.com"; the rule also
+            reads the OS and the IP from sourcePayload.
    Returns: the sys_id of the one CI of that class named with the short hostname whose own domain
             information agrees with the scanned domain; a namesake in another domain is never
             picked.
+   Sample : the Linux Server CI named "ah-1047132-001" whose dns_domain is
+            "sdi.corp.bankofamerica.com".
 
    Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
    Before : the FQDN rules looked for the exact name in the fqdn field and found nothing.
@@ -20,13 +32,13 @@
 (function process(rule, sourceValue, sourcePayload) {
     if (!sourceValue)                             // nothing to look up
         return null;
-    var full = ('' + sourceValue).trim().toLowerCase();   // e.g. "ah-1047132-001.sdi.corp.bankofamerica.com"
+    var full = ('' + sourceValue).trim().toLowerCase();   // "ah-1047132-001.sdi.corp.bankofamerica.com"
     var dot = full.indexOf('.');
     if (dot < 1)                                  // a bare label is left to the hostname rules
         return null;
     var host = full.substring(0, dot);            // "ah-1047132-001"
     var domain = full.substring(dot + 1);         // "sdi.corp.bankofamerica.com"
-    var ip = sourcePayload.IP ? '' + sourcePayload.IP : '';   // only used to break a tie
+    var ip = sourcePayload.IP ? '' + sourcePayload.IP : '';   // "171.128.225.96", only used to break a tie
     // Classes that must never be matched (placeholder and technical CIs); the list lives in the
     // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
     var ignore = (typeof _ignoreClass != 'undefined' && _ignoreClass) ?
@@ -34,9 +46,10 @@
     // -- Class from the scanned OS ----------------------------------------------------------------
     // The search below stays inside the class the OS points at (sub-classes included), so a Red Hat
     // host can only land on a Linux Server and a Windows Server carrying the same value is never
-    // seen. "Red Hat Enterprise Linux 9.8" gives cmdb_ci_linux_server (Linux Server). An unknown or
-    // multi-guess OS gives no class and the rule declines; the hardware-wide hostname-plus-domain
-    // match takes over.
+    // seen. An unknown or multi-guess OS gives no class and the rule declines; the hardware-wide
+    // hostname-plus-domain match takes over.
+    // Sample: classFor("Red Hat Enterprise Linux 9.8") gives Linux Server, so pref is
+    //         cmdb_ci_linux_server and the search below runs on that class.
     // classFor() maps the OS text Qualys reports to the CMDB class the CI should be in, e.g. "Red
     // Hat Enterprise Linux 9.8" is a Linux Server, "Windows Server 2016 Standard" a Windows Server
     // and "VMware ESXi 7.0.3" an ESX Server. A string of guesses separated by "/" comes from an
@@ -72,6 +85,10 @@
     // app01), and this check is what keeps the findings off the namesake. One confirmed CI is the
     // match; several with exactly one carrying the scanned IP gives that one; anything else
     // declines.
+    // Sample: the Linux Server is named "ah-1047132-001" and its dns_domain is
+    //         "sdi.corp.bankofamerica.com", so it lands in good as the only entry and its sys_id is
+    //         returned. A CI "ah-1047132-001" with dns_domain "lab.example.net" would be skipped;
+    //         two confirmed CIs would be resolved by ip_address "171.128.225.96" or declined.
     function pickCombo(table) {
         var gr = new GlideRecord(table);
         if (!gr.isValid())

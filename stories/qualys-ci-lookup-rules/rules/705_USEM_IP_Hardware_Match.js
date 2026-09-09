@@ -3,21 +3,32 @@
    The address across the whole hardware tree, with two extra safety checks: the CI must not be a
    load balancer, and its class must not contradict the scanned OS.
 
-   Input  : sourceValue is the IP field; the rule also reads the OS from sourcePayload.
+   Sample payload (one Qualys host record, used in every note below)
+   {
+     "ID": "83047624",
+     "IP": "30.162.178.24",
+     "TRACKING_METHOD": "IP",
+     "OS": "Ubuntu / Tiny Core Linux / Linux 2.6.x / IBM ASM / HP StoreOnce / F5 Networks Big-IP / Cisco IOS Software"
+   }
+   Input  : sourceValue is the IP field, "30.162.178.24"; the rule also reads the OS from
+            sourcePayload.
    Returns: the sys_id of the one hardware CI whose ip_address equals the scanned address, when it
             is not a load balancer and its class agrees with the scanned OS or is generic; null
             otherwise.
+   Sample : the CI in the generic Server class whose ip_address is "30.162.178.24"; a Load Balancer
+            on that address would be refused, and with a known OS a CI of a contradicting class
+            would be too.
 
    Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
    Before : USEM IP Class Match required the address to belong to one CI of the class the OS
-            implies.
+            implies; the sample OS is a list of guesses, so that rule declined without searching.
    Reaches: DNS-less hosts whose CI is classed generically or whose OS gave no class.
    After  : USEM IP Adapter Match and USEM IP Layered Match.
    ------------------------------------------------------------------------------------------------- */
 (function process(rule, sourceValue, sourcePayload) {
     if (!sourceValue)                             // nothing to look up
         return null;
-    var ip = ('' + sourceValue).trim();           // e.g. "30.162.178.21"
+    var ip = ('' + sourceValue).trim();           // "30.162.178.24"
     if (!ip || ip.indexOf('127.') == 0 || ip.indexOf('169.254.') == 0)   // loopback and link-local identify nothing
         return null;
     // Classes that must never be matched (placeholder and technical CIs); the list lives in the
@@ -26,9 +37,11 @@
         ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
     // -- Class the scanned OS implies, kept as a preference ---------------------------------------
     // This rule searches the whole hardware tree, so the class is not a filter here; it is checked
-    // at the end to reject a CI whose class contradicts the scan. "VMware ESXi 7.0.3 build
-    // 24723872" gives cmdb_ci_esx_server (ESX Server); an unknown OS gives no class and then no
-    // check is made.
+    // at the end to reject a CI whose class contradicts the scan. An unknown OS gives no class and
+    // then no check is made.
+    // Sample: classFor("Ubuntu / Tiny Core Linux / Linux 2.6.x / IBM ASM / HP StoreOnce / F5
+    //         Networks Big-IP / Cisco IOS Software") gives no class, so pref is ""; it is only used
+    //         in the last stage.
     // classFor() maps the OS text Qualys reports to the CMDB class the CI should be in, e.g. "Red
     // Hat Enterprise Linux 9.8" is a Linux Server, "Windows Server 2016 Standard" a Windows Server
     // and "VMware ESXi 7.0.3" an ESX Server. A string of guesses separated by "/" comes from an
@@ -66,6 +79,8 @@
     }
     // -- Address search across the hardware tree --------------------------------------------------
     // Nothing is filtered by class here; the three checks that follow provide the safety.
+    // Sample: the search on cmdb_ci_hardware for ip_address "30.162.178.24" finds one CI in the
+    //         generic Server class.
     var gr = new GlideRecord('cmdb_ci_hardware');// Hardware and every class beneath it
     gr.addQuery('ip_address', ip);
     if (ignore)
@@ -74,6 +89,7 @@
     // The first row is remembered with its class; a second row means an address answered by several
     // CIs (a shared virtual IP, an address reused after a rebuild), which is never a safe match and
     // the rule declines.
+    // Sample: one row, so id is the sys_id of that Server and cls is "cmdb_ci_server".
     gr.query();
     if (!gr.next())
         return null;
@@ -84,12 +100,17 @@
     // -- Reject a load balancer -------------------------------------------------------------------
     // A scanned address that belongs to a load balancer is a virtual IP; the findings describe a
     // pool member behind it, not the balancer.
+    // Sample: the Server is not a Load Balancer, so the rule carries on. A Load Balancer on
+    //         "30.162.178.24" would end it here.
     if (isLoadBalancer(id))
         return null;
     // -- Reject a CI whose class contradicts the scanned OS ---------------------------------------
     // When the OS gave a class, the CI found must sit inside it (sub-classes included) or be
     // generically classed. A host that lands on a Windows Server by name or address is a namesake
     // or a reused address, not the same machine, and its findings would go to the wrong owner.
+    // Sample: pref is empty for the sample, so no class check is made and the sys_id is returned.
+    //         With OS "VMware ESXi 7.0.3", pref would be cmdb_ci_esx_server; the generic Server
+    //         would still pass, a Windows Server would be rejected.
     if (pref) {
         var chk = new GlideRecord(pref);
         if (!(chk.isValid() && chk.get(id)) && !generic[cls])
