@@ -106,8 +106,10 @@ Follow it without being asked again.
 - Discovered Items (`sn_sec_cmn_src_ci`) hold each scanned host's payload (`source_data` JSON), the resolved CI and
   `state` matched/unmatched; the PDI holds 281,700 unmatched items from the client. VITs reach them through `src_ci`.
   `cmdb_ci_lb` (load balancer device) extends Server, not Network Gear; VIPs are `cmdb_ci_lb_service` (extends cmdb_ci).
-- Qualys CI lookup rules (SNOWUSEMTP-895): 16 custom USEM rules, orders 175-850 (set V2.3), plus rules 420/430/460 (set V3.1)
-  (management controllers, network interfaces, load balancer services; lists in `usem.ci_lookup.*`), Global, script method
+- Qualys CI lookup rules (SNOWUSEMTP-895): 16 custom USEM rules, orders 175-850 (set V2.3), plus rules 420/430/460 (set V3.2)
+  (management controllers, network interfaces, load balancer services). Mihir wants **no custom system properties** in these
+  rules: every suffix / marker / product list is an inline array in the script (the general properties rule above does not
+  apply here). Global, script method
   `process(rule, sourceValue, sourcePayload)`; exactly-one-match via `next()` / `hasNext()`, no `setLimit`;
   the OOB `CIIdentify._queryMatch` helper is private and returns the first duplicate, so it is not used.
   Comment style Mihir wants in delivered scripts: short header (purpose, input, returns, place in the chain by rule

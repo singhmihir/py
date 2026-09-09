@@ -428,7 +428,7 @@
    "reads": "DNS, plus the OS",
    "returns": "the one hardware CI named like the label without its suffix",
    "before": "the hostname rules tried the whole label and found nothing.",
-   "reaches": "labels ending in a listed suffix, or a controller named in the OS text.",
+   "reaches": "labels ending in one of the controller suffixes, or a controller named in the OS text; both lists are in the script.",
    "after": "the network interface rule and the full-FQDN name rule.",
    "rows": [
     [
@@ -473,17 +473,16 @@
    "reads": "DNS, plus the OS",
    "returns": "the one Network Gear or Load Balancer device named by a prefix",
    "before": "the hostname rules tried the whole label; the controller rule found no suffix.",
-   "reaches": "labels under an interface domain, or carrying a marker segment.",
+   "reaches": "labels under an interface domain, or carrying a marker segment; both lists are in the script.",
    "after": "the full-FQDN name rule and the load balancer service rule.",
    "rows": [
     [
      "Interface evidence first",
-     "Plenty of ordinary server names contain hyphens. Without this check the prefix walk would strip real hostnames and could land on an unrelated device.",
+     "Plenty of ordinary server names contain hyphens. Without this check the prefix walk would strip real hostnames and could land on an unrelated device. The two lists sit right here in the script.",
      [
-      "var domains = list('usem.ci_lookup.interface_domains',",
-      "                   '.network.');",
-      "var markers = list('usem.ci_lookup.interface_markers',",
-      "                   'vlan,v,hsrp,vrrp,po,eth,gi,te,lo,aom,vs');",
+      "var domains = ['.network.'];",
+      "var markers = ['vlan', 'v', 'hsrp', 'vrrp', 'po', 'eth',",
+      "               'gi', 'te', 'lo', 'mgmt', 'aom', 'vs', 'fab'];",
       "if (!evidence) return null;"
      ]
     ],
@@ -554,17 +553,15 @@
    "reads": "IP, plus the OS and the DNS name",
    "returns": "the one Load Balancer Service CI for that VIP",
    "before": "the hardware rules declined: no serial, no server name, address on a balancer.",
-   "reaches": "hosts with a load balancer OS word, or a VIP marker in the label.",
+   "reaches": "hosts with a load balancer OS word, or a VIP marker in the label; both lists are in the script.",
    "after": "the ordinary address rules, for hosts that are not VIPs.",
    "rows": [
     [
      "VIP evidence first",
-     "A Load Balancer Service must never be returned for an ordinary server that happens to share an address with a VIP.",
+     "A Load Balancer Service must never be returned for an ordinary server that happens to share an address with a VIP. The two lists sit right here in the script.",
      [
-      "var osMarkers = list('usem.ci_lookup.vip_os_markers',",
-      "                     'f5,big-ip,big ip,netscaler');",
-      "var labelMarkers = list('usem.ci_lookup.vip_markers',",
-      "                        'vip,vs');",
+      "var osMarkers = ['f5', 'big-ip', 'big ip', 'netscaler'];",
+      "var labelMarkers = ['vip', 'vs'];",
       "if (!evidence) return null;"
      ]
     ],
@@ -895,39 +892,39 @@
  ],
  "props": [
   [
-   "usem.ci_lookup.mgmt_suffixes",
+   "suffixes",
    "420",
-   "ilo, ilom, idrac, drac, ipmi, bmc, oob, mgmt, imm, cimc, rmm, con",
+   "['ilo', 'ilom', 'idrac', 'drac', 'ipmi', 'bmc', 'oob', 'mgmt', 'imm', 'cimc', 'rmm', 'con']",
    "Label suffixes that mark a management controller."
   ],
   [
-   "usem.ci_lookup.mgmt_os_markers",
+   "markers",
    "420",
-   "ilo, ilom, idrac, drac, remote access controller, imm, cimc, bmc, ipmi, lights out",
+   "['ilo', 'ilom', 'idrac', 'drac', 'remote access controller', 'imm', 'cimc', 'bmc', 'ipmi', 'lights out']",
    "Controller words in the OS text; the last segment is then stripped whatever it is."
   ],
   [
-   "usem.ci_lookup.interface_domains",
+   "domains",
    "430",
-   ".network.",
+   "['.network.']",
    "DNS domains under which network devices are scanned per interface."
   ],
   [
-   "usem.ci_lookup.interface_markers",
+   "markers",
    "430",
-   "vlan, v, hsrp, vrrp, po, eth, gi, te, lo, mgmt, aom, vs, fab",
+   "['vlan', 'v', 'hsrp', 'vrrp', 'po', 'eth', 'gi', 'te', 'lo', 'mgmt', 'aom', 'vs', 'fab']",
    "Label segments that mark an interface or VLAN address."
   ],
   [
-   "usem.ci_lookup.vip_os_markers",
+   "osMarkers",
    "460",
-   "f5, big-ip, big ip, netscaler",
+   "['f5', 'big-ip', 'big ip', 'netscaler']",
    "Load balancer products in the OS text."
   ],
   [
-   "usem.ci_lookup.vip_markers",
+   "labelMarkers",
    "460",
-   "vip, vs",
+   "['vip', 'vs']",
    "Label segments that mark a virtual IP."
   ]
  ]

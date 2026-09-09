@@ -13,8 +13,8 @@
    Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
    Before : the hostname rules tried the whole label ("tx6dd630001-ilo") and found nothing, because
             no CI is named after the controller.
-   Reaches: hosts whose label ends with a listed controller suffix, or whose OS text names a
-            controller (properties usem.ci_lookup.mgmt_suffixes and usem.ci_lookup.mgmt_os_markers).
+   Reaches: hosts whose label ends with one of the controller suffixes, or whose OS text names a
+            controller; both lists are declared in the script, at the top of the matching stage.
    After  : USEM Network Interface Name Match and USEM FQDN Name Hardware Match.
    ------------------------------------------------------------------------------------------------- */
 (function process(rule, sourceValue, sourcePayload) {
@@ -30,18 +30,6 @@
     // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
     var ignore = (typeof _ignoreClass != 'undefined' && _ignoreClass) ?
         ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
-    // list() reads a comma separated system property into a lower-cased list, falling back to the
-    // default shipped with the rule; the lists are tuned in the properties, not in the script.
-    function list(name, fallback) {
-        var parts = ('' + gs.getProperty(name, fallback)).split(',');
-        var out = [];
-        for (var i = 0; i < parts.length; i++) {
-            var item = parts[i].trim().toLowerCase();
-            if (item)
-                out.push(item);
-        }
-        return out;
-    }
     // -- Recognise a controller and derive the server name ----------------------------------------
     // The segment after the last hyphen is checked against the suffix list; when it is listed the
     // server name is the label without it. Otherwise the OS text is checked for a controller word,
@@ -49,8 +37,10 @@
     // site-specific tail instead ("crpchictx103-r" with OS "HP iLO"). Both habits are in the feed.
     // Without either piece of evidence the host is not a controller and the rule must not touch it
     // ("usposwks0042-x" with a Windows OS stays with the name rules).
-    var suffixes = list('usem.ci_lookup.mgmt_suffixes', 'ilo,ilom,idrac,drac,ipmi,bmc,oob,mgmt,imm,cimc,rmm,con');
-    var markers = list('usem.ci_lookup.mgmt_os_markers', 'ilo,ilom,idrac,drac,remote access controller,imm,cimc,bmc,ipmi,lights out');
+    // The label suffixes that mark a controller, and the words that name one in the OS text. Extend
+    // these two lists when a site uses another naming habit.
+    var suffixes = ['ilo', 'ilom', 'idrac', 'drac', 'ipmi', 'bmc', 'oob', 'mgmt', 'imm', 'cimc', 'rmm', 'con'];
+    var markers = ['ilo', 'ilom', 'idrac', 'drac', 'remote access controller', 'imm', 'cimc', 'bmc', 'ipmi', 'lights out'];
     var tail = label.substring(dash + 1);         // "ilo"
     var base = '';
     if (suffixes.indexOf(tail) != -1)

@@ -91,7 +91,7 @@ function footer(s, text) {
     color: WHITE, isTextBox: true, margin: 0, valign: 'middle' });
   s.addText('How a scanned host becomes a configuration item, rule by rule', { x: M, y: 3.48, w: 11.2, h: 0.44,
     fontFace: SANS, fontSize: 17, color: 'B9BEC3', isTextBox: true, margin: 0 });
-  const facts = [['19', 'rules in the USEM chain'], ['3', 'added for the unmatched backlog'], ['6', 'property lists, no code to change']];
+  const facts = [['19', 'rules in the USEM chain'], ['3', 'added for the unmatched backlog'], ['5', 'principles shared by every rule']];
   facts.forEach(([n, l], i) => {
     const x = M + i * 4.15;
     s.addText(n, { x, y: 4.55, w: 1.05, h: 0.66, fontFace: SANS, fontSize: 42, bold: true, color: RED, isTextBox: true, margin: 0, valign: 'middle' });
@@ -547,7 +547,7 @@ D.rules.forEach((r) => {
 
 // ------------------------------------------------------------------ section 4: backlog
 divider('4', 'The unmatched backlog', 'What the unresolved population is actually made of, and the three rules built to reach it.',
-  ['What 281,700 hosts are made of', 'What evidence they carry', 'Six properties that tune the rules']);
+  ['What 281,700 hosts are made of', 'What evidence they carry', 'The lists that drive the new rules']);
 
 // population chart
 {
@@ -623,23 +623,23 @@ divider('4', 'The unmatched backlog', 'What the unresolved population is actuall
 // properties
 {
   const s = pres.addSlide(); light(s);
-  slideTitle(s, 'Six properties, so the lists are not in the code', 'Tuning');
-  s.addText('The three new rules each depend on a vocabulary: which suffixes mark a controller, which segments mark an interface, which words name a load balancer. Naming habits differ by site and change over time, so every list is a system property the rule reads at run time.',
+  slideTitle(s, 'The lists that drive the new rules', 'Vocabulary');
+  s.addText('The three new rules each depend on a vocabulary: which suffixes mark a controller, which segments mark an interface, which words name a load balancer. Each list is declared in the script itself, at the top of the stage that reads it, so a reviewer sees the words beside the code that uses them and nothing outside the rule has to exist for it to run.',
     { x: M, y: 1.44, w: 12.3, h: 0.4, fontFace: SANS, fontSize: 12, color: MUTED, isTextBox: true, margin: 0 });
   D.props.forEach(([name, rule, value, desc], i) => {
     const y = 1.96 + i * 0.78;
     card(s, M, y, 12.33, 0.7);
-    s.addText(name, { x: M + 0.22, y: y + 0.08, w: 3.5, h: 0.28, fontFace: MONO, fontSize: 10, bold: true, color: RED, isTextBox: true, margin: 0, valign: 'middle' });
-    badge(s, M + 3.78, y + 0.09, rule, 0.5, 0.26);
-    s.addText(desc, { x: M + 4.42, y: y + 0.08, w: 7.6, h: 0.28, fontFace: SANS, fontSize: 10, color: INK, isTextBox: true, margin: 0, valign: 'middle' });
-    s.addText(value, { x: M + 0.22, y: y + 0.38, w: 11.8, h: 0.26, fontFace: MONO, fontSize: 9, color: MUTED, isTextBox: true, margin: 0, valign: 'middle' });
+    badge(s, M + 0.22, y + 0.09, rule, 0.5, 0.26);
+    s.addText('var ' + name, { x: M + 0.86, y: y + 0.08, w: 2.6, h: 0.28, fontFace: MONO, fontSize: 10, bold: true, color: RED, isTextBox: true, margin: 0, valign: 'middle' });
+    s.addText(desc, { x: M + 3.6, y: y + 0.08, w: 8.4, h: 0.28, fontFace: SANS, fontSize: 10, color: INK, isTextBox: true, margin: 0, valign: 'middle' });
+    s.addText(value, { x: M + 0.86, y: y + 0.38, w: 11.2, h: 0.26, fontFace: MONO, fontSize: 9, color: MUTED, isTextBox: true, margin: 0, valign: 'middle' });
   });
   card(s, M, 6.62, 12.33, 0.62, WHITE);
   s.addText([
-    { text: 'Adding a site’s naming habit is a property edit, not a code change.  ', options: { bold: true, color: INK } },
-    { text: 'A new controller suffix or VLAN marker is typed into the list; the rule picks it up on the next evaluation, with no update set and no release.', options: { color: MUTED } },
+    { text: 'Changing a list is a change to the rule.  ', options: { bold: true, color: INK } },
+    { text: 'A new controller suffix or VLAN marker is added to the array and the rule ships in the next update set, the same path as any other change to the chain. No system property is created, read or shipped.', options: { color: MUTED } },
   ], { x: M + 0.3, y: 6.74, w: 11.7, h: 0.4, fontFace: SANS, fontSize: 11, isTextBox: true, margin: 0, valign: 'middle' });
-  s.addNotes('The values shown are the defaults shipped with the rules; each rule falls back to them if its property is missing.');
+  s.addNotes('These are the lists as shipped; each sits at the top of the matching stage in its rule script.');
 }
 
 // ------------------------------------------------------------------ section 5
@@ -677,7 +677,7 @@ divider('5', 'Testing and delivery', 'How the chain was exercised end to end, wh
   slideTitle(s, 'What ships, and how it is operated', 'Delivery');
   const sets = [
     ['Rule scripts', '16 updates', 'The rewritten scripts for the existing custom chain. Names, orders, source fields and descriptions are untouched; only the script field changes.'],
-    ['Backlog rules', '9 updates', 'Three new rules and their six properties. Applies on top of the first set.'],
+    ['Backlog rules', '3 updates', 'Three new rules, each carrying its own lists. Applies on top of the first set.'],
   ];
   sets.forEach(([t2, n, d], i) => {
     const x = M + i * 6.28;
@@ -688,9 +688,9 @@ divider('5', 'Testing and delivery', 'How the chain was exercised end to end, wh
   });
   const ops = [
     ['Turning a rule off', 'Every rule is independent. Clearing Active on one takes it out of the chain; the hosts it served fall through to the next rule that can read their evidence.'],
-    ['Adding a naming habit', 'A new controller suffix, VLAN marker or balancer product goes into the matching property. No script edit, no update set.'],
+    ['Adding a naming habit', 'A new controller suffix, VLAN marker or balancer product is added to the list at the top of the matching stage, and the rule ships in the next update set.'],
     ['Applying it to existing data', 'The rules run on new scans automatically. To reach the existing backlog, re-run the reconcile job for the changed Discovered Items.'],
-    ['What to watch first', 'The matched share of Discovered Items by rule. A rule that suddenly matches far more than its group size is the early sign that a property list has been widened too far.'],
+    ['What to watch first', 'The matched share of Discovered Items by rule. A rule that suddenly matches far more than its group size is the early sign that a list has been widened too far.'],
   ];
   ops.forEach(([t2, d], i) => {
     const x = M + (i % 2) * 6.28, y = 3.06 + Math.floor(i / 2) * 1.72;
@@ -701,7 +701,7 @@ divider('5', 'Testing and delivery', 'How the chain was exercised end to end, wh
     ], { x: x + 0.25, y: y + 0.1, w: 5.55, h: 1.3, fontFace: SANS, isTextBox: true, margin: 0, valign: 'middle' });
   });
   footer(s, 'Both sets are Global scope. The rule table is not update-set tracked by default, so each rule is captured explicitly on save.');
-  s.addNotes('The last point is the operational guardrail: watch the matched share per rule after any property change.');
+  s.addNotes('The last point is the operational guardrail: watch the matched share per rule after any list change.');
 }
 
 // appendix tables
@@ -734,7 +734,7 @@ divider('5', 'Testing and delivery', 'How the chain was exercised end to end, wh
     'The chain reads evidence in order of how much a machine can be trusted to keep it: serial, then name, then address.',
     'Every rule ends the same way, on exactly one candidate or a decline, so a wrong owner is never the cheap outcome.',
     'The three new rules read evidence that was already in the feed but described a part of a device rather than the device.',
-    'The vocabularies those rules depend on live in properties, so a naming habit can be added without touching a script.',
+    'The vocabularies those rules depend on are declared beside the code that reads them, so nothing outside the rule has to exist for it to run.',
   ];
   points.forEach((p, i) => {
     const y = 3.36 + i * 0.72;
