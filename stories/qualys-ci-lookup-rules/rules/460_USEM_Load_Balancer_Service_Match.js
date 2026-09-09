@@ -14,9 +14,9 @@
    Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
    Before : the hardware rules declined: a VIP has no serial, its name is not a server name, and the
             address belongs to a load balancer device.
-   Reaches: hosts with VIP evidence: an OS text naming a load balancer product (property
-            usem.ci_lookup.vip_os_markers) or a DNS label with a VIP marker segment such as "-vip"
-            or "vs1" (property usem.ci_lookup.vip_markers).
+   Reaches: hosts with VIP evidence: an OS text naming a load balancer product, or a DNS label with
+            a VIP marker segment such as "-vip" or "vs1"; both lists are declared in the script, at
+            the top of the matching stage.
    After  : the IP address rules, for hosts that are not VIPs.
    ------------------------------------------------------------------------------------------------- */
 (function process(rule, sourceValue, sourcePayload) {
@@ -32,18 +32,6 @@
     // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
     var ignore = (typeof _ignoreClass != 'undefined' && _ignoreClass) ?
         ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
-    // list() reads a comma separated system property into a lower-cased list, falling back to the
-    // default shipped with the rule; the lists are tuned in the properties, not in the script.
-    function list(name, fallback) {
-        var parts = ('' + gs.getProperty(name, fallback)).split(',');
-        var out = [];
-        for (var i = 0; i < parts.length; i++) {
-            var item = parts[i].trim().toLowerCase();
-            if (item)
-                out.push(item);
-        }
-        return out;
-    }
     // isMarker() says whether one hyphen segment of the label is a listed marker: the word itself
     // ("vlan"), the word followed by digits only ("vlan705", "v201"), or, for words of three
     // letters or more, a segment ending in the word ("multihostvip").
@@ -64,8 +52,10 @@
     // label segments is a listed VIP marker. A Load Balancer Service must never be returned for an
     // ordinary server that happens to share an address with a VIP; this check keeps the rule to the
     // hosts that really are VIPs ("f5 big ip", "rbps-dev3-sve-vip").
-    var osMarkers = list('usem.ci_lookup.vip_os_markers', 'f5,big-ip,big ip,netscaler');
-    var labelMarkers = list('usem.ci_lookup.vip_markers', 'vip,vs');
+    // The load balancer products looked for in the OS text, and the label segments that mark a
+    // virtual IP. Extend these two lists when a site uses another naming habit.
+    var osMarkers = ['f5', 'big-ip', 'big ip', 'netscaler'];
+    var labelMarkers = ['vip', 'vs'];
     var evidence = false;
     for (var m = 0; m < osMarkers.length; m++)
         if (os.indexOf(osMarkers[m]) != -1)

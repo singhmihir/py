@@ -14,9 +14,9 @@
    Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
    Before : the hostname rules tried the whole label and USEM Management Interface Match looked for
             a controller suffix.
-   Reaches: hosts whose DNS domain is an interface domain (".network." in our feed, property
-            usem.ci_lookup.interface_domains) or whose label contains an interface marker segment
-            such as "vlan705", "v201", "hsrp", "aom" (property usem.ci_lookup.interface_markers).
+   Reaches: hosts whose DNS domain is an interface domain (".network." in our feed) or whose label
+            contains an interface marker segment such as "vlan705", "v201", "hsrp", "aom"; both
+            lists are declared in the script, at the top of the matching stage.
    After  : USEM FQDN Name Hardware Match and USEM Load Balancer Service Match.
    ------------------------------------------------------------------------------------------------- */
 (function process(rule, sourceValue, sourcePayload) {
@@ -31,18 +31,6 @@
     // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
     var ignore = (typeof _ignoreClass != 'undefined' && _ignoreClass) ?
         ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
-    // list() reads a comma separated system property into a lower-cased list, falling back to the
-    // default shipped with the rule; the lists are tuned in the properties, not in the script.
-    function list(name, fallback) {
-        var parts = ('' + gs.getProperty(name, fallback)).split(',');
-        var out = [];
-        for (var i = 0; i < parts.length; i++) {
-            var item = parts[i].trim().toLowerCase();
-            if (item)
-                out.push(item);
-        }
-        return out;
-    }
     // isMarker() says whether one hyphen segment of the label is a listed marker: the word itself
     // ("vlan"), the word followed by digits only ("vlan705", "v201"), or, for words of three
     // letters or more, a segment ending in the word ("multihostvip").
@@ -63,8 +51,10 @@
     // segments after the first is a listed marker. Plenty of ordinary server names contain hyphens
     // ("ah-1047132-001"); without this check the prefix walk would strip real hostnames and could
     // land on an unrelated device.
-    var domains = list('usem.ci_lookup.interface_domains', '.network.');
-    var markers = list('usem.ci_lookup.interface_markers', 'vlan,v,hsrp,vrrp,po,eth,gi,te,lo,mgmt,aom,vs,fab');
+    // The domains under which devices are scanned per interface, and the label segments that mark
+    // an interface or VLAN address. Extend these two lists when a site uses another naming habit.
+    var domains = ['.network.'];
+    var markers = ['vlan', 'v', 'hsrp', 'vrrp', 'po', 'eth', 'gi', 'te', 'lo', 'mgmt', 'aom', 'vs', 'fab'];
     var evidence = false;
     for (var d = 0; d < domains.length; d++)
         if (full.indexOf(domains[d]) != -1)
