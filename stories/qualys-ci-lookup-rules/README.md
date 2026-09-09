@@ -69,3 +69,12 @@ with a metadata line on top), `live_rules.json` (all lookup rules and the helper
 read from the instance), `build_rules.py` (set, script update, explicit capture of every rule with
 `GlideUpdateManager2.saveRecord` because `sn_sec_cmn_ci_lookup_rule` is not update-set tracked,
 Global audit), `export_rules.py` (native export, scrub, parse, upload proof, archive copy).
+
+## Walkthrough deck
+
+`Qualys CI Lookup Rules - Technical Walkthrough.pptx` (43 slides, built by `deck/build_deck.js` from
+`deck/deck_data.json`, which `deck/build_data.py` writes): the framework and the rule contract, the chain
+at a glance, the five principles the whole chain shares, one page per rule (purpose, what it reads and
+returns, the matching stages with their code, and its place in the chain by rule name), the unmatched
+population analysis with the three gaps, the six tuning properties, testing, delivery and a rule reference
+table. Rebuild with `python3 deck/build_data.py && node deck/build_deck.js`.
