@@ -106,7 +106,7 @@ Follow it without being asked again.
 - Discovered Items (`sn_sec_cmn_src_ci`) hold each scanned host's payload (`source_data` JSON), the resolved CI and
   `state` matched/unmatched; the PDI holds 281,700 unmatched items from the client. VITs reach them through `src_ci`.
   `cmdb_ci_lb` (load balancer device) extends Server, not Network Gear; VIPs are `cmdb_ci_lb_service` (extends cmdb_ci).
-- Qualys CI lookup rules (SNOWUSEMTP-895): 16 custom USEM rules, orders 175-850 (set V2.3), plus rules 420/430/460 (set V3.2)
+- Qualys CI lookup rules (SNOWUSEMTP-895): 16 custom USEM rules, orders 175-850 (set V2.3), plus rules 420/430/460 (set V3.3, which also deletes the six former usem.ci_lookup.* properties)
   (management controllers, network interfaces, load balancer services). Mihir wants **no custom system properties** in these
   rules: every suffix / marker / product list is an inline array in the script (the general properties rule above does not
   apply here). Global, script method

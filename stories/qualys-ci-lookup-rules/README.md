@@ -27,8 +27,10 @@ sample) and `analyse_population.py` (`Qualys Unmatched Hosts - Analysis.xlsx`) b
 down by the evidence each host carries. Three groups carry evidence the chain never used; one rule per
 group. Every list a rule relies on (controller suffixes and OS words, interface domains and markers,
 load balancer products and VIP markers) is declared inline in the script, at the top of the stage
-that reads it; V3.2 removed the `usem.ci_lookup.*` properties that V3.0 / V3.1 shipped, at Mihir's
-request, and `remove_props_v3.py` deleted them from the instance.
+that reads it. At Mihir's request the `usem.ci_lookup.*` properties that V3.0 / V3.1 shipped are gone: V3.2
+stopped reading them and `remove_props_v3.py` deleted them from the instance; V3.3 carries their deletion in
+the set itself (`capture_prop_deletes_v3.py` re-creates each one under its original sys_id inside the pinned set
+and deletes it, so the platform records a DELETE that removes it wherever V3.0 / V3.1 was applied).
 
 | Order | Rule | Resolves | Evidence required |
 |---|---|---|---|
@@ -36,8 +38,8 @@ request, and `remove_props_v3.py` deleted them from the instance.
 | 430 | USEM Network Interface Name Match | interface and VLAN addresses to the network device (Network Gear and Load Balancer devices) | interface domain (`.network.`) or a marker segment (`vlan705`, `v201`, `hsrp`, `aom`) |
 | 460 | USEM Load Balancer Service Match | virtual IPs to the Load Balancer Service CI, by fqdn, then name, then address | load balancer word in the OS text, or a VIP marker segment (`-vip`, `vs1`) |
 
-Update set `SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V3.2` (Global, 3 updates: the three rules, no
-properties) applies on top of V2.3. `build_rules_v3.py` deploys, `test_v3.py` creates the fixtures
+Update set `SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V3.3` (Global, 9 updates: the three rules plus six
+DELETE entries for the earlier properties) applies on top of V2.3. `build_rules_v3.py` deploys, `test_v3.py` creates the fixtures
 and runs 18 cases twice through `CIIdentify.identify()` (positive, negative, ambiguity, regression),
 `export_rules.py state_v3.json` exports. Platform fact: Load Balancer devices (`cmdb_ci_lb`) sit under
 Server, not Network Gear, so 430 searches both branches.
@@ -67,7 +69,7 @@ first of several matching CIs after only logging the duplication, it mutates the
 result object (`returnObj.ciIds`, capped at 10) and it only performs a query the rules already
 express in two lines. The rules need "exactly one match or decline", which it does not offer.
 
-Files: `gen_rules.py` (generator), `build_workbook.py` (the code-line explanations workbook: an Overview sheet plus one sheet per rule with every code line, its stage and its explanation), `sweep.py`, `compile_check.py`, `fixtures_v4.py` (fixtures for the address rules and the broad name rule), `remove_props_v3.py`, `deck/` (the technical walkthrough deck: `build_data.py` content, `build_deck.js` renderer), `rules/<order>_<name>.js` (delivered scripts), `current/` (scripts as they were before,
+Files: `gen_rules.py` (generator), `build_workbook.py` (the code-line explanations workbook: an Overview sheet plus one sheet per rule with every code line, its stage and its explanation), `sweep.py`, `compile_check.py`, `fixtures_v4.py` (fixtures for the address rules and the broad name rule), `remove_props_v3.py`, `capture_prop_deletes_v3.py`, `props_v31_ids.json`, `deck/` (the technical walkthrough deck: `build_data.py` content, `build_deck.js` renderer), `rules/<order>_<name>.js` (delivered scripts), `current/` (scripts as they were before,
 with a metadata line on top), `live_rules.json` (all lookup rules and the helper script include as
 read from the instance), `build_rules.py` (set, script update, explicit capture of every rule with
 `GlideUpdateManager2.saveRecord` because `sn_sec_cmn_ci_lookup_rule` is not update-set tracked,
