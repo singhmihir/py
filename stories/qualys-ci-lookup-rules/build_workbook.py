@@ -1,6 +1,6 @@
 """Builds 'Qualys CI Lookup Rules - Code Line Explanations.xlsx' from rules/*.js:
-an Overview sheet (one row per rule) and one sheet per rule listing every code
-line with its explanation, grouped by stage."""
+an Overview sheet (one row per rule: purpose, input, returns, place in the chain) and
+one sheet per rule listing every code line with its explanation, grouped by stage."""
 import glob, json, os, re
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
@@ -20,51 +20,35 @@ WRAP = Alignment(wrap_text=True, vertical='top')
 def parse(path):
     text = open(path).read()
     head, body = text.split('*/', 1)
+    order = os.path.basename(path).split('_', 1)[0]
     hl = [l[3:] if l.startswith('   ') else l for l in head.split('\n')]
-    title = next(l for l in hl if l.startswith('RULE '))
-    order, name = re.match(r'RULE (\d+) - (.*)', title).groups()
-    # header paragraphs
-    paras, cur = [], []
-    for l in hl[3:]:
-        if l.strip() == '':
-            if cur: paras.append(' '.join(x.strip() for x in cur)); cur = []
-        else:
-            cur.append(l)
-    if cur: paras.append(' '.join(x.strip() for x in cur))
-    purpose = paras[0]
-    payload = re.search(r'\{.*?\n   \}', head, re.S).group(0)
-    payload = '\n'.join(l[3:] if l.startswith('   ') else l for l in payload.split('\n'))
-    field = re.search(r'sourceValue\s+= the (\S+) field', head).group(1)
-    expected = re.search(r'Expected for the sample: (.*?)\n\n', head, re.S).group(1)
-    expected = ' '.join(x.strip() for x in expected.split('\n'))
-    def bullet(lab):
-        m = re.search(r'- %s\s*: (.*?)(?=\n   - |\n   =)' % lab, head, re.S)
-        return ' '.join(x.strip() for x in m.group(1).split('\n'))
-    before, reaches, after = bullet('Before it'), bullet('Reaches it'), bullet('After it')
-    # body rows
-    rows, pending, stage, i = [], [], '', 0
+    name = hl[0][3:].strip()
+    # header paragraphs: purpose (until the first blank line), then labelled lines
+    i = 2; purpose = []
+    while i < len(hl) and hl[i].strip():
+        purpose.append(hl[i].strip()); i += 1
+    labelled = {}; cur = None
+    for l in hl[i:]:
+        m = re.match(r'(Input|Returns|Before|Reaches|After)\s*: (.*)', l)
+        if m:
+            cur = m.group(1); labelled[cur] = m.group(2).strip()
+        elif cur and l.startswith('         ') and l.strip():
+            labelled[cur] += ' ' + l.strip()
+        elif l.startswith('Place in the chain'):
+            cur = None
+    field = re.search(r'sourceValue is the (\S+) field', labelled.get('Input', '')).group(1)
+    # body: stage notes, plain comments, code lines
     lines = body.split('\n')
+    rows = []; pending = []; i = 0
     while i < len(lines):
         l = lines[i]; s = l.strip()
-        m = re.match(r'// ={6} STAGE (\d+): (.*?) =+$', s)
+        m = re.match(r'// -- (.*?) -+$', s)
         if m:
-            stage = 'Stage %s: %s' % m.groups()
-            parts, i = [], i + 1
-            while not re.match(r'// =+$', lines[i].strip()):
-                t = lines[i].strip()[3:]
-                lm = re.match(r'(What|Why|Sample)\s*: (.*)', t)
-                if lm: parts.append([lm.group(1), lm.group(2)])
-                else: parts[-1][1] += ' ' + t.strip()
-                i += 1
-            rows.append(('stage', stage, '\n'.join('%s: %s' % (a, b) for a, b in parts)))
-            pending = []; i += 1; continue
-        if s.startswith('// ->'):
-            t = s[5:].strip(); i += 1
-            while i < len(lines) and re.match(r'//\s{3,}\S', lines[i].strip()) and not lines[i].strip().startswith('// ->'):
-                t += ' ' + lines[i].strip()[2:].strip(); i += 1
-            if rows and rows[-1][0] == 'code':
-                k, c, e = rows[-1]; rows[-1] = (k, c, (e + '\n' if e else '') + 'Result: ' + t)
-            continue
+            title = m.group(1); i += 1; note = []
+            while i < len(lines) and lines[i].strip().startswith('//') and not re.match(r'// -- ', lines[i].strip()):
+                note.append(lines[i].strip()[2:].strip()); i += 1
+            rows.append(('stage', title, ' '.join(note)))
+            pending = []; continue
         if s.startswith('//'):
             pending.append(s[2:].strip()); i += 1; continue
         if s == '':
@@ -85,9 +69,8 @@ def parse(path):
         if k == 'code' and not e:
             e = default_expl(c)
         out.append((k, c, e))
-    rows = out
-    return dict(order=order, name=name, purpose=purpose, payload=payload, field=field, expected=expected,
-                before=before, reaches=reaches, after=after, rows=rows)
+    return dict(order=order, name=name, purpose=' '.join(purpose), field=field, input=labelled.get('Input', ''), returns=labelled.get('Returns', ''),
+                before=labelled.get('Before', ''), reaches=labelled.get('Reaches', ''), after=labelled.get('After', ''), rows=out)
 
 CONTROL = re.compile(r'^(if|for|while)\s*\(.*\)$')
 
@@ -142,6 +125,71 @@ DEFAULTS = [
     (r"^nic\.addQuery\('mac_address', 'IN'", 'Condition: the adapter MAC is one of the four spellings.'),
     (r"^ph\.addQuery\('mac_address', 'IN'", 'Condition: the phone record MAC is one of the four spellings.'),
     (r'^while \(\w+\.next\(\)\) \{', 'Loop over every row of the result.'),
+    (r'^\}$', 'End of the block.'),
+    (r'^\} else \{$', 'Otherwise.'),
+    (r'^var pref = classFor\(sourcePayload\.OS\)', 'The class the scanned OS points at; empty when the OS is unknown or a multi-guess fingerprint.'),
+    (r'^if \(!pref\)\n\s*return null', 'No class from the OS -> this class-scoped rule declines and the hardware-wide rule takes over.'),
+    (r'^if \(\w+\.hasNext\(\)\)\n\s*return null', 'A second row means the value is shared by two CIs -> decline rather than guess.'),
+    (r'^if \(!\w+\.next\(\)\)\n\s*return null', 'No row at all -> decline.'),
+    (r'^var match = \w+\.getUniqueValue\(\)', 'The sys_id of the CI found.'),
+    (r'^return match;', 'Exactly one CI -> return its sys_id; the framework links the host to it and stops the chain.'),
+    (r"^var cls = '' \+ \w+\.getValue\('sys_class_name'\)", 'The class of the CI found, checked later against the scanned OS.'),
+    (r'^var id = \w+\.getUniqueValue\(\)', 'The sys_id of the CI found.'),
+    (r"^var parts = \('' \+ gs\.getProperty\(name, fallback\)\)\.split\(','\)", 'Read the property (or the default shipped with the rule) and split it on commas.'),
+    (r'^var out = \[\];$', 'The cleaned list.'),
+    (r'^for \(var i = 0; i < parts\.length; i\+\+\) \{', 'Loop over the comma separated entries.'),
+    (r'^var item = parts\[i\]\.trim\(\)\.toLowerCase\(\)', 'Trim and lower-case one entry.'),
+    (r'^if \(item\)\n\s*out\.push\(item\)', 'Keep non-empty entries.'),
+    (r'^return out;', 'The list of lower-cased entries.'),
+    (r"^var dot = full\.indexOf\('\.'\)", 'Position of the first dot, which separates the short hostname from the domain.'),
+    (r"^gr\.addQuery\('name', base\)", 'Condition: name equals the derived name.'),
+    (r'^for \(var i = 0; i < words\.length; i\+\+\) \{', 'Loop over the listed marker words.'),
+    (r'^var w = words\[i\];', 'One marker word.'),
+    (r'^if \(segment == w\)\n\s*return true', 'The segment is the word itself ("vlan").'),
+    (r'^if \(segment\.indexOf\(w\) == 0 && ', 'The segment is the word followed by digits only ("vlan705", "v201").'),
+    (r'^if \(w\.length >= 3 && segment\.length > w\.length', 'For words of three letters or more, the segment ends in the word ("multihostvip").'),
+    (r'^return false;', 'No marker word fits this segment.'),
+    (r'^var evidence = false;', 'Set to true as soon as one piece of evidence is found.'),
+    (r'^if \(!evidence\)\n\s*return null', 'No evidence -> this host is not one the rule is for; decline untouched.'),
+    (r'^var m = label\.match\(/\^sep', 'Strict pattern: "sep" plus exactly twelve hexadecimal characters; anything else is not a phone label.'),
+    (r'^if \(!ph\.hasNext\(\)\)\n\s*return byMac', 'Exactly one phone carries the MAC on its own record -> match.'),
+    (r'^if \(byName\.hasNext\(\)\)\n\s*return null', 'Two phones with one device name -> never guess.'),
+    (r"^gr\.addQuery\('dns_name\.name', fqdn\)", 'Condition: the DNS Name record at the start of the chain is named with the scanned name.'),
+    (r"^var dash = label\.lastIndexOf\('-'\)", 'Position of the last hyphen; the controller suffix sits after it.'),
+    (r"^var os = \('' \+ \(sourcePayload\.OS \|\| ''\)\)\.toLowerCase\(\)", 'The scanned OS text, lower-cased; empty when Qualys reported none.'),
+    (r"^var suffixes = list\('usem\.ci_lookup\.mgmt_suffixes'", 'Controller suffixes, from the property (defaults shipped with the rule).'),
+    (r"^var markers = list\('usem\.ci_lookup\.mgmt_os_markers'", 'Controller words looked for in the OS text, from the property.'),
+    (r"^var base = '';", 'The server name once derived; stays empty without controller evidence.'),
+    (r'^else\n\s*for \(var i = 0; i < markers\.length; i\+\+\)', 'No listed suffix: when the OS text names a controller, strip the last segment whatever it is.'),
+    (r'^break;', 'One controller word is enough.'),
+    (r'^if \(!base\)\n\s*return null', 'No controller evidence -> decline untouched.'),
+    (r'^if \(lb\.isValid\(\) && lb\.get\(match\)\)\n\s*return null', 'The CI found is a load balancer -> refuse it.'),
+    (r"^var label = full\.split\('\.'\)\[0\]", 'The first label of the DNS name.'),
+    (r"^var label = dns\.split\('\.'\)\[0\]", 'The first label of the DNS name, empty when there is no DNS name.'),
+    (r"^var domains = list\('usem\.ci_lookup\.interface_domains'", 'Interface domains, from the property.'),
+    (r"^var markers = list\('usem\.ci_lookup\.interface_markers'", 'Interface marker words, from the property.'),
+    (r'^for \(var d = 0; d < domains\.length; d\+\+\)', 'Evidence when the DNS name contains a listed interface domain.'),
+    (r'^for \(var s = 1; s < segments\.length; s\+\+\)', 'Evidence when a segment after the first is a listed marker.'),
+    (r"^var tables = \['cmdb_ci_netgear', 'cmdb_ci_lb'\]", 'The two branches that hold network devices.'),
+    (r'^for \(var k = segments\.length - 1; k >= 1; k--\) \{', 'From the longest prefix (all segments but the last) down to the first segment alone.'),
+    (r'^var hits = \[\];', 'Devices named exactly like this prefix.'),
+    (r'^for \(var t = 0; t < tables\.length; t\+\+\) \{', 'Search both branches.'),
+    (r'^var gr = new GlideRecord\(tables\[t\]\)', 'Search on one branch and every class beneath it.'),
+    (r'^while \(gr\.next\(\) && hits\.length < 2\)', 'Collect up to two hits; two is already one too many.'),
+    (r'^return hits\[0\];', 'Exactly one device carries this prefix -> match.'),
+    (r"^var osMarkers = list\('usem\.ci_lookup\.vip_os_markers'", 'Load balancer product words looked for in the OS text, from the property.'),
+    (r"^var labelMarkers = list\('usem\.ci_lookup\.vip_markers'", 'VIP marker words for the label segments, from the property.'),
+    (r'^for \(var m = 0; m < osMarkers\.length; m\+\+\)', 'Evidence when the OS text contains a listed load balancer word.'),
+    (r"^var segments = label \? label\.split\('-'\) : \[\]", 'The hyphen segments of the label; none without a DNS name.'),
+    (r'^for \(var s = 0; s < segments\.length; s\+\+\)', 'Evidence when any segment is a listed VIP marker.'),
+    (r'^function one\(field, value\)', 'Helper: the one Load Balancer Service whose field equals the value; undefined when nothing to search or nothing found, null when two are found.'),
+    (r"^var gr = new GlideRecord\('cmdb_ci_lb_service'\)", 'Search on the Load Balancer Service class and every class beneath it.'),
+    (r'^gr\.addQuery\(field, value\)', 'Condition: the field named by the step equals the value.'),
+    (r"^var steps = \[\['fqdn', dns\]", 'The evidence in order of strength: the DNS name as fqdn, as name, its label as name, then the address.'),
+    (r'^for \(var t = 0; t < steps\.length; t\+\+\) \{', 'Try the steps in order.'),
+    (r'^var found = one\(steps\[t\]\[0\], steps\[t\]\[1\]\)', 'Run one step.'),
+    (r'^if \(found === null\)\n\s*return null', 'Two services at this step -> decline; a weaker step must not override an ambiguous stronger one.'),
+    (r'^if \(found\)\n\s*return found', 'Exactly one service -> match.'),
     (r'^ids\.push\(gr\.getUniqueValue\(\)\)', 'Remember the sys_id of this CI.'),
     (r"^if \(ip && gr\.getValue\('ip_address'\) == ip\)", 'When this CI also carries the scanned IP, remember it as an IP-confirmed candidate.'),
     (r'^good\.push\(gr\.getUniqueValue\(\)\)', 'The domain evidence agrees -> remember the sys_id of this CI.'),
@@ -237,12 +285,12 @@ def header_row(ws, cols, widths):
 
 rules = [parse(f) for f in sorted(glob.glob(os.path.join(HERE, 'rules', '*.js')))]
 wb = Workbook(); ov = wb.active; ov.title = 'Overview'
-header_row(ov, ['Order', 'Rule', 'Source field', 'Purpose', 'Runs before it', 'Which hosts reach it', 'Runs after it', 'Expected result for the sample', 'Sample payload'],
-           [8, 30, 14, 55, 40, 40, 40, 50, 50])
+header_row(ov, ['Order', 'Rule', 'Source field', 'Purpose', 'Input', 'Returns', 'Runs before it', 'Which hosts reach it', 'Runs after it'],
+           [8, 30, 14, 55, 40, 50, 40, 40, 40])
 for r, x in enumerate(rules, 2):
-    vals = [int(x['order']), x['name'], x['field'], x['purpose'], x['before'], x['reaches'], x['after'], x['expected'], x['payload']]
+    vals = [int(x['order']), x['name'], x['field'], x['purpose'], x['input'], x['returns'], x['before'], x['reaches'], x['after']]
     for j, v in enumerate(vals, 1):
-        c = ov.cell(row=r, column=j, value=v); c.font = CODE if j == 9 else TEXT; c.alignment = WRAP; c.border = BORDER
+        c = ov.cell(row=r, column=j, value=v); c.font = TEXT; c.alignment = WRAP; c.border = BORDER
 ov.auto_filter.ref = 'A1:I%d' % (len(rules) + 1)
 for x in rules:
     ws = wb.create_sheet(('%s %s' % (x['order'], x['name'].replace('USEM ', '')))[:31])

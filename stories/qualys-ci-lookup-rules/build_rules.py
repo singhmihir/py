@@ -13,20 +13,20 @@ BASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 sys.path.insert(0, os.path.join(BASE, 'tools'))
 from snui import SNUI
 HERE = os.path.join(BASE, 'stories', 'qualys-ci-lookup-rules')
-NAME = 'SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V2.2'
-DESC = ('Qualys CI lookup rules (USEM custom chain, orders 175 to 850) rewritten so that any reader can follow them. '
-        'Each rule script opens with its purpose, the sample Qualys Host Detection payload it handles and why the rule '
-        'sits at its order. The stages that do the matching (class from the scanned OS, the search, the exactly-one '
-        'decision, the IP tie-break, the load balancer and class-contradiction checks) carry a banner stating what '
-        'happens, why the stage is in place and the sample data; the remaining lines carry a short comment. Result '
-        'sets are no longer capped with setLimit: a rule accepts a CI only when exactly one candidate remains, or, for '
-        'the tie-break rules, when the scanned IP confirms one of several. Matching behaviour is otherwise unchanged.')
+NAME = 'SNOWUSEMTP-895_MS_Qualys CI Lookup Rules_V2.3'
+DESC = ('Qualys CI lookup rules (USEM custom chain) with the script comments rewritten for a reader who does not know the '
+        'chain. Each rule opens with what it matches, what it reads from the Qualys host record, what it returns and where it '
+        'sits in the chain, and carries a short note on the stages that do the matching (class from the scanned OS, the search, '
+        'the exactly-one decision, the IP tie-break, the load balancer and class checks). Matching logic is unchanged from V2.2: '
+        'no setLimit, a rule accepts a CI only when exactly one candidate remains or the scanned IP confirms one of several.')
 live = json.load(open(os.path.join(HERE, 'live_rules.json')))['rules']
 STATE = os.path.join(HERE, 'state.json')
 PRIOR = json.load(open(STATE))['set'] if os.path.exists(STATE) else ''
 rules = []
 for fn in sorted(glob.glob(os.path.join(HERE, 'rules', '*.js'))):
     order, rest = os.path.basename(fn)[:-3].split('_', 1)
+    if order in ('420', '430', '460'):            # delivered in the V3 set (build_rules_v3.py)
+        continue
     name = rest.replace('_', ' ')
     match = [r for r in live if r['name'] == name and r['order'] == order and r['source'].startswith('Qualys')]
     assert len(match) == 1, (name, order, len(match))
