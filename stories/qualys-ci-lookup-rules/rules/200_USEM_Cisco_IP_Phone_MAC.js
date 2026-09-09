@@ -1,76 +1,52 @@
-/* =================================================================================================
-   RULE 200 - USEM Cisco IP Phone MAC
-   =================================================================================================
-   Match Cisco IP phones. Cisco Unified Communications Manager names every phone "SEP" followed by
-   its MAC address, and Qualys reports that name as the DNS host label. The rule turns the label
-   back into a MAC address and looks for exactly one IP Phone CI that carries it.
+/* USEM Cisco IP Phone MAC
+   -------------------------------------------------------------------------------------------------
+   Cisco Unified Communications Manager names every phone "SEP" followed by its MAC address, and
+   Qualys reports that name as the DNS label (under voip.bankofamerica.com in our feed). The rule
+   turns the label back into a MAC address and looks for exactly one IP Phone CI that carries it.
 
-   SAMPLE PAYLOAD (one Qualys Host Detection record, used in every example below)
-   {
-     "ID": "41277345",
-     "IP": "30.144.62.108",
-     "TRACKING_METHOD": "IP",
-     "OS": "Cisco IP Phone",
-     "DNS": "sep64f69dd5c9b0.voip.bankofamerica.com"
-   }
+   Input  : sourceValue is the DNS field.
+   Returns: the sys_id of the IP Phone CI whose network adapter, mac_address field or name carries
+            that MAC; null for any label that is not a phone label, and when no phone or two phones
+            carry the MAC.
 
-   sourceValue   = the DNS field -> "sep64f69dd5c9b0.voip.bankofamerica.com"
-   sourcePayload = the whole record
-   Expected for the sample: the IP Phone CI whose network adapter, mac_address field or name carries
-   the MAC 64:F6:9D:D5:C9:B0, for example the phone "SEP64F69DD5C9B0". Any DNS name that does not
-   follow the SEP pattern makes the rule decline at once.
-
-   WHY THIS RULE SITS AT ORDER 200
-   Rules run from the lowest order to the highest; the first rule that returns a CI wins and the
-   later rules are skipped. A rule that returns null passes the host on.
-   - Before it : 175 and 180 handled serial numbers (phones report none).
-   - Reaches it: only hosts whose DNS label reads SEP plus twelve hexadecimal characters; every
-                 other host passes through untouched.
-   - After it  : 250 and above are the name rules. Phones are resolved first so a phone label can
-                 never be mistaken for a server name, and a MAC clash can never pull in a server or
-                 a switch: this rule only searches IP Phone CIs.
-   ================================================================================================= */
+   Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
+   Before : the serial number rules (phones report none).
+   Reaches: only hosts whose DNS label is "sep" plus twelve hexadecimal characters; every other host
+            passes through untouched.
+   After  : the FQDN and hostname rules. Phones are resolved before them so a phone label is never
+            tried as a server name, and because only IP Phone CIs are searched a MAC clash can never
+            pull in a switch or a server.
+   ------------------------------------------------------------------------------------------------- */
 (function process(rule, sourceValue, sourcePayload) {
-    if (!sourceValue)                             // nothing to look up -> null = "no match from this rule"
+    if (!sourceValue)                             // nothing to look up
         return null;
-    // ====== STAGE 1: Recognise the SEP label and rebuild the MAC address =========================
-    // What   : takes the first label of the DNS name, checks it against the strict pattern "sep"
-    //          plus exactly twelve hexadecimal characters, and rebuilds the MAC in the four
-    //          spellings CMDBs use.
-    // Why    : a server named "sepulveda01" must not be treated as a phone, hence the strict
-    //          pattern; different discovery tools write MACs differently, hence the four spellings.
-    // Sample : "sep64f69dd5c9b0.voip.bankofamerica.com" -> label "sep64f69dd5c9b0" -> hex
-    //          "64f69dd5c9b0" -> candidates ["64:F6:9D:D5:C9:B0", "64:f6:9d:d5:c9:b0",
-    //          "64F69DD5C9B0", "64f69dd5c9b0"].
-    // =============================================================================================
-    var label = ('' + sourceValue).split('.')[0].toLowerCase();   // "sep64f69dd5c9b0"
-    var m = label.match(/^sep([0-9a-f]{12})$/);  // null for anything that is not a phone label
+    // -- Recognise the phone label and rebuild the MAC address ------------------------------------
+    // The first label of the DNS name must be exactly "sep" plus twelve hex characters; a server
+    // called "sepulveda01" must not be treated as a phone. The MAC is rebuilt in the four spellings
+    // the CMDB holds, because discovery tools and the call manager export write it differently
+    // ("64:F6:9D:D5:C9:B0", "64:f6:9d:d5:c9:b0", "64F69DD5C9B0", "64f69dd5c9b0").
+    var label = ('' + sourceValue).split('.')[0].toLowerCase();   // e.g. "sep64f69dd5c9b0"
+    var m = label.match(/^sep([0-9a-f]{12})$/);
     if (!m)
         return null;
     var hex = m[1];                               // "64f69dd5c9b0"
     var pairs = [];
     for (var i = 0; i < 12; i += 2)
-        pairs.push(hex.substr(i, 2));             // ["64", "f6", "9d", "d5", "c9", "b0"]
+        pairs.push(hex.substr(i, 2));
     var colon = pairs.join(':');                  // "64:f6:9d:d5:c9:b0"
     var candidates = [colon.toUpperCase(), colon, hex.toUpperCase(), hex];
-    // CI classes that must never be matched (placeholder and technical classes). Administrators
-    // keep the list in the property sn_sec_cmn.ignoreCIClass; the framework may pass the same list
-    // in as _ignoreClass.
+    // Classes that must never be matched (placeholder and technical CIs); the list lives in the
+    // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
     var ignore = (typeof _ignoreClass != 'undefined' && _ignoreClass) ?
         ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
-    // -> ignore =
-    //    "sn_sec_cmn_unmatched_ci,sn_vul_qualys_ci,cmdb_ci_unclassed_hardware,cmdb_ci_incomplete_ip,cmdb_ci_dns_name"
-    // ====== STAGE 2: Attempt 1: a network adapter with that MAC owned by an IP phone =============
-    // What   : searches the Network Adapter table for adapters carrying one of the four spellings
-    //          and belonging to a CI, keeps only owners that really are IP Phone CIs, each counted
-    //          once, and accepts a single phone.
-    // Why    : discovery tools usually store the MAC on the adapter, not on the phone. Checking
-    //          that the owner is an IP Phone guarantees a switch or server adapter with a colliding
-    //          MAC is never returned.
-    // Sample : adapter "eth0" with mac_address "64:F6:9D:D5:C9:B0" belongs to the IP Phone
-    //          "SEP64F69DD5C9B0" -> count = 1 -> return "3f2a9c7e1b8d4a5f9e6c0d2b7a4f8e1c".
-    // =============================================================================================
-    var nic = new GlideRecord('cmdb_ci_network_adapter');
+    // -- Find the one phone that carries the MAC --------------------------------------------------
+    // Three places are tried in turn: a network adapter with that MAC whose owner is an IP Phone CI
+    // (discovery usually stores the MAC on the adapter), the mac_address field on the phone record
+    // itself, and finally a phone named with the Unified CM device name ("SEP64F69DD5C9B0"). Each
+    // place must yield exactly one phone; two phones on one MAC or one device name is never
+    // guessed. Checking that the adapter owner really is an IP Phone is what keeps a switch or
+    // server adapter with a colliding MAC out.
+    var nic = new GlideRecord('cmdb_ci_network_adapter');   // 1. adapter with that MAC, owned by an IP phone
     nic.addQuery('mac_address', 'IN', candidates.join(','));
     nic.addNotNullQuery('cmdb_ci');
     nic.query();
@@ -87,40 +63,25 @@
     }
     if (count == 1)
         return first;
-    // ====== STAGE 3: Attempt 2: the MAC stored on the IP phone record itself =====================
-    // What   : searches the IP Phone class for a phone whose own mac_address field is one of the
-    //          four spellings and accepts it when it is the only one; otherwise attempt 3 runs.
-    // Why    : some loads write the MAC on the phone record instead of an adapter record.
-    // Sample : the IP Phone "SEP64F69DD5C9B0" with mac_address "64F69DD5C9B0" and no second row ->
-    //          return "3f2a9c7e1b8d4a5f9e6c0d2b7a4f8e1c".
-    // =============================================================================================
-    var ph = new GlideRecord('cmdb_ci_ip_phone');
+    var ph = new GlideRecord('cmdb_ci_ip_phone');           // 2. the MAC stored on the phone record
     ph.addQuery('mac_address', 'IN', candidates.join(','));
     if (ignore)
         ph.addQuery('sys_class_name', 'NOT IN', ignore);
     ph.query();
     if (ph.next()) {
         var byMac = ph.getUniqueValue();
-        if (!ph.hasNext())                        // exactly one phone -> match
+        if (!ph.hasNext())
             return byMac;
     }
-    // ====== STAGE 4: Attempt 3: an IP phone named with its Unified CM device name ================
-    // What   : searches the IP Phone class for a phone named "SEP64F69DD5C9B0" (the label in upper
-    //          case) and accepts it when it is the only one.
-    // Why    : a phone loaded from the call manager export carries no MAC on either record but is
-    //          named exactly like the DNS label.
-    // Sample : the IP Phone named "SEP64F69DD5C9B0" and no second row -> return
-    //          "3f2a9c7e1b8d4a5f9e6c0d2b7a4f8e1c". No phone at all -> null.
-    // =============================================================================================
-    var byName = new GlideRecord('cmdb_ci_ip_phone');
-    byName.addQuery('name', label.toUpperCase());  // "SEP64F69DD5C9B0"
+    var byName = new GlideRecord('cmdb_ci_ip_phone');       // 3. the phone named with its device name
+    byName.addQuery('name', label.toUpperCase());
     if (ignore)
         byName.addQuery('sys_class_name', 'NOT IN', ignore);
     byName.query();
     if (!byName.next())
         return null;
     var named = byName.getUniqueValue();
-    if (byName.hasNext())                         // two phones with one device name -> never guess
+    if (byName.hasNext())
         return null;
     return named;
 })(rule, sourceValue, sourcePayload);

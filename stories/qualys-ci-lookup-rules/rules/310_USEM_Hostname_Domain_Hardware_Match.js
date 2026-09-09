@@ -1,77 +1,54 @@
-/* =================================================================================================
-   RULE 310 - USEM Hostname Domain Hardware Match
-   =================================================================================================
-   Match by short hostname plus domain evidence anywhere in the hardware tree. Second combination
-   stage, for hosts whose CI is classed generically (Server, Computer) or differently from the OS.
+/* USEM Hostname Domain Hardware Match
+   -------------------------------------------------------------------------------------------------
+   Short hostname plus domain evidence again, across the whole hardware tree, for CIs classed
+   generically (Server, Computer) or differently from the scanned OS.
 
-   SAMPLE PAYLOAD (one Qualys Host Detection record, used in every example below)
-   {
-     "ID": "35884392",
-     "IP": "171.128.140.192",
-     "TRACKING_METHOD": "IP",
-     "OS": "Ubuntu/Linux",
-     "DNS": "lrche01xtrapd01.sdi.corp.bankofamerica.com"
-   }
+   Input  : sourceValue is the DNS field; the rule also reads the IP from sourcePayload.
+   Returns: the sys_id of the one hardware CI named with the short hostname whose fqdn or dns_domain
+            agrees with the scanned domain; null otherwise.
 
-   sourceValue   = the DNS field -> "lrche01xtrapd01.sdi.corp.bankofamerica.com"
-   sourcePayload = the whole record; the rule also reads the IP from it
-   Expected for the sample: the hardware CI named "lrche01xtrapd01" whose fqdn is
-   "lrche01xtrapd01.sdi.corp.bankofamerica.com" or whose dns_domain is "sdi.corp.bankofamerica.com",
-   for example a CI in the generic Server class.
-
-   WHY THIS RULE SITS AT ORDER 310
-   Rules run from the lowest order to the highest; the first rule that returns a CI wins and the
-   later rules are skipped. A rule that returns null passes the host on.
-   - Before it : 300 tried hostname plus domain inside the class the OS implies (Linux Server for
-                 the sample OS "Ubuntu/Linux").
-   - Reaches it: hosts whose CI is classed generically (Server, Computer) or differently from the
-                 scanned OS, so the class-scoped search found nothing.
-   - After it  : 350 (layered DNS records) and 400/410 (short hostname without domain evidence).
-   ================================================================================================= */
+   Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
+   Before : USEM Hostname Domain Class Match tried the same evidence inside the class the OS
+            implies.
+   Reaches: hosts whose CI is classed generically or differently from the scanned OS, so the
+            class-scoped search found nothing.
+   After  : USEM Layered DNS Match and then the plain hostname rules.
+   ------------------------------------------------------------------------------------------------- */
 (function process(rule, sourceValue, sourcePayload) {
-    if (!sourceValue)                             // nothing to look up -> null = "no match from this rule"
+    if (!sourceValue)                             // nothing to look up
         return null;
-    var full = ('' + sourceValue).trim().toLowerCase();   // "lrche01xtrapd01.sdi.corp.bankofamerica.com"
-    var dot = full.indexOf('.');                  // 15, position of the first dot
-    if (dot < 1)                                  // no domain part -> the hostname rules (400+) handle bare labels
+    var full = ('' + sourceValue).trim().toLowerCase();   // e.g. "lrche01xtrapd01.sdi.corp.bankofamerica.com"
+    var dot = full.indexOf('.');
+    if (dot < 1)                                  // a bare label is left to the hostname rules
         return null;
     var host = full.substring(0, dot);            // "lrche01xtrapd01"
     var domain = full.substring(dot + 1);         // "sdi.corp.bankofamerica.com"
-    var ip = sourcePayload.IP ? '' + sourcePayload.IP : '';   // "171.128.140.192", used only to break ties
-    // CI classes that must never be matched (placeholder and technical classes). Administrators
-    // keep the list in the property sn_sec_cmn.ignoreCIClass; the framework may pass the same list
-    // in as _ignoreClass.
+    var ip = sourcePayload.IP ? '' + sourcePayload.IP : '';   // only used to break a tie
+    // Classes that must never be matched (placeholder and technical CIs); the list lives in the
+    // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
     var ignore = (typeof _ignoreClass != 'undefined' && _ignoreClass) ?
         ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
-    // -> ignore =
-    //    "sn_sec_cmn_unmatched_ci,sn_vul_qualys_ci,cmdb_ci_unclassed_hardware,cmdb_ci_incomplete_ip,cmdb_ci_dns_name"
-    // ====== STAGE 1: Hostname plus domain evidence, with the scanned IP as tie-break (pickCombo) =
-    // What   : pickCombo() searches one table for CIs named with the short hostname and keeps a CI
-    //          only when its own domain information agrees with the scanned domain: its fqdn equals
-    //          the scanned name, or its dns_domain equals the scanned domain, or its fqdn starts
-    //          with the hostname and contains the domain. One confirmed CI -> match. Several but
-    //          exactly one with the scanned IP -> that one. Anything else -> null.
-    // Why    : the same short hostname can exist in several domains (a test and a production
-    //          machine both called app01). Domain evidence on the CI itself stops the findings from
-    //          landing on the namesake in another domain.
-    // Sample : the Server "lrche01xtrapd01" has dns_domain "sdi.corp.bankofamerica.com" ->
-    //          confirmed -> good = ["3f2a9c7e1b8d4a5f9e6c0d2b7a4f8e1c"] -> return
-    //          "3f2a9c7e1b8d4a5f9e6c0d2b7a4f8e1c". A CI "lrche01xtrapd01" with dns_domain
-    //          "lab.example.net" is skipped.
-    // =============================================================================================
+    // -- Short hostname plus domain evidence, scanned IP as the tie-break -------------------------
+    // pickCombo() looks for CIs under Hardware named with the short hostname and keeps one only
+    // when its own record agrees with the scanned domain: fqdn equal to the scanned name,
+    // dns_domain equal to the scanned domain, or an fqdn that starts with the hostname and contains
+    // the domain. The same short name lives in several domains (a test and a production box both
+    // called app01), and this check is what keeps the findings off the namesake. One confirmed CI
+    // is the match; several with exactly one carrying the scanned IP gives that one; anything else
+    // declines.
     function pickCombo(table) {
         var gr = new GlideRecord(table);
         if (!gr.isValid())
             return null;
-        gr.addQuery('name', host);                // name = "lrche01xtrapd01" (case-insensitive)
+        gr.addQuery('name', host);                // name compares case-insensitively
         if (ignore)
             gr.addQuery('sys_class_name', 'NOT IN', ignore);
         gr.query();
         var good = [];                            // CIs whose domain evidence agrees
         var ipHits = [];                          // those that also carry the scanned IP
         while (gr.next()) {
-            var cifqdn = ('' + gr.getValue('fqdn')).toLowerCase();        // e.g. "lrche01xtrapd01.sdi.corp.bankofamerica.com"
-            var cidom = ('' + gr.getValue('dns_domain')).toLowerCase();   // e.g. "sdi.corp.bankofamerica.com"
+            var cifqdn = ('' + gr.getValue('fqdn')).toLowerCase();
+            var cidom = ('' + gr.getValue('dns_domain')).toLowerCase();
             if (cifqdn == full || cidom == domain ||
                 (cifqdn && cifqdn.indexOf(host + '.') == 0 && cifqdn.indexOf(domain) > 0)) {
                 good.push(gr.getUniqueValue());
@@ -79,13 +56,11 @@
                     ipHits.push(gr.getUniqueValue());
             }
         }
-        // -> good = ["3f2a9c7e1b8d4a5f9e6c0d2b7a4f8e1c"], ipHits =
-        //    ["3f2a9c7e1b8d4a5f9e6c0d2b7a4f8e1c"] for the sample
-        if (good.length == 1)                     // one confirmed CI -> match
+        if (good.length == 1)
             return good[0];
-        if (good.length > 1 && ipHits.length == 1) // several, one confirmed by the IP -> that one
+        if (good.length > 1 && ipHits.length == 1) // several, one confirmed by the IP
             return ipHits[0];
-        return null;                              // none, or an unresolved tie -> decline
+        return null;                              // none, or a tie nothing can break
     }
-    return pickCombo('cmdb_ci_hardware');     // hostname + domain anywhere under Hardware
+    return pickCombo('cmdb_ci_hardware');     // hostname plus domain anywhere under Hardware
 })(rule, sourceValue, sourcePayload);

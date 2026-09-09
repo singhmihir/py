@@ -17,7 +17,7 @@ ui = SNUI(); ui.app('global')
 d = ui.js('''
 var o = {rows: []};
 var ux = new GlideRecord('sys_update_xml'); ux.addQuery('update_set', %s); ux.orderBy('target_name'); ux.query();
-while (ux.next()) o.rows.push('' + ux.getValue('target_name') + ' | ' + ux.application.getDisplayValue() + ' | ' + ((('' + ux.getValue('payload')).indexOf('WHY THIS RULE SITS AT ORDER') > -1 || ('' + ux.getValue('payload')).indexOf('usem.ci_lookup') > -1) ? 'rewritten' : 'OLD TEXT'));
+while (ux.next()) o.rows.push('' + ux.getValue('target_name') + ' | ' + ux.application.getDisplayValue() + ' | ' + ((('' + ux.getValue('payload')).indexOf('Place in the chain') > -1 || ('' + ux.getValue('payload')).indexOf('usem.ci_lookup') > -1) ? 'rewritten' : 'OLD TEXT'));
 var us = new GlideRecord('sys_update_set'); us.get(%s); o.name = '' + us.name; o.app = '' + us.application.getDisplayValue(); us.setValue('state', 'complete'); us.update();
 var us2 = new GlideRecord('sys_update_set'); us2.get(%s); o.remote_id = '' + new UpdateSetExport().exportUpdateSet(us2);
 gs.print('X::' + JSON.stringify(o));''' % (json.dumps(SET), json.dumps(SET), json.dumps(SET)))

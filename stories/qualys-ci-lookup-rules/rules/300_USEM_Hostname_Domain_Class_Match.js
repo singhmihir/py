@@ -1,72 +1,47 @@
-/* =================================================================================================
-   RULE 300 - USEM Hostname Domain Class Match
-   =================================================================================================
-   Match by the combination of short hostname and domain, inside the class the OS implies. Serves
-   CIs named with the short hostname that carry the domain in another field (dns_domain or fqdn)
-   instead of an exact fqdn value.
+/* USEM Hostname Domain Class Match
+   -------------------------------------------------------------------------------------------------
+   For CIs that are named with the short hostname and carry the domain in another field (dns_domain,
+   or an fqdn that was never copied into the name). The short name and the domain are matched
+   together, inside the class the scanned OS points at.
 
-   SAMPLE PAYLOAD (one Qualys Host Detection record, used in every example below)
-   {
-     "ID": "35832680",
-     "IP": "171.128.225.96",
-     "TRACKING_METHOD": "AGENT",
-     "OS": "Red Hat Enterprise Linux 9.8",
-     "DNS": "ah-1047132-001.sdi.corp.bankofamerica.com",
-     "QG_HOSTID": "633769a4-0139-0002-e352-005056bf41ea"
-   }
+   Input  : sourceValue is the DNS field; the rule also reads the OS and the IP from sourcePayload.
+   Returns: the sys_id of the one CI of that class named with the short hostname whose own domain
+            information agrees with the scanned domain; a namesake in another domain is never
+            picked.
 
-   sourceValue   = the DNS field -> "ah-1047132-001.sdi.corp.bankofamerica.com"
-   sourcePayload = the whole record; the rule also reads the OS and the IP from it
-   Expected for the sample: the Linux Server CI named "ah-1047132-001" whose dns_domain is
-   "sdi.corp.bankofamerica.com" (or whose fqdn is the scanned name); a namesake in another domain is
-   never picked.
-
-   WHY THIS RULE SITS AT ORDER 300
-   Rules run from the lowest order to the highest; the first rule that returns a CI wins and the
-   later rules are skipped. A rule that returns null passes the host on.
-   - Before it : 250/260 looked for the exact FQDN in the fqdn field.
-   - Reaches it: hosts whose CI has no exact fqdn value but is named with the short hostname and
-                 shows the domain elsewhere.
-   - After it  : 310 repeats the search across all hardware; 350 uses the layered DNS records;
-                 400/410 accept a unique short name without domain evidence.
-   ================================================================================================= */
+   Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
+   Before : the FQDN rules looked for the exact name in the fqdn field and found nothing.
+   Reaches: hosts whose CI has no exact fqdn value but is named with the short hostname and shows
+            the domain elsewhere.
+   After  : USEM Hostname Domain Hardware Match repeats the search across all hardware, USEM Layered
+            DNS Match reads the discovery DNS records, and the plain hostname rules accept a unique
+            short name without domain evidence.
+   ------------------------------------------------------------------------------------------------- */
 (function process(rule, sourceValue, sourcePayload) {
-    if (!sourceValue)                             // nothing to look up -> null = "no match from this rule"
+    if (!sourceValue)                             // nothing to look up
         return null;
-    var full = ('' + sourceValue).trim().toLowerCase();   // "ah-1047132-001.sdi.corp.bankofamerica.com"
-    var dot = full.indexOf('.');                  // 14, position of the first dot
-    if (dot < 1)                                  // no domain part -> the hostname rules (400+) handle bare labels
+    var full = ('' + sourceValue).trim().toLowerCase();   // e.g. "ah-1047132-001.sdi.corp.bankofamerica.com"
+    var dot = full.indexOf('.');
+    if (dot < 1)                                  // a bare label is left to the hostname rules
         return null;
     var host = full.substring(0, dot);            // "ah-1047132-001"
     var domain = full.substring(dot + 1);         // "sdi.corp.bankofamerica.com"
-    var ip = sourcePayload.IP ? '' + sourcePayload.IP : '';   // "171.128.225.96", used only to break ties
-    // CI classes that must never be matched (placeholder and technical classes). Administrators
-    // keep the list in the property sn_sec_cmn.ignoreCIClass; the framework may pass the same list
-    // in as _ignoreClass.
+    var ip = sourcePayload.IP ? '' + sourcePayload.IP : '';   // only used to break a tie
+    // Classes that must never be matched (placeholder and technical CIs); the list lives in the
+    // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
     var ignore = (typeof _ignoreClass != 'undefined' && _ignoreClass) ?
         ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
-    // -> ignore =
-    //    "sn_sec_cmn_unmatched_ci,sn_vul_qualys_ci,cmdb_ci_unclassed_hardware,cmdb_ci_incomplete_ip,cmdb_ci_dns_name"
-    // ====== STAGE 1: Work out the CMDB class from the scanned OS =================================
-    // What   : classFor() maps the OS text to the class the CI should be in; the search that
-    //          follows is limited to that class and its sub-classes.
-    // Why    : evidence is trusted only when it lands in a class that agrees with the scanned OS. A
-    //          Red Hat host must resolve to a Linux Server CI, never to a Windows Server that
-    //          happens to carry the same value.
-    // Sample : classFor("Red Hat Enterprise Linux 9.8") -> "cmdb_ci_linux_server" (Linux Server).
-    //          An unknown or multi-guess OS gives "" and this rule declines so that rule 310 (all
-    //          hardware, no class) takes over.
-    // =============================================================================================
-    // classFor() turns the OS text Qualys reports into the CMDB class the CI lives in. Examples:
-    //   "Red Hat Enterprise Linux 9.8"                              -> cmdb_ci_linux_server
-    //   "Windows Server 2016 Standard 64 bit Edition Version 1607"  -> cmdb_ci_win_server
-    //   "Windows 10 Enterprise 64 bit Edition Version 22H2"         -> cmdb_ci_computer
-    //   "VMware ESXi 7.0.3 build 24723872"                          -> cmdb_ci_esx_server
-    //   "AIX 7.3 TL3"                                               -> cmdb_ci_aix_server
-    //   "Cisco NX-OS 9.3(8)"                                        -> cmdb_ci_netgear
-    //   "Ubuntu / Tiny Core Linux / Linux 2.6.x / IBM ASM / HP StoreOnce / F5 Networks Big-IP / Cisco IOS Software"
-    //       -> "" : three or more guesses separated by "/" means the unauthenticated scan
-    //               could not identify the OS, so no class is chosen
+    // -- Class from the scanned OS ----------------------------------------------------------------
+    // The search below stays inside the class the OS points at (sub-classes included), so a Red Hat
+    // host can only land on a Linux Server and a Windows Server carrying the same value is never
+    // seen. "Red Hat Enterprise Linux 9.8" gives cmdb_ci_linux_server (Linux Server). An unknown or
+    // multi-guess OS gives no class and the rule declines; the hardware-wide hostname-plus-domain
+    // match takes over.
+    // classFor() maps the OS text Qualys reports to the CMDB class the CI should be in, e.g. "Red
+    // Hat Enterprise Linux 9.8" is a Linux Server, "Windows Server 2016 Standard" a Windows Server
+    // and "VMware ESXi 7.0.3" an ESX Server. A string of guesses separated by "/" comes from an
+    // unauthenticated scan that could not identify the OS; three or more guesses give no class at
+    // all.
     function classFor(os) {
         if (!os) return '';
         var s = ('' + os).toLowerCase();
@@ -87,36 +62,29 @@
         return '';
     }
     var pref = classFor(sourcePayload.OS);
-    // -> pref = "cmdb_ci_linux_server"
     if (!pref)
         return null;
-    // ====== STAGE 2: Hostname plus domain evidence, with the scanned IP as tie-break (pickCombo) =
-    // What   : pickCombo() searches one table for CIs named with the short hostname and keeps a CI
-    //          only when its own domain information agrees with the scanned domain: its fqdn equals
-    //          the scanned name, or its dns_domain equals the scanned domain, or its fqdn starts
-    //          with the hostname and contains the domain. One confirmed CI -> match. Several but
-    //          exactly one with the scanned IP -> that one. Anything else -> null.
-    // Why    : the same short hostname can exist in several domains (a test and a production
-    //          machine both called app01). Domain evidence on the CI itself stops the findings from
-    //          landing on the namesake in another domain.
-    // Sample : the Linux Server "ah-1047132-001" has dns_domain "sdi.corp.bankofamerica.com" ->
-    //          confirmed -> good = ["3f2a9c7e1b8d4a5f9e6c0d2b7a4f8e1c"] -> return
-    //          "3f2a9c7e1b8d4a5f9e6c0d2b7a4f8e1c". A CI "ah-1047132-001" with dns_domain
-    //          "lab.example.net" is skipped.
-    // =============================================================================================
+    // -- Short hostname plus domain evidence, scanned IP as the tie-break -------------------------
+    // pickCombo() looks for CIs of that class named with the short hostname and keeps one only when
+    // its own record agrees with the scanned domain: fqdn equal to the scanned name, dns_domain
+    // equal to the scanned domain, or an fqdn that starts with the hostname and contains the
+    // domain. The same short name lives in several domains (a test and a production box both called
+    // app01), and this check is what keeps the findings off the namesake. One confirmed CI is the
+    // match; several with exactly one carrying the scanned IP gives that one; anything else
+    // declines.
     function pickCombo(table) {
         var gr = new GlideRecord(table);
         if (!gr.isValid())
             return null;
-        gr.addQuery('name', host);                // name = "ah-1047132-001" (case-insensitive)
+        gr.addQuery('name', host);                // name compares case-insensitively
         if (ignore)
             gr.addQuery('sys_class_name', 'NOT IN', ignore);
         gr.query();
         var good = [];                            // CIs whose domain evidence agrees
         var ipHits = [];                          // those that also carry the scanned IP
         while (gr.next()) {
-            var cifqdn = ('' + gr.getValue('fqdn')).toLowerCase();        // e.g. "ah-1047132-001.sdi.corp.bankofamerica.com"
-            var cidom = ('' + gr.getValue('dns_domain')).toLowerCase();   // e.g. "sdi.corp.bankofamerica.com"
+            var cifqdn = ('' + gr.getValue('fqdn')).toLowerCase();
+            var cidom = ('' + gr.getValue('dns_domain')).toLowerCase();
             if (cifqdn == full || cidom == domain ||
                 (cifqdn && cifqdn.indexOf(host + '.') == 0 && cifqdn.indexOf(domain) > 0)) {
                 good.push(gr.getUniqueValue());
@@ -124,13 +92,11 @@
                     ipHits.push(gr.getUniqueValue());
             }
         }
-        // -> good = ["3f2a9c7e1b8d4a5f9e6c0d2b7a4f8e1c"], ipHits =
-        //    ["3f2a9c7e1b8d4a5f9e6c0d2b7a4f8e1c"] for the sample
-        if (good.length == 1)                     // one confirmed CI -> match
+        if (good.length == 1)
             return good[0];
-        if (good.length > 1 && ipHits.length == 1) // several, one confirmed by the IP -> that one
+        if (good.length > 1 && ipHits.length == 1) // several, one confirmed by the IP
             return ipHits[0];
-        return null;                              // none, or an unresolved tie -> decline
+        return null;                              // none, or a tie nothing can break
     }
-    return pickCombo(pref);                   // hostname + domain inside the Linux Server class
+    return pickCombo(pref);                   // hostname plus domain inside the class chosen
 })(rule, sourceValue, sourcePayload);
