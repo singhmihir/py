@@ -677,7 +677,7 @@ divider('5', 'Testing and delivery', 'How the chain was exercised end to end, wh
   slideTitle(s, 'What ships, and how it is operated', 'Delivery');
   const sets = [
     ['Rule scripts', '16 updates', 'The rewritten scripts for the existing custom chain. Names, orders, source fields and descriptions are untouched; only the script field changes.'],
-    ['Backlog rules', '3 updates', 'Three new rules, each carrying its own lists. Applies on top of the first set.'],
+    ['Backlog rules', '9 updates', 'Three new rules, each carrying its own lists, plus the removal of the six properties an earlier cut shipped. Applies on top of the first set.'],
   ];
   sets.forEach(([t2, n, d], i) => {
     const x = M + i * 6.28;
