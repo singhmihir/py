@@ -1,0 +1,12 @@
+{
+ "set": "b0e8c03093178b10e3aef0aefaba1083",
+ "set_name": "INC0010003_MS_Kafka Producer V2 and Payload Validator_V1.0",
+ "scope": "9d1e03de930b8310e3aef0aefaba10d5",
+ "si": {
+  "BOFA_SI_KafkaProducerV2": "b4e8c03093178b10e3aef0aefaba1088",
+  "BOFA_SI_KafkaPayloadValidator": "8de8c03093178b10e3aef0aefaba109b"
+ },
+ "property": "2ad8003093178b10e3aef0aefaba1079",
+ "topic": "e6d8003093178b10e3aef0aefaba1079",
+ "global_default": "7dba58ecf54403100a22c0b3dfa151af"
+}
