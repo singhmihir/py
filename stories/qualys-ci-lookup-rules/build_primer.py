@@ -86,6 +86,17 @@ table(ws, 4, ['Term', 'In one line', 'Example', 'Why it matters for matching'], 
  ('Network interface / VLAN', 'A switch or router has many addresses, one per interface or VLAN, each scanned under its own label.', 'uspaltwrr01drm0119-cz04-hsrp-vlan705.network.bankofamerica.com', 'The device CI is named with the leading part only; rule 430 walks the label prefix by prefix.'),
  ('Unmatched', 'A scanned host no rule could place on a CI.', 'the Unmatched CI list', 'These are the hosts a person has to look at. The new rules were written from what the unmatched list is made of (sheet 6).'),
 ], [26, 46, 46, 52])
+r = 26
+para(ws, r, 'Hostname vs domain vs FQDN vs DNS - the same machine, four angles', True, NAVY, 11, 20, 4); r += 1
+para(ws, r, 'Take the real name from the payload: ah-1047132-001.sdi.corp.bankofamerica.com', False, '000000', 10, 18, 4); r += 1
+table(ws, r, ['Piece', 'Value', 'What it is', 'Analogy'], [
+ ('Hostname', 'ah-1047132-001', 'The machine\'s own short name. Unique only inside its domain: another ah-1047132-001 can exist in hk.baml.com. No dots.', 'First name'),
+ ('Domain', 'sdi.corp.bankofamerica.com', 'The area the name belongs to.', 'Surname + address'),
+ ('FQDN', 'ah-1047132-001.sdi.corp.bankofamerica.com', 'Hostname + domain. "Fully qualified" = nothing missing, so it is unique everywhere. Has dots.', 'Full name on an envelope'),
+ ('DNS', '(not a name)', 'The phone book of the network: it translates names to IP addresses and back. Qualys asks DNS "who is 171.128.225.96?", DNS answers with the FQDN, and Qualys puts that answer in the payload field it calls DNS. So the DNS field holds an FQDN (occasionally just a hostname, when the phone book only knows the short name).', 'The phone book'),
+], [26, 46, 46, 52])
+ws.freeze_panes = 'A5'
+para(ws, r + 6, 'Quick test: no dots = hostname; dots = FQDN; "DNS" = where the FQDN came from. The rules check every way a CI may have stored the name: the FQDN in the fqdn field (250/260), the hostname in name with the domain in dns_domain (300/310), the hostname alone (400/410), the whole FQDN typed into name (450/850).', False, '000000', 10, 44, 4)
 
 # ------------------------------------------------------------ 3. One payload
 ws = wb.create_sheet('3 One payload')
