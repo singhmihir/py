@@ -6,10 +6,10 @@ const FONT = 'Arial', SZ = 18, MUTED = '555555', HEAD = 'E8EAED', ZEBRA = 'F6F7F
 const HAIR = { style: BorderStyle.SINGLE, size: 4, color: 'C8CCD0' };
 const t = (text, o) => { o = o || {}; return new TextRun({ text, font: o.mono ? 'Consolas' : FONT, size: o.size || SZ, bold: o.bold, italics: o.italics, color: o.color }); };
 const link = (url, label) => new ExternalHyperlink({ children: [new TextRun({ text: label, font: FONT, size: SZ, color: '1155CC', underline: {} })], link: url });
-const p = (runs, o) => { o = o || {}; return new Paragraph({ children: Array.isArray(runs) ? runs : [runs], spacing: { before: o.before || 0, after: o.after == null ? 40 : o.after, line: o.line || 228 }, alignment: o.align }); };
-const h = (text) => new Paragraph({ children: [t(text, { bold: true, size: 20 })], spacing: { before: 100, after: 30, line: 240 },
+const p = (runs, o) => { o = o || {}; return new Paragraph({ children: Array.isArray(runs) ? runs : [runs], spacing: { before: o.before || 0, after: o.after == null ? 40 : o.after, line: o.line || 222 }, alignment: o.align }); };
+const h = (text) => new Paragraph({ children: [t(text, { bold: true, size: 20 })], spacing: { before: 80, after: 24, line: 236 },
   border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: 'C8CCD0', space: 2 } } });
-const b = (runs, level) => new Paragraph({ children: Array.isArray(runs) ? runs : [runs], numbering: { reference: 'bullets', level: level || 0 }, spacing: { after: 24, line: 228 } });
+const b = (runs, level) => new Paragraph({ children: Array.isArray(runs) ? runs : [runs], numbering: { reference: 'bullets', level: level || 0 }, spacing: { after: 20, line: 222 } });
 const cell = (children, w, fill) => new TableCell({ children, width: { size: w, type: WidthType.DXA }, shading: fill ? { type: ShadingType.CLEAR, fill } : undefined,
   margins: { top: 40, bottom: 40, left: 80, right: 80 } });
 function table(headers, rows, widths) {
@@ -50,15 +50,15 @@ const D = [
 ];
 D.forEach((d) => K.push(b([link(d[1], d[0]), t('  ' + d[1].replace(/^https?:\/\/(www\.)?/, '').split('/')[0], { color: MUTED, size: 16 })])));
 
-K.push(h('4. Where the lengths are stored on the instance'));
-K.push(p(t('Dictionary entries, table sys_dictionary. Open /sys_dictionary.do?sys_id=<id> on the instance to read the Max length figure.', { color: MUTED }), { after: 40 }));
-K.push(table(['Related list', 'Field', 'Max length', 'Dictionary record id'], [
-  ['HTTP Query Parameters (sys_rest_message_fn_param_defs)', 'value', '1,000', '4d84182cf50003100a22c0b3dfa15142'],
-  ['Variable Substitutions (sys_rest_message_fn_parameters)', 'value "Test value"', '1,000', 'dd84182cf50003100a22c0b3dfa1519a'],
-  ['HTTP Method (sys_rest_message_fn)', 'rest_endpoint', '200', '7084d42cf50003100a22c0b3dfa1518f'],
-  ['Integration Instance Parameter (sn_sec_int_impl_config)', 'value', '512', '1b9d2390934e4710e3aef0aefaba1029'],
-  ['System Property (sys_properties)', 'value', '4,000', '31931420f50003100a22c0b3dfa151f8'],
-], [3100, 1500, 900, 4500]));
+K.push(h('4. Where the lengths are stored'));
+K.push(p([t('Max length of the dictionary entry (sys_dictionary), not a property record. Open on any instance: ', { color: MUTED }), t('/sys_dictionary_list.do?sysparm_query=', { mono: true, size: 16, color: MUTED }), t(' plus the query.', { color: MUTED })], { after: 30 }));
+K.push(table(['Related list', 'Field', 'Max length', 'Dictionary entry (query)'], [
+  ['HTTP Query Parameters (sys_rest_message_fn_param_defs)', 'value', '1,000', 'name=sys_rest_message_fn_param_defs^element=value'],
+  ['Variable Substitutions (sys_rest_message_fn_parameters)', 'value "Test value"', '1,000', 'name=sys_rest_message_fn_parameters^element=value'],
+  ['HTTP Method (sys_rest_message_fn)', 'rest_endpoint', '200', 'name=sys_rest_message_fn^element=rest_endpoint'],
+  ['Integration Instance Parameter (sn_sec_int_impl_config)', 'value', '512', 'name=sn_sec_int_impl_config^element=value'],
+  ['System Property (sys_properties)', 'value', '4,000', 'name=sys_properties^element=value'],
+], [2900, 1400, 850, 4850]));
 
 K.push(h('5. Suggested wording for the comment'));
 K.push(p(t('The ids value is supplied at run time with RESTMessageV2.setStringParameter, which substitutes it into the ${ids} placeholder when the request is executed and escapes XML reserved characters. The value is not stored, so no field length applies to it. The HTTP Query Parameter Value field it substitutes into is declared at 1,000 characters (sys_rest_message_fn_param_defs.value) and a system property at 4,000 (sys_properties.value); neither length is enforced on save, so the declared figure is the supported ceiling. The practical limit is the request URL: plan for about 2,000 characters of query string (IIS default 2,048 bytes; Apache 8,190; RFC 9110 recommends 8,000 octets) and use POST for anything longer. Qualys accepts comma-separated IDs and ranges in ids, processes 1,000 policy records per request and pages the rest.', { italics: true }), { after: 0 }));
@@ -68,6 +68,6 @@ const doc = new Document({
   styles: { default: { document: { run: { font: FONT, size: SZ } } } },
   numbering: { config: [{ reference: 'bullets', levels: [{ level: 0, format: LevelFormat.BULLET, text: '•', alignment: AlignmentType.LEFT,
     style: { paragraph: { indent: { left: 300, hanging: 200 } } } }] }] },
-  sections: [{ properties: { page: { margin: { top: 600, bottom: 560, left: 680, right: 680 } } }, children: K }],
+  sections: [{ properties: { page: { margin: { top: 500, bottom: 460, left: 680, right: 680 } } }, children: K }],
 });
 Packer.toBuffer(doc).then((buf) => { const out = __dirname + '/../../setStringParameter and the Qualys ids parameter.docx'; fs.writeFileSync(out, buf); console.log('written', out, buf.length, 'bytes'); });
