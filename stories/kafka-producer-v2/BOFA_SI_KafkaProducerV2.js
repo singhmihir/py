@@ -1,10 +1,11 @@
 var BOFA_SI_KafkaProducerV2 = Class.create();
 BOFA_SI_KafkaProducerV2.prototype = {
 
-    /*
-     * Sends outbound messages to Hermes Kafka through sn_ih_kafka.ProducerV2:
-     * send(topicSysID, key, message, isSync, headers, schemaID)
-     * https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html
+    /**
+     * Configuration: the ProducerV2 send options, the Kafka topic property per source table and the
+     * envelope fields every payload must carry. ProducerV2 signature: send(topicSysID, key, message,
+     * isSync, headers, schemaID), see https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html
+     * @returns {void}
      */
     initialize: function() {
         this.IS_SYNC = false; // the caller does not wait for the broker acknowledgement
@@ -32,12 +33,11 @@ BOFA_SI_KafkaProducerV2.prototype = {
     },
 
     /**
-     * Sends one message to the Kafka topic of the record's table. The payload is
-     * validated first (see the payload validation section below), so a malformed
-     * message is logged and never sent. The message key is <table>.<sys_id>, which
-     * keeps every message about one record on the same partition.
-     * @param {String|Object} payload - the message as a JSON string or as the object it was built from
+     * Validates the payload and sends it to the Kafka topic of the record's table with the key
+     * <table>.<sys_id>; any failure is logged once and nothing is sent.
+     * @param {String|Object} payload - the message as JSON text or as the object it was built from
      * @param {GlideRecord} record - the record the message is about
+     * @returns {void}
      */
     sendPayload: function(payload, record) {
         var subject = 'record';
@@ -53,6 +53,12 @@ BOFA_SI_KafkaProducerV2.prototype = {
         }
     },
 
+    /**
+     * Resolves the Kafka topic of a table from its system property; throws when the table has no
+     * topic or the property is empty.
+     * @param {String} table - the source table name
+     * @returns {String} sys_id of the Kafka Topic [sys_kafka_topic]
+     */
     _topicSysId: function(table) {
         if (!this.TOPIC_PROPERTIES.hasOwnProperty(table))
             throw new Error('no Kafka topic is associated with table ' + table);
@@ -62,6 +68,13 @@ BOFA_SI_KafkaProducerV2.prototype = {
         return topicSysId;
     },
 
+    /**
+     * Hands the message to sn_ih_kafka.ProducerV2.
+     * @param {String} topicSysId - sys_id of the Kafka topic
+     * @param {String} key - the message key
+     * @param {String} message - the message text
+     * @returns {void}
+     */
     _send: function(topicSysId, key, message) {
         new sn_ih_kafka.ProducerV2().send(topicSysId, key, message, this.IS_SYNC, this.HEADERS, this.SCHEMA_ID);
     },
@@ -75,8 +88,10 @@ BOFA_SI_KafkaProducerV2.prototype = {
     // ________________________________________________________________________________________
 
     /**
-     * @param {String|Object} payload - a JSON string, or the object it was built from
-     * @returns {String} the payload serialised as the message text to send
+     * Checks the payload against the message contract and serialises it; throws an Error naming
+     * the first problem found.
+     * @param {String|Object} payload - JSON text or the object it was built from
+     * @returns {String} the message text to send
      */
     _validate: function(payload) {
         if (this._isEmpty(payload))
@@ -89,6 +104,11 @@ BOFA_SI_KafkaProducerV2.prototype = {
         return JSON.stringify(message);
     },
 
+    /**
+     * Parses JSON text; throws with the parser's reason when it is not valid JSON.
+     * @param {String} text - the payload text
+     * @returns {*} the parsed value
+     */
     _parse: function(text) {
         if (!text.trim())
             throw new Error('payload is empty');
@@ -99,6 +119,11 @@ BOFA_SI_KafkaProducerV2.prototype = {
         }
     },
 
+    /**
+     * Checks that the envelope is an object carrying every mandatory field; throws otherwise.
+     * @param {*} envelope - the payload's envelope
+     * @returns {void}
+     */
     _checkEnvelope: function(envelope) {
         if (!this._isObject(envelope))
             throw new Error(this.ENVELOPE_KEY + ' is missing');
@@ -107,6 +132,12 @@ BOFA_SI_KafkaProducerV2.prototype = {
                 throw new Error(this.ENVELOPE_KEY + '.' + this.ENVELOPE_FIELDS[i] + ' is missing or empty');
     },
 
+    /**
+     * Checks that the payload holds exactly one non-empty list of element objects whose length
+     * equals envelope.element_count; throws otherwise.
+     * @param {Object} message - the parsed payload
+     * @returns {void}
+     */
     _checkElements: function(message) {
         var keys = Object.keys(message);
         var lists = keys.filter(function(key) {
@@ -126,10 +157,20 @@ BOFA_SI_KafkaProducerV2.prototype = {
                 throw new Error(name + '[' + i + '] is not an element');
     },
 
+    /**
+     * Tells whether a value is a plain object (not null, not an array).
+     * @param {*} value - the value to check
+     * @returns {Boolean} true for a plain object
+     */
     _isObject: function(value) {
         return value !== null && typeof value === 'object' && !Array.isArray(value);
     },
 
+    /**
+     * Tells whether a value is undefined, null or an empty string.
+     * @param {*} value - the value to check
+     * @returns {Boolean} true when empty
+     */
     _isEmpty: function(value) {
         return value === undefined || value === null || String(value) === '';
     },

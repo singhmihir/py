@@ -5,7 +5,7 @@ from snui import SNUI
 HERE = os.path.dirname(os.path.abspath(__file__))
 SCOPE = '9d1e03de930b8310e3aef0aefaba10d5'  # stand-in scoped app on the PDI
 PROPERTY = 'x_boar_bofa_usem_1.x_boar_bofa.usem.kafka.topic_sys_id'  # read by the producer, test fixture on the PDI
-NAME = 'INC0010003_MS_Kafka Producer V2 with Payload Validation_V1.1'
+NAME = 'INC0010003_MS_Kafka Producer V2 with Payload Validation_V1.2'
 SCRIPTS = {n: open(os.path.join(HERE, n + '.js')).read() for n in ['BOFA_SI_KafkaProducerV2']}
 DESC = {
     'BOFA_SI_KafkaProducerV2': 'Utilizes KafkaProducer V2 to send messages to Hermes kafka. The payload is validated before it is sent (payload validation section of the script).\nDocumentation of API used - https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html',
