@@ -2,7 +2,7 @@
 // instance_readings.json (readings taken on the instance) and citations.json (published sources).
 const fs = require('fs');
 const path = require('path');
-const NM = path.join('/tmp/claude-0/-home-user-py/92674a7d-a733-5fc3-a7aa-42bdf76f593b/scratchpad', 'node_modules');
+const NM = process.env.NODE_MODULES || 'node_modules';   // where docx is installed
 const D = require(path.join(NM, 'docx'));
 const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType,
         BorderStyle, ExternalHyperlink, AlignmentType, ShadingType, TableLayoutType } = D;
