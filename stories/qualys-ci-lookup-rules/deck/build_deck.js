@@ -1,7 +1,7 @@
 // Builds "Qualys CI Lookup Rules - Technical Walkthrough.pptx" from deck_data.json.
 const fs = require('fs');
 const path = require('path');
-const PptxGenJS = require(path.join('/tmp/claude-0/-home-user-py/92674a7d-a733-5fc3-a7aa-42bdf76f593b/scratchpad', 'node_modules', 'pptxgenjs'));
+const PptxGenJS = require('pptxgenjs');   // set NODE_PATH to the node_modules holding pptxgenjs when it is not local
 
 const D = JSON.parse(fs.readFileSync(path.join(__dirname, 'deck_data.json'), 'utf8'));
 
