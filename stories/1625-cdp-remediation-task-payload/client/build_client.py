@@ -6,7 +6,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); STORY = os.path.dirname(HERE)
 sys.path.insert(0, os.path.join(BASE, 'tools'))
 from snui import SNUI
 SCOPE = '9d1e03de930b8310e3aef0aefaba10d5'
-NAME = 'INC0010003_MS_Remediation Task Payload Builder_V1.1'
+NAME = 'INC0010003_MS_Remediation Task Payload Builder_V1.2'
 script = open(os.path.join(HERE, 'BOA_SI_USEM_RemediationTaskPayloadBuilder.js')).read()
 props = {n: open(os.path.join(HERE, n + '.txt')).read().rstrip('\n') for n in json.load(open(os.path.join(HERE, 'property_descriptions.json')))}
 ui = SNUI(); ui.app('global')
