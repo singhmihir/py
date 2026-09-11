@@ -21,7 +21,10 @@ var l = new GlideRecord('syslog'); l.addQuery('message', 'STARTSWITH', 'Remediat
 while (l.next()) o.msgs.push('' + l.getValue('message'));
 gs.print('X::' + JSON.stringify(o));''' % n)['msgs']
 def pairs(table):
-    return [(f, j or f) for f, j in json.loads(P['usem.cdp.remtask.fields.' + table]).items()]
+    out = []
+    for entry in P['usem.cdp.remtask.fields.' + table].replace(',', '\n').split('\n'):
+        if entry.strip(): out.append(tuple(x.strip() for x in entry.split('=')))
+    return out
 def expected_keys(table):
     return [j for _, j in pairs(table)] + ['change_requests', 'exception_requests']
 RECS = {'sn_vul_vulnerability': 'VUL0004576', 'sn_vul_app_vulnerability': 'AVUL0010008', 'sn_vul_container_vulnerability': 'CVUL0010001', 'sn_vulc_result_group': 'CRG0001133'}
@@ -76,17 +79,9 @@ var probe = {};
 var b = new RemediationTaskPayloadBuilder();
 var g = new GlideRecord('sn_vul_vulnerability'); g.addQuery('number', 'VUL0004576'); g.query(); g.next();
 var name = 'usem.cdp.remtask.fields.sn_vul_vulnerability'; var original = gs.getProperty(name);
-gs.setProperty(name, JSON.stringify({"number": "task_number", "short_description": "", "bogus_field": "bogus", "assigned_to.name": "owner_name", "sys_mod_count": "updates", "state": "state", "risk_score": ""}, null, 2));
+gs.setProperty(name, ' number = task_number ,\n short_description,\n\n bogus_field=bogus , assigned_to.name=owner_name ,\r\n sys_mod_count = updates ,\n state=state,\n state=status,\n =nothing,\n risk_score=,');
 probe.custom = new RemediationTaskPayloadBuilder().buildPayload(g);
 probe.mod = '' + g.getValue('sys_mod_count');
-gs.setProperty(name, '{"number": "task_number", ');
-probe.bad_json = new RemediationTaskPayloadBuilder().buildPayload(g);
-gs.setProperty(name, '["number"]');
-probe.array = new RemediationTaskPayloadBuilder().buildPayload(g);
-gs.setProperty(name, '{}');
-probe.empty_obj = new RemediationTaskPayloadBuilder().buildPayload(g);
-gs.setProperty(name, '{"number": 5}');
-probe.non_string = new RemediationTaskPayloadBuilder().buildPayload(g);
 gs.setProperty(name, '');
 probe.blank = new RemediationTaskPayloadBuilder().buildPayload(g);
 gs.setProperty(name, original);
@@ -103,14 +98,10 @@ var left = new GlideRecord('sys_script_include'); left.addQuery('name', 'IN', 'R
 var props = new GlideRecord('sys_properties'); props.addQuery('name', 'STARTSWITH', 'usem.cdp.remtask.').addOrCondition('name', 'usem.remtask.payload.fields'); props.query(); probe.props = []; while (props.next()) probe.props.push('' + props.name);
 gs.print('X::' + JSON.stringify(probe));''')
 custom = json.loads(d2['custom'])['rem_tasks'][0]['remediation_task']
-check('2a property parsing: JSON object in payload order, rename, empty json_field keeps the field name, unknown field, dot-walk', list(custom.keys()) == ['task_number', 'short_description', 'bogus', 'owner_name', 'updates', 'state', 'risk_score', 'change_requests', 'exception_requests'] and custom['task_number'] == 'VUL0004576' and custom['updates'] == d2['mod'], str(list(custom.keys())))
+check('2a property parsing: comma-terminated lines, rename, bare name, blank lines, whitespace, CRLF, duplicate key, empty field, empty json name', list(custom.keys()) == ['task_number', 'short_description', 'bogus', 'owner_name', 'updates', 'state', 'status', 'risk_score', 'change_requests', 'exception_requests'] and custom['task_number'] == 'VUL0004576' and custom['updates'] == d2['mod'] and custom['state'] == custom['status'], str(list(custom.keys())))
 check('2b unknown field and dot-walk entries yield "" without error', custom['bogus'] == '' and custom['owner_name'] == '')
-msgs = errors(12)
+msgs = errors(6)
 check('2c blank table property -> "" with the single error format', d2['blank'] == '' and any(m.endswith('- table sn_vul_vulnerability is not configured in property usem.cdp.remtask.fields.sn_vul_vulnerability') for m in msgs))
-check('2k property not valid JSON -> "" naming the property and the parser reason', d2['bad_json'] == '' and any(re.search(r'- property usem\.cdp\.remtask\.fields\.sn_vul_vulnerability is not valid JSON - .+$', m) for m in msgs), next((m for m in msgs if 'not valid JSON' in m), 'no log'))
-check('2l property is a JSON array -> "" with the format named', d2['array'] == '' and any(m.endswith('- property usem.cdp.remtask.fields.sn_vul_vulnerability must be a JSON object of "servicenow_field": "json_field" pairs') for m in msgs))
-check('2m empty JSON object -> ""', d2['empty_obj'] == '' and any(m.endswith('- property usem.cdp.remtask.fields.sn_vul_vulnerability holds no fields') for m in msgs))
-check('2n json_field that is not a string -> "" naming the field', d2['non_string'] == '' and any(m.endswith('- property usem.cdp.remtask.fields.sn_vul_vulnerability: the json_field for number must be a string') for m in msgs))
 check('2d property restored -> sheet layout back', list(json.loads(d2['restored'])['rem_tasks'][0]['remediation_task'].keys()) == expected_keys('sn_vul_vulnerability'))
 check('2e unsupported table -> "" with the single error format', d2['unsupported'] == '' and ('RemediationTaskPayloadBuilder: payload not built for incident %s - table incident is not configured in property usem.cdp.remtask.fields.incident' % d2['inc_id']) in msgs)
 check('2f invalid inputs -> "" with one error each', d2['neg'] == ['', '', '', ''] and sum(1 for m in msgs if m == 'RemediationTaskPayloadBuilder: payload not built - record is not a valid GlideRecord') >= 4 and all(ERR.match(m) for m in msgs))
@@ -175,11 +166,11 @@ var p = new GlideRecord('sys_properties'); p.addQuery('name', 'STARTSWITH', 'use
 while (p.next()) o.props['' + p.name] = '' + p.getValue('value');
 var s = new GlideRecord('sys_script_include'); s.addQuery('name', 'RemediationTaskPayloadBuilder'); s.query(); s.next(); o.script = '' + s.script;
 gs.print('X::' + JSON.stringify(o));''')
-def live_pairs(v): return [(f, j or f) for f, j in json.loads(v).items()]
+def live_pairs(v): return [tuple(x.strip() for x in e.strip().split('=')) for e in v.replace(',', '\n').split('\n') if e.strip()]
 check('V3a live properties equal the sheet rows with CDP Required = Yes, per table', all(live_pairs(live['props']['usem.cdp.remtask.fields.' + t]) == required_common + required_specific[t] for t in groups.values()) and len(live['props']) == 4)
-check('V3b every property is a JSON object, one "servicenow_field": "json_field" pair per line, every json_field a string', all(isinstance(json.loads(v), dict) and v.count('\n') == len(json.loads(v)) + 1 and all(isinstance(j, str) for j in json.loads(v).values()) for v in live['props'].values()))
+check('V3b every property line is field=json ending with a comma', all(all(line.endswith(',') and '=' in line for line in v.split('\n')) for v in live['props'].values()))
 sc = live['script']
-check('V3c script hygiene: entry-point try/catch plus the JSON parse translation, one gs.error, no info/warn, no field lists in code', sc.count('try {') == 2 and sc.count('catch (') == 2 and sc.count('gs.error(') == 1 and 'gs.info' not in sc and 'gs.warn' not in sc and 'assigned_to' not in sc)
+check('V3c script hygiene: one try/catch, one gs.error, no info/warn, no field lists in code', sc.count('try {') == 1 and sc.count('catch (') == 1 and sc.count('gs.error(') == 1 and 'gs.info' not in sc and 'gs.warn' not in sc and 'assigned_to' not in sc)
 not_required = [m['sn_field'] for m in mapping if m['required'].strip().lower() != 'yes' and m['sn_field'] and m['sn_field'] not in ('table',)]
 leak = [f for f in set(not_required) if any(f == a for a, _ in live_pairs(live['props']['usem.cdp.remtask.fields.sn_vul_vulnerability']))]
 check('V3d no non-required sheet field leaks into the IVR property', not leak, str(leak))

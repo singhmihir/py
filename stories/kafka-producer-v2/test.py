@@ -27,8 +27,8 @@ ui.js('new GlideUpdateSet().set(%s); gs.print("X::{}");' % json.dumps(ST['global
 # ---------- A. validator: every reason it can refuse, and what it accepts ----------
 a = ui.js(r'''
 var o = {cases: {}};
-var V = x_196061_bofasim.BOFA_SI_KafkaPayloadValidator;
-function attempt(x) { try { return {ok: true, out: '' + new V().validate(x)}; } catch (e) { return {ok: false, err: '' + e.message}; } }
+var V = x_196061_bofasim.BOFA_SI_KafkaProducerV2;
+function attempt(x) { try { return {ok: true, out: '' + new V()._validate(x)}; } catch (e) { return {ok: false, err: '' + e.message}; } }
 var g = new GlideRecord('sn_vul_vulnerability'); g.addQuery('number', 'VUL0004576'); g.query(); g.next();
 var good = new RemediationTaskPayloadBuilder().buildPayload(g);
 var obj = JSON.parse(good);
@@ -92,6 +92,20 @@ check('A accepts two elements with element_count 2', C['two_elements']['ok'] and
 refused('two_elements_count_one', 'envelope.element_count is 1 but rem_tasks holds 2')
 refused('no_envelope_other_list', 'envelope is missing')
 check('A accepts any element_activity text', C['other_activity']['ok'])
+
+# ---------- A2. one script include, validation section after the separator line ----------
+sc = ui.js(r'''
+var __s = {names: []};
+var si = new GlideRecord('sys_script_include'); si.addQuery('sys_scope', %s); si.addQuery('name', 'STARTSWITH', 'BOFA_SI_Kafka'); si.query();
+while (si.next()) __s.names.push('' + si.getValue('name'));
+var p = new GlideRecord('sys_script_include'); p.get(%s); __s.script = '' + p.getValue('script');
+gs.print('X::' + JSON.stringify(__s));''' % (json.dumps(ST['scope']), json.dumps(ST['si']['BOFA_SI_KafkaProducerV2'])))
+check('A2 only the producer remains in the scope (no separate validator)', sc['names'] == ['BOFA_SI_KafkaProducerV2'], str(sc['names']))
+body = sc['script']; line = body.find('// ______')
+before = ['sendPayload: function', '_topicSysId: function', '_send: function']; after = ['_validate: function', '_parse: function', '_checkEnvelope: function', '_checkElements: function', '_isObject: function', '_isEmpty: function']
+check('A2 separator line present with the payload validation comment', line > 0 and 'Payload validation' in body[line:line + 400])
+check('A2 send methods before the line, every validation function after it', all(0 < body.find(m) < line for m in before) and all(body.find(m) > line for m in after) and body.find("type: 'BOFA_SI_KafkaProducerV2'") > max(body.find(m) for m in after))
+check('A2 one gs.error, one entry-point try/catch plus the JSON parse translation, no info/warn', body.count('gs.error(') == 1 and body.count('try {') == 2 and 'gs.info' not in body and 'gs.warn' not in body)
 
 # ---------- B. producer: topic per table, key, message, and every refusal ----------
 b = ui.js(r'''

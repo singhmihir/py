@@ -25,16 +25,14 @@ record run), `export_1625.py`. `generateRemediationTaskSCRIPT.txt` is the origin
 script this replaced.
 
 
-## V2.3 - properties in JSON
-Each `usem.cdp.remtask.fields.<table>` property now holds a JSON object of `"servicenow_field": "json_field"`
-pairs in payload order (an empty `json_field` keeps the ServiceNow field name), replacing the
-`field=json,` line format. Same pairs, same order, same output. The script parses the property with
-`JSON.parse`, names the property and the parser reason when the value is not valid JSON, and refuses an
-array, an empty object or a non-string `json_field`. `test_1625.py`: 52 checks, run twice.
+## V2.4 - line-format properties, client copy
+V2.3 moved the `usem.cdp.remtask.fields.<table>` properties to JSON objects; V2.4 returns them to the
+original `servicenow_field=json_field,` line format (same pairs, same order, same output) with the
+original parser. `test_1625.py`: run twice.
 
-`client/` holds the same change applied to the copy deployed on the client instance
-(`BOA_SI_USEM_RemediationTaskPayloadBuilder`, scope `x_boar_bofa_usem_1`, property prefix
-`x_boar_bofa_usem_1.usem.cdp.remtask.fields.`): the script, one `.json` file per property value, the
-import-ready record XML (`Remediation Task Payload Builder - Script Include.xml`) and the stand-in scope
-build/test drivers (`test_client.py`: the client copy against the reference builder on the four fixture
-records plus the JSON refusals).
+`client/` holds the copy deployed on the client instance (`BOA_SI_USEM_RemediationTaskPayloadBuilder`,
+scope `x_boar_bofa_usem_1`, property prefix `x_boar_bofa_usem_1.usem.cdp.remtask.fields.`) with the
+operation parameter passed through to the envelope, one `.txt` file per property value, the import-ready
+record XML (`Remediation Task Payload Builder - Script Include.xml`) and the stand-in scope build/test
+drivers (`test_client.py`: the client copy against the reference builder on the four fixture records
+plus the line-format parsing cases).

@@ -21,10 +21,10 @@ RemediationTaskPayloadBuilder.prototype = {
 
     /**
      * Builds the outbound Kafka payload for one remediation task. The fields
-     * come from the system property usem.cdp.remtask.fields.<table>, a JSON
-     * object of "servicenow_field": "json_field" pairs in payload order (an
-     * empty json_field keeps the ServiceNow field name); a field missing on
-     * the table or empty is sent as "". The activity is the operation in progress when
+     * come from the system property usem.cdp.remtask.fields.<table>, one
+     * servicenow_field=json_field pair per line ending with a comma; a field
+     * missing on the table or
+     * empty is sent as "". The activity is the operation in progress when
      * called from a business rule, otherwise INSERT for a record that has
      * never been updated and UPDATE for any other.
      * @param {GlideRecord} record - a remediation task record
@@ -99,28 +99,16 @@ RemediationTaskPayloadBuilder.prototype = {
         var value = gs.getProperty(property, '');
         if (!value)
             throw new Error('table ' + table + ' is not configured in property ' + property);
-        var fields = this._parseFields(property, value);
         var mapping = [];
-        for (var field in fields) {
-            if (typeof fields[field] !== 'string')
-                throw new Error('property ' + property + ': the json_field for ' + field + ' must be a string');
-            mapping.push({ field: field, json: fields[field] || field });
+        var entries = value.split(/\r?\n|,/);
+        for (var i = 0; i < entries.length; i++) {
+            var pair = entries[i].split('=');
+            var field = pair[0].trim();
+            if (!field)
+                continue;
+            mapping.push({ field: field, json: pair.length > 1 && pair[1].trim() ? pair[1].trim() : field });
         }
-        if (!mapping.length)
-            throw new Error('property ' + property + ' holds no fields');
         return mapping;
-    },
-
-    _parseFields: function(property, value) {
-        var fields;
-        try {
-            fields = JSON.parse(value);
-        } catch (e) {
-            throw new Error('property ' + property + ' is not valid JSON - ' + e.message);
-        }
-        if (fields === null || typeof fields !== 'object' || Array.isArray(fields))
-            throw new Error('property ' + property + ' must be a JSON object of "servicenow_field": "json_field" pairs');
-        return fields;
     },
 
     _fieldValue: function(record, field) {

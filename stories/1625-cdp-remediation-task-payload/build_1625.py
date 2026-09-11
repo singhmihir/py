@@ -7,11 +7,11 @@ HERE = os.path.join(BASE, 'stories', '1625-cdp-remediation-task-payload')
 ST = json.load(open(os.path.join(HERE, 'state.json')))
 P = json.load(open(os.path.join(HERE, 'properties.json')))
 script = open(os.path.join(HERE, 'RemediationTaskPayloadBuilder.js')).read()
-NAME = 'SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.3'
+NAME = 'SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.4'
 d = ui.js('''
 var o = {rows: [], deleted: []};
 var us = new GlideRecord('sys_update_set'); us.get(%s); us.setValue('state', 'in progress'); us.setValue('name', %s);
-us.setValue('description', 'Kafka payload builder for remediation tasks sent to the sn_usem_remtask_outbound topic. One script include, RemediationTaskPayloadBuilder, builds envelope + rem_tasks for one record; the CDP required fields per table come from the system properties usem.cdp.remtask.fields.<table>, each a JSON object of \"servicenow_field\": \"json_field\" pairs in payload order, so field changes need no code change. change_requests and exception_requests are derived. The earlier CdpRemediationTaskPayloadBuilder and the superseded properties are removed.');
+us.setValue('description', 'Kafka payload builder for remediation tasks sent to the sn_usem_remtask_outbound topic. One script include, RemediationTaskPayloadBuilder, builds envelope + rem_tasks for one record; the CDP required fields per table come from the system properties usem.cdp.remtask.fields.<table> (servicenow_field=json_field pairs) so field changes need no code change. change_requests and exception_requests are derived. The earlier CdpRemediationTaskPayloadBuilder and the superseded properties are removed.');
 us.update();
 new GlideUpdateSet().set(%s);
 var um = new GlideUpdateManager2();
@@ -27,7 +27,7 @@ for (var name in props) {
     p.update() || p.insert(); um.saveRecord(p);
 }
 var si = new GlideRecord('sys_script_include'); si.get(%s); si.setValue('script', %s);
-si.setValue('description', 'SNOWUSEMTP-1625 - builds the outbound Kafka payload (topic sn_usem_remtask_outbound) for one remediation task record. Fields per table come from usem.cdp.remtask.fields.<table> as a JSON object of servicenow_field to json_field pairs; a field missing on the table or empty is sent as an empty string; change_requests and exception_requests are derived; the activity comes from the record operation.');
+si.setValue('description', 'SNOWUSEMTP-1625 - builds the outbound Kafka payload (topic sn_usem_remtask_outbound) for one remediation task record. Fields per table come from usem.cdp.remtask.fields.<table>; a field missing on the table or empty is sent as an empty string; change_requests and exception_requests are derived; the activity comes from the record operation.');
 si.update(); um.saveRecord(si);
 var ux = new GlideRecord('sys_update_xml'); ux.addQuery('update_set', %s); ux.orderBy('target_name'); ux.query();
 while (ux.next()) o.rows.push('' + ux.getValue('target_name') + ' | ' + ux.getValue('action') + ' | ' + ux.application.getDisplayValue());

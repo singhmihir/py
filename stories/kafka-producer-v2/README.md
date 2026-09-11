@@ -15,15 +15,16 @@ every existing parameter and behaviour, plus a script that handles a malformed p
   error when empty, the payload validated before anything is sent, the send isolated in `_send`, one
   try/catch with one `gs.error` in the format `BOFA_SI_KafkaProducerV2: message not sent for <table>
   <sys_id> - <reason>`, no unused return values, no trailing comma in the argument list.
-- `BOFA_SI_KafkaPayloadValidator.js` — new. `validate(payload)` accepts the JSON string or the
-  object, returns the canonical JSON text to send, and throws an Error naming the first problem:
-  empty payload, JSON that does not parse (with the parser's reason), not an object, envelope
-  missing, any of the nine envelope fields missing or empty, no or more than one element list,
-  element list not an array or empty, `element_count` not matching, an element that is not an
-  object. The producer logs that reason and does not send.
-- `Kafka Producer V2 - Script Includes.xml` — both records for *Import XML* on the client instance:
-  the producer under its existing sys_id, the validator new, both in `x_boar_bofa_usem_1`, access
-  public. User and timestamp fields are left out so the import stamps them.
+- Payload validation lives in the same script include, after a separator line of underscores and a
+  comment saying so: `_validate(payload)` accepts the JSON string or the object, returns the canonical
+  JSON text to send, and throws an Error naming the first problem: empty payload, JSON that does not
+  parse (with the parser's reason), not an object, envelope missing, any of the nine envelope fields
+  missing or empty, no or more than one element list, element list not an array or empty,
+  `element_count` not matching, an element that is not an object. `sendPayload` logs that reason and
+  does not send. The earlier separate `BOFA_SI_KafkaPayloadValidator` is withdrawn.
+- `Kafka Producer V2 - Script Include.xml` — the producer for *Import XML* on the client instance,
+  under its existing sys_id in `x_boar_bofa_usem_1`, access public. User and timestamp fields are left
+  out so the import stamps them.
 
 ## Suggested rule body (optional, the rule was not part of the ask)
 The producer serialises and checks the payload itself, so the rule no longer needs
@@ -40,10 +41,10 @@ The producer serialises and checks the payload itself, so the rule no longer nee
 ```
 
 ## Testing (PDI, stand-in scope `x_196061_bofasim`)
-`build.py` deploys both script includes into the stand-in scope under a pinned update set and
+`build.py` deploys the script include into the stand-in scope under a pinned update set, removes the earlier separate validator, and
 creates the topic property the producer reads (a test fixture holding a generated sys_id).
 `test.py` runs 86 checks; run twice, 86/86 both times:
-- A. validator: 64 cases — the good payload from the real builder comes back canonical (string and
+- A. validation: 64 cases through `_validate`, plus a section check (one script include; every validation function after the separator line) — the good payload from the real builder comes back canonical (string and
   object), and every refusal reason above is produced by the exact input that should trigger it.
 - B. producer with `_send` captured: all eight tables, string and object payloads (16 sends) with
   the topic from the property, key `<table>.<sys_id>`, canonical message; five refusals (unmapped
