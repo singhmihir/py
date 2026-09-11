@@ -5,11 +5,10 @@ from snui import SNUI
 HERE = os.path.dirname(os.path.abspath(__file__))
 SCOPE = '9d1e03de930b8310e3aef0aefaba10d5'  # stand-in scoped app on the PDI
 PROPERTY = 'x_boar_bofa_usem_1.x_boar_bofa.usem.kafka.topic_sys_id'  # read by the producer, test fixture on the PDI
-NAME = 'INC0010003_MS_Kafka Producer V2 and Payload Validator_V1.0'
-SCRIPTS = {n: open(os.path.join(HERE, n + '.js')).read() for n in ['BOFA_SI_KafkaProducerV2', 'BOFA_SI_KafkaPayloadValidator']}
+NAME = 'INC0010003_MS_Kafka Producer V2 with Payload Validation_V1.1'
+SCRIPTS = {n: open(os.path.join(HERE, n + '.js')).read() for n in ['BOFA_SI_KafkaProducerV2']}
 DESC = {
-    'BOFA_SI_KafkaProducerV2': 'Utilizes KafkaProducer V2 to send messages to Hermes kafka.\nDocumentation of API used - https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html',
-    'BOFA_SI_KafkaPayloadValidator': 'Checks an outbound Kafka payload before it is sent: well-formed JSON, the envelope with every mandatory field, and one list of elements matching element_count. Throws an Error naming the first problem found; BOFA_SI_KafkaProducerV2 logs it and does not send.',
+    'BOFA_SI_KafkaProducerV2': 'Utilizes KafkaProducer V2 to send messages to Hermes kafka. The payload is validated before it is sent (payload validation section of the script).\nDocumentation of API used - https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html',
 }
 ui = SNUI(); ui.app('global')
 st_path = os.path.join(HERE, 'state.json')
@@ -33,7 +32,7 @@ print('property fixture:', PROPERTY, '=', g['topic'], '|', g['property_scope'])
 d = ui.js('''
 var o = {rows: []};
 var us = new GlideRecord('sys_update_set');
-if (%s && us.get(%s)) { us.setValue('state', 'in progress'); us.update(); }
+if (%s && us.get(%s)) { us.setValue('state', 'in progress'); us.setValue('name', %s); us.update(); }
 else { us.initialize(); us.setValue('name', %s); us.setValue('application', %s);
   us.setValue('description', 'Kafka producer (sn_ih_kafka.ProducerV2) and outbound payload validator for the CDP integration, built here in the stand-in scope.'); us.insert(); }
 o.set = us.getUniqueValue(); o.set_scope = '' + us.application.getDisplayValue();
@@ -47,16 +46,18 @@ for (var name in scripts) {
     si.update() || si.insert();
     o.si[name] = {sys_id: si.getUniqueValue(), api_name: '' + si.getValue('api_name'), scope: '' + si.sys_scope.getDisplayValue(), access: '' + si.getValue('access')};
 }
+var gone = new GlideRecord('sys_script_include'); gone.addQuery('name', 'BOFA_SI_KafkaPayloadValidator'); gone.addQuery('sys_scope', %s); gone.query(); o.removed = 0;
+while (gone.next()) { gone.deleteRecord(); o.removed++; }
 var ux = new GlideRecord('sys_update_xml'); ux.addQuery('update_set', o.set); ux.orderBy('target_name'); ux.query();
 while (ux.next()) o.rows.push('' + ux.getValue('target_name') + ' | ' + ux.getValue('action') + ' | ' + ux.application.getDisplayValue());
-gs.print('X::' + JSON.stringify(o));''' % (json.dumps(bool(ST.get('set'))), json.dumps(ST.get('set', '')), json.dumps(NAME), json.dumps(SCOPE),
-                                         json.dumps(SCRIPTS), json.dumps(DESC), json.dumps(SCOPE)), scope=SCOPE)
+gs.print('X::' + JSON.stringify(o));''' % (json.dumps(bool(ST.get('set'))), json.dumps(ST.get('set', '')), json.dumps(NAME), json.dumps(NAME), json.dumps(SCOPE),
+                                         json.dumps(SCRIPTS), json.dumps(DESC), json.dumps(SCOPE), json.dumps(SCOPE)), scope=SCOPE)
 print('update set:', d['set'], '|', d['set_scope'])
 for n, i in d['si'].items(): print(' ', i['api_name'], i['sys_id'], '|', i['scope'], '| access', i['access'])
-print('\n'.join(' captured: ' + r for r in d['rows']))
-assert d['set_scope'] == 'BofA Sim' and all(r.endswith('| BofA Sim') for r in d['rows']) and len(d['rows']) == 2
+print('validator records removed:', d['removed']); print('\n'.join(' captured: ' + r for r in d['rows']))
+assert d['set_scope'] == 'BofA Sim' and all(r.endswith('| BofA Sim') for r in d['rows']) and sorted(d['rows']) == ['BOFA_SI_KafkaPayloadValidator | DELETE | BofA Sim', 'BOFA_SI_KafkaProducerV2 | INSERT_OR_UPDATE | BofA Sim']
 assert all(i['scope'] == 'BofA Sim' and i['access'] == 'public' for i in d['si'].values())
 json.dump({'set': d['set'], 'set_name': NAME, 'scope': SCOPE, 'si': {n: i['sys_id'] for n, i in d['si'].items()},
            'property': g['property'], 'topic': g['topic'], 'global_default': g['global_default']}, open(st_path, 'w'), indent=1)
 ui.app('global')
-print('deployed: 2 script includes in the stand-in scope, update set scope matches every captured row')
+print('deployed: producer updated, validator removed, update set scope matches every captured row')

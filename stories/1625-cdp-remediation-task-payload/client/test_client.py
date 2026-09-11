@@ -32,29 +32,24 @@ for t, r in d['tables'].items():
     e = c['envelope']
     check('1 %s: envelope with the given activity' % t, e['type'] == 'record' and e['topic_name'] == 'sn_usem_remtask_outbound' and e['namespace'] == 'com.bofa.usem' and e['element_count'] == 1 and e['element_activity'] == 'UPDATE' and UUID.match(e['event_id']) and TS.match(e['event_timestamp']))
     check('1 %s: activity follows the parameter (INSERT on the second call)' % t, again['envelope']['element_activity'] == 'INSERT' and again['rem_tasks'] == c['rem_tasks'])
-n = ui.js(r'''
+n = ui.js(r"""
 var __n = {}; var name = 'x_boar_bofa_usem_1.usem.cdp.remtask.fields.sn_vul_vulnerability';
 var p = new GlideRecord('sys_properties'); p.get(%s); var keep = '' + p.getValue('value');
 var C = x_196061_bofasim.BOA_SI_USEM_RemediationTaskPayloadBuilder;
 var g = new GlideRecord('sn_vul_vulnerability'); g.addQuery('number', 'VUL0004576'); g.query(); g.next();
 function set(v) { p.setValue('value', v); p.update(); return '' + gs.getProperty(name, ''); }
-set('{"number": "task_number", '); __n.bad_json = new C().buildPayload(g, 'UPDATE');
-set('["number"]'); __n.array = new C().buildPayload(g, 'UPDATE');
-set('{}'); __n.empty = new C().buildPayload(g, 'UPDATE');
-set('{"number": 5}'); __n.non_string = new C().buildPayload(g, 'UPDATE');
-set(JSON.stringify({"number": "task_number", "short_description": "", "state": "status"})); var small = new C().buildPayload(g, 'UPDATE'); __n.small = JSON.stringify(small);
+set(' number = task_number ,\n short_description,\n\n bogus_field=bogus , assigned_to.name=owner_name ,\r\n sys_mod_count = updates ,\n state=state,\n state=status,\n =nothing,\n risk_score=,');
+__n.custom = JSON.stringify(new C().buildPayload(g, 'UPDATE')); __n.mod = '' + g.getValue('sys_mod_count');
+set(''); __n.blank = new C().buildPayload(g, 'UPDATE');
 __n.restored = set(keep) === keep; __n.after = JSON.stringify(new C().buildPayload(g, 'UPDATE'));
 var l = new GlideRecord('syslog'); l.addQuery('message', 'STARTSWITH', 'BOA_SI_USEM_RemediationTaskPayloadBuilder: payload not built'); l.addQuery('sys_created_on', '>', gs.minutesAgoStart(2)); l.orderByDesc('sys_created_on'); l.query();
 __n.msgs = []; while (l.next()) __n.msgs.push('' + l.getValue('message'));
-gs.print('X::' + JSON.stringify(__n));''' % json.dumps(ST['props']['x_boar_bofa_usem_1.usem.cdp.remtask.fields.sn_vul_vulnerability']))
-PFX = 'BOA_SI_USEM_RemediationTaskPayloadBuilder: payload not built for sn_vul_vulnerability '
+gs.print('X::' + JSON.stringify(__n));""" % json.dumps(ST['props']['x_boar_bofa_usem_1.usem.cdp.remtask.fields.sn_vul_vulnerability']))
 M = n['msgs']
-check('2 invalid JSON -> "" and the property named with the parser reason', n['bad_json'] == '' and any(re.search(PFX + r'[0-9a-f]{32} - property x_boar_bofa_usem_1\.usem\.cdp\.remtask\.fields\.sn_vul_vulnerability is not valid JSON - .+$', m) for m in M), next((m for m in M if 'not valid JSON' in m), 'no log'))
-check('2 JSON array -> ""', n['array'] == '' and any(m.endswith('must be a JSON object of "servicenow_field": "json_field" pairs') for m in M))
-check('2 empty object -> ""', n['empty'] == '' and any(m.endswith('holds no fields') for m in M))
-check('2 non-string json_field -> ""', n['non_string'] == '' and any(m.endswith('the json_field for number must be a string') for m in M))
-small = json.loads(n['small'])['rem_tasks'][0]['remediation_task']
-check('2 small mapping: rename, empty json_field keeps the field, order kept', list(small.keys()) == ['task_number', 'short_description', 'status', 'change_requests', 'exception_requests'] and small['task_number'] == 'VUL0004576', str(list(small.keys())))
+custom = json.loads(n['custom'])['rem_tasks'][0]['remediation_task']
+check('2 line format: comma-terminated lines, rename, bare name, blank lines, whitespace, CRLF, duplicate key, empty field, empty json name', list(custom.keys()) == ['task_number', 'short_description', 'bogus', 'owner_name', 'updates', 'state', 'status', 'risk_score', 'change_requests', 'exception_requests'] and custom['task_number'] == 'VUL0004576' and custom['updates'] == n['mod'] and custom['state'] == custom['status'], str(list(custom.keys())))
+check('2 unknown field and dot-walk entries yield "" without error', custom['bogus'] == '' and custom['owner_name'] == '')
+check('2 blank property -> "" with the property named', n['blank'] == '' and any(re.search(r'^BOA_SI_USEM_RemediationTaskPayloadBuilder: payload not built for sn_vul_vulnerability [0-9a-f]{32} - table sn_vul_vulnerability is not configured in property x_boar_bofa_usem_1\.usem\.cdp\.remtask\.fields\.sn_vul_vulnerability$', m) for m in M), M[0] if M else 'no log')
 check('2 property restored and the full mapping back', n['restored'] and len(json.loads(n['after'])['rem_tasks'][0]['remediation_task']) == d['tables']['sn_vul_vulnerability']['mapping_len'] + 2)
 print('\n%s: %d checks, %d failed%s' % ('ALL PASS' if not FAILS else 'FAILED', TOTAL[0], len(FAILS), '' if not FAILS else ' -> ' + '; '.join(FAILS)))
 sys.exit(1 if FAILS else 0)
