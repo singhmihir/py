@@ -85,3 +85,25 @@ at a glance, the five principles the whole chain shares, one page per rule (purp
 returns, the matching stages with their code, and its place in the chain by rule name), the unmatched
 population analysis with the three gaps, the six tuning properties, testing, delivery and a rule reference
 table. Rebuild with `python3 deck/build_data.py && node deck/build_deck.js`.
+
+
+## Class agreement (set "Qualys CI Lookup Rules Class Agreement" V1.0)
+Raised on a Cisco IOS router (`usmabghwt01atr0001.network...`) that Layered DNS Match had placed on a
+Computer CI: the router record carries no fqdn and no dns_domain, so the name-with-domain rules could
+not confirm it, and the discovery chain DNS Name -> IP Address -> adapter ends on a Computer whose
+adapter holds the router's addresses. Rules 350, 730 and 740 reach a CI through discovery records and
+had no check that its class agrees with the scanned OS; 410 and 705 had one, but with a fixed list of
+"generic" classes that treated Computer as never contradicting.
+
+All five now share one check, `agrees(cls)`: the CI's class must be the class the OS implies, a
+sub-class of it, or a parent of it (found by walking `sys_db_object.super_class`; `TableUtils` is not
+visible inside the rule evaluator). Cisco IOS implies Network Gear, so an IP Router or a plain
+Hardware record agrees and a Computer does not. With no class from the OS nothing is refused.
+
+- `fixtures_v5.py` recreates the case (router, Computer with adapter, two IP Address records, the DNS
+  Name record linked to both); `william_case.py` runs the payload through the chain and every rule.
+  Before: 350 -> KBC091B0ACE13 [Computer]. After: 350 declines, 400 -> usmabghwt01atr0001 [IP Router].
+- `test_v5.py`: 18 cases, twice (agreement on same class, sub-class, parent class; refusals for
+  Computer/Server against Cisco IOS in 350, 410, 705, 730, 740; no OS or multi-guess OS trusting the
+  chain, documented). `test_v3.py` 36/36, `sweep.py` 20 hosts unchanged. `build_rules_v5.py` deploys
+  the five rules into the set; `export_rules.py state_v5.json` exports it.

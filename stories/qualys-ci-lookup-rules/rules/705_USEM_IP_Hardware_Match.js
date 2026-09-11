@@ -13,8 +13,8 @@
    Input  : sourceValue is the IP field, "30.162.178.24"; the rule also reads the OS from
             sourcePayload.
    Returns: the sys_id of the one hardware CI whose ip_address equals the scanned address, when it
-            is not a load balancer and its class agrees with the scanned OS or is generic; null
-            otherwise.
+            is not a load balancer and its class is the one the OS implies, a sub-class of it or a
+            parent of it; null otherwise.
    Sample : the CI in the generic Server class whose ip_address is "30.162.178.24"; a Load Balancer
             on that address would be refused, and with a known OS a CI of a contradicting class
             would be too.
@@ -22,7 +22,7 @@
    Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
    Before : USEM IP Class Match required the address to belong to one CI of the class the OS
             implies; the sample OS is a list of guesses, so that rule declined without searching.
-   Reaches: DNS-less hosts whose CI is classed generically or whose OS gave no class.
+   Reaches: DNS-less hosts whose CI is kept in a parent class or whose OS gave no class.
    After  : USEM IP Adapter Match and USEM IP Layered Match.
    ------------------------------------------------------------------------------------------------- */
 (function process(rule, sourceValue, sourcePayload) {
@@ -67,10 +67,32 @@
         return '';
     }
     var pref = classFor(sourcePayload.OS);
-    // Classes that say nothing about the OS (a CI loaded as a plain Server before discovery refined
-    // it) never contradict the scan.
-    var generic = {cmdb_ci_hardware: 1, cmdb_ci_computer: 1, cmdb_ci_server: 1,
-        cmdb_ci_unix_server: 1};
+    // agrees() decides whether a CI of class cls can be the scanned host once the OS gave a class:
+    // the same class, one of its sub-classes, or one of its parents (a Cisco IOS host may be kept
+    // as a plain Network Gear or Hardware record). Any other class is a different kind of machine:
+    // a Computer named or addressed like a router is a namesake or a reused address, never the
+    // router. With no class from the OS nothing is refused.
+    function parentsOf(table) {                   // the class and every class above it
+        var out = [table];
+        var db = new GlideRecord('sys_db_object');
+        db.addQuery('name', table);
+        db.query();
+        while (db.next() && db.getValue('super_class')) {
+            var parent = '' + db.super_class.name;
+            out.push(parent);
+            db = new GlideRecord('sys_db_object');
+            db.addQuery('name', parent);
+            db.query();
+        }
+        return out;
+    }
+    function agrees(cls) {
+        if (!pref || cls == pref)
+            return true;
+        if (parentsOf(cls).indexOf(pref) != -1)     // cls is a sub-class of pref
+            return true;
+        return parentsOf(pref).indexOf(cls) != -1;   // cls is a parent of pref
+    }
     // A load balancer answers on virtual addresses for the servers behind it, so it is never the
     // host that was scanned.
     function isLoadBalancer(id) {
@@ -105,16 +127,14 @@
     if (isLoadBalancer(id))
         return null;
     // -- Reject a CI whose class contradicts the scanned OS ---------------------------------------
-    // When the OS gave a class, the CI found must sit inside it (sub-classes included) or be
-    // generically classed. A host that lands on a Windows Server by name or address is a namesake
-    // or a reused address, not the same machine, and its findings would go to the wrong owner.
-    // Sample: pref is empty for the sample, so no class check is made and the sys_id is returned.
-    //         With OS "VMware ESXi 7.0.3", pref would be cmdb_ci_esx_server; the generic Server
-    //         would still pass, a Windows Server would be rejected.
-    if (pref) {
-        var chk = new GlideRecord(pref);
-        if (!(chk.isValid() && chk.get(id)) && !generic[cls])
-            return null;
-    }
+    // When the OS gave a class, the CI found must be of that class, of a sub-class of it, or of a
+    // parent of it. A host that lands on a Windows Server by name or address is a namesake or a
+    // reused address, not the same machine, and its findings would go to the wrong owner.
+    // Sample: pref is empty for the sample, so agrees() is true and the sys_id is returned. With OS
+    //         "VMware ESXi 7.0.3", pref would be cmdb_ci_esx_server; the plain Server, a parent of
+    //         ESX Server, would still pass, a Windows Server or a Computer named like a router
+    //         would be rejected.
+    if (!agrees(cls))
+        return null;
     return id;
 })(rule, sourceValue, sourcePayload);
