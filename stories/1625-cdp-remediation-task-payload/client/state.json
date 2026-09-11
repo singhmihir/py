@@ -1,0 +1,12 @@
+{
+ "set": "ea4c9c4593df0f10e3aef0aefaba1011",
+ "set_name": "INC0010003_MS_Remediation Task Payload Builder JSON_V1.0",
+ "si": "7e4c9c4593df0f10e3aef0aefaba1016",
+ "props": {
+  "x_boar_bofa_usem_1.usem.cdp.remtask.fields.sn_vul_vulnerability": "204c184593df0f10e3aef0aefaba10c0",
+  "x_boar_bofa_usem_1.usem.cdp.remtask.fields.sn_vul_app_vulnerability": "414c584593df0f10e3aef0aefaba109b",
+  "x_boar_bofa_usem_1.usem.cdp.remtask.fields.sn_vul_container_vulnerability": "a54c984593df0f10e3aef0aefaba10aa",
+  "x_boar_bofa_usem_1.usem.cdp.remtask.fields.sn_vulc_result_group": "354cd84593df0f10e3aef0aefaba10af"
+ },
+ "global_default": "7dba58ecf54403100a22c0b3dfa151af"
+}

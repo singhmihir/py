@@ -1,5 +1,6 @@
-var RemediationTaskPayloadBuilder = Class.create();
-RemediationTaskPayloadBuilder.prototype = {
+var BOA_SI_USEM_RemediationTaskPayloadBuilder = Class.create();
+BOA_SI_USEM_RemediationTaskPayloadBuilder.prototype = {
+
     initialize: function() {
         this.TOPIC_NAME = 'sn_usem_remtask_outbound';
         this.NAMESPACE = 'com.bofa.usem';
@@ -7,40 +8,52 @@ RemediationTaskPayloadBuilder.prototype = {
         this.OUTBOUND_VERSION = '1.0.0';
         this.DATE_FORMAT = 'MM-dd-yyyy';
         this.TIME_FORMAT = 'HH:mm:ss';
-        this.FIELDS_PROPERTY_PREFIX = 'usem.cdp.remtask.fields.';
+        this.FIELDS_PROPERTY_PREFIX = 'x_boar_bofa_usem_1.usem.cdp.remtask.fields.';
         this.EXCEPTION_TABLE = 'sn_sec_exception_change_approval';
         this.EXCEPTION_STATES = '1,4';
+        this.CHANGE_CANCELED = '4';
         // change requests are associated to each remediation task table through its own m2m table
         this.CHANGE_LINKS = {
-            sn_vul_vulnerability:           { table: 'sn_vul_m2m_vg_change_request',                          field: 'sn_vul_vulnerability' },
-            sn_vul_app_vulnerability:       { table: 'sn_vul_app_m2m_vg_change_request',                      field: 'sn_vul_app_vulnerability' },
-            sn_vul_container_vulnerability: { table: 'sn_vul_container_m2m_remediation_task_change_request',  field: 'sn_vul_container_vulnerability' },
-            sn_vulc_result_group:           { table: 'sn_vulc_m2m_trg_change_request',                        field: 'result_group' }
+            sn_vul_vulnerability: {
+                table: 'sn_vul_m2m_vg_change_request',
+                field: 'sn_vul_vulnerability'
+            },
+            sn_vul_app_vulnerability: {
+                table: 'sn_vul_app_m2m_vg_change_request',
+                field: 'sn_vul_app_vulnerability'
+            },
+            sn_vul_container_vulnerability: {
+                table: 'sn_vul_container_m2m_remediation_task_change_request',
+                field: 'sn_vul_container_vulnerability'
+            },
+            sn_vulc_result_group: {
+                table: 'sn_vulc_m2m_trg_change_request',
+                field: 'result_group'
+            }
         };
     },
 
     /**
-     * Builds the outbound Kafka payload for one remediation task. The fields
-     * come from the system property usem.cdp.remtask.fields.<table>, a JSON
-     * object of "servicenow_field": "json_field" pairs in payload order (an
-     * empty json_field keeps the ServiceNow field name); a field missing on
-     * the table or empty is sent as "". The activity is the operation in progress when
-     * called from a business rule, otherwise INSERT for a record that has
-     * never been updated and UPDATE for any other.
-     * @param {GlideRecord} record - a remediation task record
-     * @returns {String} JSON payload, or an empty string when the payload cannot be built
+     Builds the outbound Kafka payload for one remediation task. The fields
+     come from the system property usem.cdp.remtask.fields.<table>, a JSON
+     object of "servicenow_field": "json_field" pairs in payload order (an
+     empty json_field keeps the ServiceNow field name); a field missing on
+     the table or empty is sent as "".
+     @param {GlideRecord} record - a remediation task record
+     @param {String} normalizedOperation - the operation performed on the record itself
+     @returns {Object} payload object, or an empty string when the payload cannot be built
      */
-    buildPayload: function(record) {
+    buildPayload: function(record, normalizedOperation) {
         try {
             if (!this._isRecord(record))
                 throw new Error('record is not a valid GlideRecord');
             var payload = {
-                envelope: this._buildEnvelope(this._activity(record)),
+                envelope: this._buildEnvelope(this._activity(record, normalizedOperation)),
                 rem_tasks: [{
                     remediation_task: this._buildRemediationTask(record)
                 }]
             };
-            return JSON.stringify(payload);
+            return payload;
         } catch (e) {
             gs.error(this._errorMessage(record, e));
             return '';
@@ -56,11 +69,8 @@ RemediationTaskPayloadBuilder.prototype = {
         return this.type + ': payload not built' + subject + ' - ' + e.message;
     },
 
-    _activity: function(record) {
-        var operation = String(record.operation() || '').toUpperCase();
-        if (operation)
-            return operation;
-        return parseInt(record.getValue('sys_mod_count')) > 0 ? 'UPDATE' : 'INSERT';
+    _activity: function(record, normalizedOperation) {
+        return String(normalizedOperation || record.operation() || '').toUpperCase();
     },
 
     _buildEnvelope: function(activity) {
@@ -70,7 +80,7 @@ RemediationTaskPayloadBuilder.prototype = {
             namespace: this.NAMESPACE,
             core_version: this.CORE_VERSION,
             outbound_version: this.OUTBOUND_VERSION,
-            event_id: this._newEventId(),
+            event_id: this._newEventId(), // putting back event ID as instructed by Vamsi
             event_timestamp: this._utcTimestamp(),
             element_count: 1,
             element_activity: activity
@@ -88,12 +98,7 @@ RemediationTaskPayloadBuilder.prototype = {
         return task;
     },
 
-    /**
-     * Reads the table's property: one servicenow_field=json_field pair per
-     * line, each ending with a comma (a bare field name keeps its own name
-     * in the payload).
-     * @returns {Array} [{field, json}, ...] in property order
-     */
+
     _fieldMapping: function(table) {
         var property = this.FIELDS_PROPERTY_PREFIX + table;
         var value = gs.getProperty(property, '');
@@ -133,12 +138,12 @@ RemediationTaskPayloadBuilder.prototype = {
     },
 
     /**
-     * Renders one field as the string CDP expects, decided by the field's
-     * dictionary type: dates are formatted, journals give their latest entry,
-     * fields whose stored value is a key (references, choices, lists,
-     * booleans, durations) give their display value, everything else its
-     * stored value.
-     */
+     Renders one field as the string CDP expects, decided by the field's
+     dictionary type: dates are formatted, journals give their latest entry,
+     fields whose stored value is a key (references, choices, lists,
+    booleans, durations) give their display value, everything else its
+     stored value.
+    */
     _renderElement: function(element) {
         switch (String(element.getED().getInternalType())) {
             case 'glide_date_time':
@@ -179,6 +184,7 @@ RemediationTaskPayloadBuilder.prototype = {
             return '';
         var m2m = new GlideRecord(link.table);
         m2m.addQuery(link.field, record.getUniqueValue());
+        m2m.addQuery("change_request.state", "!=", this.CHANGE_CANCELED); // Omitting canceled change requests
         m2m.addNotNullQuery('change_request');
         m2m.orderBy('change_request.number');
         m2m.query();
@@ -200,15 +206,14 @@ RemediationTaskPayloadBuilder.prototype = {
         return numbers.join(',');
     },
 
-    _newEventId: function() {
+    _newEventId: function() { // putting back event ID as instructed by Vamsi
         var guid = gs.generateGUID();
         return guid.substring(0, 8) + '-' + guid.substring(8, 12) + '-' + guid.substring(12, 16) + '-' +
             guid.substring(16, 20) + '-' + guid.substring(20, 32);
     },
-
+	
     _utcTimestamp: function() {
         return new GlideDateTime().getValue().replace(' ', 'T') + 'Z';
     },
-
-    type: 'RemediationTaskPayloadBuilder'
+    type: 'BOA_SI_USEM_RemediationTaskPayloadBuilder'
 };

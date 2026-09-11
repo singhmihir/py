@@ -23,3 +23,18 @@ properties, script include), `test_1625.py` (43 checks: field-by-field rendering
 tables, missing/empty fields, property parsing, errors, activity in insert/update rules, 50
 record run), `export_1625.py`. `generateRemediationTaskSCRIPT.txt` is the original background
 script this replaced.
+
+
+## V2.3 - properties in JSON
+Each `usem.cdp.remtask.fields.<table>` property now holds a JSON object of `"servicenow_field": "json_field"`
+pairs in payload order (an empty `json_field` keeps the ServiceNow field name), replacing the
+`field=json,` line format. Same pairs, same order, same output. The script parses the property with
+`JSON.parse`, names the property and the parser reason when the value is not valid JSON, and refuses an
+array, an empty object or a non-string `json_field`. `test_1625.py`: 52 checks, run twice.
+
+`client/` holds the same change applied to the copy deployed on the client instance
+(`BOA_SI_USEM_RemediationTaskPayloadBuilder`, scope `x_boar_bofa_usem_1`, property prefix
+`x_boar_bofa_usem_1.usem.cdp.remtask.fields.`): the script, one `.json` file per property value, the
+import-ready record XML (`Remediation Task Payload Builder - Script Include.xml`) and the stand-in scope
+build/test drivers (`test_client.py`: the client copy against the reference builder on the four fixture
+records plus the JSON refusals).
