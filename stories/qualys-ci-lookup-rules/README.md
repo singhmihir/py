@@ -107,3 +107,28 @@ Hardware record agrees and a Computer does not. With no class from the OS nothin
   Computer/Server against Cisco IOS in 350, 410, 705, 730, 740; no OS or multi-guess OS trusting the
   chain, documented). `test_v3.py` 36/36, `sweep.py` 20 hosts unchanged. `build_rules_v5.py` deploys
   the five rules into the set; `export_rules.py state_v5.json` exports it.
+
+
+## Class agreement (set "Qualys CI Lookup Rules Class Agreement" V1.0)
+Raised by William on INC0010003: a Cisco IOS router scanned as `usmabghwt01atr0001.network.bankofamerica.com`
+was matched by the Layered DNS rule to a Computer, because the router CI has no fqdn / dns_domain (so the
+name-with-domain rules could not confirm it) and the DNS Name -> IP Address -> adapter chain in the CMDB ends
+on that Computer. Rules 350, 730 and 740 followed discovery records without checking the class of the CI they
+reached; rules 410 and 705 checked against a fixed list of "generic" classes that counted Computer as never
+contradicting, even for network gear.
+
+Five rules now share one check, `agrees(cls)`: the CI's class must be the class the OS implies, a sub-class
+of it, or one of its parents, read from the table definitions (`sys_db_object` super_class walk; `TableUtils`
+is not defined inside the rule evaluator). With no class from the OS nothing is refused.
+
+- `fixtures_v5.py` builds the case from William's export (router, Computer with adapter, two IP Address
+  records, the DNS Name linked to both) plus the variation fixtures; `fixtures_v5.py remove` takes them away.
+- `william_case.py` runs the payload through the chain and through every rule alone.
+- `test_v5.py`: 18 cases run twice (William's host, OS-empty and multi-guess limits, aliases of Network Gear
+  and IP Switch CIs, a plain Server for Cisco vs AIX vs empty OS, Computers on the address for 705/730/740).
+- `build_rules_v5.py` / `export_rules.py state_v5.json`: the five rules captured with saveRecord, native export,
+  import proof, archived. `test_v3.py` (36) and `sweep.py` (20 sample hosts, no differences) rerun afterwards.
+
+Known limit: when the OS text is empty or a multi-guess there is no class to check and the discovery chain is
+trusted as before. Data fixes recommended on the client: re-point the DNS Name and IP Address records to the
+router, and fill fqdn / dns_domain on network CIs.

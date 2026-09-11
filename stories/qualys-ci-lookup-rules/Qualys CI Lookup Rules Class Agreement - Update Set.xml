@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-11 13:59:40">
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-11 14:11:01">
 <sys_remote_update_set action="INSERT_OR_UPDATE">
 <application display_value="Global">global</application>
 <application_name>Global</application_name>
@@ -20,11 +20,11 @@
 <summary/>
 <sys_class_name>sys_remote_update_set</sys_class_name>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-11 13:59:40</sys_created_on>
-<sys_id>ea293dc1939f4f10e3aef0aefaba106a</sys_id>
+<sys_created_on>2026-09-11 14:11:01</sys_created_on>
+<sys_id>30cbfd89939f4f10e3aef0aefaba1021</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-11 13:59:40</sys_updated_on>
+<sys_updated_on>2026-09-11 14:11:01</sys_updated_on>
 <update_set display_value=""/>
 <update_source display_value=""/>
 <updated/>
@@ -175,21 +175,187 @@
 })(rule, sourceValue, sourcePayload);
 ]]&gt;&lt;/script&gt;&lt;source display_value="Qualys Cloud Platform"&gt;ed44bdc453220300e8f9f745911c0801&lt;/source&gt;&lt;source_field&gt;IP&lt;/source_field&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-10 14:42:02&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;97ff4d7e936a4310e3aef0aefaba106d&lt;/sys_id&gt;&lt;sys_mod_count&gt;7&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-11 13:59:09&lt;/sys_updated_on&gt;&lt;table&gt;sn_vul_qualys_host_attrb&lt;/table&gt;&lt;target_field/&gt;&lt;target_field_product_model/&gt;&lt;target_table/&gt;&lt;target_table_product_model&gt;cmdb_application_product_model&lt;/target_table_product_model&gt;&lt;type&gt;custom&lt;/type&gt;&lt;/sn_sec_cmn_ci_lookup_rule&gt;&lt;/record_update&gt;</payload>
 <payload_hash>157854136</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Class Agreement_V1.0">ea293dc1939f4f10e3aef0aefaba106a</remote_update_set>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Class Agreement_V1.0">30cbfd89939f4f10e3aef0aefaba1021</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-11 13:59:40</sys_created_on>
-<sys_id>2e293dc1939f4f10e3aef0aefaba106c</sys_id>
+<sys_created_on>2026-09-11 14:11:01</sys_created_on>
+<sys_id>34cbfd89939f4f10e3aef0aefaba1022</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a090c3d9c80000001</sys_recorded_at>
+<sys_recorded_at>1a090ce54460000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-11 13:59:40</sys_updated_on>
+<sys_updated_on>2026-09-11 14:11:01</sys_updated_on>
 <table>sn_vul_qualys_host_attrb</table>
 <target_name>USEM IP Adapter Match</target_name>
 <type>Lookup Rule</type>
 <update_domain>global</update_domain>
-<update_guid>8309b5c1b59f4f1041ad5d974fdd0f70</update_guid>
-<update_guid_history>8309b5c1b59f4f1041ad5d974fdd0f70:157854136,17f7f901b99f4f10703e7ce5a634a92a:331796377,ae59d718ca5b8710173451db3f694f75:-433426905,ad52421066db47104e347393b365e266:1445549499,0d11e53ab18b8710b96206fdd23fe7aa:1010908198,bc1fd5f2768b8710e75a99cb96365755:-1842880445,5a8a997ed50b87106f5b43ca42659964:-1228599577</update_guid_history>
+<update_guid>faab7989119f4f10d9aa1232d04dab60</update_guid>
+<update_guid_history>faab7989119f4f10d9aa1232d04dab60:157854136,8309b5c1b59f4f1041ad5d974fdd0f70:157854136,17f7f901b99f4f10703e7ce5a634a92a:331796377,ae59d718ca5b8710173451db3f694f75:-433426905,ad52421066db47104e347393b365e266:1445549499,0d11e53ab18b8710b96206fdd23fe7aa:1010908198,bc1fd5f2768b8710e75a99cb96365755:-1842880445,5a8a997ed50b87106f5b43ca42659964:-1228599577</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sn_sec_cmn_ci_lookup_rule_1fff4d7e936a4310e3aef0aefaba1068</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sn_sec_cmn_ci_lookup_rule"&gt;&lt;sn_sec_cmn_ci_lookup_rule action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;applies_to/&gt;&lt;condition/&gt;&lt;description&gt;Scanned address across the hardware tree, exactly one CI, not a load balancer, its class the one the OS implies, a sub-class or a parent of it.&lt;/description&gt;&lt;lookup_script/&gt;&lt;lookup_target&gt;ci&lt;/lookup_target&gt;&lt;method&gt;script&lt;/method&gt;&lt;name&gt;USEM IP Hardware Match&lt;/name&gt;&lt;order&gt;705&lt;/order&gt;&lt;reapply&gt;true&lt;/reapply&gt;&lt;reapply_version&gt;8&lt;/reapply_version&gt;&lt;script&gt;&lt;![CDATA[/* USEM IP Hardware Match
+   -------------------------------------------------------------------------------------------------
+   The address across the whole hardware tree, with two extra safety checks: the CI must not be a
+   load balancer, and its class must not contradict the scanned OS.
+
+   Sample payload (one Qualys host record, used in every note below)
+   {
+     "ID": "83047624",
+     "IP": "30.162.178.24",
+     "TRACKING_METHOD": "IP",
+     "OS": "Ubuntu / Tiny Core Linux / Linux 2.6.x / IBM ASM / HP StoreOnce / F5 Networks Big-IP / Cisco IOS Software"
+   }
+   Input  : sourceValue is the IP field, "30.162.178.24"; the rule also reads the OS from
+            sourcePayload.
+   Returns: the sys_id of the one hardware CI whose ip_address equals the scanned address, when it
+            is not a load balancer and its class is the one the OS implies, a sub-class of it or a
+            parent of it; null otherwise.
+   Sample : the CI in the generic Server class whose ip_address is "30.162.178.24"; a Load Balancer
+            on that address would be refused, and with a known OS a CI of a contradicting class
+            would be too.
+
+   Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
+   Before : USEM IP Class Match required the address to belong to one CI of the class the OS
+            implies; the sample OS is a list of guesses, so that rule declined without searching.
+   Reaches: DNS-less hosts whose CI is kept in a parent class or whose OS gave no class.
+   After  : USEM IP Adapter Match and USEM IP Layered Match.
+   ------------------------------------------------------------------------------------------------- */
+(function process(rule, sourceValue, sourcePayload) {
+    if (!sourceValue)                             // nothing to look up
+        return null;
+    var ip = ('' + sourceValue).trim();           // "30.162.178.24"
+    if (!ip || ip.indexOf('127.') == 0 || ip.indexOf('169.254.') == 0)   // loopback and link-local identify nothing
+        return null;
+    // Classes that must never be matched (placeholder and technical CIs); the list lives in the
+    // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
+    var ignore = (typeof _ignoreClass != 'undefined' &amp;&amp; _ignoreClass) ?
+        ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
+    // -- Class the scanned OS implies, kept as a preference ---------------------------------------
+    // This rule searches the whole hardware tree, so the class is not a filter here; it is checked
+    // at the end to reject a CI whose class contradicts the scan. An unknown OS gives no class and
+    // then no check is made.
+    // Sample: classFor("Ubuntu / Tiny Core Linux / Linux 2.6.x / IBM ASM / HP StoreOnce / F5
+    //         Networks Big-IP / Cisco IOS Software") gives no class, so pref is ""; it is only used
+    //         in the last stage.
+    // classFor() maps the OS text Qualys reports to the CMDB class the CI should be in, e.g. "Red
+    // Hat Enterprise Linux 9.8" is a Linux Server, "Windows Server 2016 Standard" a Windows Server
+    // and "VMware ESXi 7.0.3" an ESX Server. A string of guesses separated by "/" comes from an
+    // unauthenticated scan that could not identify the OS; three or more guesses give no class at
+    // all.
+    function classFor(os) {
+        if (!os) return '';
+        var s = ('' + os).toLowerCase();
+        if (s.split('/').length &gt; 2) return '';                  // multi-guess fingerprint
+        if (s.indexOf('esx') != -1) return 'cmdb_ci_esx_server';
+        if (s.indexOf('windows') != -1)
+            return s.indexOf('server') != -1 ? 'cmdb_ci_win_server' : 'cmdb_ci_computer';
+        if (s.indexOf('aix') != -1) return 'cmdb_ci_aix_server';
+        if (s.indexOf('solaris') != -1 || s.indexOf('sunos') != -1) return 'cmdb_ci_solaris_server';
+        if (s.indexOf('hp-ux') != -1) return 'cmdb_ci_hpux_server';
+        if (s.indexOf('netapp') != -1 || s.indexOf('ontap') != -1) return 'cmdb_ci_storage_server';
+        if (s.indexOf('printer') != -1 || s.indexOf('laserjet') != -1 || s.indexOf('jetdirect') != -1) return 'cmdb_ci_printer';
+        if (s.indexOf('red hat') != -1 || s.indexOf('linux') != -1 || s.indexOf('centos') != -1 ||
+            s.indexOf('ubuntu') != -1 || s.indexOf('suse') != -1 || s.indexOf('debian') != -1 ||
+            s.indexOf('fedora') != -1 || s.indexOf('euleros') != -1 ||
+            s.indexOf('oracle enterprise') != -1 || s.indexOf('amazon') != -1) return 'cmdb_ci_linux_server';
+        if (s.indexOf('nx-os') != -1 || s.indexOf('catos') != -1 || s.indexOf('cisco') != -1) return 'cmdb_ci_netgear';
+        return '';
+    }
+    var pref = classFor(sourcePayload.OS);
+    // agrees() decides whether a CI of class cls can be the scanned host once the OS gave a class:
+    // the same class, one of its sub-classes, or one of its parents (a Cisco IOS host may be kept
+    // as a plain Network Gear or Hardware record). Any other class is a different kind of machine:
+    // a Computer named or addressed like a router is a namesake or a reused address, never the
+    // router. With no class from the OS nothing is refused.
+    function parentsOf(table) {                   // the class and every class above it
+        var out = [table];
+        var db = new GlideRecord('sys_db_object');
+        db.addQuery('name', table);
+        db.query();
+        while (db.next() &amp;&amp; db.getValue('super_class')) {
+            var parent = '' + db.super_class.name;
+            out.push(parent);
+            db = new GlideRecord('sys_db_object');
+            db.addQuery('name', parent);
+            db.query();
+        }
+        return out;
+    }
+    function agrees(cls) {
+        if (!pref || cls == pref)
+            return true;
+        if (parentsOf(cls).indexOf(pref) != -1)     // cls is a sub-class of pref
+            return true;
+        return parentsOf(pref).indexOf(cls) != -1;   // cls is a parent of pref
+    }
+    // A load balancer answers on virtual addresses for the servers behind it, so it is never the
+    // host that was scanned.
+    function isLoadBalancer(id) {
+        var lb = new GlideRecord('cmdb_ci_lb');
+        return lb.isValid() &amp;&amp; lb.get(id);
+    }
+    // -- Address search across the hardware tree --------------------------------------------------
+    // Nothing is filtered by class here; the three checks that follow provide the safety.
+    // Sample: the search on cmdb_ci_hardware for ip_address "30.162.178.24" finds one CI in the
+    //         generic Server class.
+    var gr = new GlideRecord('cmdb_ci_hardware');// Hardware and every class beneath it
+    gr.addQuery('ip_address', ip);
+    if (ignore)
+        gr.addQuery('sys_class_name', 'NOT IN', ignore);
+    // -- Exactly one CI carries the value ---------------------------------------------------------
+    // The first row is remembered with its class; a second row means an address answered by several
+    // CIs (a shared virtual IP, an address reused after a rebuild), which is never a safe match and
+    // the rule declines.
+    // Sample: one row, so id is the sys_id of that Server and cls is "cmdb_ci_server".
+    gr.query();
+    if (!gr.next())
+        return null;
+    var id = gr.getUniqueValue();
+    var cls = '' + gr.getValue('sys_class_name');
+    if (gr.hasNext())
+        return null;
+    // -- Reject a load balancer -------------------------------------------------------------------
+    // A scanned address that belongs to a load balancer is a virtual IP; the findings describe a
+    // pool member behind it, not the balancer.
+    // Sample: the Server is not a Load Balancer, so the rule carries on. A Load Balancer on
+    //         "30.162.178.24" would end it here.
+    if (isLoadBalancer(id))
+        return null;
+    // -- Reject a CI whose class contradicts the scanned OS ---------------------------------------
+    // When the OS gave a class, the CI found must be of that class, of a sub-class of it, or of a
+    // parent of it. A host that lands on a Windows Server by name or address is a namesake or a
+    // reused address, not the same machine, and its findings would go to the wrong owner.
+    // Sample: pref is empty for the sample, so agrees() is true and the sys_id is returned. With OS
+    //         "VMware ESXi 7.0.3", pref would be cmdb_ci_esx_server; the plain Server, a parent of
+    //         ESX Server, would still pass, a Windows Server or a Computer named like a router
+    //         would be rejected.
+    if (!agrees(cls))
+        return null;
+    return id;
+})(rule, sourceValue, sourcePayload);
+]]&gt;&lt;/script&gt;&lt;source display_value="Qualys Cloud Platform"&gt;ed44bdc453220300e8f9f745911c0801&lt;/source&gt;&lt;source_field&gt;IP&lt;/source_field&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-10 14:42:02&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;1fff4d7e936a4310e3aef0aefaba1068&lt;/sys_id&gt;&lt;sys_mod_count&gt;7&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-11 13:59:09&lt;/sys_updated_on&gt;&lt;table&gt;sn_vul_qualys_host_attrb&lt;/table&gt;&lt;target_field/&gt;&lt;target_field_product_model/&gt;&lt;target_table/&gt;&lt;target_table_product_model&gt;cmdb_application_product_model&lt;/target_table_product_model&gt;&lt;type&gt;custom&lt;/type&gt;&lt;/sn_sec_cmn_ci_lookup_rule&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-865541360</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Class Agreement_V1.0">30cbfd89939f4f10e3aef0aefaba1021</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-11 14:11:01</sys_created_on>
+<sys_id>74cbfd89939f4f10e3aef0aefaba1021</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a090ce542f0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-11 14:11:01</sys_updated_on>
+<table>sn_vul_qualys_host_attrb</table>
+<target_name>USEM IP Hardware Match</target_name>
+<type>Lookup Rule</type>
+<update_domain>global</update_domain>
+<update_guid>f6ab7989559f4f10a576c4e8e90e3a5e</update_guid>
+<update_guid_history>f6ab7989559f4f10a576c4e8e90e3a5e:-865541360,4709b5c1a69f4f101139254867a6376c:-865541360,97f7f901109f4f10cc8eb58749a1e726:544132111,ee59d718365b8710063c6d9edc12b671:1389685939,615242109adb4710bd7a59f31db68c63:-1473898434,4d11e53a968b8710addc2eb7853a06a6:-1859920496,fc1fd5f23a8b871080c5b1f2c5bd1a51:-895666955,1e8a997e2a0b871020e8aee6a0ffab61:-804499763</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -354,187 +520,21 @@
 })(rule, sourceValue, sourcePayload);
 ]]&gt;&lt;/script&gt;&lt;source display_value="Qualys Cloud Platform"&gt;ed44bdc453220300e8f9f745911c0801&lt;/source&gt;&lt;source_field&gt;DNS&lt;/source_field&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-10 14:17:12&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;ef4a4df2932a4310e3aef0aefaba1066&lt;/sys_id&gt;&lt;sys_mod_count&gt;7&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-11 13:59:09&lt;/sys_updated_on&gt;&lt;table&gt;sn_vul_qualys_host_attrb&lt;/table&gt;&lt;target_field/&gt;&lt;target_field_product_model/&gt;&lt;target_table/&gt;&lt;target_table_product_model&gt;cmdb_application_product_model&lt;/target_table_product_model&gt;&lt;type&gt;custom&lt;/type&gt;&lt;/sn_sec_cmn_ci_lookup_rule&gt;&lt;/record_update&gt;</payload>
 <payload_hash>-1603832581</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Class Agreement_V1.0">ea293dc1939f4f10e3aef0aefaba106a</remote_update_set>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Class Agreement_V1.0">30cbfd89939f4f10e3aef0aefaba1021</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-11 13:59:40</sys_created_on>
-<sys_id>62293dc1939f4f10e3aef0aefaba106d</sys_id>
+<sys_created_on>2026-09-11 14:11:01</sys_created_on>
+<sys_id>78cbfd89939f4f10e3aef0aefaba1022</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a090c3d9220000001</sys_recorded_at>
+<sys_recorded_at>1a090ce53ee0000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-11 13:59:40</sys_updated_on>
+<sys_updated_on>2026-09-11 14:11:01</sys_updated_on>
 <table>sn_vul_qualys_host_attrb</table>
 <target_name>USEM Layered DNS Match</target_name>
 <type>Lookup Rule</type>
 <update_domain>global</update_domain>
-<update_guid>4309b5c1809f4f1026d2f64268b15458</update_guid>
-<update_guid_history>4309b5c1809f4f1026d2f64268b15458:-1603832581,9bf7f901fb9f4f100d91405739627b1d:141756474,9659d718ea5b87101629982497dd7d45:1807785403,215242101edb47105c0d46e5a4167250:-59941078,3811e53a368b8710526dd46e8a24d886:27985359,601fd5f2828b8710da7d2de2939fe83e:1224457235,d28a997e2f0b8710d565066270f11947:1099334146</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value="Global">global</application>
-<category>customer</category>
-<comments/>
-<name>sn_sec_cmn_ci_lookup_rule_1fff4d7e936a4310e3aef0aefaba1068</name>
-<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sn_sec_cmn_ci_lookup_rule"&gt;&lt;sn_sec_cmn_ci_lookup_rule action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;applies_to/&gt;&lt;condition/&gt;&lt;description&gt;Scanned address across the hardware tree, exactly one CI, not a load balancer, its class the one the OS implies, a sub-class or a parent of it.&lt;/description&gt;&lt;lookup_script/&gt;&lt;lookup_target&gt;ci&lt;/lookup_target&gt;&lt;method&gt;script&lt;/method&gt;&lt;name&gt;USEM IP Hardware Match&lt;/name&gt;&lt;order&gt;705&lt;/order&gt;&lt;reapply&gt;true&lt;/reapply&gt;&lt;reapply_version&gt;8&lt;/reapply_version&gt;&lt;script&gt;&lt;![CDATA[/* USEM IP Hardware Match
-   -------------------------------------------------------------------------------------------------
-   The address across the whole hardware tree, with two extra safety checks: the CI must not be a
-   load balancer, and its class must not contradict the scanned OS.
-
-   Sample payload (one Qualys host record, used in every note below)
-   {
-     "ID": "83047624",
-     "IP": "30.162.178.24",
-     "TRACKING_METHOD": "IP",
-     "OS": "Ubuntu / Tiny Core Linux / Linux 2.6.x / IBM ASM / HP StoreOnce / F5 Networks Big-IP / Cisco IOS Software"
-   }
-   Input  : sourceValue is the IP field, "30.162.178.24"; the rule also reads the OS from
-            sourcePayload.
-   Returns: the sys_id of the one hardware CI whose ip_address equals the scanned address, when it
-            is not a load balancer and its class is the one the OS implies, a sub-class of it or a
-            parent of it; null otherwise.
-   Sample : the CI in the generic Server class whose ip_address is "30.162.178.24"; a Load Balancer
-            on that address would be refused, and with a known OS a CI of a contradicting class
-            would be too.
-
-   Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
-   Before : USEM IP Class Match required the address to belong to one CI of the class the OS
-            implies; the sample OS is a list of guesses, so that rule declined without searching.
-   Reaches: DNS-less hosts whose CI is kept in a parent class or whose OS gave no class.
-   After  : USEM IP Adapter Match and USEM IP Layered Match.
-   ------------------------------------------------------------------------------------------------- */
-(function process(rule, sourceValue, sourcePayload) {
-    if (!sourceValue)                             // nothing to look up
-        return null;
-    var ip = ('' + sourceValue).trim();           // "30.162.178.24"
-    if (!ip || ip.indexOf('127.') == 0 || ip.indexOf('169.254.') == 0)   // loopback and link-local identify nothing
-        return null;
-    // Classes that must never be matched (placeholder and technical CIs); the list lives in the
-    // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
-    var ignore = (typeof _ignoreClass != 'undefined' &amp;&amp; _ignoreClass) ?
-        ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
-    // -- Class the scanned OS implies, kept as a preference ---------------------------------------
-    // This rule searches the whole hardware tree, so the class is not a filter here; it is checked
-    // at the end to reject a CI whose class contradicts the scan. An unknown OS gives no class and
-    // then no check is made.
-    // Sample: classFor("Ubuntu / Tiny Core Linux / Linux 2.6.x / IBM ASM / HP StoreOnce / F5
-    //         Networks Big-IP / Cisco IOS Software") gives no class, so pref is ""; it is only used
-    //         in the last stage.
-    // classFor() maps the OS text Qualys reports to the CMDB class the CI should be in, e.g. "Red
-    // Hat Enterprise Linux 9.8" is a Linux Server, "Windows Server 2016 Standard" a Windows Server
-    // and "VMware ESXi 7.0.3" an ESX Server. A string of guesses separated by "/" comes from an
-    // unauthenticated scan that could not identify the OS; three or more guesses give no class at
-    // all.
-    function classFor(os) {
-        if (!os) return '';
-        var s = ('' + os).toLowerCase();
-        if (s.split('/').length &gt; 2) return '';                  // multi-guess fingerprint
-        if (s.indexOf('esx') != -1) return 'cmdb_ci_esx_server';
-        if (s.indexOf('windows') != -1)
-            return s.indexOf('server') != -1 ? 'cmdb_ci_win_server' : 'cmdb_ci_computer';
-        if (s.indexOf('aix') != -1) return 'cmdb_ci_aix_server';
-        if (s.indexOf('solaris') != -1 || s.indexOf('sunos') != -1) return 'cmdb_ci_solaris_server';
-        if (s.indexOf('hp-ux') != -1) return 'cmdb_ci_hpux_server';
-        if (s.indexOf('netapp') != -1 || s.indexOf('ontap') != -1) return 'cmdb_ci_storage_server';
-        if (s.indexOf('printer') != -1 || s.indexOf('laserjet') != -1 || s.indexOf('jetdirect') != -1) return 'cmdb_ci_printer';
-        if (s.indexOf('red hat') != -1 || s.indexOf('linux') != -1 || s.indexOf('centos') != -1 ||
-            s.indexOf('ubuntu') != -1 || s.indexOf('suse') != -1 || s.indexOf('debian') != -1 ||
-            s.indexOf('fedora') != -1 || s.indexOf('euleros') != -1 ||
-            s.indexOf('oracle enterprise') != -1 || s.indexOf('amazon') != -1) return 'cmdb_ci_linux_server';
-        if (s.indexOf('nx-os') != -1 || s.indexOf('catos') != -1 || s.indexOf('cisco') != -1) return 'cmdb_ci_netgear';
-        return '';
-    }
-    var pref = classFor(sourcePayload.OS);
-    // agrees() decides whether a CI of class cls can be the scanned host once the OS gave a class:
-    // the same class, one of its sub-classes, or one of its parents (a Cisco IOS host may be kept
-    // as a plain Network Gear or Hardware record). Any other class is a different kind of machine:
-    // a Computer named or addressed like a router is a namesake or a reused address, never the
-    // router. With no class from the OS nothing is refused.
-    function parentsOf(table) {                   // the class and every class above it
-        var out = [table];
-        var db = new GlideRecord('sys_db_object');
-        db.addQuery('name', table);
-        db.query();
-        while (db.next() &amp;&amp; db.getValue('super_class')) {
-            var parent = '' + db.super_class.name;
-            out.push(parent);
-            db = new GlideRecord('sys_db_object');
-            db.addQuery('name', parent);
-            db.query();
-        }
-        return out;
-    }
-    function agrees(cls) {
-        if (!pref || cls == pref)
-            return true;
-        if (parentsOf(cls).indexOf(pref) != -1)     // cls is a sub-class of pref
-            return true;
-        return parentsOf(pref).indexOf(cls) != -1;   // cls is a parent of pref
-    }
-    // A load balancer answers on virtual addresses for the servers behind it, so it is never the
-    // host that was scanned.
-    function isLoadBalancer(id) {
-        var lb = new GlideRecord('cmdb_ci_lb');
-        return lb.isValid() &amp;&amp; lb.get(id);
-    }
-    // -- Address search across the hardware tree --------------------------------------------------
-    // Nothing is filtered by class here; the three checks that follow provide the safety.
-    // Sample: the search on cmdb_ci_hardware for ip_address "30.162.178.24" finds one CI in the
-    //         generic Server class.
-    var gr = new GlideRecord('cmdb_ci_hardware');// Hardware and every class beneath it
-    gr.addQuery('ip_address', ip);
-    if (ignore)
-        gr.addQuery('sys_class_name', 'NOT IN', ignore);
-    // -- Exactly one CI carries the value ---------------------------------------------------------
-    // The first row is remembered with its class; a second row means an address answered by several
-    // CIs (a shared virtual IP, an address reused after a rebuild), which is never a safe match and
-    // the rule declines.
-    // Sample: one row, so id is the sys_id of that Server and cls is "cmdb_ci_server".
-    gr.query();
-    if (!gr.next())
-        return null;
-    var id = gr.getUniqueValue();
-    var cls = '' + gr.getValue('sys_class_name');
-    if (gr.hasNext())
-        return null;
-    // -- Reject a load balancer -------------------------------------------------------------------
-    // A scanned address that belongs to a load balancer is a virtual IP; the findings describe a
-    // pool member behind it, not the balancer.
-    // Sample: the Server is not a Load Balancer, so the rule carries on. A Load Balancer on
-    //         "30.162.178.24" would end it here.
-    if (isLoadBalancer(id))
-        return null;
-    // -- Reject a CI whose class contradicts the scanned OS ---------------------------------------
-    // When the OS gave a class, the CI found must be of that class, of a sub-class of it, or of a
-    // parent of it. A host that lands on a Windows Server by name or address is a namesake or a
-    // reused address, not the same machine, and its findings would go to the wrong owner.
-    // Sample: pref is empty for the sample, so agrees() is true and the sys_id is returned. With OS
-    //         "VMware ESXi 7.0.3", pref would be cmdb_ci_esx_server; the plain Server, a parent of
-    //         ESX Server, would still pass, a Windows Server or a Computer named like a router
-    //         would be rejected.
-    if (!agrees(cls))
-        return null;
-    return id;
-})(rule, sourceValue, sourcePayload);
-]]&gt;&lt;/script&gt;&lt;source display_value="Qualys Cloud Platform"&gt;ed44bdc453220300e8f9f745911c0801&lt;/source&gt;&lt;source_field&gt;IP&lt;/source_field&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-10 14:42:02&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;1fff4d7e936a4310e3aef0aefaba1068&lt;/sys_id&gt;&lt;sys_mod_count&gt;7&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-11 13:59:09&lt;/sys_updated_on&gt;&lt;table&gt;sn_vul_qualys_host_attrb&lt;/table&gt;&lt;target_field/&gt;&lt;target_field_product_model/&gt;&lt;target_table/&gt;&lt;target_table_product_model&gt;cmdb_application_product_model&lt;/target_table_product_model&gt;&lt;type&gt;custom&lt;/type&gt;&lt;/sn_sec_cmn_ci_lookup_rule&gt;&lt;/record_update&gt;</payload>
-<payload_hash>-865541360</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Class Agreement_V1.0">ea293dc1939f4f10e3aef0aefaba106a</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-11 13:59:40</sys_created_on>
-<sys_id>a2293dc1939f4f10e3aef0aefaba106b</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a090c3d9910000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-11 13:59:40</sys_updated_on>
-<table>sn_vul_qualys_host_attrb</table>
-<target_name>USEM IP Hardware Match</target_name>
-<type>Lookup Rule</type>
-<update_domain>global</update_domain>
-<update_guid>4709b5c1a69f4f101139254867a6376c</update_guid>
-<update_guid_history>4709b5c1a69f4f101139254867a6376c:-865541360,97f7f901109f4f10cc8eb58749a1e726:544132111,ee59d718365b8710063c6d9edc12b671:1389685939,615242109adb4710bd7a59f31db68c63:-1473898434,4d11e53a968b8710addc2eb7853a06a6:-1859920496,fc1fd5f23a8b871080c5b1f2c5bd1a51:-895666955,1e8a997e2a0b871020e8aee6a0ffab61:-804499763</update_guid_history>
+<update_guid>feab79895c9f4f10f801e1bfa9ad1559</update_guid>
+<update_guid_history>feab79895c9f4f10f801e1bfa9ad1559:-1603832581,4309b5c1809f4f1026d2f64268b15458:-1603832581,9bf7f901fb9f4f100d91405739627b1d:141756474,9659d718ea5b87101629982497dd7d45:1807785403,215242101edb47105c0d46e5a4167250:-59941078,3811e53a368b8710526dd46e8a24d886:27985359,601fd5f2828b8710da7d2de2939fe83e:1224457235,d28a997e2f0b8710d565066270f11947:1099334146</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -686,21 +686,21 @@
 })(rule, sourceValue, sourcePayload);
 ]]&gt;&lt;/script&gt;&lt;source display_value="Qualys Cloud Platform"&gt;ed44bdc453220300e8f9f745911c0801&lt;/source&gt;&lt;source_field&gt;IP&lt;/source_field&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-10 14:42:03&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;23ff4d7e936a4310e3aef0aefaba1072&lt;/sys_id&gt;&lt;sys_mod_count&gt;7&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-11 13:59:09&lt;/sys_updated_on&gt;&lt;table&gt;sn_vul_qualys_host_attrb&lt;/table&gt;&lt;target_field/&gt;&lt;target_field_product_model/&gt;&lt;target_table/&gt;&lt;target_table_product_model&gt;cmdb_application_product_model&lt;/target_table_product_model&gt;&lt;type&gt;custom&lt;/type&gt;&lt;/sn_sec_cmn_ci_lookup_rule&gt;&lt;/record_update&gt;</payload>
 <payload_hash>-2046627259</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Class Agreement_V1.0">ea293dc1939f4f10e3aef0aefaba106a</remote_update_set>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Class Agreement_V1.0">30cbfd89939f4f10e3aef0aefaba1021</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-11 13:59:40</sys_created_on>
-<sys_id>a2293dc1939f4f10e3aef0aefaba106c</sys_id>
+<sys_created_on>2026-09-11 14:11:01</sys_created_on>
+<sys_id>b8cbfd89939f4f10e3aef0aefaba1021</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a090c3da020000001</sys_recorded_at>
+<sys_recorded_at>1a090ce54620000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-11 13:59:40</sys_updated_on>
+<sys_updated_on>2026-09-11 14:11:01</sys_updated_on>
 <table>sn_vul_qualys_host_attrb</table>
 <target_name>USEM IP Layered Match</target_name>
 <type>Lookup Rule</type>
 <update_domain>global</update_domain>
-<update_guid>df09b5c18c9f4f10d3927f492d4fa873</update_guid>
-<update_guid_history>df09b5c18c9f4f10d3927f492d4fa873:-2046627259,93f7f901589f4f10b431140b1d6d522e:-1922625852,2659d718555b871023d262bbd9352086:-2136908317,e95242103edb4710741600698f1e946a:-517500551,c911e53a668b87107e285298a10b19ae:1223752585,b01fd5f29e8b8710fee5c9b607d1507f:1083934253,968a997e3c0b87108f3099178a618467:-804836697</update_guid_history>
+<update_guid>feab7989039f4f101b4d5816878e7d62</update_guid>
+<update_guid_history>feab7989039f4f101b4d5816878e7d62:-2046627259,df09b5c18c9f4f10d3927f492d4fa873:-2046627259,93f7f901589f4f10b431140b1d6d522e:-1922625852,2659d718555b871023d262bbd9352086:-2136908317,e95242103edb4710741600698f1e946a:-517500551,c911e53a668b87107e285298a10b19ae:1223752585,b01fd5f29e8b8710fee5c9b607d1507f:1083934253,968a997e3c0b87108f3099178a618467:-804836697</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -844,21 +844,21 @@
 })(rule, sourceValue, sourcePayload);
 ]]&gt;&lt;/script&gt;&lt;source display_value="Qualys Cloud Platform"&gt;ed44bdc453220300e8f9f745911c0801&lt;/source&gt;&lt;source_field&gt;DNS&lt;/source_field&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-10 14:42:02&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;93ff4d7e936a4310e3aef0aefaba1064&lt;/sys_id&gt;&lt;sys_mod_count&gt;7&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-11 13:59:09&lt;/sys_updated_on&gt;&lt;table&gt;sn_vul_qualys_host_attrb&lt;/table&gt;&lt;target_field/&gt;&lt;target_field_product_model/&gt;&lt;target_table/&gt;&lt;target_table_product_model&gt;cmdb_application_product_model&lt;/target_table_product_model&gt;&lt;type&gt;custom&lt;/type&gt;&lt;/sn_sec_cmn_ci_lookup_rule&gt;&lt;/record_update&gt;</payload>
 <payload_hash>1741788574</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Class Agreement_V1.0">ea293dc1939f4f10e3aef0aefaba106a</remote_update_set>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Class Agreement_V1.0">30cbfd89939f4f10e3aef0aefaba1021</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-11 13:59:40</sys_created_on>
-<sys_id>e6293dc1939f4f10e3aef0aefaba106c</sys_id>
+<sys_created_on>2026-09-11 14:11:01</sys_created_on>
+<sys_id>fccbfd89939f4f10e3aef0aefaba1021</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a090c3d9610000001</sys_recorded_at>
+<sys_recorded_at>1a090ce54140000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-11 13:59:40</sys_updated_on>
+<sys_updated_on>2026-09-11 14:11:01</sys_updated_on>
 <table>sn_vul_qualys_host_attrb</table>
 <target_name>USEM Hostname Hardware Match</target_name>
 <type>Lookup Rule</type>
 <update_domain>global</update_domain>
-<update_guid>0b09b5c1ef9f4f10ccc29c10e0b67e68</update_guid>
-<update_guid_history>0b09b5c1ef9f4f10ccc29c10e0b67e68:1741788574,1bf7f901079f4f10d0b75a9e4f202322:1801082653,1659d718775b871036b9ae614119c74d:-1955429482,a95242106cdb471045c9221cdecccf57:212678384,4911e53a9c8b8710667b939a6043ff8e:-630903067,b01fd5f2898b87101b0b4973d5330846:-82472092,5e8a997ec40b87105ef5dfbae115c74c:1245545680</update_guid_history>
+<update_guid>f2ab7989529f4f1043bbee204a2db75c</update_guid>
+<update_guid_history>f2ab7989529f4f1043bbee204a2db75c:1741788574,0b09b5c1ef9f4f10ccc29c10e0b67e68:1741788574,1bf7f901079f4f10d0b75a9e4f202322:1801082653,1659d718775b871036b9ae614119c74d:-1955429482,a95242106cdb471045c9221cdecccf57:212678384,4911e53a9c8b8710667b939a6043ff8e:-630903067,b01fd5f2898b87101b0b4973d5330846:-82472092,5e8a997ec40b87105ef5dfbae115c74c:1245545680</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
