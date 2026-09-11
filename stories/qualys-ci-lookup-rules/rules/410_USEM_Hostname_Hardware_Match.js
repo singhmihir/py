@@ -1,8 +1,8 @@
 /* USEM Hostname Hardware Match
    -------------------------------------------------------------------------------------------------
    The short hostname across the whole hardware tree, with a check that the CI found does not
-   contradict the scanned OS. For CIs classed generically (Server, Computer, UNIX Server) or
-   differently from the OS.
+   contradict the scanned OS. For CIs kept in a parent class (Server, Computer, Hardware) or in a
+   different class than the OS suggests.
 
    Sample payload (one Qualys host record, used in every note below)
    {
@@ -16,15 +16,16 @@
    Input  : sourceValue is the DNS field, "va2ausapabw0.bankofamerica.com"; the rule also reads the
             OS from sourcePayload.
    Returns: the sys_id of the one hardware CI named with the short hostname, accepted when its class
-            agrees with the scanned OS or is generic; null when the name is shared or the class
-            contradicts the scan.
-   Sample : the CI named "va2ausapabw0" in the generic Server class; it would also be accepted as an
-            AIX Server, and rejected as, say, a Windows Server.
+            is the one the OS implies, a sub-class of it or a parent of it; null when the name is
+            shared or the class contradicts the scan.
+   Sample : the CI named "va2ausapabw0" in the plain Server class, a parent of AIX Server; it would
+            also be accepted as an AIX Server, and rejected as, say, a Windows Server or an IP
+            Router.
 
    Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
    Before : USEM Hostname Class Match required the short name to be unique inside the class the OS
             implies (AIX Server) and found nothing there.
-   Reaches: hosts whose CI is classed generically or whose OS gave no class.
+   Reaches: hosts whose CI is kept in a parent class or whose OS gave no class.
    After  : USEM FQDN Name Hardware Match, then the IP address rules for hosts without a usable
             name.
    ------------------------------------------------------------------------------------------------- */
@@ -70,10 +71,32 @@
         return '';
     }
     var pref = classFor(sourcePayload.OS);
-    // Classes that say nothing about the OS (a CI loaded as a plain Server before discovery refined
-    // it) never contradict the scan.
-    var generic = {cmdb_ci_hardware: 1, cmdb_ci_computer: 1, cmdb_ci_server: 1,
-        cmdb_ci_unix_server: 1};
+    // agrees() decides whether a CI of class cls can be the scanned host once the OS gave a class:
+    // the same class, one of its sub-classes, or one of its parents (a Cisco IOS host may be kept
+    // as a plain Network Gear or Hardware record). Any other class is a different kind of machine:
+    // a Computer named or addressed like a router is a namesake or a reused address, never the
+    // router. With no class from the OS nothing is refused.
+    function parentsOf(table) {                   // the class and every class above it
+        var out = [table];
+        var db = new GlideRecord('sys_db_object');
+        db.addQuery('name', table);
+        db.query();
+        while (db.next() && db.getValue('super_class')) {
+            var parent = '' + db.super_class.name;
+            out.push(parent);
+            db = new GlideRecord('sys_db_object');
+            db.addQuery('name', parent);
+            db.query();
+        }
+        return out;
+    }
+    function agrees(cls) {
+        if (!pref || cls == pref)
+            return true;
+        if (parentsOf(cls).indexOf(pref) != -1)     // cls is a sub-class of pref
+            return true;
+        return parentsOf(pref).indexOf(cls) != -1;   // cls is a parent of pref
+    }
     // -- Short name search across the hardware tree -----------------------------------------------
     // Nothing is filtered by class here; the two checks that follow provide the safety.
     // Sample: the search on cmdb_ci_hardware for name "va2ausapabw0" finds the Server
@@ -96,16 +119,14 @@
     if (gr.hasNext())
         return null;
     // -- Reject a CI whose class contradicts the scanned OS ---------------------------------------
-    // When the OS gave a class, the CI found must sit inside it (sub-classes included) or be
-    // generically classed. A host that lands on a Windows Server by name or address is a namesake
-    // or a reused address, not the same machine, and its findings would go to the wrong owner.
-    // Sample: pref is cmdb_ci_aix_server; the CI is not an AIX Server, but cmdb_ci_server is in
-    //         generic, so it passes and its sys_id is returned. A Windows Server named
-    //         "va2ausapabw0" would fail both checks and the rule would decline.
-    if (pref) {
-        var chk = new GlideRecord(pref);
-        if (!(chk.isValid() && chk.get(id)) && !generic[cls])
-            return null;
-    }
+    // When the OS gave a class, the CI found must be of that class, of a sub-class of it, or of a
+    // parent of it. A host that lands on a Windows Server by name or address is a namesake or a
+    // reused address, not the same machine, and its findings would go to the wrong owner.
+    // Sample: pref is cmdb_ci_aix_server and cls is cmdb_ci_server, a parent of AIX Server, so
+    //         agrees() is true and the sys_id is returned. A Windows Server or an IP Router named
+    //         "va2ausapabw0" is neither a sub-class nor a parent of AIX Server and the rule would
+    //         decline.
+    if (!agrees(cls))
+        return null;
     return id;
 })(rule, sourceValue, sourcePayload);

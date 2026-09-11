@@ -1,13 +1,26 @@
 """'Qualys CI Lookup Rules - Plain English Primer.xlsx': the vocabulary, one payload explained,
-the chain, every rule's core idea with its sample payload, and a demo Q&A. Run with the
-scratchpad as the working directory (the repository root shadows numpy)."""
+the chain, every rule's core idea with its sample payload, and a demo Q&A. Run from a directory
+outside the repository root (the root's numpy folder shadows the real module)."""
 import json, os
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, 'Qualys CI Lookup Rules - Plain English Primer.xlsx')
-CAP = {r['order']: r for r in json.load(open('/tmp/claude-0/-home-user-py/92674a7d-a733-5fc3-a7aa-42bdf76f593b/scratchpad/rules_capture.json'))}
+import sys
+sys.path.insert(0, HERE)
+import gen_rules as G
+def capture():
+    """The sample payload, input field and sample outcome of every rule, read from the generator."""
+    cap = []
+    def header(name, purpose, payload, source, value, reads, result, outcome, before, reaches, after):
+        cap.append(dict(name=name, purpose=purpose, payload=payload, source=source, value=value, reads=reads, result=result, outcome=outcome)); return ''
+    def write(order, name, text):
+        cap[-1]['order'] = order; return ''
+    G.header, G.write = header, write
+    for f in G.RULES: f()
+    return {r['order']: r for r in cap}
+CAP = capture()
 F = 'Arial'; NAVY = '1F3864'; BLUE = 'DCE6F1'; GREY = 'F2F2F2'; GREEN = 'E2EFDA'; AMBER = 'FFF2CC'
 thin = Side(style='thin', color='BFBFBF'); BOX = Border(left=thin, right=thin, top=thin, bottom=thin)
 def font(sz=10, b=False, c='000000', i=False): return Font(name=F, size=sz, bold=b, color=c, italic=i)
@@ -178,15 +191,15 @@ LOGIC = {
    'OS "Ubuntu/Linux" gives no clean class. A generic Server named "lrche01xtrapd01" has fqdn = the scanned name. Matched.',
    'No CI with that name carries the domain; duplicates.'),
  '350': ('Follow the discovery records: DNS Name -> IP Address -> adapter -> CI.',
-   'Discovery sometimes does not write the name on the CI at all; it keeps a separate DNS Name record linked to an IP Address record, linked to a network adapter, linked to the CI. This rule follows that chain from the scanned name. Count the distinct CIs at the end: one -> match; several -> the one reached through the scanned IP. An alias resolves to the real machine because the chain ends on whatever device holds the address.',
+   'Discovery sometimes does not write the name on the CI at all; it keeps a separate DNS Name record linked to an IP Address record, linked to a network adapter, linked to the CI. This rule follows that chain from the scanned name. A CI at the end of the chain whose class contradicts the OS (a Computer for a Cisco IOS host) is left out. Count the remaining CIs: one -> match; several -> the one reached through the scanned IP. An alias resolves to the real machine because the chain ends on whatever device holds the address.',
    '"hklvteqoradbp3.hk.baml.com" -> DNS Name record -> IP Address 167.202.60.26 -> adapter eth0 -> Linux Server "hklvteqoradbp3". Matched.',
-   'No DNS Name record; the name points to two devices and the IP does not pick one.'),
+   'No DNS Name record; the only CI at the end of the chain is of a class the OS rules out; the name points to two devices and the IP does not pick one.'),
  '400': ('The hostname alone, inside the OS class.',
    'For CIs that carry only a short name and nothing about the domain. Everything from the first dot is dropped. With no domain to confirm, the class is the only safeguard against a namesake, so the name must be unique inside the class.',
    'OS says Windows Server 2016 -> class Windows Server. One Windows Server is named "WSAOI01ZEAPD1". Matched.',
    'OS gives no class; two Windows Servers share the name.'),
  '410': ('The hostname alone, whole tree, with a class veto.',
-   'Search all hardware for exactly one CI with the hostname. Then a sanity check: if the OS says AIX and the CI found is a Windows Server, that is a namesake, refuse it. A generic class (Server, Computer, UNIX Server) never contradicts.',
+   'Search all hardware for exactly one CI with the hostname. Then a sanity check: the CI must be of the class the OS implies, a sub-class of it, or a parent of it (a plain Server for an AIX host is fine; a Windows Server or a Computer for a Cisco IOS host is a namesake and is refused).',
    'OS "AIX 7.3". One CI named "va2ausapabw0", in the generic Server class. Accepted (it would also be accepted as AIX Server, refused as Windows Server). Matched.',
    'Two hardware CIs share the name; the single CI found is of a contradicting class.'),
  '420': ('NEW. Management controllers: strip the suffix, match the server.',
@@ -210,15 +223,15 @@ LOGIC = {
    'IP only, OS says VMware ESXi -> class ESX Server. One ESX Server has ip_address 30.162.178.21: "vsdnesxm21". Matched.',
    'OS gives no class; two CIs of the class share the address.'),
  '705': ('The address, whole tree, not a balancer, class must not contradict.',
-   'Exactly one hardware CI on the address. Refuse it if it is a load balancer (the address is a VIP) or if its class contradicts the OS (generic classes never do).',
+   'Exactly one hardware CI on the address. Refuse it if it is a load balancer (the address is a VIP) or if its class contradicts the OS (a parent class such as Server or Hardware never does).',
    'OS is a multi-guess -> no class. One hardware CI has ip_address 30.162.178.24, a generic Server. Matched.',
    'Address shared by several CIs; the CI is a load balancer; the class contradicts a known OS.'),
  '730': ('The address on a Network Adapter record.',
-   'A server with several network cards keeps its addresses on Network Adapter records, not on the CI. Find adapters carrying the address; count the distinct owning CIs (one server with two cards counts once). One owner, not a balancer -> match.',
+   'A server with several network cards keeps its addresses on Network Adapter records, not on the CI. Find adapters carrying the address; skip owners whose class contradicts the OS; count the distinct owning CIs (one server with two cards counts once). One owner, not a balancer -> match.',
    'No CI record carries 30.162.178.22, but adapter "eth0" does; its owner is one Server. Matched.',
    'Adapters on two different CIs carry the address; the owner is a load balancer.'),
  '740': ('The address as its own IP Address record.',
-   'Newer discovery writes each address as an IP Address record linked to the adapter, and the adapter itself may carry nothing. Read those records: IP Address -> adapter -> CI. Same counting as 730.',
+   'Newer discovery writes each address as an IP Address record linked to the adapter, and the adapter itself may carry nothing. Read those records: IP Address -> adapter -> CI. Same counting and the same class check as 730.',
    'Neither the Server nor its adapter holds 30.162.178.23; an IP Address record does -> adapter "eth0" -> the Server. Matched.',
    'Two devices at the end of the chain; a balancer.'),
  '850': ('Last and broad: the whole FQDN as the CI name, anywhere.',
@@ -242,6 +255,7 @@ table(ws, 4, ['Question', 'Answer'], [
  ('Why does each rule have a "Class" version and a "Hardware" version?', 'Narrow first: inside the class the OS points at, where a namesake of another type cannot appear. Wide second: the whole hardware tree, for hosts whose OS is unknown (a third of the feed) or whose CI is stored as a generic Server.'),
  ('What is a class?', 'The type of CMDB record: Linux Server, Windows Server, ESX Server, IP Switch, IP Phone... The OS text tells us which one to search.'),
  ('What if the OS text is empty or a guess like "Ubuntu / F5 / Cisco IOS"?', 'Then there is no class. The class rule steps aside and the hardware-wide twin does the search, with extra checks (not a load balancer, no contradicting class).'),
+ ('What does "class contradicts the OS" mean?', 'The CI found must be of the class the OS implies, a sub-class of it, or a parent of it. Cisco IOS implies Network Gear: an IP Router or a plain Hardware record agrees, a Computer or a Server does not. Every rule that can land outside the OS class applies this check, including the ones that follow discovery records (350, 730, 740).'),
  ('Why is the IP address used last?', 'It is the weakest fact: addresses move between machines and load balancers answer on shared virtual IPs. It is used only when there is no serial and no usable name.'),
  ('What do the three new rules add?', 'They handle labels that are not a machine\'s own name: management controllers (server-ilo -> the server), switch interfaces (device-vlan705 -> the switch), and load balancer virtual IPs (-> the Load Balancer Service CI). Together they cover the biggest groups on the unmatched list.'),
  ('Where do the suffix and marker lists live?', 'In the rule scripts themselves, as short lists at the top of the relevant stage. No custom system properties.'),
