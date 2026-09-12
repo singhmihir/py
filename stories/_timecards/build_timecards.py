@@ -1,5 +1,6 @@
-"""Build the bi-weekly ServiceNow time card workbooks (Daily Notes, Daily Timecard, Deloitte
-Reconciliation) for 10-Aug-2026 to 04-Sep-2026 in the layout of the 27-Jul to 07-Aug workbook.
+"""Build the ServiceNow time card workbooks (Daily Notes, Daily Timecard, Deloitte Reconciliation)
+for 10-Aug-2026 onwards in the layout of the 27-Jul to 07-Aug workbook. `python3 build_timecards.py
+[file ...]` builds the named workbooks only.
 
 Deloitte T&E is the system of record (weekly screenshots, all approved). The ServiceNow side
 carries at most 3.00h of project work per day for the week ending 22-Aug-2026 (VDI unavailable),
@@ -129,6 +130,38 @@ WEEK_4 = dict(ending=date(2026, 9, 5), days=[
         'the stage comments into V2.2.'),
 ])
 
+WEEK_5 = dict(ending=date(2026, 9, 12), days=[
+    day(date(2026, 9, 7), 8, 0, 8, 0, 'Configurations', 'SNOWUSEMTP-895',
+        'Configurations - SNOWUSEMTP-895: built the read-only diagnosis harness for the unmatched Qualys hosts and '
+        'profiled the unmatched population; added three CI lookup rules for the groups the chain could not place '
+        '(management controllers, network device interfaces and VLANs, load balancer virtual IPs), each accepting a CI '
+        'only when exactly one candidate remains; proved the chain on nine real unmatched discovered items, all matched. '
+        'V3.0 captured in a Global update set.'),
+    day(date(2026, 9, 8), 8, 0, 8, 0, 'Design', 'Primary AIT resolution',
+        'Design - Primary AIT resolution: design proposal for resolving the Primary AIT and application manager on '
+        'findings, with benchmarks of the stamping options across vulnerable items, application vulnerable items and '
+        'container image vulnerable items; recommendation and trade-offs documented for review.'),
+    day(date(2026, 9, 9), 8, 0, 8, 0, 'Documentation', 'SNOWUSEMTP-895',
+        'Documentation - SNOWUSEMTP-895: rewrote the comments on all nineteen Qualys CI lookup rules as short first-hand '
+        'notes (sample payload in every header, each matching stage walking the sample through, no order numbers), '
+        'moved the suffix, marker and product lists inline into the three new rules and retired the six lookup '
+        'properties, and produced the 43-slide technical walkthrough deck. V2.4 and V3.4 delivered; chain behaviour '
+        'identical before and after.'),
+    day(date(2026, 9, 10), 8, 0, 8, 0, 'Configurations', 'SNOWUSEMTP-1625',
+        'Configurations - SNOWUSEMTP-1625: standardised the Kafka producer script include for the CDP outbound '
+        '(configuration in initialize, topic per table, single error format) and added payload validation ahead of the '
+        'send so a malformed message is logged and never published; tested per remediation task table with captured '
+        'sends and every refusal path. Wrote up the outbound REST parameter length limits for the Qualys Policy '
+        'Compliance integration (setStringParameter, field lengths, request URL) for the story comment.'),
+    day(date(2026, 9, 11), 8, 0, 8, 0, 'Configurations', 'SNOWUSEMTP-895',
+        'Configurations - SNOWUSEMTP-895: investigated the Cisco IOS router matched to a Computer by the Layered DNS '
+        'rule (router CI without fqdn or dns_domain, discovery chain ending on the wrong CI) and added a class-agreement '
+        'check to the discovery-chain and hardware-wide rules; retested the case, its variations and the full chain; '
+        'update set delivered and reply posted. Folded the payload validation into the Kafka producer, returned the '
+        'CDP field mapping properties to the line format, added standard function comments to the producer and payload '
+        'builder (V2.5), and produced the plain-English primer on the lookup rules for the demo.'),
+])
+
 FILES = [
     dict(file='BofA_USEM_Timecard_10Aug21Aug_2026.xlsx', weeks=[WEEK_1, WEEK_2],
          notes_footer='Week ending 15-Aug carries a single Project line Mon to Thu and a Sick line on Fri 14-Aug (9.00h). '
@@ -156,6 +189,18 @@ FILES = [
              'Week ending 05-Sep: Mon 31-Aug 8.00h SLV Sick Leave, Tue to Fri 8.00h on the India Kolkata worked line; weekly 40.00, Worked 32.00, Absence 8.00.',
              'Mapping rule: SN Project + SN Training reconcile to Deloitte Worked; SN Sick / Holiday reconciles to Deloitte Absence; daily and weekly totals are identical.',
              'Activity notes are drawn from the engagement work on the Trident resolve gate, SNOWUSEMTP-1420 (Trident closure governance), SNOWUSEMTP.26.P3.17 (weekly Vulnerabilities Summary) and SNOWUSEMTP-1625 (CDP remediation task payload).',
+         ]),
+    dict(file='BofA_USEM_Timecard_07Sep11Sep_2026.xlsx', weeks=[WEEK_5],
+         notes_footer='Week ending 12-Sep carries a single Project line Mon to Fri (8.00h each). See the Reconciliation sheet for the '
+                      'line-by-line tie-out; the Deloitte columns hold the planned 8.00h per day until the approved T&E is available.',
+         recon_intro='Deloitte is the system of record. Every daily and weekly total below is computed live and must read MATCH. '
+                     'SN Project + SN Training = Deloitte Worked. SN Sick = Deloitte Absence. The Deloitte columns hold the planned '
+                     '8.00h per day for the week ending 12-Sep; replace them with the approved T&E figures when available.',
+         recon_notes=[
+             'Source of record: Deloitte T&E timesheet, week ending 12-Sep-2026 (Deloitte columns entered as the planned 8.00h per day; confirm against the approved timesheet).',
+             'Week ending 12-Sep: Mon to Fri 8.00h on the India Kolkata worked line; weekly 40.00, Worked 40.00, Absence 0.00.',
+             'Mapping rule: SN Project + SN Training reconcile to Deloitte Worked; SN Sick reconciles to Deloitte Absence; daily and weekly totals are identical.',
+             'Activity notes are drawn from the engagement work on SNOWUSEMTP-895 (Qualys CI lookup rules), the Primary AIT resolution design and SNOWUSEMTP-1625 (CDP remediation task payload and Kafka producer).',
          ]),
 ]
 
@@ -362,5 +407,8 @@ def build(spec):
 
 
 if __name__ == '__main__':
+    import sys
+    targets = sys.argv[1:]
     for spec in FILES:
-        print(build(spec))
+        if not targets or spec['file'] in targets:
+            print(build(spec))
