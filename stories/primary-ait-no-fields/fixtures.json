@@ -1,0 +1,83 @@
+{
+ "aits": {
+  "AIT57152": "069ec712934b8310e3aef0aefaba10bb",
+  "AIT57153": "4a9ec712934b8310e3aef0aefaba10bb",
+  "AIT57154": "8e9ec712934b8310e3aef0aefaba10bb",
+  "AIT57151": "c29ec712934b8310e3aef0aefaba10ba"
+ },
+ "apps": {
+  "App1": "c620ecf5931b0750e3aef0aefaba1023",
+  "App2": "1a20ecf5931b0750e3aef0aefaba102a",
+  "App3": "d220ecf5931b0750e3aef0aefaba102b",
+  "App4": "9e20ecf5931b0750e3aef0aefaba102b",
+  "App5": "5a20ecf5931b0750e3aef0aefaba102c"
+ },
+ "svcs": {
+  "S1": "9620ecf5931b0750e3aef0aefaba102d",
+  "S2": "1220ecf5931b0750e3aef0aefaba1036",
+  "S3": "5e20ecf5931b0750e3aef0aefaba1036",
+  "S4": "9a20ecf5931b0750e3aef0aefaba1037",
+  "S5": "d620ecf5931b0750e3aef0aefaba1038",
+  "S6": "1620ecf5931b0750e3aef0aefaba1039"
+ },
+ "cis": {
+  "C1": "e220ecf5931b0750e3aef0aefaba1075",
+  "C2": "6a20ecf5931b0750e3aef0aefaba1078",
+  "C3": "e220ecf5931b0750e3aef0aefaba1079",
+  "C4": "6e20ecf5931b0750e3aef0aefaba1079",
+  "C5": "2e20ecf5931b0750e3aef0aefaba109f",
+  "C6": "a620ecf5931b0750e3aef0aefaba10a0",
+  "C7": "2220ecf5931b0750e3aef0aefaba10a1",
+  "C8": "aa20ecf5931b0750e3aef0aefaba10a1",
+  "C9": "2620ecf5931b0750e3aef0aefaba10a2",
+  "C10": "ae20ecf5931b0750e3aef0aefaba10a2"
+ },
+ "dis": {
+  "src_C1_1": "ee20ecf5931b0750e3aef0aefaba10ac",
+  "src_C1_2": "2a20ecf5931b0750e3aef0aefaba10b3",
+  "src_C1_3": "ee20ecf5931b0750e3aef0aefaba10b4",
+  "src_C2_1": "a620ecf5931b0750e3aef0aefaba10b6",
+  "src_C2_2": "2a20ecf5931b0750e3aef0aefaba10b8",
+  "src_C2_3": "ee20ecf5931b0750e3aef0aefaba10b9",
+  "src_C3_1": "a620ecf5931b0750e3aef0aefaba10bb",
+  "src_C3_2": "2a20ecf5931b0750e3aef0aefaba10bd",
+  "src_C3_3": "ee20ecf5931b0750e3aef0aefaba10be",
+  "src_C4_1": "a620ecf5931b0750e3aef0aefaba10c0",
+  "src_C4_2": "6620ecf5931b0750e3aef0aefaba10c2",
+  "src_C4_3": "2e20ecf5931b0750e3aef0aefaba10c3",
+  "src_C5_1": "e220ecf5931b0750e3aef0aefaba10c5",
+  "src_C5_2": "ae20ecf5931b0750e3aef0aefaba10c6",
+  "src_C5_3": "6620ecf5931b0750e3aef0aefaba10c8",
+  "src_C6_1": "2e20ecf5931b0750e3aef0aefaba10c9",
+  "src_C6_2": "f620ecf5931b0750e3aef0aefaba10cb",
+  "src_C6_3": "be20ecf5931b0750e3aef0aefaba10cc",
+  "src_C7_1": "7620ecf5931b0750e3aef0aefaba10ce",
+  "src_C7_2": "7620ecf5931b0750e3aef0aefaba10d0",
+  "src_C7_3": "7620ecf5931b0750e3aef0aefaba10d2",
+  "src_C8_1": "7620ecf5931b0750e3aef0aefaba10d4",
+  "src_C8_2": "b220ecf5931b0750e3aef0aefaba10d6",
+  "src_C8_3": "fa20ecf5931b0750e3aef0aefaba10d7",
+  "src_C9_1": "3620ecf5931b0750e3aef0aefaba10d9",
+  "src_C9_2": "b620ecf5931b0750e3aef0aefaba10db",
+  "src_C9_3": "7e20ecf5931b0750e3aef0aefaba10dc",
+  "src_C10_1": "3620ecf5931b0750e3aef0aefaba10de",
+  "src_C10_2": "b620ecf5931b0750e3aef0aefaba10e0",
+  "src_C10_3": "7e20ecf5931b0750e3aef0aefaba10e1",
+  "rel_C2": "78922071935b0750e3aef0aefaba10cf",
+  "rel_C8": "09922071935b0750e3aef0aefaba10d6",
+  "img_C3": "0d922071935b0750e3aef0aefaba10d8",
+  "img_C4": "85922071935b0750e3aef0aefaba10dc"
+ },
+ "expected": {
+  "C1": "c29ec712934b8310e3aef0aefaba10ba",
+  "C2": "069ec712934b8310e3aef0aefaba10bb",
+  "C3": "4a9ec712934b8310e3aef0aefaba10bb",
+  "C4": "",
+  "C5": "069ec712934b8310e3aef0aefaba10bb",
+  "C6": "c29ec712934b8310e3aef0aefaba10ba",
+  "C7": "4a9ec712934b8310e3aef0aefaba10bb",
+  "C8": "",
+  "C9": "8e9ec712934b8310e3aef0aefaba10bb",
+  "C10": "069ec712934b8310e3aef0aefaba10bb"
+ }
+}

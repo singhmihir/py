@@ -1,0 +1,45 @@
+PASS  T1 discovered items hold the expected Primary AIT after insert
+PASS  T2 queue registry provisioned its processing job, sequential, one job  [{"order": "sequential", "job_config": "job_count=1", "poll": "1970-01-01 00:00:10", "auto": "1"}]
+PASS  T2 fixture events processed (events settled in 0.2s, 0 in error)
+PASS  T2 fixture events processed: queue drained without errors
+   event states: {"processed": 50}
+PASS  T3 re-pointed discovered item takes the new CI value in the same write  [c29ec712934b8310e3aef0aefaba10ba]
+PASS  T3 pointed back to a CI without services, cleared in the same write  ['']
+PASS  T3 new discovered item stamped at insert  [delete of the temporary row: true]
+PASS  T4 association insert: C8 takes the AIT of S3 on every table (events settled in 6.8s, 0 in error)
+PASS  T4 association insert: C8 takes the AIT of S3 on every table: queue drained without errors
+PASS  T4 association delete: C8 cleared (events settled in 9.1s, 0 in error)
+PASS  T4 association delete: C8 cleared: queue drained without errors
+PASS  T5 relationship App1 to S4 insert: C4 takes AIT57151 (S4 had only an application without AIT) (events settled in 9.0s, 0 in error)
+PASS  T5 relationship App1 to S4 insert: C4 takes AIT57151 (S4 had only an application without AIT): queue drained without errors
+PASS  T5 relationship delete: C4 cleared (events settled in 11.2s, 0 in error)
+PASS  T5 relationship delete: C4 cleared: queue drained without errors
+PASS  T6 application AIT change: S2 and S3 now resolve to AIT57151 (C2, C3, C5, C7), C10 unchanged (events settled in 6.8s, 0 in error)
+PASS  T6 application AIT change: S2 and S3 now resolve to AIT57151 (C2, C3, C5, C7), C10 unchanged: queue drained without errors
+PASS  T6 application AIT reverted: values back (events settled in 9.0s, 0 in error)
+PASS  T6 application AIT reverted: values back: queue drained without errors
+PASS  T7 AIT tier change: C10 moves to AIT57154 (events settled in 9.0s, 0 in error)
+PASS  T7 AIT tier change: C10 moves to AIT57154: queue drained without errors
+PASS  T7 AIT tier reverted: C10 back to AIT57152 (tie by number) (events settled in 11.2s, 0 in error)
+PASS  T7 AIT tier reverted: C10 back to AIT57152 (tie by number): queue drained without errors
+PASS  T8 relationship S1 to C8 insert: C8 takes AIT57151 through the related service (events settled in 6.8s, 0 in error)
+PASS  T8 relationship S1 to C8 insert: C8 takes AIT57151 through the related service: queue drained without errors
+PASS  T8 relationship delete: C8 cleared (events settled in 11.2s, 0 in error)
+PASS  T8 relationship delete: C8 cleared: queue drained without errors
+PASS  T9 Related Services insert: C8 takes AIT57152 (events settled in 9.1s, 0 in error)
+PASS  T9 Related Services insert: C8 takes AIT57152: queue drained without errors
+PASS  T9 Related Services row deleted through the table API  [{"deleted": 1, "left": 0}]
+PASS  T9 Related Services delete: C8 cleared (events settled in 9.1s, 0 in error)
+PASS  T9 Related Services delete: C8 cleared: queue drained without errors
+PASS  T10 nothing stale before and after a full refresh of the fixture CIs  [{"stale_before": 0, "ms": 213, "stale_after": 0, "ms_second": 65, "rows_touched_second_run": 0}]
+PASS  T10 values unchanged by two refresh runs
+PASS  T11 orphan (no CI) cleared by clearOrphans  [{"reconcile_ms": 41679, "orphan_after": ""}]
+PASS  T11 reconcile of the two partitions repaired the wrong and the missing value
+PASS  T12 600 fresh resolutions deterministic and equal to the expected graph values  [ms per CI resolution: 9.81]
+PASS  T13 association written with rules off: nothing changed yet (no event)
+PASS  T13 catch-up job (executed as a scheduled job) stamped C8 after 3.6 s
+PASS  T13 association deleted with rules off, reconcile cleared C8
+PASS  T14 no AitResolver errors in the system log during the run
+PASS  T15 final state equals the expected state
+
+42 checks, 0 failed

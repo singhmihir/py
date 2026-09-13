@@ -1,0 +1,123 @@
+{
+ "import_rule_on": {
+  "ms_per_insert_ci_with_service": 30.29,
+  "ms_per_insert_ci_related_only": 29.8,
+  "ms_per_insert_ci_without_links": 19.12,
+  "rows_stamped": 200,
+  "rows_removed": 300,
+  "wall_s": 18.1
+ },
+ "import_rule_off": {
+  "ms_per_insert_ci_with_service": 13.09,
+  "ms_per_insert_ci_related_only": 11.96,
+  "ms_per_insert_ci_without_links": 12.81,
+  "rows_stamped": 0,
+  "rows_removed": 300,
+  "wall_s": 14.1
+ },
+ "fanout": {
+  "cis": 2001,
+  "assoc_insert_ms": 2634,
+  "dis_of_those_cis": 2004,
+  "refresh_ms": 12995,
+  "dis_stamped": 2004,
+  "refresh_again_ms": 6997,
+  "wall_s": 26.6
+ },
+ "fanout_clear": {
+  "assoc_removed": 2001,
+  "clear_ms": 13801,
+  "dis_still_stamped": 0,
+  "wall_s": 72.3
+ },
+ "reconcile_partition": {
+  "cis": 6182,
+  "dis": 6182,
+  "ms": 22339,
+  "ms_per_ci": 3.61,
+  "wall_s": 23.2
+ },
+ "reconcile_job": {
+  "wall_s": 25.8,
+  "dis_with_ait_before": 24,
+  "dis_with_ait_after": 24,
+  "fixture_dis_with_ait": 24,
+  "errors": 0
+ },
+ "nightly_foreground": {
+  "ms": 347686,
+  "batches": {
+   "sn_sec_cmn_src_ci 01234567": {
+    "partitions": {
+     "0": 20906,
+     "1": 22008,
+     "2": 22620,
+     "3": 20834,
+     "4": 21801,
+     "5": 22558,
+     "6": 20944,
+     "7": 21967
+    },
+    "ms": 173639
+   },
+   "sn_sec_cmn_src_ci 89abcdef": {
+    "partitions": {
+     "8": 22402,
+     "9": 25841,
+     "a": 22328,
+     "b": 21569,
+     "c": 20265,
+     "d": 20771,
+     "e": 20813,
+     "f": 19709
+    },
+    "orphans_ms": 4,
+    "ms": 173703
+   },
+   "sn_vul_app_release 0123456789abcdef": {
+    "partitions": {
+     "0": 4,
+     "1": 18,
+     "2": 2,
+     "3": 11,
+     "4": 2,
+     "5": 18,
+     "6": 15,
+     "7": 1,
+     "8": 2,
+     "9": 11,
+     "a": 8,
+     "b": 2,
+     "c": 2,
+     "d": 12,
+     "e": 1,
+     "f": 1
+    },
+    "orphans_ms": 1,
+    "ms": 111
+   },
+   "sn_vul_container_image 0123456789abcdef": {
+    "partitions": {
+     "0": 15,
+     "1": 1,
+     "2": 1,
+     "3": 9,
+     "4": 11,
+     "5": 10,
+     "6": 19,
+     "7": 37,
+     "8": 28,
+     "9": 9,
+     "a": 11,
+     "b": 2,
+     "c": 8,
+     "d": 9,
+     "e": 18,
+     "f": 44
+    },
+    "orphans_ms": 1,
+    "ms": 233
+   }
+  }
+ }
+}
