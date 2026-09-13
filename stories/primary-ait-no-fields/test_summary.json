@@ -1,0 +1,12 @@
+{
+ "total_dis": 281887,
+ "matched_dis": 281872,
+ "total_cis": 192264,
+ "matched_cis": 100001,
+ "app_releases": 21,
+ "container_images": 70,
+ "dis_with_ait": 24,
+ "checks": 42,
+ "runs": 2,
+ "failed": 0
+}

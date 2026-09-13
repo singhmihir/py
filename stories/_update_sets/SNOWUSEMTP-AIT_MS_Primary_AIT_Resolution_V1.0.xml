@@ -1,0 +1,1086 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-13 16:10:13">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Global">global</application>
+<application_name>Global</application_name>
+<application_scope>global</application_scope>
+<application_version/>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>Primary AIT resolution for discovered items without new fields or tables. AitResolver derives the Primary AIT of a CI from the service association, Related Services and relationship index tables (lowest RTO tier over the business applications related to the services the CI belongs to, tie broken by AIT number). Discovered items receive the value in a before rule when their CI changes; changes on svc_ci_assoc, sn_vul_m2m_ci_services, cmdb_rel_ci, the business application AIT reference and the AIT tier queue one keyed event on the sequential queue usem_ait, where the processor resolves only the CIs the key can affect and stamps the discovered item tables in sets grouped by the value written. A nightly partitioned reconcile job re-derives everything from source; a catch-up job replays the last 30 minutes of association and relationship inserts. Table and field names, the discovered item tables in scope, the chunk size and the queue name are system properties usem.ait.*.</description>
+<inserted/>
+<name>SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>aaff9cb5931b0750e3aef0aefaba1041</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>623aac3d931f0750e3aef0aefaba1085</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_6e246cf5935b0750e3aef0aefaba100a</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;false&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;cmdb_ci_business_app&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="cmdb_ci_business_app"&gt;u_primary_aitVALCHANGES^EQ&lt;item endquery="false" field="u_primary_ait" goto="false" newquery="false" operator="VALCHANGES" or="false" value=""/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;USEM Primary AIT - application AIT&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous) {
+    new AitResolver().enqueue('app', current.getUniqueValue());
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-13 15:43:44&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;6e246cf5935b0750e3aef0aefaba100a&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;USEM Primary AIT - application AIT&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_6e246cf5935b0750e3aef0aefaba100a&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-13 15:43:44&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=6e246cf5935b0750e3aef0aefaba100a"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>1134294715</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>223aac3d931f0750e3aef0aefaba10ef</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b70502b0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table>cmdb_ci_business_app</table>
+<target_name>USEM Primary AIT - application AIT</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>e2246cf56e5b0750dd4ebb82f40b480f</update_guid>
+<update_guid_history>e2246cf56e5b0750dd4ebb82f40b480f:1134294715</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_1d0060f5931b0750e3aef0aefaba109d</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>Business application table.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.ait.app_table</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-13 15:25:37</sys_created_on><sys_id>1d0060f5931b0750e3aef0aefaba109d</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.ait.app_table</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_1d0060f5931b0750e3aef0aefaba109d</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-13 15:25:37</sys_updated_on><type>string</type><value>cmdb_ci_business_app</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=1d0060f5931b0750e3aef0aefaba109d"/></record_update>]]></payload>
+<payload_hash>995381174</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>263aac3d931f0750e3aef0aefaba10eb</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b704ccb0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table/>
+<target_name>usem.ait.app_table</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>1e242cf5cf5b07509b1714b108a412a2</update_guid>
+<update_guid_history>1e242cf5cf5b07509b1714b108a412a2:995381174,f100a0f5c41b07502ea28e966f06fdd0:995381174</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_ea242cf5935b0750e3aef0aefaba10bc</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;true&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_sec_cmn_src_ci&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="sn_sec_cmn_src_ci"&gt;cmdb_ciVALCHANGES^EQ&lt;item endquery="false" field="cmdb_ci" goto="false" newquery="false" operator="VALCHANGES" or="false" value=""/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;USEM Primary AIT - discovered item&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous) {
+    new AitResolver().resolveRecord(current);
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-13 15:43:43&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;ea242cf5935b0750e3aef0aefaba10bc&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;USEM Primary AIT - discovered item&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_ea242cf5935b0750e3aef0aefaba10bc&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-13 15:43:43&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;before&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=ea242cf5935b0750e3aef0aefaba10bc"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>721293390</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>263aac3d931f0750e3aef0aefaba10f0</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b704e5b0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table>sn_sec_cmn_src_ci</table>
+<target_name>USEM Primary AIT - discovered item</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>e6242cf5205b0750206468d4c20af8e6</update_guid>
+<update_guid_history>e6242cf5205b0750206468d4c20af8e6:721293390</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sysauto_script_5710e8f5931b0750e3aef0aefaba1095</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sysauto_script"&gt;&lt;sysauto_script action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;advanced&gt;false&lt;/advanced&gt;&lt;business_calendar/&gt;&lt;condition/&gt;&lt;conditional&gt;false&lt;/conditional&gt;&lt;entered_run_end/&gt;&lt;entered_run_start/&gt;&lt;entered_time/&gt;&lt;max_drift/&gt;&lt;name&gt;USEM Primary AIT catch-up&lt;/name&gt;&lt;offset/&gt;&lt;offset_type&gt;0&lt;/offset_type&gt;&lt;repeat_every/&gt;&lt;run_as display_value="Mihir Kumar Singh"&gt;aad1386593e4c710b096f35e1dba10f0&lt;/run_as&gt;&lt;run_as_tz/&gt;&lt;run_dayofmonth&gt;1&lt;/run_dayofmonth&gt;&lt;run_dayofweek/&gt;&lt;run_daysofweek/&gt;&lt;run_end/&gt;&lt;run_month/&gt;&lt;run_period&gt;1970-01-01 00:15:00&lt;/run_period&gt;&lt;run_start&gt;2026-09-13 15:26:02&lt;/run_start&gt;&lt;run_time/&gt;&lt;run_type&gt;periodically&lt;/run_type&gt;&lt;run_weekinmonth/&gt;&lt;script&gt;&lt;![CDATA[var resolver = new AitResolver();
+var since = new GlideDateTime();
+since.addSeconds(-30 * 60);
+var cis = [];
+var assoc = new GlideRecord('svc_ci_assoc');
+assoc.addQuery('sys_created_on', '&gt;', since);
+assoc.query();
+while (assoc.next())
+    cis.push(assoc.getValue('ci_id'), assoc.getValue('service_id'));
+if (resolver.SOURCES.related) {
+    var related = new GlideRecord('sn_vul_m2m_ci_services');
+    related.addQuery('sys_created_on', '&gt;', since);
+    related.query();
+    while (related.next())
+        cis.push(related.getValue('item'));
+}
+if (cis.length)
+    resolver.refresh('ci', cis.join(','));
+var ends = [];
+var rel = new GlideRecord('cmdb_rel_ci');
+rel.addQuery('sys_created_on', '&gt;', since);
+rel.query();
+while (rel.next())
+    ends.push(rel.getValue('parent'), rel.getValue('child'));
+if (ends.length)
+    resolver.refresh('rel', ends.join(','));]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sysauto_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-13 15:26:02&lt;/sys_created_on&gt;&lt;sys_id&gt;5710e8f5931b0750e3aef0aefaba1095&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;USEM Primary AIT catch-up&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sysauto_script_5710e8f5931b0750e3aef0aefaba1095&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-13 15:26:02&lt;/sys_updated_on&gt;&lt;time_zone/&gt;&lt;upgrade_safe&gt;false&lt;/upgrade_safe&gt;&lt;/sysauto_script&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-680753081</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>2a3aac3d931f0750e3aef0aefaba1085</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b7050ca0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table/>
+<target_name>USEM Primary AIT catch-up</target_name>
+<type>Scheduled Script Execution</type>
+<update_domain>global</update_domain>
+<update_guid>62246cf5755b07507fdcc1034ecca51d</update_guid>
+<update_guid_history>62246cf5755b07507fdcc1034ecca51d:-680753081,1710e8f5581b0750e821397e9ce174b0:-680753081</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sysauto_script_db10e8f5931b0750e3aef0aefaba108b</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sysauto_script"&gt;&lt;sysauto_script action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;advanced&gt;false&lt;/advanced&gt;&lt;business_calendar/&gt;&lt;condition/&gt;&lt;conditional&gt;false&lt;/conditional&gt;&lt;entered_run_end/&gt;&lt;entered_run_start/&gt;&lt;entered_time/&gt;&lt;max_drift/&gt;&lt;name&gt;USEM Primary AIT reconcile&lt;/name&gt;&lt;offset/&gt;&lt;offset_type&gt;0&lt;/offset_type&gt;&lt;repeat_every/&gt;&lt;run_as display_value="Mihir Kumar Singh"&gt;aad1386593e4c710b096f35e1dba10f0&lt;/run_as&gt;&lt;run_as_tz/&gt;&lt;run_dayofmonth&gt;1&lt;/run_dayofmonth&gt;&lt;run_dayofweek/&gt;&lt;run_daysofweek/&gt;&lt;run_end/&gt;&lt;run_month/&gt;&lt;run_period/&gt;&lt;run_start&gt;2026-09-13 15:26:02&lt;/run_start&gt;&lt;run_time&gt;1970-01-01 02:00:00&lt;/run_time&gt;&lt;run_type&gt;daily&lt;/run_type&gt;&lt;run_weekinmonth/&gt;&lt;script&gt;&lt;![CDATA[var resolver = new AitResolver();
+var prefixes = '0123456789abcdef'.split('');
+for (var table in resolver.DI_TABLES) {
+    for (var i = 0; i &lt; prefixes.length; i++)
+        new AitResolver().reconcile(table, prefixes[i]);
+    resolver.clearOrphans(table);
+}]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sysauto_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-13 15:26:02&lt;/sys_created_on&gt;&lt;sys_id&gt;db10e8f5931b0750e3aef0aefaba108b&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;USEM Primary AIT reconcile&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sysauto_script_db10e8f5931b0750e3aef0aefaba108b&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-13 15:26:02&lt;/sys_updated_on&gt;&lt;time_zone/&gt;&lt;upgrade_safe&gt;false&lt;/upgrade_safe&gt;&lt;/sysauto_script&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-62427290</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>2a3aac3d931f0750e3aef0aefaba1086</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b7050ab0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table/>
+<target_name>USEM Primary AIT reconcile</target_name>
+<type>Scheduled Script Execution</type>
+<update_domain>global</update_domain>
+<update_guid>a2246cf57e5b07504a86d2b036506c1a</update_guid>
+<update_guid_history>a2246cf57e5b07504a86d2b036506c1a:-62427290,5710e8f5ec1b07503fc9574449720893:-62427290</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_7b0064f5931b0750e3aef0aefaba106e</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>Where a CI finds its services: assoc = service associations in both directions, self = a service counts for itself, related = the Related Services links.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.ait.sources</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-13 15:25:48</sys_created_on><sys_id>7b0064f5931b0750e3aef0aefaba106e</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.ait.sources</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_7b0064f5931b0750e3aef0aefaba106e</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-13 15:25:48</sys_updated_on><type>string</type><value>assoc,self,related</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=7b0064f5931b0750e3aef0aefaba106e"/></record_update>]]></payload>
+<payload_hash>-1650416937</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>2a3aac3d931f0750e3aef0aefaba10ec</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b704d090000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table/>
+<target_name>usem.ait.sources</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>16242cf59c5b07500a56d53906f433aa</update_guid>
+<update_guid_history>16242cf59c5b07500a56d53906f433aa:-1650416937,d010a4f5231b0750c138909f321cf83a:-1650416937</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_c51028f5931b0750e3aef0aefaba1034</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>Event queue that carries the keyed refresh events (Queue Registry).</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.ait.event_queue</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-13 15:25:52</sys_created_on><sys_id>c51028f5931b0750e3aef0aefaba1034</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.ait.event_queue</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_c51028f5931b0750e3aef0aefaba1034</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-13 15:25:52</sys_updated_on><type>string</type><value>usem_ait</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=c51028f5931b0750e3aef0aefaba1034"/></record_update>]]></payload>
+<payload_hash>703890540</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>2e3aac3d931f0750e3aef0aefaba10ed</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b704d400000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table/>
+<target_name>usem.ait.event_queue</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>1e242cf5bc5b0750a2d41023c4aabdb1</update_guid>
+<update_guid_history>1e242cf5bc5b0750a2d41023c4aabdb1:703890540,d51028f5901b0750db484c158f14e479:703890540</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_22246cf5935b0750e3aef0aefaba1004</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;true&lt;/action_delete&gt;&lt;action_insert&gt;true&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;cmdb_rel_ci&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition/&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;USEM Primary AIT - relationship&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous) {
+    var resolver = new AitResolver();
+    resolver.enqueueRelationship(current.getValue('parent'), current.getValue('child'));
+    if (current.operation() == 'update')
+        resolver.enqueueRelationship(previous.getValue('parent'), previous.getValue('child'));
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-13 15:43:43&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;22246cf5935b0750e3aef0aefaba1004&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;USEM Primary AIT - relationship&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_22246cf5935b0750e3aef0aefaba1004&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-13 15:43:43&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=22246cf5935b0750e3aef0aefaba1004"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>146919873</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>623aac3d931f0750e3aef0aefaba10ee</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b704fb40000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table>cmdb_rel_ci</table>
+<target_name>USEM Primary AIT - relationship</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>e6246cf5875b075014d6f915136d5108</update_guid>
+<update_guid_history>e6246cf5875b075014d6f915136d5108:146919873</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_aa242cf5935b0750e3aef0aefaba10ef</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;true&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vul_container_image&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="sn_vul_container_image"&gt;cmdb_ciVALCHANGES^EQ&lt;item endquery="false" field="cmdb_ci" goto="false" newquery="false" operator="VALCHANGES" or="false" value=""/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;USEM Primary AIT - container image&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous) {
+    new AitResolver().resolveRecord(current);
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-13 15:43:43&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;aa242cf5935b0750e3aef0aefaba10ef&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;USEM Primary AIT - container image&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_aa242cf5935b0750e3aef0aefaba10ef&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-13 15:43:43&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;before&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=aa242cf5935b0750e3aef0aefaba10ef"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>1066903384</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>663aac3d931f0750e3aef0aefaba10ef</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b704ecd0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table>sn_vul_container_image</table>
+<target_name>USEM Primary AIT - container image</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>62242cf5bb5b0750943dd6096154a0f4</update_guid>
+<update_guid_history>62242cf5bb5b0750943dd6096154a0f4:1066903384</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_2c10e4f5931b0750e3aef0aefaba103a</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>CIs per set-based statement when stamping discovered items.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.ait.stamp_chunk</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-13 15:25:51</sys_created_on><sys_id>2c10e4f5931b0750e3aef0aefaba103a</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.ait.stamp_chunk</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_2c10e4f5931b0750e3aef0aefaba103a</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-13 15:25:51</sys_updated_on><type>string</type><value>200</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=2c10e4f5931b0750e3aef0aefaba103a"/></record_update>]]></payload>
+<payload_hash>-1846319886</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>6a3aac3d931f0750e3aef0aefaba10eb</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b704d2f0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table/>
+<target_name>usem.ait.stamp_chunk</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>16242cf5685b0750f2bee8b319049faf</update_guid>
+<update_guid_history>16242cf5685b0750f2bee8b319049faf:-1846319886,0510e4f5a21b07507697e77bdb577d80:-1846319886</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_0710a8f5931b0750e3aef0aefaba1077</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;global.AitResolver&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;Derives the Primary AIT of a CI from the service association, Related Services and relationship index tables, writes it on discovered items, and propagates keyed changes (CI, service, application, AIT) by stamping discovered items in sets. No intermediate value is stored anywhere; configuration in the usem.ait.* properties.&lt;/description&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;AitResolver&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[var AitResolver = Class.create();
+AitResolver.prototype = {
+
+    /**
+     * Configuration from the usem.ait.* properties: the AIT table and its tier field, the business
+     * application table and its AIT reference, the discovered item tables with their CI and AIT
+     * fields, the service sources and the fallback, the stamp chunk and the event queue.
+     * @returns {void}
+     */
+    initialize: function() {
+        this.AIT_TABLE = gs.getProperty('usem.ait.ait_table', '');
+        this.TIER_FIELD = gs.getProperty('usem.ait.tier_field', 'rto_tier');
+        this.APP_TABLE = gs.getProperty('usem.ait.app_table', 'cmdb_ci_business_app');
+        this.APP_AIT_FIELD = gs.getProperty('usem.ait.app_ait_field', 'u_primary_ait');
+        this.SERVICE_TABLE = 'cmdb_ci_service';
+        this.DI_TABLES = this._diTables(gs.getProperty('usem.ait.di_tables', ''));
+        this.SOURCES = this._flags(gs.getProperty('usem.ait.sources', 'assoc,self,related'));
+        this.FALLBACK = gs.getProperty('usem.ait.fallback', 'neighbours');
+        this.CHUNK = parseInt(gs.getProperty('usem.ait.stamp_chunk', '200'));
+        this.QUEUE = gs.getProperty('usem.ait.event_queue', 'usem_ait');
+        this.EVENT = 'usem.ait.refresh';
+        this.WALK_DEPTH = parseInt(gs.getProperty('sn_sec_cmn.services_affected_by_CI_max_depth', '10'));
+        this.WALK_SIZE = parseInt(gs.getProperty('sn_sec_cmn.services_affected_by_CI_max_size', '1000'));
+        this.serviceMemo = {};
+        this.ciMemo = {};
+    },
+
+    /**
+     * Writes the Primary AIT of a discovered item from its CI, for the before rules on the
+     * discovered item tables; nothing is stored anywhere else.
+     * @param {GlideRecord} current - the discovered item being written
+     * @returns {void}
+     */
+    resolveRecord: function(current) {
+        try {
+            var config = this.DI_TABLES[current.getTableName()];
+            current.setValue(config.aitField, this.ciAit(current.getValue(config.ciField)));
+        } catch (e) {
+            gs.error(this.type + ': primary AIT not resolved for ' + current.getTableName() + ' ' + current.getUniqueValue() + ' - ' + (e.message || e));
+        }
+    },
+
+    /**
+     * Queues one keyed refresh for the processor; the rules on the source tables call this and
+     * compute nothing themselves.
+     * @param {String} kind - ait, app, service, ci (membership changed) or rel (relationship changed)
+     * @param {String} ids - comma-separated sys_ids of that kind
+     * @returns {void}
+     */
+    enqueue: function(kind, ids) {
+        gs.eventQueue(this.EVENT, null, kind, ids, this.QUEUE);
+    },
+
+    /**
+     * Queues the refresh for one relationship: a link between a business application and a
+     * service refreshes that service, any other link refreshes its two ends.
+     * @param {String} parent - sys_id of the parent CI
+     * @param {String} child - sys_id of the child CI
+     * @returns {void}
+     */
+    enqueueRelationship: function(parent, child) {
+        var apps = this._members(this.APP_TABLE, [parent, child]);
+        var services = this._members(this.SERVICE_TABLE, [parent, child]);
+        if (apps.length == 1 &amp;&amp; services.length == 1)
+            this.enqueue('service', services[0]);
+        else
+            this.enqueue('rel', parent + ',' + child);
+    },
+
+    /**
+     * Processes one keyed refresh: expands the key down to the CIs it can affect, resolves each
+     * CI once and stamps the discovered items in sets grouped by the value written.
+     * @param {String} kind - ait, app, service, ci or rel
+     * @param {String} ids - comma-separated sys_ids of that kind
+     * @returns {void}
+     */
+    refresh: function(kind, ids) {
+        try {
+            var list = String(ids || '').split(',');
+            if (kind == 'ait') {
+                list = this._appsOfAits(list);
+                kind = 'app';
+            }
+            if (kind == 'app') {
+                list = this._servicesOfApps(list);
+                kind = 'service';
+            }
+            if (kind == 'service') {
+                list = this._cisOfServices(list);
+                kind = 'ci';
+            }
+            if (kind == 'ci' &amp;&amp; this.FALLBACK == 'neighbours')
+                list = list.concat(this._neighbours(list));
+            this.refreshCis(list);
+        } catch (e) {
+            gs.error(this.type + ': refresh not applied for ' + kind + ' ' + ids + ' - ' + (e.message || e));
+        }
+    },
+
+    /**
+     * Resolves each CI once, groups the CIs by the AIT found and stamps every discovered item
+     * table once per group; rows that already hold the value are left untouched.
+     * @param {Array} ciIds - sys_ids of the CIs to refresh
+     * @returns {void}
+     */
+    refreshCis: function(ciIds) {
+        var groups = {};
+        var seen = {};
+        for (var i = 0; i &lt; ciIds.length; i++) {
+            var ci = ciIds[i];
+            if (!ci || seen[ci])
+                continue;
+            seen[ci] = true;
+            var ait = this.ciAit(ci);
+            (groups[ait] = groups[ait] || []).push(ci);
+        }
+        for (var value in groups)
+            for (var table in this.DI_TABLES)
+                this._stamp(table, groups[value], value);
+    },
+
+    /**
+     * Re-derives every discovered item of one table whose CI sys_id starts with the prefix, for
+     * the nightly pass and for an initial load; one partition per call.
+     * @param {String} table - a discovered item table from usem.ait.di_tables
+     * @param {String} prefix - first characters of the CI sys_id, empty for the whole table
+     * @returns {void}
+     */
+    reconcile: function(table, prefix) {
+        try {
+            var config = this.DI_TABLES[table];
+            var ids = [];
+            var ga = new GlideAggregate(table);
+            ga.addNotNullQuery(config.ciField);
+            if (prefix)
+                ga.addQuery(config.ciField + '.sys_id', 'STARTSWITH', prefix);
+            ga.addAggregate('COUNT');
+            ga.groupBy(config.ciField);
+            ga.query();
+            while (ga.next()) {
+                ids.push(ga.getValue(config.ciField));
+                if (ids.length == 5000)
+                    this.refreshCis(ids.splice(0, ids.length));
+            }
+            this.refreshCis(ids);
+        } catch (e) {
+            gs.error(this.type + ': reconcile not completed for ' + table + ' prefix "' + prefix + '" - ' + (e.message || e));
+        }
+    },
+
+    /**
+     * Clears the Primary AIT of the discovered items of one table that no longer point at a CI.
+     * @param {String} table - a discovered item table from usem.ait.di_tables
+     * @returns {void}
+     */
+    clearOrphans: function(table) {
+        try {
+            var config = this.DI_TABLES[table];
+            var orphan = new GlideRecord(table);
+            orphan.addNullQuery(config.ciField);
+            orphan.addNotNullQuery(config.aitField);
+            orphan.setWorkflow(false);
+            orphan.autoSysFields(false);
+            this._clear(orphan, config.aitField);
+        } catch (e) {
+            gs.error(this.type + ': orphans not cleared for ' + table + ' - ' + (e.message || e));
+        }
+    },
+
+    /**
+     * The Primary AIT of a CI: the lowest tier among the AITs of the services the CI belongs to,
+     * ties broken by AIT number.
+     * @param {String} ciId - sys_id of the CI
+     * @returns {String} sys_id of the AIT, empty when none
+     */
+    ciAit: function(ciId) {
+        if (!ciId)
+            return '';
+        if (this.ciMemo.hasOwnProperty(ciId))
+            return this.ciMemo[ciId];
+        var best = null;
+        var services = this.ciServices(ciId);
+        for (var i = 0; i &lt; services.length; i++) {
+            var candidate = this.serviceAit(services[i]);
+            if (candidate &amp;&amp; (!best || this._better(candidate, best)))
+                best = candidate;
+        }
+        return (this.ciMemo[ciId] = best ? best.ait : '');
+    },
+
+    /**
+     * The services a CI belongs to, from the configured sources (service associations in both
+     * directions, the CI itself when it is a service, the Related Services links); when they
+     * are empty, the configured fallback: the same sources on the CIs related to it, or the
+     * platform's bounded impact walk.
+     * @param {String} ciId - sys_id of the CI
+     * @returns {Array} sys_ids of the services, distinct
+     */
+    ciServices: function(ciId) {
+        var found = this._directServices([ciId]);
+        if (!found.length &amp;&amp; this.FALLBACK == 'neighbours')
+            found = this._directServices(this._neighbours([ciId]));
+        if (!found.length &amp;&amp; this.FALLBACK == 'walk')
+            found = new global.CIUtils().servicesAffectedByCI(ciId, { maxDepth: this.WALK_DEPTH, maxSize: this.WALK_SIZE }).map(String);
+        return found;
+    },
+
+    /**
+     * The Primary AIT of a service: the lowest tier among the AITs of the business applications
+     * related to it in either direction; memoised for the life of the instance.
+     * @param {String} serviceId - sys_id of the service
+     * @returns {Object} {ait, tier, number} or null when no related application carries an AIT
+     */
+    serviceAit: function(serviceId) {
+        if (this.serviceMemo.hasOwnProperty(serviceId))
+            return this.serviceMemo[serviceId];
+        var best = null;
+        var aits = this._aitsOfApps(this._neighbours([serviceId]));
+        if (aits.length) {
+            var ait = new GlideRecord(this.AIT_TABLE);
+            ait.addQuery('sys_id', 'IN', aits.join(','));
+            ait.query();
+            while (ait.next()) {
+                var candidate = { ait: ait.getUniqueValue(), tier: parseInt(ait.getValue(this.TIER_FIELD)), number: '' + ait.getValue('number') };
+                if (!best || this._better(candidate, best))
+                    best = candidate;
+            }
+        }
+        return (this.serviceMemo[serviceId] = best);
+    },
+
+    _better: function(a, b) {
+        var tierA = isNaN(a.tier) ? Infinity : a.tier;
+        var tierB = isNaN(b.tier) ? Infinity : b.tier;
+        if (tierA != tierB)
+            return tierA &lt; tierB;
+        return a.number &lt; b.number;
+    },
+
+    _directServices: function(ciIds) {
+        var found = {};
+        for (var start = 0; start &lt; ciIds.length; start += this.CHUNK) {
+            var chunk = ciIds.slice(start, start + this.CHUNK).join(',');
+            if (this.SOURCES.assoc) {
+                var assoc = new GlideRecord('svc_ci_assoc');
+                assoc.addQuery('ci_id', 'IN', chunk).addOrCondition('service_id', 'IN', chunk);
+                assoc.query();
+                while (assoc.next())
+                    found[assoc.getValue('service_id')] = true;
+            }
+            if (this.SOURCES.related) {
+                var related = new GlideRecord('sn_vul_m2m_ci_services');
+                related.addQuery('item', 'IN', chunk);
+                related.query();
+                while (related.next())
+                    found[related.getValue('service')] = true;
+            }
+            if (this.SOURCES.self) {
+                var service = new GlideRecord(this.SERVICE_TABLE);
+                service.addQuery('sys_id', 'IN', chunk);
+                service.query();
+                while (service.next())
+                    found[service.getUniqueValue()] = true;
+            }
+        }
+        return Object.keys(found);
+    },
+
+    _neighbours: function(ciIds) {
+        var ends = {};
+        for (var start = 0; start &lt; ciIds.length; start += this.CHUNK) {
+            var chunk = ciIds.slice(start, start + this.CHUNK).join(',');
+            var rel = new GlideRecord('cmdb_rel_ci');
+            rel.addQuery('parent', 'IN', chunk).addOrCondition('child', 'IN', chunk);
+            rel.query();
+            while (rel.next()) {
+                ends[rel.getValue('parent')] = true;
+                ends[rel.getValue('child')] = true;
+            }
+        }
+        return Object.keys(ends);
+    },
+
+    _members: function(table, ids) {
+        var members = [];
+        var gr = new GlideRecord(table);
+        gr.addQuery('sys_id', 'IN', ids.join(','));
+        gr.query();
+        while (gr.next())
+            members.push(gr.getUniqueValue());
+        return members;
+    },
+
+    _aitsOfApps: function(appIds) {
+        var aits = {};
+        if (!appIds.length)
+            return [];
+        var app = new GlideRecord(this.APP_TABLE);
+        app.addQuery('sys_id', 'IN', appIds.join(','));
+        app.addNotNullQuery(this.APP_AIT_FIELD);
+        app.query();
+        while (app.next())
+            aits[app.getValue(this.APP_AIT_FIELD)] = true;
+        return Object.keys(aits);
+    },
+
+    _appsOfAits: function(aitIds) {
+        var apps = [];
+        var app = new GlideRecord(this.APP_TABLE);
+        app.addQuery(this.APP_AIT_FIELD, 'IN', aitIds.join(','));
+        app.query();
+        while (app.next())
+            apps.push(app.getUniqueValue());
+        return apps;
+    },
+
+    _servicesOfApps: function(appIds) {
+        return this._members(this.SERVICE_TABLE, this._neighbours(appIds));
+    },
+
+    _cisOfServices: function(serviceIds) {
+        var cis = {};
+        for (var start = 0; start &lt; serviceIds.length; start += this.CHUNK) {
+            var chunk = serviceIds.slice(start, start + this.CHUNK).join(',');
+            if (this.SOURCES.assoc) {
+                var assoc = new GlideRecord('svc_ci_assoc');
+                assoc.addQuery('service_id', 'IN', chunk);
+                assoc.query();
+                while (assoc.next())
+                    cis[assoc.getValue('ci_id')] = true;
+            }
+            if (this.SOURCES.related) {
+                var related = new GlideRecord('sn_vul_m2m_ci_services');
+                related.addQuery('service', 'IN', chunk);
+                related.query();
+                while (related.next())
+                    cis[related.getValue('item')] = true;
+            }
+        }
+        for (var i = 0; i &lt; serviceIds.length; i++)
+            cis[serviceIds[i]] = true;
+        return Object.keys(cis);
+    },
+
+    /**
+     * One set-based statement per chunk of CIs: the rows of the table whose CI is in the chunk
+     * and whose AIT field does not already hold the value; rules and audit left aside because
+     * the value is derived. Clearing is done row by row, the only way that empties a reference
+     * on every table regardless of how the platform executes the multi-row update.
+     */
+    _stamp: function(table, ciIds, value) {
+        var config = this.DI_TABLES[table];
+        for (var start = 0; start &lt; ciIds.length; start += this.CHUNK) {
+            var di = new GlideRecord(table);
+            di.addQuery(config.ciField, 'IN', ciIds.slice(start, start + this.CHUNK).join(','));
+            di.setWorkflow(false);
+            di.autoSysFields(false);
+            if (value) {
+                di.addEncodedQuery(config.aitField + '!=' + value + '^OR' + config.aitField + 'ISEMPTY');
+                di.setValue(config.aitField, value);
+                di.updateMultiple();
+            } else {
+                di.addNotNullQuery(config.aitField);
+                this._clear(di, config.aitField);
+            }
+        }
+    },
+
+    _clear: function(di, field) {
+        di.query();
+        while (di.next()) {
+            di.setValue(field, '');
+            di.update();
+        }
+    },
+
+    _diTables: function(value) {
+        var tables = {};
+        var entries = value.split(/\r?\n|,/);
+        for (var i = 0; i &lt; entries.length; i++) {
+            var parts = entries[i].split('=');
+            if (parts.length == 3 &amp;&amp; parts[0].trim())
+                tables[parts[0].trim()] = { ciField: parts[1].trim(), aitField: parts[2].trim() };
+        }
+        return tables;
+    },
+
+    _flags: function(value) {
+        var flags = {};
+        var entries = value.split(',');
+        for (var i = 0; i &lt; entries.length; i++)
+            if (entries[i].trim())
+                flags[entries[i].trim()] = true;
+        return flags;
+    },
+
+    type: 'AitResolver'
+};
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-13 15:26:00&lt;/sys_created_on&gt;&lt;sys_id&gt;0710a8f5931b0750e3aef0aefaba1077&lt;/sys_id&gt;&lt;sys_mod_count&gt;2&lt;/sys_mod_count&gt;&lt;sys_name&gt;AitResolver&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_0710a8f5931b0750e3aef0aefaba1077&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-13 15:43:43&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<payload_hash>2030409430</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>6a3aac3d931f0750e3aef0aefaba10f0</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b704dee0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table/>
+<target_name>AitResolver</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_guid>d2242cf5815b0750c28ef286a4d0c2b7</update_guid>
+<update_guid_history>d2242cf5815b0750c28ef286a4d0c2b7:2030409430,eb42a031fc5b075063a87f53d2e78cc7:298927178,c710a8f5a21b075062d5cd4028d7b1ba:38925082</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sysevent_queue_8f10e8f5931b0750e3aef0aefaba101a</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sysevent_queue"><sysevent_queue action="INSERT_OR_UPDATE"><automatic_processing>true</automatic_processing><description>Primary AIT keyed refresh events, processed one at a time in the order they were queued so that a later change always writes after an earlier one.</description><job_config>job_count</job_config><job_config_value>1</job_config_value><poll_interval>1970-01-01 00:00:10</poll_interval><processing_order>sequential</processing_order><provider display_value="Event Provider">44af4464431212108da9a574a9b8f2f5</provider><queue>usem_ait</queue><suffix/><sys_class_name>sysevent_queue</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-13 15:26:01</sys_created_on><sys_id>8f10e8f5931b0750e3aef0aefaba101a</sys_id><sys_mod_count>1</sys_mod_count><sys_name>usem_ait</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sysevent_queue_8f10e8f5931b0750e3aef0aefaba101a</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-13 15:35:36</sys_updated_on></sysevent_queue></record_update>]]></payload>
+<payload_hash>1733338566</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>6e3aac3d931f0750e3aef0aefaba1086</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b704e180000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table/>
+<target_name>usem_ait</target_name>
+<type>Queue Registration</type>
+<update_domain>global</update_domain>
+<update_guid>6e242cf57f5b0750acc027136e9e88ba</update_guid>
+<update_guid_history>6e242cf57f5b0750acc027136e9e88ba:1733338566,2742a031e65b07505d2f0bbeabfe7fdb:1733338566,8710e8f5d21b0750814e53de715f3420:1357846941</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_9410a4f5931b0750e3aef0aefaba1040</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>When the sources find nothing: neighbours = the sources applied to the CIs related to it, walk = the platform impact walk, none.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.ait.fallback</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-13 15:25:50</sys_created_on><sys_id>9410a4f5931b0750e3aef0aefaba1040</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.ait.fallback</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_9410a4f5931b0750e3aef0aefaba1040</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-13 15:25:50</sys_updated_on><type>string</type><value>neighbours</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=9410a4f5931b0750e3aef0aefaba1040"/></record_update>]]></payload>
+<payload_hash>1800946291</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>6e3aac3d931f0750e3aef0aefaba10ec</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b704d1b0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table/>
+<target_name>usem.ait.fallback</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>1e242cf5055b0750f9998df0f1201eac</update_guid>
+<update_guid_history>1e242cf5055b0750f9998df0f1201eac:1800946291,2010a4f58e1b0750eb16f8c0b9c7a493:1800946291</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_b2ff9cb5931b0750e3aef0aefaba1045</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>Table holding the AITs (client: x_boar_bofa_techad_ait).</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.ait.ait_table</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-13 15:25:26</sys_created_on><sys_id>b2ff9cb5931b0750e3aef0aefaba1045</sys_id><sys_mod_count>5</sys_mod_count><sys_name>usem.ait.ait_table</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_b2ff9cb5931b0750e3aef0aefaba1045</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-13 16:10:05</sys_updated_on><type>string</type><value>x_boar_bofa_techad_ait</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=b2ff9cb5931b0750e3aef0aefaba1045"/></record_update>]]></payload>
+<payload_hash>1677938287</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>a23aac3d931f0750e3aef0aefaba10ed</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b888b770000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table/>
+<target_name>usem.ait.ait_table</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>de3aac3db21f07504b90cc686144eb57</update_guid>
+<update_guid_history>de3aac3db21f07504b90cc686144eb57:1677938287,940aa03d9e1f07509d3bb6d1e521a500:1323264913,06f9acf9ee1f0750804896fa13150ec7:1677938287,efc9e4f9ea1f07505b7fa3a9c6704d08:1323264913,32c964f9d71f075009dbc4dd84e09c25:1677938287,3800acb5ca1b0750df38f5c8c1c4e6cf:1323264913</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_6a246cf5935b0750e3aef0aefaba1011</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;false&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;x_boar_bofa_techad_ait&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="x_boar_bofa_techad_ait"&gt;rto_tierVALCHANGES^EQ&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;USEM Primary AIT - AIT tier&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous) {
+    new global.AitResolver().enqueue('ait', current.getUniqueValue());
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-13 15:43:44&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;6a246cf5935b0750e3aef0aefaba1011&lt;/sys_id&gt;&lt;sys_mod_count&gt;5&lt;/sys_mod_count&gt;&lt;sys_name&gt;USEM Primary AIT - AIT tier&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_6a246cf5935b0750e3aef0aefaba1011&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-13 16:10:12&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=6a246cf5935b0750e3aef0aefaba1011"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-1216435782</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>a63aac3d931f0750e3aef0aefaba10ee</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b888c520000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table>x_boar_bofa_techad_ait</table>
+<target_name>USEM Primary AIT - AIT tier</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>523aac3d911f075081023faef470a465</update_guid>
+<update_guid_history>523aac3d911f075081023faef470a465:-1216435782,d80aa03d091f075052dcb63998da9231:1758278829,c6f9ecf9de1f0750733f973988ac46fe:-1216435782,abc9e4f9431f0750f33f3a9cf38a6946:1758278829,fec964f9111f075053d9551805da957b:-1216435782,22246cf5575b0750562799f15f730116:1758278829</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sysevent_register_8710a8f5931b0750e3aef0aefaba10bc</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sysevent_register"><sysevent_register action="INSERT_OR_UPDATE"><caller_access/><derived_priority>100</derived_priority><description>Keyed Primary AIT refresh: parm1 = ait | app | service | ci | rel, parm2 = comma-separated sys_ids. </description><event_name>usem.ait.refresh</event_name><fired_by/><priority>100</priority><queue>usem_ait</queue><suffix/><sys_class_name>sysevent_register</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-13 15:26:01</sys_created_on><sys_id>8710a8f5931b0750e3aef0aefaba10bc</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.ait.refresh</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sysevent_register_8710a8f5931b0750e3aef0aefaba10bc</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-13 15:26:01</sys_updated_on><table/></sysevent_register></record_update>]]></payload>
+<payload_hash>2037810356</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>aa3aac3d931f0750e3aef0aefaba10ea</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b60183e0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table/>
+<target_name>usem.ait.refresh</target_name>
+<type>Event Registration</type>
+<update_domain>global</update_domain>
+<update_guid>8f10a8f56a1b07504d0f738a6ae1a1c1</update_guid>
+<update_guid_history>8f10a8f56a1b07504d0f738a6ae1a1c1:2037810356</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_e2242cf5935b0750e3aef0aefaba10fd</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;true&lt;/action_delete&gt;&lt;action_insert&gt;true&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vul_m2m_ci_services&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition/&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;USEM Primary AIT - related service&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous) {
+    var ids = [current.getValue('item')];
+    if (current.operation() == 'update')
+        ids.push(previous.getValue('item'));
+    new AitResolver().enqueue('ci', ids.join(','));
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-13 15:43:43&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;e2242cf5935b0750e3aef0aefaba10fd&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;USEM Primary AIT - related service&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_e2242cf5935b0750e3aef0aefaba10fd&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-13 15:43:43&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=e2242cf5935b0750e3aef0aefaba10fd"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-610835187</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>aa3aac3d931f0750e3aef0aefaba10ef</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b704f4e0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table>sn_vul_m2m_ci_services</table>
+<target_name>USEM Primary AIT - related service</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>aa246cf5575b0750ddd588240639ad01</update_guid>
+<update_guid_history>aa246cf5575b0750ddd588240639ad01:-610835187</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_3500a0f5931b0750e3aef0aefaba10d6</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>Reference on the business application to its AIT.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.ait.app_ait_field</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-13 15:25:39</sys_created_on><sys_id>3500a0f5931b0750e3aef0aefaba10d6</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.ait.app_ait_field</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_3500a0f5931b0750e3aef0aefaba10d6</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-13 15:25:39</sys_updated_on><type>string</type><value>u_primary_ait</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=3500a0f5931b0750e3aef0aefaba10d6"/></record_update>]]></payload>
+<payload_hash>1210931149</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>ae3aac3d931f0750e3aef0aefaba10eb</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b704ce10000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table/>
+<target_name>usem.ait.app_ait_field</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>16242cf5d45b07505df339353e758da5</update_guid>
+<update_guid_history>16242cf5d45b07505df339353e758da5:1210931149,6300e0f50a1b07501d06215c3a9ccd3b:1210931149</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_630024f5931b0750e3aef0aefaba103a</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>Discovered item tables kept current, one table=ci_field=ait_field per line.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.ait.di_tables</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-13 15:25:46</sys_created_on><sys_id>630024f5931b0750e3aef0aefaba103a</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.ait.di_tables</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_630024f5931b0750e3aef0aefaba103a</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-13 15:25:46</sys_updated_on><type>string</type><value>sn_sec_cmn_src_ci=cmdb_ci=u_primary_ait
+sn_vul_app_release=cmdb_ci=u_primary_ait
+sn_vul_container_image=cmdb_ci=u_bofa_primary_ait</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=630024f5931b0750e3aef0aefaba103a"/></record_update>]]></payload>
+<payload_hash>-1674259149</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>e23aac3d931f0750e3aef0aefaba10ec</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b704cf50000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table/>
+<target_name>usem.ait.di_tables</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>1e242cf5525b0750d63bfc9243848ba7</update_guid>
+<update_guid_history>1e242cf5525b0750d63bfc9243848ba7:-1674259149,b30024f5581b075016e3c1ed6f877cd3:-1674259149</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_bc0020f5931b0750e3aef0aefaba1031</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>Numeric RTO tier field on the AIT table; the lowest tier wins.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.ait.tier_field</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-13 15:25:35</sys_created_on><sys_id>bc0020f5931b0750e3aef0aefaba1031</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.ait.tier_field</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_bc0020f5931b0750e3aef0aefaba1031</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-13 15:25:35</sys_updated_on><type>string</type><value>rto_tier</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=bc0020f5931b0750e3aef0aefaba1031"/></record_update>]]></payload>
+<payload_hash>-1476596877</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>e63aac3d931f0750e3aef0aefaba10ed</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b704cbb0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table/>
+<target_name>usem.ait.tier_field</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>16242cf5805b075009bf82355db36ca0</update_guid>
+<update_guid_history>16242cf5805b075009bf82355db36ca0:-1476596877,190060f5251b07504db72cce4df2d497:-1476596877</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_6e242cf5935b0750e3aef0aefaba10e8</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;true&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vul_app_release&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="sn_vul_app_release"&gt;cmdb_ciVALCHANGES^EQ&lt;item endquery="false" field="cmdb_ci" goto="false" newquery="false" operator="VALCHANGES" or="false" value=""/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;USEM Primary AIT - application release&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous) {
+    new AitResolver().resolveRecord(current);
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-13 15:43:43&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;6e242cf5935b0750e3aef0aefaba10e8&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;USEM Primary AIT - application release&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_6e242cf5935b0750e3aef0aefaba10e8&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-13 15:43:43&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;before&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=6e242cf5935b0750e3aef0aefaba10e8"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-1623132086</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>ea3aac3d931f0750e3aef0aefaba10ee</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b704e930000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table>sn_vul_app_release</table>
+<target_name>USEM Primary AIT - application release</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>26242cf5c75b075019311798f1a74ded</update_guid>
+<update_guid_history>26242cf5c75b075019311798f1a74ded:-1623132086</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sysevent_script_action_5b10e8f5931b0750e3aef0aefaba1024</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sysevent_script_action"&gt;&lt;sysevent_script_action action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;condition_script/&gt;&lt;description&gt;Resolves the CIs a keyed change can affect and stamps the discovered item tables.&lt;/description&gt;&lt;event_name&gt;usem.ait.refresh&lt;/event_name&gt;&lt;name&gt;USEM Primary AIT refresh&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;script&gt;&lt;![CDATA[new AitResolver().refresh('' + event.parm1, '' + event.parm2);]]&gt;&lt;/script&gt;&lt;synchronous&gt;false&lt;/synchronous&gt;&lt;sys_class_name&gt;sysevent_script_action&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-13 15:26:01&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;5b10e8f5931b0750e3aef0aefaba1024&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;USEM Primary AIT refresh&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sysevent_script_action_5b10e8f5931b0750e3aef0aefaba1024&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-13 15:26:01&lt;/sys_updated_on&gt;&lt;/sysevent_script_action&gt;&lt;/record_update&gt;</payload>
+<payload_hash>1104218169</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>ee3aac3d931f0750e3aef0aefaba10ea</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b601a3d0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table>usem.ait.refresh</table>
+<target_name>USEM Primary AIT refresh</target_name>
+<type>Script Action</type>
+<update_domain>global</update_domain>
+<update_guid>1710e8f52c1b0750bdd9274025556c2a</update_guid>
+<update_guid_history>1710e8f52c1b0750bdd9274025556c2a:1104218169</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_e6242cf5935b0750e3aef0aefaba10f6</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;true&lt;/action_delete&gt;&lt;action_insert&gt;true&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;svc_ci_assoc&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition/&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;USEM Primary AIT - service association&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous) {
+    var ids = [current.getValue('ci_id'), current.getValue('service_id')];
+    if (current.operation() == 'update')
+        ids.push(previous.getValue('ci_id'), previous.getValue('service_id'));
+    new AitResolver().enqueue('ci', ids.join(','));
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-13 15:43:43&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;e6242cf5935b0750e3aef0aefaba10f6&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;USEM Primary AIT - service association&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_e6242cf5935b0750e3aef0aefaba10f6&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-13 15:43:43&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=e6242cf5935b0750e3aef0aefaba10f6"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>1302208602</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0">623aac3d931f0750e3aef0aefaba1085</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-13 16:10:13</sys_created_on>
+<sys_id>ee3aac3d931f0750e3aef0aefaba10ef</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09b704f0c0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-13 16:10:13</sys_updated_on>
+<table>svc_ci_assoc</table>
+<target_name>USEM Primary AIT - service association</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>6e242cf5305b0750f8fe96ef390bc8fa</update_guid>
+<update_guid_history>6e242cf5305b0750f8fe96ef390bc8fa:1302208602</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>
