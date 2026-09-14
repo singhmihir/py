@@ -146,3 +146,37 @@ for the client instance. Samples recent matched and unmatched Qualys items, runs
 rules with the framework's evaluator (first CI wins), compares with the CI the item holds today, and for every
 decline records the evidence the CMDB offers (name, base name, fqdn and address counts, retired records among
 them, class implied by the OS) with a one-line cause. `measure_rules.py` dry-runs it here with small limits.
+
+## State of play, 14 Sep (paused at Mihir's request)
+Rule of engagement: **no lookup rule is changed without Mihir's explicit go-ahead.** Everything below is
+diagnosis and proposal.
+
+Measurement runs on the client dev instance (outputs in `bofadev_runs/`, script `measure_rules.js`, handed over
+as `USEM Lookup Rules - Measurement Script.js` on INC0010003, version 3 with class pairs and the absent-host filter):
+- Run 1 (600 items) selected rules by the `USEM` prefix and found none: on the client the rules are named
+  `BOFA ...` (same orders and purposes). Its evidence data still stands.
+- Run 2 (1,000 items, 500 matched / 500 unmatched, last 30 days): 499 of 500 matched items resolve to the same
+  CI through the same rules (400: 240, 300: 193, 250: 26, 700: 17, 310: 13, 740: 8, 450: 2, 850: 1). The one
+  difference, `vk1660790` (Windows 11) matched today to the retired VMware instance `vk1448212` via IP Adapter
+  Match, lands on the retired Computer of that name via 740: both wrong, address reuse plus retired records.
+  Unmatched: 433 hosts exist nowhere in the CMDB (CMDB coverage, mostly Windows 11 clients in `ca.` / `clients.`),
+  44 have exactly one live CI with the scanned name refused by the class check (largest rule-relevant bucket;
+  the class pairs are what run 3 must show), 12 addresses on two or more live CIs, 6 addresses shared with
+  retired records, 5 other duplicate / interface-tail cases.
+- Configuration findings on the client dev instance: rule 430 `BOFA Network Interface Name Match` has source
+  field **IP** instead of DNS, so it always declines (0 matches in 1,000); rule 450 `BOFA FQDN Name Hardware
+  Match` is 7,079 characters against 3,155 delivered (a different script version); 350 / 410 / 705 / 730 / 740
+  carry the class agreement (applied 14 Sep 07:xx), the rest are the 9 Sep scripts.
+
+Proposed rule changes, not built, waiting for the run 3 numbers and Mihir's decision:
+1. Drop retired candidates (install status Retired / operational status Retired) when a name or address search
+   returns more than one CI, in 420, 430 and the other exactly-one rules; never match a retired CI on address
+   alone. Closes the retired matches seen in production and the BlueCat `-mgmt` case.
+2. Treat a bare kernel fingerprint (`Linux 5.10...`, `Linux 2.6`) as no OS class; keep Linux Server for
+   distribution names only. Lets 410 / 705 accept a single IP Switch or appliance for the plain name. To be
+   confirmed against the class pairs of run 3 (could also be Windows 11 endpoints kept as servers, or namesakes).
+
+Next step when Mihir resumes: he runs version 3 with `MATCHED_LIMIT = 200`, `UNMATCHED_LIMIT = 1000`, `DAYS = 30`,
+`LIST_CAP = 200`, attaches the output to INC0010003; read the class pairs and the retired / duplicate lists, put
+numbers on the two proposals, then ask before changing anything. The 430 source-field correction is a one-line
+configuration note for the instance administrator, also to be confirmed by Mihir.
