@@ -55,6 +55,30 @@ item or on its task.
 deferred item by number and prints it before and after each step, with the deferred tasks of the item and the reason
 when an update is refused, for QA on the client dev instance.
 
+## Test of the attached script on real items (`test_real.py`, `test_real_run1.log`, `test_real_run2.log`)
+Real Veracode items of the instance (CI and vulnerability present) plus one VAMP item without a vulnerability. The
+deferral is granted through the platform's own path: `StateChangeManager.handleStateChangeRequest` (item goes In
+Review, change approval CA created), the approver records approved, the approval flow defers the item. Ten checks,
+both runs (one check of the first run was a false negative of the test itself, the latest work note being read in the
+wrong order):
+
+| Check | Result |
+|---|---|
+| T1 exception request and approval: item Deferred with both Until fields and the backup substate | pass |
+| T2 script, property true, closed Fixed: put back to Deferred, defer count +1, work note (run twice) | pass |
+| T3 script, property false: Open, Until and backup substate kept (run twice) | pass |
+| T4 script, property true, closed Stale: put back to Deferred | pass |
+| T5 item deferred by hand: warning and Open; with `PREPARE_DEFERRAL` Deferred | pass |
+| T6 item without a vulnerability: reported as outside the rule, stays Open | pass |
+| Every item restored to its original values afterwards | pass |
+
+The instance's own numbers collide too (three items carry AVIT0001001), which is why the script takes the sys_id.
+
+Incident during the first run: the cleanup step deleted every `sysapproval_approver` row of the instance (3,741) because
+its query dot-walked a document-id field; the platform's Delete Recovery on rollback context BAK0001805 re-inserted all
+of them (context state rolled back, count back to 3,741). The cleanup now removes only the approver rows of the test's
+own requests. The test requests CA0010003 to CA0010006 cannot be deleted (ACL) and are left inactive, No Longer Required.
+
 ## What runs on the two writes (rules on `sn_vul_app_vulnerable_item`, all out of the box)
 Scanner close (state 3, substate Fixed or Stale): *Check for group state inheritance update* (50) resets the inheritance
 count; *Transit to Closed* (100) fills resolution and closed data and the work note; *Vulnerable Item Active State

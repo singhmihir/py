@@ -77,6 +77,8 @@ else {
         prepareDeferral(start);
     gs.print('1. Before');
     gs.print('   ' + describe(item()));
+    if (!start.getValue('vulnerability') || (!start.getValue('cmdb_ci') && !start.application_release.product_model))
+        gs.print('   Outside the platform rule: it runs only on items with a vulnerability and a CI or an application release with a product model. This item will re-open as Open whatever the property says.');
     if (!item().getValue('ignore_expiration') || !item().getValue('backup_substate'))
         gs.print('   The platform rule needs the until date and the backup substate; this item lacks one of them, so it will re-open as Open. Defer it through an approved exception, or set PREPARE_DEFERRAL = true on a test item.');
     scanner('2. Scanner reports the finding fixed', 3, CLOSE_SUBSTATE);
