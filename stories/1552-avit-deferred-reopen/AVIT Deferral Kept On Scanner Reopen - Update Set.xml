@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-14 12:13:13">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Vulnerability Response">054cdcc2ff200200158bffffffffff94</application>
+<application_name>Vulnerability Response</application_name>
+<application_scope>sn_vul</application_scope>
+<application_version>30.6.1</application_version>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>Enables the platform behaviour that keeps an application vulnerable item in the Deferred state when the scanner closes it and finds it again while its approved deferral (Until date) is still valid: property sn_vul.auto_defer_avit_in_active_exception_window set to true. The out-of-box before rule "Run exception rules" on the application vulnerable item then restores state Deferred with the original reason on the scanner re-open, increments the defer count and writes a work note; a manual re-open is not affected.</description>
+<inserted/>
+<name>SNOWUSEMTP-1552_MS_AVIT Deferral Kept On Scanner Reopen_V1.0</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>d89df442935bc750e3aef0aefaba1046</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-14 12:13:12</sys_created_on>
+<sys_id>a89df442935bc750e3aef0aefaba1065</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-14 12:13:12</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Vulnerability Response">054cdcc2ff200200158bffffffffff94</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_b51ae94753af5110dba4ddeeff7b12a2</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>During ingestion, automatically defer AVITs which were manually deferred earlier, if they fall under valid exception window</description><ignore_cache>true</ignore_cache><is_private>false</is_private><name>sn_vul.auto_defer_avit_in_active_exception_window</name><read_roles>sn_vul.app_manage_exception_configuration</read_roles><suffix>auto_defer_avit_in_active_exception_window</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2022-12-08 07:00:31</sys_created_on><sys_id>b51ae94753af5110dba4ddeeff7b12a2</sys_id><sys_mod_count>4</sys_mod_count><sys_name>sn_vul.auto_defer_avit_in_active_exception_window</sys_name><sys_package display_value="Vulnerability Response" source="sn_vul">054cdcc2ff200200158bffffffffff94</sys_package><sys_policy/><sys_scope display_value="Vulnerability Response">054cdcc2ff200200158bffffffffff94</sys_scope><sys_update_name>sys_properties_b51ae94753af5110dba4ddeeff7b12a2</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-14 12:13:12</sys_updated_on><type>boolean</type><value>true</value><write_roles>sn_vul.app_manage_exception_configuration</write_roles></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=b51ae94753af5110dba4ddeeff7b12a2"/></record_update>]]></payload>
+<payload_hash>346573427</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1552_MS_AVIT Deferral Kept On Scanner Reopen_V1.0">a89df442935bc750e3aef0aefaba1065</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-14 12:13:12</sys_created_on>
+<sys_id>ec9df442935bc750e3aef0aefaba1065</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a09fd5ede70000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-14 12:13:12</sys_updated_on>
+<table/>
+<target_name>sn_vul.auto_defer_avit_in_active_exception_window</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>d89df442b85bc75087beaead2c18225d</update_guid>
+<update_guid_history>d89df442b85bc75087beaead2c18225d:346573427,e71d3402725bc7504f35dac6d3a301bb:-6361072,061db002c45bc750b96e9f98bd7f4ab3:346573427,f11db002225bc7502b664fe613396cad:-6361072</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>

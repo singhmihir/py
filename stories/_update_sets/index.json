@@ -277,5 +277,14 @@
   "file": "SNOWUSEMTP-AIT_MS_Primary_AIT_Resolution_V1.0.xml",
   "created": "2026-09-13 16:10:13",
   "scrub": []
+ },
+ {
+  "name": "SNOWUSEMTP-1552_MS_AVIT Deferral Kept On Scanner Reopen_V1.0",
+  "app": "sn_vul",
+  "rows": 1,
+  "exported": 1,
+  "file": "SNOWUSEMTP-1552_MS_AVIT_Deferral_Kept_On_Scanner_Reopen_V1.0.xml",
+  "created": "2026-09-14 12:13:12",
+  "scrub": []
  }
 ]
