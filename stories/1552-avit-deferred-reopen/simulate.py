@@ -27,7 +27,7 @@ orig = js('''gs.print('X::' + JSON.stringify({value: gs.getProperty(PROP), tz: g
 print('property before:', orig['value'], '| session tz', orig['tz'], '| system tz', orig['systz'])
 def scenario(title, prop, until_offset, close_substate=4, reopen='scanner', tz=None):
     print('\n== ' + title)
-    r = js('''var o = {}; gs.setProperty(PROP, %s); %s var id = fixture(%s); o.created = read(id); defer(id, day(%d)); o.deferred = read(id); scannerClose(id, %d); o.closed = read(id); %s; o.reopened = read(id); o.id = id; gs.print('X::' + JSON.stringify(o));'''
+    r = js('''var __out = {}; gs.setProperty(PROP, %s); %s var id = fixture(%s); __out.created = read(id); defer(id, day(%d)); __out.deferred = read(id); scannerClose(id, %d); __out.closed = read(id); %s; __out.reopened = read(id); __out.id = id; gs.print('X::' + JSON.stringify(__out));'''
            % (json.dumps(prop), ("gs.getSession().setTimeZoneName(%s);" % json.dumps(tz)) if tz else '', json.dumps(title), until_offset, close_substate, 'manualReopen(id)' if reopen == 'manual' else 'scannerReopen(id)'))
     show('created', r['created']); show('deferred until day%+d' % until_offset, r['deferred']); show('scanner closed (substate %d)' % close_substate, r['closed']); show('%s re-opened, property %s' % (reopen, prop), r['reopened'])
     return r
@@ -39,9 +39,9 @@ results['on_expired'] = scenario('D. property true, until yesterday (deferral ex
 results['on_today_ist'] = scenario('E. property true, until today, session in IST', 'true', 0)
 results['on_today_utc'] = scenario('F. property true, until today, session in UTC', 'true', 0, tz='UTC')
 results['on_manual'] = scenario('G. property true, until tomorrow, manual re-open (Reopen action) instead of scanner', 'true', 1, reopen='manual')
-results['on_twice'] = js('''var o = {}; gs.setProperty(PROP, 'true'); var id = fixture('H. two cycles'); defer(id, day(1)); scannerClose(id, 4); scannerReopen(id); o.first = read(id); scannerClose(id, 4); scannerReopen(id); o.second = read(id); gs.print('X::' + JSON.stringify(o));''')
+results['on_twice'] = js('''var __out = {}; gs.setProperty(PROP, 'true'); var id = fixture('H. two cycles'); defer(id, day(1)); scannerClose(id, 4); scannerReopen(id); __out.first = read(id); scannerClose(id, 4); scannerReopen(id); __out.second = read(id); gs.print('X::' + JSON.stringify(__out));''')
 print('\n== H. property true, two close/re-open cycles on one item'); show('after cycle 1', results['on_twice']['first']); show('after cycle 2', results['on_twice']['second'])
-end = js('''var o = {}; gs.setProperty(PROP, %s); o.value = gs.getProperty(PROP); gs.print('X::' + JSON.stringify(o));''' % json.dumps(orig['value']))
+end = js('''var __out = {}; gs.setProperty(PROP, %s); __out.value = gs.getProperty(PROP); gs.print('X::' + JSON.stringify(__out));''' % json.dumps(orig['value']))
 print('\nproperty restored to', end['value'])
 head = {'X-UserToken': ui.ck(), 'Accept': 'application/json'}
 # the item's short description is rewritten from the vulnerability on insert, so the fixtures are found by the deferral reason

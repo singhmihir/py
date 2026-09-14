@@ -40,8 +40,37 @@ scanner substate, then Open.
 | G property true, manual Reopen action | Open; Until and backup substate cleared |
 | H property true, two close/re-open cycles | Deferred both times, defer count 2 |
 
+Deferral on the remediation task instead of the item (`simulate_task_deferral.py`: fixture task deferred, item inherits
+Deferred / Risk Accepted with backup substate and Until, then the same two writes):
+
+| Case | Result after the scanner re-open |
+|---|---|
+| property false | Open; the Deferred task does not pull the item back |
+| property true | Deferred / Risk Accepted, defer count 1 |
+
+So the property decides in both cases; without it a re-opened item stays Open whether the deferral was granted on the
+item or on its task.
+
 `AVIT Rescan Simulation - Background Script.js` (attached to INC0010003) plays the same two writes on one existing
-deferred item by number and prints it before and after each step, for QA on the client dev instance.
+deferred item by number and prints it before and after each step, with the deferred tasks of the item and the reason
+when an update is refused, for QA on the client dev instance.
+
+## What runs on the two writes (rules on `sn_vul_app_vulnerable_item`, all out of the box)
+Scanner close (state 3, substate Fixed or Stale): *Check for group state inheritance update* (50) resets the inheritance
+count; *Transit to Closed* (100) fills resolution and closed data and the work note; *Vulnerable Item Active State
+Management* (250) sets active false; *Process inactivation* (300) computes the closed age; *Run exception rules* (1000)
+does not run (its filter needs active changing to true or a CI / vulnerability change). After: *Link to Remediation
+Tasks* (90) re-evaluates the task link; a Closed / Fixed item is never overridden by its task. Until date and backup
+substate survive the close.
+
+Scanner re-open (state 1): *Transit to Open* (40) sets active true, clears substate and closed data, keeps the deferral
+fields; *Active State Management* (250) counts the re-open; *Process activation* (300) marks reopened; *Run exception
+rules* (1000) runs the exception rules, then, only when the property is true, the Until date is after the start of the
+day and a backup substate exists, puts the item back to Deferred. With the property false nothing else in the chain
+re-defers the item; the task-side rules push state to items only when the task itself changes.
+
+If the client script shows no change at all, the item did not meet the rule filter (needs a CI or an application
+release with a product model, and a vulnerability) or an update was refused; the script prints both.
 
 ## Deliverable
 Update set `SNOWUSEMTP-1552_MS_AVIT Deferral Kept On Scanner Reopen_V1.0`, Vulnerability Response scope, one update
