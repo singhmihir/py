@@ -132,3 +132,17 @@ is not defined inside the rule evaluator). With no class from the OS nothing is 
 Known limit: when the OS text is empty or a multi-guess there is no class to check and the discovery chain is
 trusted as before. Data fixes recommended on the client: re-point the DNS Name and IP Address records to the
 router, and fill fqdn / dns_domain on network CIs.
+
+## BlueCat management-interface case and the measurement script (14 Sep)
+`sg_case.py` / `sg_variants.py`: SDI000003711605 (`sgsg02ppz1iptdr02-mgmt.network.asia...`, Linux kernel OS)
+stays unmatched because the CMDB names two CIs `SGSG02PPZ1IPTDR02`, a retired Network Gear record on the
+management address and the live IP Switch: rules 420 and 430 refuse to guess between two CIs with one name,
+the address leads only to the retired record (705 refuses it by class), and the plain name of the device is
+refused by the class agreement because the appliance reports a Linux kernel (410 matches it with a blank OS).
+No rule was changed.
+
+`measure_rules.js` (handed over as `USEM Lookup Rules - Measurement Script.js`): read-only background script
+for the client instance. Samples recent matched and unmatched Qualys items, runs each through the active USEM
+rules with the framework's evaluator (first CI wins), compares with the CI the item holds today, and for every
+decline records the evidence the CMDB offers (name, base name, fqdn and address counts, retired records among
+them, class implied by the OS) with a one-line cause. `measure_rules.py` dry-runs it here with small limits.
