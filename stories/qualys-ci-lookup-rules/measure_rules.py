@@ -11,5 +11,5 @@ for k, v in [('MATCHED_LIMIT', sys.argv[1] if len(sys.argv) > 1 else '20'), ('UN
 ui = SNUI(); ui.app('global')
 raw = ui.run(script)
 text = html.unescape(re.sub(r'<[^>]+>', '', raw))
-start = text.find('=== USEM lookup rule measurement')
+start = text.find('=== Qualys lookup rule measurement')
 print(text[start:] if start >= 0 else text[-3000:])
