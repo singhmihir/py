@@ -1,0 +1,13 @@
+Task-level deferral (fixture task deferred until tomorrow, item inherits Deferred / Risk Accepted, backup substate 2)
+
+property false
+  task deferred                 Deferred (12)  Risk Accepted  active 1  backup 2  until tomorrow  defer_count 0  inherit 1
+  scanner closed Fixed          Closed (3)     Fixed          active 0  backup 2  until tomorrow  defer_count 0
+  scanner re-opened             Open (1)       -              active 1  backup 2  until tomorrow  defer_count 0   (task still Deferred)
+  8 s later                     Open (1)       unchanged
+
+property true
+  task deferred                 Deferred (12)  Risk Accepted  active 1  backup 2  until tomorrow  defer_count 0  inherit 1
+  scanner closed Fixed          Closed (3)     Fixed          active 0  backup 2  until tomorrow  defer_count 0
+  scanner re-opened             Deferred (12)  Risk Accepted  active 1  backup 2  until tomorrow  defer_count 1
+  8 s later                     Deferred (12)  unchanged

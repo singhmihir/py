@@ -1,51 +1,62 @@
-/* AVIT rescan simulation for SNOWUSEMTP-1552 (Scripts - Background, Vulnerability Response or global scope)
-   -------------------------------------------------------------------------------------------------
-   Plays a scanner "close then re-open" on one application vulnerable item and prints the item before
-   and after each step, so the effect of sn_vul.auto_defer_avit_in_active_exception_window can be checked
-   without waiting for a real scan. The two writes are the ones the AVR import API makes on the item
-   record when a scanner reports a finding as fixed and later as open again; all the standard business
-   rules on the item run, exactly as they do during an import.
+/* AVIT rescan simulation (SNOWUSEMTP-1552)
+   Plays a scanner "closed, then found again" on one application vulnerable item: the two writes the
+   AVR import API makes on the item record. Every business rule on the item runs as during an import.
+   Run in Scripts - Background with the property sn_vul.auto_defer_avit_in_active_exception_window
+   false, then true, on an item that is Deferred with a future Until date. */
 
-   Use an item that is Deferred through an approved exception (Until date in the future). Set NUMBER
-   and, if wanted, the substate the scanner close should carry (4 = Fixed, 6 = Stale as the auto-close
-   rule would set). Run once with the property false and once with it true; nothing else is changed.
-   ------------------------------------------------------------------------------------------------- */
-var NUMBER = 'AVIT0000000';   // the deferred application vulnerable item to play the rescan on
+var NUMBER = 'AVIT0000000';   // the deferred application vulnerable item
 var CLOSE_SUBSTATE = 4;       // 4 = Fixed (scanner reports the finding fixed), 6 = Stale (auto-close rule)
 
-var PROP = 'sn_vul.auto_defer_avit_in_active_exception_window';
-function read(gr) {
-    gr = new GlideRecord('sn_vul_app_vulnerable_item');
+var PROPERTY = 'sn_vul.auto_defer_avit_in_active_exception_window';
+var TABLE = 'sn_vul_app_vulnerable_item';
+
+function item() {
+    var gr = new GlideRecord(TABLE);
     gr.get('number', NUMBER);
-    var note = '';
-    var j = new GlideRecord('sys_journal_field');
-    j.addQuery('element_id', gr.getUniqueValue());
-    j.addQuery('element', 'work_notes');
-    j.orderByDesc('sys_created_on');
-    j.setLimit(1);
-    j.query();
-    if (j.next())
-        note = ('' + j.getValue('value')).substring(0, 110);
-    return 'state ' + gr.getDisplayValue('state') + ' / ' + (gr.getDisplayValue('substate') || '-') + ' | active ' + gr.getValue('active') +
-        ' | until ' + (gr.getValue('ignore_expiration') || '-') + ' | backup substate ' + (gr.getValue('backup_substate') || '-') +
-        ' | defer count ' + (gr.getValue('defer_count') || '0') + ' | reopened ' + gr.getValue('reopened') + ' (' + (gr.getValue('reopened_count') || '0') + ')' +
-        ' | ignored by ' + (gr.getDisplayValue('ignored_by') || '-') + ' | last work note: ' + note;
+    return gr;
 }
-var item = new GlideRecord('sn_vul_app_vulnerable_item');
-if (!item.get('number', NUMBER)) {
+
+function snapshot(label) {
+    var gr = item();
+    var note = new GlideRecord('sys_journal_field');
+    note.addQuery('element_id', gr.getUniqueValue());
+    note.addQuery('element', 'work_notes');
+    note.orderByDesc('sys_created_on');
+    note.setLimit(1);
+    note.query();
+    gs.print(label);
+    gs.print('   state ' + gr.getDisplayValue('state') + ' / ' + (gr.getDisplayValue('substate') || '-') +
+        ', active ' + gr.getValue('active') + ', until ' + (gr.getValue('ignore_expiration') || '-') +
+        ', backup substate ' + (gr.getValue('backup_substate') || '-') + ', defer count ' + (gr.getValue('defer_count') || '0') +
+        ', reopened ' + gr.getValue('reopened') + ' (' + (gr.getValue('reopened_count') || '0') + ')');
+    gs.print('   deferred tasks of this item: ' + deferredTasks(gr) + ', last work note: ' + (note.next() ? note.getValue('value') : '-'));
+}
+
+function deferredTasks(gr) {
+    var names = [];
+    var link = new GlideRecord('sn_vul_app_m2m_vul_group_item');
+    link.addQuery(TABLE, gr.getUniqueValue());
+    link.addQuery('sn_vul_app_vulnerability.state', 12);
+    link.query();
+    while (link.next())
+        names.push(link.sn_vul_app_vulnerability.getDisplayValue());
+    return names.length ? names.join(', ') : 'none';
+}
+
+function scanner(label, state, substate) {
+    var gr = item();
+    gr.setValue('state', state);
+    if (substate)
+        gr.setValue('substate', substate);
+    var saved = gr.update();
+    snapshot(label + (saved ? '' : ' - update refused: ' + gs.getErrorMessages()));
+}
+
+if (!item().isValidRecord())
     gs.print('No application vulnerable item ' + NUMBER);
-} else {
-    gs.print('Property ' + PROP + ' = ' + gs.getProperty(PROP) + ' | session time zone ' + gs.getSession().getTimeZoneName() + ' | today ' + new GlideDate().getValue());
-    gs.print('1. before:            ' + read());
-    var close = new GlideRecord('sn_vul_app_vulnerable_item');
-    close.get(item.getUniqueValue());
-    close.setValue('state', 3);
-    close.setValue('substate', CLOSE_SUBSTATE);
-    close.update();
-    gs.print('2. scanner closes it: ' + read());
-    var reopen = new GlideRecord('sn_vul_app_vulnerable_item');
-    reopen.get(item.getUniqueValue());
-    reopen.setValue('state', 1);
-    reopen.update();
-    gs.print('3. scanner finds it:  ' + read());
+else {
+    gs.print('Property ' + PROPERTY + ' = ' + gs.getProperty(PROPERTY) + ', session time zone ' + gs.getSession().getTimeZoneName() + ', today ' + new GlideDate().getValue());
+    snapshot('1. Before');
+    scanner('2. Scanner reports the finding fixed', 3, CLOSE_SUBSTATE);
+    scanner('3. Scanner finds it again', 1);
 }
