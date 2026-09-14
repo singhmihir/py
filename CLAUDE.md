@@ -117,6 +117,13 @@ Follow it without being asked again.
   on the matching stages and each ending with a `Sample:` sentence that walks the sample through the stage, inline
   sample values on the prep lines, no sample sys_ids or "data after this line" trails, written as first-hand notes
   on the client system.
+- Qualys rules on the client dev instance are named `BOFA ...` (same orders as the PDI's `USEM ...`); rule 430 there
+  reads the IP field (dead rule) and 450 runs a longer script than delivered. `measure_rules.js` (read-only, run by
+  Mihir on the client instance, output attached to INC0010003) is the agreed way to judge the rules: 499/500 matched
+  items reproduce, unmatched are 87% hosts absent from the CMDB, then class contradictions (44/500), address
+  duplicates and retired records. Two proposals pending Mihir's decision (retired candidates dropped; kernel-only
+  OS fingerprints give no class). **Never change a lookup rule without asking him first.** Full state in
+  `stories/qualys-ci-lookup-rules/README.md`.
 - Kafka outbound (SNOWUSEMTP-1625): topic `sn_usem_remtask_outbound`, namespace `com.bofa.usem`,
   envelope + `rem_tasks[].remediation_task`, dates `MM-dd-yyyy HH:mm:ss`, mapping sheet
   *Outbound to CDP (RemTask)* — only rows with *CDP Required? = Yes*; one property per table with one
