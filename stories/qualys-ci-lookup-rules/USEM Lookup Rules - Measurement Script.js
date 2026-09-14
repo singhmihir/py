@@ -1,6 +1,6 @@
-/* USEM lookup rule measurement (read-only)
+/* Qualys lookup rule measurement (read-only)
    -------------------------------------------------------------------------------------------------
-   Runs a sample of Discovered Items through the USEM Qualys lookup rules exactly as the framework
+   Runs a sample of Discovered Items through the scripted Qualys lookup rules exactly as the framework
    does (one rule after the other, the first CI returned wins) without creating or updating anything,
    and compares the answer with what the item holds today. For every item the rules decline it
    records the evidence the CMDB offers for the scanned name and address, so the declines can be
@@ -12,15 +12,24 @@ var DAYS = 30;                // only items created in the last DAYS days; 0 = a
 var LIST_CAP = 150;           // lines printed per detail list
 
 var started = new Date().getTime();
+// every active scripted rule of the Qualys source, whatever its name, in chain order
 var rules = [];
 var rl = new GlideRecord('sn_sec_cmn_ci_lookup_rule');
-rl.addQuery('name', 'STARTSWITH', 'USEM');
 rl.addQuery('source.name', 'CONTAINS', 'Qualys');
+rl.addQuery('method', 'script');
 rl.addActiveQuery();
 rl.orderBy('order');
 rl.query();
-while (rl.next())
-    rules.push({ id: rl.getUniqueValue(), order: '' + rl.getValue('order'), name: '' + rl.getValue('name'), field: '' + rl.getValue('source_field') });
+while (rl.next()) {
+    var text = '' + rl.getValue('script');
+    var marks = [];
+    if (text.indexOf('agrees(') != -1) marks.push('class agreement');
+    if (text.indexOf('hasNext()') != -1) marks.push('exactly one');
+    if (text.indexOf('setLimit(') != -1) marks.push('setLimit');
+    if (text.indexOf('usem.ci_lookup') != -1) marks.push('properties');
+    rules.push({ id: rl.getUniqueValue(), order: '' + rl.getValue('order'), name: '' + rl.getValue('name'), field: '' + rl.getValue('source_field'),
+        info: 'updated ' + rl.getValue('sys_updated_on') + ', ' + text.length + ' chars' + (marks.length ? ', ' + marks.join(', ') : '') });
+}
 var ruleRecords = {};
 for (var r = 0; r < rules.length; r++) {
     var g = new GlideRecord('sn_sec_cmn_ci_lookup_rule');
@@ -125,15 +134,26 @@ function evidence(p) {
     e.fqdn = found('cmdb_ci', 'fqdn', dns);
     e.ip = found('cmdb_ci_hardware', 'ip_address', p.IP);
     var live = { n: e.name.n - e.name.retired, base: e.base.n - e.base.retired, ip: e.ip.n - e.ip.retired };
+    function conflict(f) { return f.n == 1 && f.retired == 0 && e.osClass && !agrees(f.oneClass, e.osClass); }
     if (!dns && !p.IP) e.reason = 'no name and no address in the payload';
     else if (e.name.n + e.base.n + e.fqdn.n + e.ip.n == 0) e.reason = 'nothing in the CMDB carries the name, the base name, the fqdn or the address';
-    else if ((e.name.n > 1 && live.n == 1) || (e.base.n > 1 && live.base == 1) || (e.ip.n > 1 && live.ip == 1)) e.reason = 'name or address shared with a retired record';
-    else if (e.name.n > 1 || e.base.n > 1 || e.ip.n > 1 || e.fqdn.n > 1) e.reason = 'name or address on two or more live records';
-    else if (e.name.n + e.base.n + e.fqdn.n == 0 && e.ip.n == 1 && e.ip.retired == 1) e.reason = 'address only on a retired record';
-    else if (e.osClass && ((e.name.n == 1 && !agrees(e.name.oneClass, e.osClass)) || (e.base.n == 1 && !agrees(e.base.oneClass, e.osClass)) || (e.ip.n == 1 && !agrees(e.ip.oneClass, e.osClass))))
-        e.reason = e.kernel ? 'class contradicts a Linux kernel fingerprint' : 'class contradicts the scanned OS';
-    else if (e.name.n + e.base.n + e.fqdn.n == 0 && e.ip.n == 1) e.reason = 'address on one record, name not confirmed';
-    else if (e.base.n == 1 && e.name.n == 0 && !e.controller && !e.network) e.reason = 'base name on one record, tail not recognised as an interface';
+    else if (e.name.n == 1 && e.name.retired == 0 && !conflict(e.name)) e.reason = 'name on one live record';
+    else if (e.name.n == 1 && e.name.retired == 1) e.reason = 'name only on a retired record';
+    else if (e.name.n > 1 && live.n == 1) e.reason = 'name shared with a retired record';
+    else if (e.name.n > 1) e.reason = 'name on two or more live records';
+    else if (conflict(e.name)) e.reason = e.kernel ? 'name on one record whose class contradicts a Linux kernel fingerprint' : 'name on one record whose class contradicts the scanned OS';
+    else if (e.fqdn.n == 1) e.reason = 'fqdn on one record';
+    else if (e.fqdn.n > 1) e.reason = 'fqdn on two or more records';
+    else if (e.base.n == 1 && e.base.retired == 0 && (e.controller || e.network) && !conflict(e.base)) e.reason = 'interface label, base name on one live record';
+    else if (e.base.n == 1 && e.base.retired == 0) e.reason = 'base name on one live record, tail not recognised as an interface';
+    else if (e.base.n > 1 && live.base == 1) e.reason = 'base name shared with a retired record';
+    else if (e.base.n > 1) e.reason = 'base name on two or more live records';
+    else if (e.base.n == 1 && e.base.retired == 1) e.reason = 'base name only on a retired record';
+    else if (e.ip.n == 1 && e.ip.retired == 1) e.reason = 'address only on a retired record';
+    else if (e.ip.n > 1 && live.ip == 1) e.reason = 'address shared with retired records';
+    else if (e.ip.n > 1) e.reason = 'address on two or more live records';
+    else if (conflict(e.ip)) e.reason = e.kernel ? 'address on one record whose class contradicts a Linux kernel fingerprint' : 'address on one record whose class contradicts the scanned OS';
+    else if (e.ip.n == 1) e.reason = 'address on one live record, name not in the CMDB';
     else e.reason = 'other';
     return e;
 }
@@ -179,11 +199,11 @@ for (var s = 0; s < states.length; s++) {
     }
 }
 var out = [];
-out.push('=== USEM lookup rule measurement, read-only ===');
+out.push('=== Qualys lookup rule measurement, read-only ===');
 out.push('items: ' + items + ' (payloads not parsed: ' + parseFailures + ', rule errors: ' + errors + ') | window: last ' + DAYS + ' days | elapsed: ' + Math.round((new Date().getTime() - started) / 1000) + ' s');
 out.push('');
-out.push('--- active USEM rules for the Qualys source, in chain order ---');
-for (var ri = 0; ri < rules.length; ri++) out.push('  ' + rules[ri].order + ' ' + rules[ri].name + ' (' + rules[ri].field + ')');
+out.push('--- active scripted rules of the Qualys source, in chain order ---');
+for (var ri = 0; ri < rules.length; ri++) out.push('  ' + rules[ri].order + ' ' + rules[ri].name + ' (' + rules[ri].field + '): ' + rules[ri].info);
 out.push('');
 out.push('--- items sampled, state / matching type today ---');
 for (var tk in today) out.push('  ' + today[tk] + '  ' + tk);
@@ -192,16 +212,16 @@ out.push('--- matches per rule ---');
 for (var k in byRule) out.push('  ' + k + ': ' + byRule[k]);
 out.push('');
 out.push('--- against what the items hold today ---');
-out.push('  same CI: ' + agree.same + ' | different CI: ' + agree.different + ' | usem matches an item that is unmatched today: ' + agree.usemOnly + ' | usem declines an item matched today: ' + agree.prodOnly + ' | both unmatched: ' + agree.none);
+out.push('  same CI: ' + agree.same + ' | different CI: ' + agree.different + ' | rules match an item that is unmatched today: ' + agree.usemOnly + ' | rules decline an item matched today: ' + agree.prodOnly + ' | both unmatched: ' + agree.none);
 out.push('');
-out.push('--- why the usem rules decline (both lists below) ---');
+out.push('--- evidence behind the declines (both lists below) ---');
 for (var rk in reasons) out.push('  ' + reasons[rk] + '  ' + rk);
 function list(title, arr) {
     out.push(''); out.push('--- ' + title + ' (' + arr.length + (arr.length > LIST_CAP ? ', first ' + LIST_CAP : '') + ') ---');
     for (var i = 0; i < arr.length && i < LIST_CAP; i++) out.push('  ' + arr[i]);
 }
 list('different CI than today', lists.different);
-list('usem declines an item matched today', lists.prodOnly);
-list('usem matches an item unmatched today', lists.usemOnly);
+list('rules decline an item matched today', lists.prodOnly);
+list('rules match an item unmatched today', lists.usemOnly);
 list('unmatched today and declined, with the evidence in the CMDB', lists.declined);
 gs.print(out.join('\n'));
