@@ -10,6 +10,7 @@ var MATCHED_LIMIT = 300;      // items in state matched to sample (newest first)
 var UNMATCHED_LIMIT = 300;    // items in state unmatched to sample (newest first)
 var DAYS = 30;                // only items created in the last DAYS days; 0 = any age
 var LIST_CAP = 150;           // lines printed per detail list
+var SKIP_ABSENT = true;       // leave hosts that exist nowhere in the CMDB out of the detail lists (they are still counted)
 
 var started = new Date().getTime();
 // every active scripted rule of the Qualys source, whatever its name, in chain order
@@ -159,7 +160,14 @@ function evidence(p) {
 }
 function clip(s, n) { s = '' + (s || ''); return s.length > n ? s.substring(0, n - 1) + '~' : s; }
 
-var byRule = {}, agree = { same: 0, different: 0, usemOnly: 0, prodOnly: 0, none: 0 }, reasons = {}, errors = 0;
+var byRule = {}, agree = { same: 0, different: 0, usemOnly: 0, prodOnly: 0, none: 0 }, reasons = {}, pairs = {}, errors = 0;
+var ABSENT = 'nothing in the CMDB carries the name, the base name, the fqdn or the address';
+function notePair(e) {
+    if (e.reason.indexOf('contradicts') == -1) return;
+    var f = e.name.n == 1 ? e.name : e.base.n == 1 ? e.base : e.ip;
+    var key = (e.osClass || '-').replace('cmdb_ci_', '') + ' (scan) vs ' + f.oneClass.replace('cmdb_ci_', '') + ' (CI)';
+    pairs[key] = (pairs[key] || 0) + 1;
+}
 var lists = { different: [], usemOnly: [], prodOnly: [], declined: [] };
 var hasRuleField = new GlideRecord('sn_sec_cmn_src_ci').isValidField('ci_lookup_rule');
 var items = 0, parseFailures = 0, today = {};
@@ -190,11 +198,11 @@ for (var s = 0; s < states.length; s++) {
         } else if (res) {
             agree.usemOnly++; lists.usemOnly.push(line + ' | today: ' + prodType + ' | usem: ' + res.rule.order + ' -> ' + ciLabel(res.ci));
         } else if (prodCi && states[s][0] == 'matched') {
-            agree.prodOnly++; var ev1 = evidence(p); reasons[ev1.reason] = (reasons[ev1.reason] || 0) + 1;
-            lists.prodOnly.push(line + ' | today: ' + ciLabel(prodCi) + ' via ' + (prodRule || prodType) + ' | ' + ev1.reason + ' | name ' + fmt(ev1.name) + ' base ' + fmt(ev1.base) + ' fqdn ' + fmt(ev1.fqdn) + ' ip ' + fmt(ev1.ip) + ' os ' + (ev1.osClass || '-'));
+            agree.prodOnly++; var ev1 = evidence(p); reasons[ev1.reason] = (reasons[ev1.reason] || 0) + 1; notePair(ev1);
+            if (!SKIP_ABSENT || ev1.reason != ABSENT) lists.prodOnly.push(line + ' | today: ' + ciLabel(prodCi) + ' via ' + (prodRule || prodType) + ' | ' + ev1.reason + ' | name ' + fmt(ev1.name) + ' base ' + fmt(ev1.base) + ' fqdn ' + fmt(ev1.fqdn) + ' ip ' + fmt(ev1.ip) + ' os ' + (ev1.osClass || '-'));
         } else {
-            agree.none++; var ev2 = evidence(p); reasons[ev2.reason] = (reasons[ev2.reason] || 0) + 1;
-            lists.declined.push(line + ' | ' + ev2.reason + ' | name ' + fmt(ev2.name) + ' base ' + fmt(ev2.base) + ' fqdn ' + fmt(ev2.fqdn) + ' ip ' + fmt(ev2.ip) + ' os ' + (ev2.osClass || '-') + (ev2.kernel ? ' (kernel only)' : ''));
+            agree.none++; var ev2 = evidence(p); reasons[ev2.reason] = (reasons[ev2.reason] || 0) + 1; notePair(ev2);
+            if (!SKIP_ABSENT || ev2.reason != ABSENT) lists.declined.push(line + ' | ' + ev2.reason + ' | name ' + fmt(ev2.name) + ' base ' + fmt(ev2.base) + ' fqdn ' + fmt(ev2.fqdn) + ' ip ' + fmt(ev2.ip) + ' os ' + (ev2.osClass || '-') + (ev2.kernel ? ' (kernel only)' : ''));
         }
     }
 }
@@ -216,6 +224,9 @@ out.push('  same CI: ' + agree.same + ' | different CI: ' + agree.different + ' 
 out.push('');
 out.push('--- evidence behind the declines (both lists below) ---');
 for (var rk in reasons) out.push('  ' + reasons[rk] + '  ' + rk);
+out.push('');
+out.push('--- class contradictions, scanned OS class against the class of the one CI carrying the name or address ---');
+for (var pk in pairs) out.push('  ' + pairs[pk] + '  ' + pk);
 function list(title, arr) {
     out.push(''); out.push('--- ' + title + ' (' + arr.length + (arr.length > LIST_CAP ? ', first ' + LIST_CAP : '') + ') ---');
     for (var i = 0; i < arr.length && i < LIST_CAP; i++) out.push('  ' + arr[i]);
@@ -223,5 +234,5 @@ function list(title, arr) {
 list('different CI than today', lists.different);
 list('rules decline an item matched today', lists.prodOnly);
 list('rules match an item unmatched today', lists.usemOnly);
-list('unmatched today and declined, with the evidence in the CMDB', lists.declined);
+list('unmatched today and declined, with the evidence in the CMDB' + (SKIP_ABSENT ? ', hosts absent from the CMDB left out' : ''), lists.declined);
 gs.print(out.join('\n'));
