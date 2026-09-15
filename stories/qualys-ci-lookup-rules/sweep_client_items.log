@@ -1,0 +1,132 @@
+matched today: 34 items, 24 chain matches, 12s
+batch 1/12 offset 0: 500 items, chain matches 2, rule hits 6, errors 0, 42s
+batch 2/12 offset 8334: 500 items, chain matches 0, rule hits 0, errors 0, 40s
+batch 3/12 offset 16668: 500 items, chain matches 0, rule hits 0, errors 0, 40s
+batch 4/12 offset 25002: 500 items, chain matches 0, rule hits 0, errors 0, 42s
+batch 5/12 offset 33336: 500 items, chain matches 0, rule hits 0, errors 0, 42s
+batch 6/12 offset 41670: 500 items, chain matches 0, rule hits 0, errors 0, 41s
+batch 7/12 offset 50005: 500 items, chain matches 1, rule hits 1, errors 0, 40s
+batch 8/12 offset 58339: 500 items, chain matches 1, rule hits 1, errors 0, 40s
+batch 9/12 offset 66673: 500 items, chain matches 0, rule hits 0, errors 0, 40s
+batch 10/12 offset 75007: 500 items, chain matches 0, rule hits 0, errors 0, 39s
+batch 11/12 offset 83341: 500 items, chain matches 0, rule hits 0, errors 0, 41s
+batch 12/12 offset 91675: 500 items, chain matches 0, rule hits 0, errors 0, 38s
+
+items 6034 of 100010 | chain 31 ms/item | all rules alone 22 ms/item
+payload shapes: {"dns_empty": 686, "dns_ip": 0, "dns_upper": 0, "dns_nodot": 0, "ip_empty": 5, "os_empty": 2919, "os_multi": 133, "tracking": {"IP": 6024, "AGENT": 2, "NETBIOS": 1, "Cloud Agent": 7}, "keys": {"tags": 6025, "q_tags": 6025, "ID": 6034, "IP": 6029, "TRACKING_METHOD": 6034, "DNS": 5348, "DNS_DATA": 5342, "OS": 3115, "FIRST_FOUND_DATE": 6025, "LAST_VULN_SCAN_DATETIME": 6025, "LAST_VM_SCANNED_DATE": 6025, "LAST_VM_SCANNED_DURATION": 6024, "LAST_COMPLIANCE_SCAN_DATETIME": 6025, "ASSET_GROUP_IDS": 6025, "LAST_VM_AUTH_SCANNED_DATE": 6025, "TAGS": 6025, "NETBIOS": 28, "LAST_VM_AUTH_SCANNED_DURATION": 181, "QG_HOSTID": 17, "USER_DEF": 3, "SERIAL_NUMBER": 16, "LAST_BOOT": 7, "HARDWARE_UUID": 7, "LAST_ACTIVITY": 7, "AGENT_STATUS": 7, "CLOUD_AGENT_RUNNING_ON": 7}}
+errors: none
+per rule ms total / max: 175: 1124 / 11, 180: 952 / 24, 200: 7275 / 75, 250: 4816 / 137, 260: 9126 / 59, 300: 4637 / 41, 310: 9045 / 57, 350: 12099 / 62, 400: 4670 / 55, 410: 9179 / 42, 420: 1777 / 26, 430: 3860 / 90, 450: 8754 / 59, 460: 5435 / 61, 700: 4806 / 38, 705: 10614 / 52, 730: 12039 / 56, 740: 12178 / 49, 850: 9154 / 104
+
+chain matches (28):
+  SDI000000404786 | gfsmq-lta-wynbt1-vip.bankofamerica.com | 167.202.156.24 | F5 Networks Big-IP -> 260 gfsmq-lta-wynbt1-vip [cmdb_ci_lb_bigip] null
+  SDI000000265839 | txr9gxcenah031.sdi.corp.bankofamerica.com | 171.135.28.125 | Ubuntu / Tiny Core Linux / Linux 2.6.x / -> 260 txr9gxcenah031 [cmdb_ci_linux_server] null
+  SDI000000407442 | uspaltwrr01drm0119-cz04-hsrp-vlan691.network.bankofamerica.com | 30.141.120.129 |  -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000361119 | rvcpcz1atmlb01s-vs1.network.bankofamerica.com | 30.204.120.4 |  -> 430 rvcpcz1atmlb01s [cmdb_ci_lb_bigip] USEM lookup rule fixture (V3)
+  SDI000000433553 | uspaltwrr01drm0119-cz04-hsrp-vlan704.network.bankofamerica.com | 171.149.3.33 | Linux 2.6 -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000265852 | ah-1015198-001.corp.bankofamerica.com | 171.135.36.217 | Windows Server 2012 R2 Standard 64 bit E -> 400 AH-1015198-001 [cmdb_ci_win_server] USEM lookup rule fixture (V3)
+  SDI000000391724 | uspaltwrr01drm0119-gz02-hsrp-vlan1000.usltwrr.baml.com | 30.131.64.65 |  -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000266279 | uspaltwrr01drm0119-cz04-hsrp-vlan705.network.bankofamerica.com | 171.149.3.49 | Linux 2.6 -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000461867 | uspaltwrr01drm0119-gz02-hsrp-vlan601.usltwrr.baml.com | 171.203.180.225 |  -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000270030 | tx6dd630001-ilo.bankofamerica.com | 159.185.200.11 |  -> 420 tx6dd630001 [cmdb_ci_linux_server] USEM lookup rule fixture (V3)
+  SDI000000422587 | gtcmmrlpa05a-drac.bankofamerica.com | 171.151.3.177 | iDRAC Device -> 420 gtcmmrlpa05a [cmdb_ci_linux_server] USEM lookup rule fixture (V3)
+  SDI000000414797 | uspaltwrr01drm0119-cz04-hsrp-vlan1945.network.bankofamerica.com | 30.223.160.1 |  -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000272601 | gtcmmrlpa05a.bankofamerica.com | 171.151.4.232 | Linux 2.6 -> 400 gtcmmrlpa05a [cmdb_ci_linux_server] USEM lookup rule fixture (V3)
+  SDI000000461538 | uspaltwrr01drm0119-gz02-hsrp-vlan600.usltwrr.baml.com | 171.203.176.65 |  -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000265142 | lrche01xtrapd01.sdi.corp.bankofamerica.com | 171.128.140.192 | Ubuntu/Linux -> 310 lrche01xtrapd01 [cmdb_ci_server] null
+  SDI000000466232 | uspaltwrr01drm0119-cz04-hsrp-vlan701.network.bankofamerica.com | 171.204.248.129 |  -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000433549 | uspaltwrr01drm0119-cz04-hsrp-vlan703.network.bankofamerica.com | 171.149.3.17 | Linux 2.6 -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000361057 | sep6c5e3b2925ac.ipt.bofa.com | 10.185.168.70 | Cisco IP Phone CP-8861 -> 200 SEP6C5E3B2925AC [cmdb_ci_ip_phone] USEM lookup rule fixture (V3)
+  SDI000000459486 | crisp-tx.bankofamerica.com | 171.203.142.26 | F5 Big IP -> 460 crisp-tx [cmdb_ci_lb_service] USEM lookup rule fixture (V3)
+  SDI000000444880 | uspaltwrr01drm0119-cz04-hsrp-vlan1948.network.bankofamerica.com | 30.96.0.1 |  -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000433526 | uspaltwrr01drm0119-cz04-hsrp-vlan706.network.bankofamerica.com | 171.149.1.233 | Linux 2.6 -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000399361 | rbps-dev3-sve-vip.ecommnp.rpg | 164.91.236.18 | Linux 2.6 -> 460 rbps-dev3-sve-vip [cmdb_ci_lb_service] USEM lookup rule fixture (V3)
+  SDI000000349548 | xtp24cel03-ilom.sdi.corp.bankofamerica.com | 30.123.8.235 | Ubuntu / Linux 3.x -> 420 xtp24cel03 [cmdb_ci_linux_server] USEM lookup rule fixture (V3)
+  SDI000000268536 | bofascanner75.bankofamerica.com | 146.125.9.215 |  -> 410 bofascanner75 [cmdb_ci_linux_server] USEM lookup rule fixture (V3)
+  SDI000000404786 | gfsmq-lta-wynbt1-vip.bankofamerica.com | 167.202.156.24 | F5 Networks Big-IP -> 260 gfsmq-lta-wynbt1-vip [cmdb_ci_lb_bigip] null
+  SDI000000265839 | txr9gxcenah031.sdi.corp.bankofamerica.com | 171.135.28.125 | Ubuntu / Tiny Core Linux / Linux 2.6.x / -> 260 txr9gxcenah031 [cmdb_ci_linux_server] null
+  SDI000000461538 | uspaltwrr01drm0119-gz02-hsrp-vlan600.usltwrr.baml.com | 171.203.176.65 |  -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000433549 | uspaltwrr01drm0119-cz04-hsrp-vlan703.network.bankofamerica.com | 171.149.3.17 | Linux 2.6 -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+
+rules returning a CI on their own (39):
+  SDI000000404786 | gfsmq-lta-wynbt1-vip.bankofamerica.com | 167.202.156.24 | F5 Networks Big-IP -> 260 gfsmq-lta-wynbt1-vip [cmdb_ci_lb_bigip] null
+  SDI000000404786 | gfsmq-lta-wynbt1-vip.bankofamerica.com | 167.202.156.24 | F5 Networks Big-IP -> 310 gfsmq-lta-wynbt1-vip [cmdb_ci_lb_bigip] null
+  SDI000000404786 | gfsmq-lta-wynbt1-vip.bankofamerica.com | 167.202.156.24 | F5 Networks Big-IP -> 410 gfsmq-lta-wynbt1-vip [cmdb_ci_lb_bigip] null
+  SDI000000265839 | txr9gxcenah031.sdi.corp.bankofamerica.com | 171.135.28.125 | Ubuntu / Tiny Core Linux / Linux 2.6.x / -> 260 txr9gxcenah031 [cmdb_ci_linux_server] null
+  SDI000000265839 | txr9gxcenah031.sdi.corp.bankofamerica.com | 171.135.28.125 | Ubuntu / Tiny Core Linux / Linux 2.6.x / -> 310 txr9gxcenah031 [cmdb_ci_linux_server] null
+  SDI000000265839 | txr9gxcenah031.sdi.corp.bankofamerica.com | 171.135.28.125 | Ubuntu / Tiny Core Linux / Linux 2.6.x / -> 410 txr9gxcenah031 [cmdb_ci_linux_server] null
+  SDI000000407442 | uspaltwrr01drm0119-cz04-hsrp-vlan691.network.bankofamerica.com | 30.141.120.129 |  -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000361119 | rvcpcz1atmlb01s-vs1.network.bankofamerica.com | 30.204.120.4 |  -> 430 rvcpcz1atmlb01s [cmdb_ci_lb_bigip] USEM lookup rule fixture (V3)
+  SDI000000433553 | uspaltwrr01drm0119-cz04-hsrp-vlan704.network.bankofamerica.com | 171.149.3.33 | Linux 2.6 -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000265852 | ah-1015198-001.corp.bankofamerica.com | 171.135.36.217 | Windows Server 2012 R2 Standard 64 bit E -> 400 AH-1015198-001 [cmdb_ci_win_server] USEM lookup rule fixture (V3)
+  SDI000000265852 | ah-1015198-001.corp.bankofamerica.com | 171.135.36.217 | Windows Server 2012 R2 Standard 64 bit E -> 410 AH-1015198-001 [cmdb_ci_win_server] USEM lookup rule fixture (V3)
+  SDI000000391724 | uspaltwrr01drm0119-gz02-hsrp-vlan1000.usltwrr.baml.com | 30.131.64.65 |  -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000266279 | uspaltwrr01drm0119-cz04-hsrp-vlan705.network.bankofamerica.com | 171.149.3.49 | Linux 2.6 -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000461867 | uspaltwrr01drm0119-gz02-hsrp-vlan601.usltwrr.baml.com | 171.203.180.225 |  -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000270030 | tx6dd630001-ilo.bankofamerica.com | 159.185.200.11 |  -> 420 tx6dd630001 [cmdb_ci_linux_server] USEM lookup rule fixture (V3)
+  SDI000000422587 | gtcmmrlpa05a-drac.bankofamerica.com | 171.151.3.177 | iDRAC Device -> 420 gtcmmrlpa05a [cmdb_ci_linux_server] USEM lookup rule fixture (V3)
+  SDI000000414797 | uspaltwrr01drm0119-cz04-hsrp-vlan1945.network.bankofamerica.com | 30.223.160.1 |  -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000272601 | gtcmmrlpa05a.bankofamerica.com | 171.151.4.232 | Linux 2.6 -> 400 gtcmmrlpa05a [cmdb_ci_linux_server] USEM lookup rule fixture (V3)
+  SDI000000272601 | gtcmmrlpa05a.bankofamerica.com | 171.151.4.232 | Linux 2.6 -> 410 gtcmmrlpa05a [cmdb_ci_linux_server] USEM lookup rule fixture (V3)
+  SDI000000461538 | uspaltwrr01drm0119-gz02-hsrp-vlan600.usltwrr.baml.com | 171.203.176.65 |  -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000265142 | lrche01xtrapd01.sdi.corp.bankofamerica.com | 171.128.140.192 | Ubuntu/Linux -> 310 lrche01xtrapd01 [cmdb_ci_server] null
+  SDI000000265142 | lrche01xtrapd01.sdi.corp.bankofamerica.com | 171.128.140.192 | Ubuntu/Linux -> 410 lrche01xtrapd01 [cmdb_ci_server] null
+  SDI000000466232 | uspaltwrr01drm0119-cz04-hsrp-vlan701.network.bankofamerica.com | 171.204.248.129 |  -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000433549 | uspaltwrr01drm0119-cz04-hsrp-vlan703.network.bankofamerica.com | 171.149.3.17 | Linux 2.6 -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000361057 | sep6c5e3b2925ac.ipt.bofa.com | 10.185.168.70 | Cisco IP Phone CP-8861 -> 200 SEP6C5E3B2925AC [cmdb_ci_ip_phone] USEM lookup rule fixture (V3)
+  SDI000000459486 | crisp-tx.bankofamerica.com | 171.203.142.26 | F5 Big IP -> 460 crisp-tx [cmdb_ci_lb_service] USEM lookup rule fixture (V3)
+  SDI000000444880 | uspaltwrr01drm0119-cz04-hsrp-vlan1948.network.bankofamerica.com | 30.96.0.1 |  -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000433526 | uspaltwrr01drm0119-cz04-hsrp-vlan706.network.bankofamerica.com | 171.149.1.233 | Linux 2.6 -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000399361 | rbps-dev3-sve-vip.ecommnp.rpg | 164.91.236.18 | Linux 2.6 -> 460 rbps-dev3-sve-vip [cmdb_ci_lb_service] USEM lookup rule fixture (V3)
+  SDI000000349548 | xtp24cel03-ilom.sdi.corp.bankofamerica.com | 30.123.8.235 | Ubuntu / Linux 3.x -> 420 xtp24cel03 [cmdb_ci_linux_server] USEM lookup rule fixture (V3)
+  SDI000000268536 | bofascanner75.bankofamerica.com | 146.125.9.215 |  -> 410 bofascanner75 [cmdb_ci_linux_server] USEM lookup rule fixture (V3)
+  SDI000000404786 | gfsmq-lta-wynbt1-vip.bankofamerica.com | 167.202.156.24 | F5 Networks Big-IP -> 260 gfsmq-lta-wynbt1-vip [cmdb_ci_lb_bigip] null
+  SDI000000404786 | gfsmq-lta-wynbt1-vip.bankofamerica.com | 167.202.156.24 | F5 Networks Big-IP -> 310 gfsmq-lta-wynbt1-vip [cmdb_ci_lb_bigip] null
+  SDI000000404786 | gfsmq-lta-wynbt1-vip.bankofamerica.com | 167.202.156.24 | F5 Networks Big-IP -> 410 gfsmq-lta-wynbt1-vip [cmdb_ci_lb_bigip] null
+  SDI000000265839 | txr9gxcenah031.sdi.corp.bankofamerica.com | 171.135.28.125 | Ubuntu / Tiny Core Linux / Linux 2.6.x / -> 260 txr9gxcenah031 [cmdb_ci_linux_server] null
+  SDI000000265839 | txr9gxcenah031.sdi.corp.bankofamerica.com | 171.135.28.125 | Ubuntu / Tiny Core Linux / Linux 2.6.x / -> 310 txr9gxcenah031 [cmdb_ci_linux_server] null
+  SDI000000265839 | txr9gxcenah031.sdi.corp.bankofamerica.com | 171.135.28.125 | Ubuntu / Tiny Core Linux / Linux 2.6.x / -> 410 txr9gxcenah031 [cmdb_ci_linux_server] null
+  SDI000000461538 | uspaltwrr01drm0119-gz02-hsrp-vlan600.usltwrr.baml.com | 171.203.176.65 |  -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000433549 | uspaltwrr01drm0119-cz04-hsrp-vlan703.network.bankofamerica.com | 171.149.3.17 | Linux 2.6 -> 430 uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+
+rules disagreeing on an item (0):
+
+
+items matched today on the PDI (38):
+  SDI000000404786 | gfsmq-lta-wynbt1-vip.bankofamerica.com | 167.202.156.24 | F5 Networks Big-IP | today gfsmq-lta-wynbt1-vip [cmdb_ci_lb_bigip] null | chain gfsmq-lta-wynbt1-vip [cmdb_ci_lb_bigip] null
+  SDI000000265839 | txr9gxcenah031.sdi.corp.bankofamerica.com | 171.135.28.125 | Ubuntu / Tiny Core Linux / Linux 2.6.x / | today txr9gxcenah031 [cmdb_ci_linux_server] null | chain txr9gxcenah031 [cmdb_ci_linux_server] null
+  SDI000000407442 | uspaltwrr01drm0119-cz04-hsrp-vlan691.network.bankofamerica.com | 30.141.120.129 |  | today uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3) | chain uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000361119 | rvcpcz1atmlb01s-vs1.network.bankofamerica.com | 30.204.120.4 |  | today rvcpcz1atmlb01s [cmdb_ci_lb_bigip] USEM lookup rule fixture (V3) | chain rvcpcz1atmlb01s [cmdb_ci_lb_bigip] USEM lookup rule fixture (V3)
+  SDI000000433553 | uspaltwrr01drm0119-cz04-hsrp-vlan704.network.bankofamerica.com | 171.149.3.33 | Linux 2.6 | today uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3) | chain uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000265852 | ah-1015198-001.corp.bankofamerica.com | 171.135.36.217 | Windows Server 2012 R2 Standard 64 bit E | today AH-1015198-001 [cmdb_ci_win_server] USEM lookup rule fixture (V3) | chain AH-1015198-001 [cmdb_ci_win_server] USEM lookup rule fixture (V3)
+  SDI000000391724 | uspaltwrr01drm0119-gz02-hsrp-vlan1000.usltwrr.baml.com | 30.131.64.65 |  | today uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3) | chain uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000266279 | uspaltwrr01drm0119-cz04-hsrp-vlan705.network.bankofamerica.com | 171.149.3.49 | Linux 2.6 | today uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3) | chain uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000001002 | lva40bnichsl07.ecomm.devicenp.rpg |  |  | today null (no such CI) | chain no match
+  SDI000000461867 | uspaltwrr01drm0119-gz02-hsrp-vlan601.usltwrr.baml.com | 171.203.180.225 |  | today uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3) | chain uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000001006 |  | 164.91.193.191 |  | today null (no such CI) | chain no match
+  SDI000000270030 | tx6dd630001-ilo.bankofamerica.com | 159.185.200.11 |  | today tx6dd630001 [cmdb_ci_linux_server] USEM lookup rule fixture (V3) | chain tx6dd630001 [cmdb_ci_linux_server] USEM lookup rule fixture (V3)
+  SDI000000422587 | gtcmmrlpa05a-drac.bankofamerica.com | 171.151.3.177 | iDRAC Device | today gtcmmrlpa05a [cmdb_ci_linux_server] USEM lookup rule fixture (V3) | chain gtcmmrlpa05a [cmdb_ci_linux_server] USEM lookup rule fixture (V3)
+  SDI000000001009 | lva40bovwsmq03.ecomm.devicenp.rpg |  |  | today null (no such CI) | chain no match
+  SDI000000414797 | uspaltwrr01drm0119-cz04-hsrp-vlan1945.network.bankofamerica.com | 30.223.160.1 |  | today uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3) | chain uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000272601 | gtcmmrlpa05a.bankofamerica.com | 171.151.4.232 | Linux 2.6 | today gtcmmrlpa05a [cmdb_ci_linux_server] USEM lookup rule fixture (V3) | chain gtcmmrlpa05a [cmdb_ci_linux_server] USEM lookup rule fixture (V3)
+  SDI000000001003 | lva40bnichsl09.ecomm.devicenp.rpg |  |  | today null (no such CI) | chain no match
+  SDI000000001007 | lva40bnichsl04.ecomm.devicenp.rpg | 164.91.209.68 |  | today null (no such CI) | chain no match
+  SDI000000461538 | uspaltwrr01drm0119-gz02-hsrp-vlan600.usltwrr.baml.com | 171.203.176.65 |  | today uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3) | chain uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000265142 | lrche01xtrapd01.sdi.corp.bankofamerica.com | 171.128.140.192 | Ubuntu/Linux | today lrche01xtrapd01 [cmdb_ci_server] null | chain lrche01xtrapd01 [cmdb_ci_server] null
+  SDI000000466232 | uspaltwrr01drm0119-cz04-hsrp-vlan701.network.bankofamerica.com | 171.204.248.129 |  | today uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3) | chain uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000433549 | uspaltwrr01drm0119-cz04-hsrp-vlan703.network.bankofamerica.com | 171.149.3.17 | Linux 2.6 | today uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3) | chain uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000361057 | sep6c5e3b2925ac.ipt.bofa.com | 10.185.168.70 | Cisco IP Phone CP-8861 | today SEP6C5E3B2925AC [cmdb_ci_ip_phone] USEM lookup rule fixture (V3) | chain SEP6C5E3B2925AC [cmdb_ci_ip_phone] USEM lookup rule fixture (V3)
+  SDI000000459486 | crisp-tx.bankofamerica.com | 171.203.142.26 | F5 Big IP | today crisp-tx [cmdb_ci_lb_service] USEM lookup rule fixture (V3) | chain crisp-tx [cmdb_ci_lb_service] USEM lookup rule fixture (V3)
+  SDI000000444880 | uspaltwrr01drm0119-cz04-hsrp-vlan1948.network.bankofamerica.com | 30.96.0.1 |  | today uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3) | chain uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000001010 |  | 164.91.209.86 |  | today null (no such CI) | chain no match
+  SDI000000001004 |  |  |  | today null (no such CI) | chain no match
+  SDI000000433526 | uspaltwrr01drm0119-cz04-hsrp-vlan706.network.bankofamerica.com | 171.149.1.233 | Linux 2.6 | today uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3) | chain uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000277410 | vrdna001xsdi002.sdi.corp.bankofamerica.com | 30.162.178.23 | VMware ESXi 7.0.3 build 24723872 | today fixv4-srv740 [cmdb_ci_server] USEM lookup rule fixture (V4) | chain no match
+  SDI000000399361 | rbps-dev3-sve-vip.ecommnp.rpg | 164.91.236.18 | Linux 2.6 | today rbps-dev3-sve-vip [cmdb_ci_lb_service] USEM lookup rule fixture (V3) | chain rbps-dev3-sve-vip [cmdb_ci_lb_service] USEM lookup rule fixture (V3)
+  SDI000000349548 | xtp24cel03-ilom.sdi.corp.bankofamerica.com | 30.123.8.235 | Ubuntu / Linux 3.x | today xtp24cel03 [cmdb_ci_linux_server] USEM lookup rule fixture (V3) | chain xtp24cel03 [cmdb_ci_linux_server] USEM lookup rule fixture (V3)
+  SDI000000001001 | lva50bnichsl07.ecomm.devicenp.rpg | 164.91.209.57 |  | today null (no such CI) | chain no match
+  SDI000000268536 | bofascanner75.bankofamerica.com | 146.125.9.215 |  | today bofascanner75 [cmdb_ci_linux_server] USEM lookup rule fixture (V3) | chain bofascanner75 [cmdb_ci_linux_server] USEM lookup rule fixture (V3)
+  SDI000000001005 | lva40bnichsl02.ecomm.devicenp.rpg |  |  | today null (no such CI) | chain no match
+  SDI000000404786 | gfsmq-lta-wynbt1-vip.bankofamerica.com | 167.202.156.24 | F5 Networks Big-IP | today gfsmq-lta-wynbt1-vip [cmdb_ci_lb_bigip] null | chain gfsmq-lta-wynbt1-vip [cmdb_ci_lb_bigip] null
+  SDI000000265839 | txr9gxcenah031.sdi.corp.bankofamerica.com | 171.135.28.125 | Ubuntu / Tiny Core Linux / Linux 2.6.x / | today txr9gxcenah031 [cmdb_ci_linux_server] null | chain txr9gxcenah031 [cmdb_ci_linux_server] null
+  SDI000000461538 | uspaltwrr01drm0119-gz02-hsrp-vlan600.usltwrr.baml.com | 171.203.176.65 |  | today uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3) | chain uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)
+  SDI000000433549 | uspaltwrr01drm0119-cz04-hsrp-vlan703.network.bankofamerica.com | 171.149.3.17 | Linux 2.6 | today uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3) | chain uspaltwrr01drm0119 [cmdb_ci_ip_switch] USEM lookup rule fixture (V3)

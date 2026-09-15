@@ -8,7 +8,7 @@ BASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 sys.path.insert(0, os.path.join(BASE, 'tools'))
 from snui import SNUI
 HERE = os.path.dirname(os.path.abspath(__file__))
-NAME = 'SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Appliances and Address Names_V1.0'
+NAME = 'SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Appliances and Address Names_V1.1'
 DESC = ('Six USEM Qualys CI lookup rules refined after reviewing how the chain resolves the discovered items. (1) Rules 350 Layered DNS '
         'Match and 410 Hostname Hardware Match accept a Linux fingerprint against Network Gear, Load Balancer and Storage Server records: '
         'switches, balancers and storage nodes run Linux underneath and Qualys reports that kernel, so a switch named with the scanned host '
