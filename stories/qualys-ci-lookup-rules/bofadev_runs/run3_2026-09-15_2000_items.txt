@@ -1,0 +1,110 @@
+*** Script: === Qualys lookup rule measurement, read-only ===
+items: 2000 (payloads not parsed: 0, rule errors: 0) | window: last 30 days | elapsed: 83 s
+
+--- active scripted rules of the Qualys source, in chain order ---
+  175 BOFA Serial Number Class Match (SERIAL_NUMBER): updated 2026-09-09 13:32:19, 6868 chars, exactly one
+  180 BOFA Serial Number Hardware Match (SERIAL_NUMBER): updated 2026-09-09 13:33:43, 4099 chars, exactly one
+  200 BOFA Cisco IP Phone MAC (DNS): updated 2026-09-09 13:36:33, 5756 chars, exactly one
+  250 BOFA FQDN Class Match (DNS): updated 2026-09-09 13:38:20, 6771 chars
+  260 BOFA FQDN Hardware Match (DNS): updated 2026-09-09 13:39:17, 4317 chars
+  300 BOFA Hostname Domain Class Match (DNS): updated 2026-09-09 13:40:55, 7729 chars
+  310 BOFA Hostname Domain Hardware Match (DNS): updated 2026-09-09 13:42:06, 4973 chars
+  350 BOFA Layered DNS Match (DNS): updated 2026-09-14 07:14:15, 8421 chars, class agreement
+  400 BOFA Hostname Class Match (DNS): updated 2026-09-09 13:44:37, 5900 chars, exactly one
+  410 BOFA Hostname Hardware Match (DNS): updated 2026-09-14 07:12:03, 7988 chars, class agreement, exactly one
+  420 BOFA Management Interface Match (DNS): updated 2026-09-09 14:02:15, 5544 chars, exactly one
+  430 BOFA Network Interface Name Match (IP): updated 2026-09-09 14:03:34, 7070 chars
+  450 BOFA FQDN Name Hardware Match (DNS): updated 2026-09-09 14:04:35, 7079 chars
+  460 BOFA Load Balancer Service Match (IP): updated 2026-09-09 14:05:15, 6792 chars, exactly one
+  700 BOFA IP Class Match (IP): updated 2026-09-09 14:07:00, 5888 chars, exactly one
+  705 BOFA IP Hardware Match (IP): updated 2026-09-14 07:09:33, 8602 chars, class agreement, exactly one
+  730 BOFA IP Adapter Match (IP): updated 2026-09-14 07:13:10, 7918 chars, class agreement
+  740 BOFA IP Layered Match (IP): updated 2026-09-14 07:10:58, 8418 chars, class agreement
+  850 BOFA FQDN Name Broad Match (DNS): updated 2026-09-09 14:09:40, 3167 chars, exactly one
+  900 FQDN (DNS): updated 2026-08-11 06:24:07, 495 chars
+  920 NetBIOS (NETBIOS): updated 2026-08-11 06:24:18, 495 chars
+  940 DNS (DNS): updated 2026-08-11 06:24:42, 495 chars
+
+--- items sampled, state / matching type today ---
+  1000  matched / matched_by_cilookup
+  965  unmatched / created_by_ire
+  35  unmatched / matched_by_ire
+
+--- matches per rule ---
+  350 BOFA Layered DNS Match: 125
+  450 BOFA FQDN Name Hardware Match: 180
+  200 BOFA Cisco IP Phone MAC: 5
+  410 BOFA Hostname Hardware Match: 16
+  400 BOFA Hostname Class Match: 275
+  740 BOFA IP Layered Match: 33
+  300 BOFA Hostname Domain Class Match: 204
+  850 BOFA FQDN Name Broad Match: 3
+  420 BOFA Management Interface Match: 1
+  730 BOFA IP Adapter Match: 87
+  310 BOFA Hostname Domain Hardware Match: 16
+  250 BOFA FQDN Class Match: 36
+  700 BOFA IP Class Match: 17
+
+--- against what the items hold today ---
+  same CI: 997 | different CI: 1 | rules match an item that is unmatched today: 0 | rules decline an item matched today: 2 | both unmatched: 1000
+
+--- evidence behind the declines (both lists below) ---
+  11  name on one record whose class contradicts the scanned OS
+  965  nothing in the CMDB carries the name, the base name, the fqdn or the address
+  1  address on one live record, name not in the CMDB
+  10  base name on one live record, tail not recognised as an interface
+  2  name on two or more live records
+  3  base name only on a retired record
+  4  address shared with retired records
+  4  address on two or more live records
+  2  base name on two or more live records
+
+--- class contradictions, scanned OS class against the class of the one CI carrying the name or address ---
+  8  linux_server (scan) vs ip_switch (CI)
+  3  linux_server (scan) vs lb (CI)
+
+--- different CI than today (1) ---
+  SDI000003713027 | vk1660790.corp.bankofamerica.com | 165.40.47.119 | Windows 11 Enterprise 64 bit Edition Ve~ | today: vk1448212 [vmware_instance, retired] via BOFA IP Adapter Match | usem: 740 -> vk1448212 [computer, retired]
+
+--- rules decline an item matched today (1) ---
+  SDI000003715638 | ininmummh03sae0015.network.asia.bankofamerica.com | 165.46.131.164 | Ubuntu/Linux | today: ininmummh03sae0015 [ip_switch] via DNS | name on one record whose class contradicts the scanned OS | name 1[ip_switch] base 0 fqdn 0 ip 1[ip_switch] os cmdb_ci_linux_server
+
+--- rules match an item unmatched today (0) ---
+
+--- unmatched today and declined, with the evidence in the CMDB, hosts absent from the CMDB left out (36) ---
+  SDI000003719169 | gdsfed-bt-prodb-rtxbt1-vip.bankofamerica.com | 171.206.135.179 | F5 Big IP | address on one live record, name not in the CMDB | name 0 base 0 fqdn 0 ip 1[lb] os -
+  SDI000003718774 | hcpwtx22220-sc1b.bankofamerica.com | 30.166.4.189 | Ubuntu/Linux | base name on one live record, tail not recognised as an interface | name 0 base 1[storage_server] fqdn 0 ip 0 os cmdb_ci_linux_server
+  SDI000003718772 | hcpwtx22209-sc1a.bankofamerica.com | 30.166.4.124 | Ubuntu/Linux | base name on one live record, tail not recognised as an interface | name 0 base 1[storage_server] fqdn 0 ip 1[msd] os cmdb_ci_linux_server
+  SDI000003718771 | hcpwtx22209-sc1b.bankofamerica.com | 30.166.4.125 | Ubuntu/Linux | base name on one live record, tail not recognised as an interface | name 0 base 1[storage_server] fqdn 0 ip 0 os cmdb_ci_linux_server
+  SDI000003718764 | hcprva22184-sc1b.bankofamerica.com | 30.132.162.125 | Ubuntu/Linux | base name on one live record, tail not recognised as an interface | name 0 base 1[storage_server] fqdn 0 ip 1[storage_server] os cmdb_ci_linux_server
+  SDI000003718762 | hcprva22215-sc1a.bankofamerica.com | 30.132.162.60 | Ubuntu/Linux | base name on one live record, tail not recognised as an interface | name 0 base 1[storage_server] fqdn 0 ip 1[msd] os cmdb_ci_linux_server
+  SDI000003715867 | sg0ppmx0378-2e28.asia.bankofamerica.com | 165.39.18.7 | NetApp | base name on one live record, tail not recognised as an interface | name 0 base 1[storage_server] fqdn 0 ip 0 os cmdb_ci_storage_server
+  SDI000003715838 | hk0ppmx0367-2e30.asia.bankofamerica.com | 165.41.62.155 | NetApp | base name on one live record, tail not recognised as an interface | name 0 base 1[storage_server] fqdn 0 ip 0 os cmdb_ci_storage_server
+  SDI000003715777 | hk0ppmx0367-1e29.asia.bankofamerica.com | 165.41.62.136 | NetApp | base name on one live record, tail not recognised as an interface | name 0 base 1[storage_server] fqdn 0 ip 0 os cmdb_ci_storage_server
+  SDI000003715752 | sinpbt1dedcn01-bthcplb01b.asia.bankofamerica.com | 165.40.8.185 | Ubuntu/Linux | name on one record whose class contradicts the scanned OS | name 1[lb] base 0 fqdn 0 ip 1[lb] os cmdb_ci_linux_server
+  SDI000003715738 | sinpbt1uticn01-btutilb02b.asia.bankofamerica.com | 165.40.8.177 | Ubuntu/Linux | name on one record whose class contradicts the scanned OS | name 1[lb] base 0 fqdn 0 ip 1[lb] os cmdb_ci_linux_server
+  SDI000003715727 | hk0ppmx0367-1e31.asia.bankofamerica.com | 165.41.62.154 | NetApp | base name on one live record, tail not recognised as an interface | name 0 base 1[storage_server] fqdn 0 ip 0 os cmdb_ci_storage_server
+  SDI000003715707 | sinpbt1uticn01-btltdlb01b.asia.bankofamerica.com | 165.40.8.188 | Ubuntu/Linux | name on two or more live records | name 2[lbx2] base 0 fqdn 0 ip 2[lbx2] os cmdb_ci_linux_server
+  SDI000003715699 | sinpbt1uticn01-btutilb02a.asia.bankofamerica.com | 165.40.8.176 | Ubuntu/Linux | name on one record whose class contradicts the scanned OS | name 1[lb] base 0 fqdn 0 ip 1[lb] os cmdb_ci_linux_server
+  SDI000003715644 | sg0ppmx0378-2e30.asia.bankofamerica.com | 165.39.18.71 | NetApp | base name on one live record, tail not recognised as an interface | name 0 base 1[storage_server] fqdn 0 ip 0 os cmdb_ci_storage_server
+  SDI000003715584 | ininmummh03dbm01-ininmummh03sdm0009.asia.bankofamerica.com | 165.46.131.138 | Cisco Nexus Switch | base name only on a retired record | name 0 base 1(1 retired)[ip_switch] fqdn 0 ip 0 os cmdb_ci_netgear
+  SDI000003715510 | ininmummh03dbm02-ininmummh03sdm0004.asia.bankofamerica.com | 165.46.131.110 | Cisco Nexus Switch | base name only on a retired record | name 0 base 1(1 retired)[ip_switch] fqdn 0 ip 0 os cmdb_ci_netgear
+  SDI000003715508 | ininmummh03dbm02-ininmummh03sdm0002.asia.bankofamerica.com | 165.46.131.102 | Cisco Nexus Switch | base name only on a retired record | name 0 base 1(1 retired)[ip_switch] fqdn 0 ip 0 os cmdb_ci_netgear
+  SDI000003713255 | sh-7055375-001t.sdi.corp.bankofamerica.com | 30.39.252.59 | Red Hat Enterprise Linux 8.10 | address shared with retired records | name 0 base 0 fqdn 0 ip 15(14 retired)[linux_serverx6,serverx6,computer,win_serverx2] os cmdb_ci_linux_server
+  SDI000003713089 | rjpmvr3apiadev.corp.bankofamerica.com | 10.218.228.158 | Windows Server 2022 Standard 64 bit Edi~ | address shared with retired records | name 0 base 0 fqdn 0 ip 5(4 retired)[serverx2,linux_serverx3] os cmdb_ci_win_server
+  SDI000003712975 | ckd4ab61ac7e52.ca.bankofamerica.com | 10.166.12.182 | Windows 11 Enterprise 64 bit Edition Ve~ | address shared with retired records | name 0 base 0 fqdn 0 ip 2(1 retired)[computerx2] os cmdb_ci_computer
+  SDI000003712252 | k34fd703420f1.corp.bankofamerica.com | 10.54.135.175 | Windows 11 Enterprise 64 bit Edition Ve~ | address on two or more live records | name 0 base 0 fqdn 0 ip 2[computerx2] os cmdb_ci_computer
+  SDI000003712002 | cke862be8de0c3.network.bankofamerica.com | 10.79.14.28 | Windows 11 Enterprise 64 bit Edition Ve~ | address on two or more live records | name 0 base 0 fqdn 0 ip 2(2 retired)[computerx2] os cmdb_ci_computer
+  SDI000003711816 | ckec8e773baa9c.ca.bankofamerica.com | 10.165.133.172 | Windows 11 Enterprise 64 bit Edition Ve~ | address on two or more live records | name 0 base 0 fqdn 0 ip 2(2 retired)[computerx2] os cmdb_ci_computer
+  SDI000003711808 | ckac3dcb99fa1b.ca.bankofamerica.com | 10.165.197.50 | Windows 11 Enterprise 64 bit Edition Ve~ | address shared with retired records | name 0 base 0 fqdn 0 ip 2(1 retired)[computerx2] os cmdb_ci_computer
+  SDI000003711664 | ah-1512985-001t.corp.bankofamerica.com | 165.46.136.113 | Windows Server 2025 Standard Version 24~ | address on two or more live records | name 0 base 0 fqdn 0 ip 2(2 retired)[win_serverx2] os cmdb_ci_win_server
+  SDI000003711605 | sgsg02ppz1iptdr02-mgmt.network.asia.bankofamerica.com | 171.147.168.234 | x86_64 Linux/5.10.0-36-amd64 | base name on two or more live records | name 0 base 2[netgear,ip_switch] fqdn 0 ip 1[netgear] os cmdb_ci_linux_server (kernel only)
+  SDI000003711585 | usnjcarse01mag0001-cdn1.network.bankofamerica.com | 10.253.247.133 | Ubuntu / Linux 2.x | name on one record whose class contradicts the scanned OS | name 1[ip_switch] base 0 fqdn 0 ip 1[ip_switch] os cmdb_ci_linux_server
+  SDI000003711584 | usnjmtjlg01mag0001-cdn1.network.bankofamerica.com | 10.253.247.69 | Ubuntu / Linux 2.x | name on one record whose class contradicts the scanned OS | name 1[ip_switch] base 0 fqdn 0 ip 1[ip_switch] os cmdb_ci_linux_server
+  SDI000003711583 | usnjpcwqf01mlf0001-cdn1.network.bankofamerica.com | 10.253.247.193 | Ubuntu / Linux 2.x | name on one record whose class contradicts the scanned OS | name 1[ip_switch] base 0 fqdn 0 ip 1[ip_switch] os cmdb_ci_linux_server
+  SDI000003711577 | usaz02ppz1entdr02-mgmt.bankofamerica.com | 171.175.129.91 | x86_64 Linux/5.10.0-36-amd64 | base name on two or more live records | name 0 base 2[netgearx2] fqdn 0 ip 1[netgear] os cmdb_ci_linux_server (kernel only)
+  SDI000003711506 | cncnshasd03sae0002.network.asia.bankofamerica.com | 10.214.1.205 | Ubuntu/Linux | name on one record whose class contradicts the scanned OS | name 1[ip_switch] base 0 fqdn 0 ip 1[ip_switch] os cmdb_ci_linux_server
+  SDI000003711502 | cncnshasd03sdm0012.network.asia.bankofamerica.com | 10.214.1.14 | Ubuntu / Linux 2.x | name on one record whose class contradicts the scanned OS | name 1[ip_switch] base 0 fqdn 0 ip 1[ip_switch] os cmdb_ci_linux_server
+  SDI000003711501 | cncnshasd03sdm0011.network.asia.bankofamerica.com | 10.214.1.13 | Ubuntu / Linux 2.x | name on one record whose class contradicts the scanned OS | name 1[ip_switch] base 0 fqdn 0 ip 1[ip_switch] os cmdb_ci_linux_server
+  SDI000003711498 | cncnshasd03sae0001.network.asia.bankofamerica.com | 10.214.1.204 | Ubuntu/Linux | name on one record whose class contradicts the scanned OS | name 1[ip_switch] base 0 fqdn 0 ip 1[ip_switch] os cmdb_ci_linux_server
+  SDI000003711483 | usazphxwu01fwd001y.network.bankofamerica.com | 30.204.140.125 | EulerOS / Ubuntu / Fedora / Tiny Core L~ | name on two or more live records | name 2[ip_switchx2] base 0 fqdn 0 ip 2[ip_switchx2] os 

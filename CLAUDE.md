@@ -121,8 +121,10 @@ Follow it without being asked again.
   reads the IP field (dead rule) and 450 runs a longer script than delivered. `measure_rules.js` (read-only, run by
   Mihir on the client instance, output attached to INC0010003) is the agreed way to judge the rules: 499/500 matched
   items reproduce, unmatched are 87% hosts absent from the CMDB, then class contradictions (44/500), address
-  duplicates and retired records. Two proposals pending Mihir's decision (retired candidates dropped; kernel-only
-  OS fingerprints give no class). **Never change a lookup rule without asking him first.** Full state in
+  duplicates and retired records. Closed out 15 Sep with **no rule change**: retired CIs stay candidates by the client's design expectation (do not
+  propose excluding them again); two proposals parked for a future story (Linux fingerprint compatible with Network
+  Gear / Load Balancer classes; a storage node rule). Rule 430 on the client instance reads the IP field and must be
+  set back to DNS by their administrator. **Never change a lookup rule without asking him first.** Full state in
   `stories/qualys-ci-lookup-rules/README.md`.
 - Kafka outbound (SNOWUSEMTP-1625): topic `sn_usem_remtask_outbound`, namespace `com.bofa.usem`,
   envelope + `rem_tasks[].remediation_task`, dates `MM-dd-yyyy HH:mm:ss`, mapping sheet
