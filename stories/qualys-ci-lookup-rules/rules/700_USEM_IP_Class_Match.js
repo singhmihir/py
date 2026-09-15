@@ -14,8 +14,9 @@
    }
    Input  : sourceValue is the IP field, "30.162.178.21"; the rule also reads the OS from
             sourcePayload.
-   Returns: the sys_id of the one CI of that class whose ip_address equals the scanned address; null
-            when none or two carry it.
+   Returns: the sys_id of the one CI of that class whose ip_address equals the scanned address,
+            named with the scanned hostname when the scan carries one; null when none or two carry
+            it or the name differs.
    Sample : the ESX Server CI "vsdnesxm21", whose ip_address is "30.162.178.21"; a load balancer or
             a Windows CI on the same address is outside the class and cannot be picked.
 
@@ -36,6 +37,23 @@
     // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
     var ignore = (typeof _ignoreClass != 'undefined' && _ignoreClass) ?
         ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
+    // nameAgrees() checks the CI found against the name the scan carries. With no DNS in the
+    // payload there is nothing to check. Otherwise the first label of the CI name must be the
+    // scanned label, or the scanned label must be that name plus an interface tail ("<name>-mgmt"),
+    // or the CI name must be the label plus a tail. A CI named differently sits on a reused address
+    // (a lease that moved, a decommissioned machine whose address was handed on) and is not the
+    // scanned host, whatever its class.
+    function nameAgrees(ciId) {
+        var label = ('' + (sourcePayload.DNS || '')).trim().toLowerCase().split('.')[0];
+        if (!label)
+            return true;
+        var ci = new GlideRecord('cmdb_ci');
+        ci.get(ciId);
+        var name = ('' + ci.getValue('name')).trim().toLowerCase().split('.')[0];
+        if (!name)
+            return true;
+        return name == label || label.indexOf(name + '-') == 0 || name.indexOf(label + '-') == 0;
+    }
     // -- Class from the scanned OS ----------------------------------------------------------------
     // The search below stays inside the class the OS points at (sub-classes included), so a Red Hat
     // host can only land on a Linux Server and a Windows Server carrying the same value is never
@@ -87,6 +105,15 @@
         return null;
     var match = gr.getUniqueValue();
     if (gr.hasNext())                             // a second CI carries the same value, never guess
+        return null;
+    // -- The CI must carry the scanned name -------------------------------------------------------
+    // An address alone is not enough when the scan also carries a hostname: the CI found must be
+    // named with it, or with it minus an interface tail. This keeps a finding scanned as one host
+    // off a record named after another, which is what a reused address produces.
+    // Sample: the sample carries no DNS, so nothing is checked and the sys_id of "vsdnesxm21" is
+    //         returned. A host scanned as "vk1660790" whose address leads to a CI named "vk1448212"
+    //         would be declined here: the address has been reused.
+    if (!nameAgrees(match))
         return null;
     return match;
 })(rule, sourceValue, sourcePayload);

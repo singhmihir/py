@@ -13,8 +13,8 @@
    Input  : sourceValue is the IP field, "30.162.178.24"; the rule also reads the OS from
             sourcePayload.
    Returns: the sys_id of the one hardware CI whose ip_address equals the scanned address, when it
-            is not a load balancer and its class is the one the OS implies, a sub-class of it or a
-            parent of it; null otherwise.
+            is not a load balancer, it carries the scanned hostname when the scan has one, and its
+            class is the one the OS implies, a sub-class of it or a parent of it; null otherwise.
    Sample : the CI in the generic Server class whose ip_address is "30.162.178.24"; a Load Balancer
             on that address would be refused, and with a known OS a CI of a contradicting class
             would be too.
@@ -99,8 +99,25 @@
         var lb = new GlideRecord('cmdb_ci_lb');
         return lb.isValid() && lb.get(id);
     }
+    // nameAgrees() checks the CI found against the name the scan carries. With no DNS in the
+    // payload there is nothing to check. Otherwise the first label of the CI name must be the
+    // scanned label, or the scanned label must be that name plus an interface tail ("<name>-mgmt"),
+    // or the CI name must be the label plus a tail. A CI named differently sits on a reused address
+    // (a lease that moved, a decommissioned machine whose address was handed on) and is not the
+    // scanned host, whatever its class.
+    function nameAgrees(ciId) {
+        var label = ('' + (sourcePayload.DNS || '')).trim().toLowerCase().split('.')[0];
+        if (!label)
+            return true;
+        var ci = new GlideRecord('cmdb_ci');
+        ci.get(ciId);
+        var name = ('' + ci.getValue('name')).trim().toLowerCase().split('.')[0];
+        if (!name)
+            return true;
+        return name == label || label.indexOf(name + '-') == 0 || name.indexOf(label + '-') == 0;
+    }
     // -- Address search across the hardware tree --------------------------------------------------
-    // Nothing is filtered by class here; the three checks that follow provide the safety.
+    // Nothing is filtered by class here; the four checks that follow provide the safety.
     // Sample: the search on cmdb_ci_hardware for ip_address "30.162.178.24" finds one CI in the
     //         generic Server class.
     var gr = new GlideRecord('cmdb_ci_hardware');// Hardware and every class beneath it
@@ -125,6 +142,14 @@
     // Sample: the Server is not a Load Balancer, so the rule carries on. A Load Balancer on
     //         "30.162.178.24" would end it here.
     if (isLoadBalancer(id))
+        return null;
+    // -- The CI must carry the scanned name -------------------------------------------------------
+    // An address alone is not enough when the scan also carries a hostname: the CI found must be
+    // named with it, or with it minus an interface tail. This keeps a finding scanned as one host
+    // off a record named after another, which is what a reused address produces.
+    // Sample: the sample carries no DNS, so nothing is checked. A host scanned as "vk1660790" whose
+    //         address sits on a Server named "vk1448212" would be declined here.
+    if (!nameAgrees(id))
         return null;
     // -- Reject a CI whose class contradicts the scanned OS ---------------------------------------
     // When the OS gave a class, the CI found must be of that class, of a sub-class of it, or of a

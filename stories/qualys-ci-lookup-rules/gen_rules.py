@@ -109,6 +109,47 @@ AGREES = '\n'.join([
     '        return parentsOf(pref).indexOf(cls) != -1;   // cls is a parent of pref',
     '    }',
 ])
+AGREES_APPLIANCE = '\n'.join([
+    c('agrees() decides whether a CI of class cls can be the scanned host once the OS gave a class: the same class, one of its sub-classes, or one of its parents (a Cisco IOS host may be kept as a plain Network Gear or Hardware record). A Linux fingerprint is also accepted against Network Gear, Load Balancer and Storage Server records: switches, balancers and storage nodes run Linux underneath and Qualys reports that kernel, so the fingerprint says nothing against those classes. Any other class is a different kind of machine: a Windows Server named like the scanned Linux host is a namesake, never the host. With no class from the OS nothing is refused.'),
+    '    function parentsOf(table) {                   // the class and every class above it',
+    '        var out = [table];',
+    "        var db = new GlideRecord('sys_db_object');",
+    "        db.addQuery('name', table);",
+    '        db.query();',
+    "        while (db.next() && db.getValue('super_class')) {",
+    "            var parent = '' + db.super_class.name;",
+    '            out.push(parent);',
+    "            db = new GlideRecord('sys_db_object');",
+    "            db.addQuery('name', parent);",
+    '            db.query();',
+    '        }',
+    '        return out;',
+    '    }',
+    '    function agrees(cls) {',
+    '        if (!pref || cls == pref)',
+    '            return true;',
+    '        var above = parentsOf(cls);',
+    "        if (pref == 'cmdb_ci_linux_server' && (above.indexOf('cmdb_ci_netgear') != -1 || above.indexOf('cmdb_ci_lb') != -1 || above.indexOf('cmdb_ci_storage_server') != -1))",
+    '            return true;                          // an appliance reporting the Linux it runs on',
+    '        if (above.indexOf(pref) != -1)               // cls is a sub-class of pref',
+    '            return true;',
+    '        return parentsOf(pref).indexOf(cls) != -1;   // cls is a parent of pref',
+    '    }',
+])
+NAME_AGREES = '\n'.join([
+    c('nameAgrees() checks the CI found against the name the scan carries. With no DNS in the payload there is nothing to check. Otherwise the first label of the CI name must be the scanned label, or the scanned label must be that name plus an interface tail ("<name>-mgmt"), or the CI name must be the label plus a tail. A CI named differently sits on a reused address (a lease that moved, a decommissioned machine whose address was handed on) and is not the scanned host, whatever its class.'),
+    '    function nameAgrees(ciId) {',
+    "        var label = ('' + (sourcePayload.DNS || '')).trim().toLowerCase().split('.')[0];",
+    '        if (!label)',
+    '            return true;',
+    "        var ci = new GlideRecord('cmdb_ci');",
+    '        ci.get(ciId);',
+    "        var name = ('' + ci.getValue('name')).trim().toLowerCase().split('.')[0];",
+    '        if (!name)',
+    '            return true;',
+    "        return name == label || label.indexOf(name + '-') == 0 || name.indexOf(label + '-') == 0;",
+    '    }',
+])
 CHECK = '\n'.join(['    if (!sourceValue)                             // nothing to look up', '        return null;'])
 
 
@@ -194,6 +235,23 @@ def search_lines(table_expr, table_desc, field, value, var='gr', valid=False):
     return '\n'.join(L)
 
 
+def decide_named(var, sample):
+    return '\n'.join([
+        '    %s.query();' % var,
+        '    if (!%s.next())' % var,
+        '        return null;',
+        '    var match = %s.getUniqueValue();' % var,
+        '    if (%s.hasNext())                             // a second CI carries the same value, never guess' % var,
+        '        return null;',
+        stage('The CI must carry the scanned name',
+              'An address alone is not enough when the scan also carries a hostname: the CI found must be named with it, or with it minus an interface tail. This keeps a finding scanned as one host off a record named after another, which is what a reused address produces.',
+              sample),
+        '    if (!nameAgrees(match))',
+        '        return null;',
+        '    return match;',
+    ])
+
+
 def decide(var='gr'):
     return '\n'.join([
         '    %s.query();' % var,
@@ -273,8 +331,8 @@ def pick_combo(scope_text, run_expr, run_desc, host, domain, ip, ci):
 
 def owners_stage(var, owner_expr, class_expr, what, sample):
     return '\n'.join([
-        stage('One owning CI whose class agrees, and not a load balancer',
-              'An owner whose class contradicts the scanned OS is skipped: the address record then belongs to a different kind of machine, most often a stale or misattributed discovery record. Each remaining owner is counted once, so %s. Two different owners cannot be told apart by the address and the rule declines; a single owner that is a load balancer is refused too, because the address is then a virtual IP and the scanned host sits behind it.' % what,
+        stage('One owning CI whose class agrees, not a load balancer, carrying the scanned name',
+              'An owner whose class contradicts the scanned OS is skipped: the address record then belongs to a different kind of machine, most often a stale or misattributed discovery record. Each remaining owner is counted once, so %s. Two different owners cannot be told apart by the address and the rule declines; a single owner that is a load balancer is refused too, because the address is then a virtual IP and the scanned host sits behind it; and when the scan carries a hostname the owner must be named with it, otherwise the address has been reused by another machine.' % what,
               sample),
         '    var owners = {};',
         '    var count = 0, first = null;',
@@ -289,7 +347,7 @@ def owners_stage(var, owner_expr, class_expr, what, sample):
         '                first = owner;',
         '        }',
         '    }',
-        '    if (count == 1 && !isLoadBalancer(first))',
+        '    if (count == 1 && !isLoadBalancer(first) && nameAgrees(first))',
         '        return first;',
         '    return null;',
     ])
@@ -540,14 +598,14 @@ def rule_350():
     h = header('USEM Layered DNS Match',
         'Discovery keeps names and addresses as their own records linked to the device: a DNS Name record is tied to an IP Address record, the IP Address record belongs to a Network Adapter, and the adapter belongs to the CI. This rule follows that chain, which is the only way to find a host whose name is not written on the CI record at all, and it resolves aliases to the real machine. A CI at the end of the chain whose class contradicts the scanned OS is left out, because the discovery records then describe a different kind of machine.',
         payload, 'DNS', value, 'the OS and the IP',
-        'the sys_id of the CI at the end of the chain DNS Name -> IP Address -> adapter -> CI, its class agreeing with the scanned OS when one is known; when several CIs answer to the name, the one whose chain runs through the scanned IP; null otherwise.',
+        'the sys_id of the CI at the end of the chain DNS Name -> IP Address -> adapter -> CI, its class agreeing with the scanned OS when one is known (a Linux fingerprint agrees with Network Gear, Load Balancer and Storage Server records too); when several CIs answer to the name, the one whose chain runs through the scanned IP; null otherwise.',
         'the Linux Server "hklvteqoradbp3", reached through DNS Name "hklvteqoradbp3.hk.baml.com" -> IP Address "167.202.60.26" -> adapter "eth0".',
         'the FQDN and hostname-plus-domain rules looked at name fields stored on the CI record itself.',
         'hosts whose name lives only in the discovery DNS records, and aliases that point at an address of the device.',
         'the plain hostname rules and USEM FQDN Name Hardware Match.')
     body = [OPEN, CHECK, fqdn_prep(value, '167.202.60.26'), IGNORE_BLOCK,
         class_pref_chain('Red Hat Enterprise Linux Server 7.9', 'cmdb_ci_linux_server', 'Linux Server'),
-        AGREES,
+        AGREES_APPLIANCE,
         stage('Follow the chain DNS Name -> IP Address -> adapter -> CI',
               'cmdb_ip_address_dns_name ties one DNS Name record to one IP Address record; dot-walking reaches the rest: dns_name.name is the name on the DNS Name record and ip_address.nic.cmdb_ci is the CI owning the adapter that holds the address. Because the chain ends on whatever device holds the address, an alias resolves to the real machine.',
               'the DNS Name record "hklvteqoradbp3.hk.baml.com" is linked to the IP Address record "167.202.60.26", which belongs to the adapter "eth0" of the Linux Server "hklvteqoradbp3"; that is the one row the query returns.'),
@@ -561,7 +619,7 @@ def rule_350():
         '    gr.query();',
         stage('One CI at the end of the chain, class agreeing, scanned IP as the tie-break',
               'A CI whose class contradicts the scanned OS is skipped: a Computer at the end of the chain for a Cisco IOS host is a stale or misattributed discovery record, not the router. Each remaining CI is counted once, and the CIs reached through the scanned address are noted. One CI is the match. A name that resolves to two devices (an alias moved between hosts, an old and a new record) is taken only when exactly one of them is reached through the scanned IP; otherwise the rule declines.',
-              'the chain ends on a Linux Server, the class pref holds, so it is counted: count is 1 and the sys_id of "hklvteqoradbp3" is returned. A Computer at the end of the chain would also count (a parent of Linux Server); an IP Router would be skipped. Were the name also linked to an address of a second Linux Server, ipOwners would hold only the CI reached through "167.202.60.26" and that one would be returned.'),
+              'the chain ends on a Linux Server, the class pref holds, so it is counted: count is 1 and the sys_id of "hklvteqoradbp3" is returned. A Computer at the end of the chain would also count (a parent of Linux Server), and so would an IP Switch or a Load Balancer, appliances that report the Linux they run on; a Windows Server would be skipped. Were the name also linked to an address of a second Linux Server, ipOwners would hold only the CI reached through "167.202.60.26" and that one would be returned.'),
         '    var owners = {}, ipOwners = {};',
         '    var count = 0, first = null;',
         '    while (gr.next()) {',
@@ -620,14 +678,14 @@ def rule_410():
     h = header('USEM Hostname Hardware Match',
         'The short hostname across the whole hardware tree, with a check that the CI found does not contradict the scanned OS. For CIs kept in a parent class (Server, Computer, Hardware) or in a different class than the OS suggests.',
         payload, 'DNS', value, 'the OS',
-        'the sys_id of the one hardware CI named with the short hostname, accepted when its class is the one the OS implies, a sub-class of it or a parent of it; null when the name is shared or the class contradicts the scan.',
+        'the sys_id of the one hardware CI named with the short hostname, accepted when its class is the one the OS implies, a sub-class of it or a parent of it, or an appliance class (Network Gear, Load Balancer, Storage Server) for a Linux fingerprint; null when the name is shared or the class contradicts the scan.',
         'the CI named "va2ausapabw0" in the plain Server class, a parent of AIX Server; it would also be accepted as an AIX Server, and rejected as, say, a Windows Server or an IP Router.',
         'USEM Hostname Class Match required the short name to be unique inside the class the OS implies (AIX Server) and found nothing there.',
         'hosts whose CI is kept in a parent class or whose OS gave no class.',
         'USEM FQDN Name Hardware Match, then the IP address rules for hosts without a usable name.')
     body = [OPEN, CHECK, short_prep(value, 'va2ausapabw0'), IGNORE_BLOCK,
         class_pref('AIX 7.3 TL3', 'cmdb_ci_aix_server', 'AIX Server'),
-        AGREES,
+        AGREES_APPLIANCE,
         stage('Short name search across the hardware tree',
               'Nothing is filtered by class here; the two checks that follow provide the safety.',
               'the search on cmdb_ci_hardware for name "va2ausapabw0" finds the Server "va2ausapabw0", class cmdb_ci_server.'),
@@ -635,7 +693,7 @@ def rule_410():
         one_owner('gr', 'two hardware CIs with one short name (a test and a production box, a retired and a rebuilt one), which the name alone cannot tell apart',
                   'one row, so id is the sys_id of "va2ausapabw0" and cls is "cmdb_ci_server". A second CI with that name would end the rule here.'),
         contradiction('Windows Server',
-                      'pref is cmdb_ci_aix_server and cls is cmdb_ci_server, a parent of AIX Server, so agrees() is true and the sys_id is returned. A Windows Server or an IP Router named "va2ausapabw0" is neither a sub-class nor a parent of AIX Server and the rule would decline.'),
+                      'pref is cmdb_ci_aix_server and cls is cmdb_ci_server, a parent of AIX Server, so agrees() is true and the sys_id is returned. A Windows Server or an IP Router named "va2ausapabw0" is neither a sub-class nor a parent of AIX Server and the rule would decline. An IP Switch named "cncnshasd03sae0002" scanned as "Ubuntu/Linux" is accepted: the switch reports the Linux it runs on.'),
         CLOSE]
     return write('410', 'USEM Hostname Hardware Match', h + '\n' + '\n'.join(body))
 RULES.append(rule_410)
@@ -667,18 +725,19 @@ def rule_700():
     h = header('USEM IP Class Match',
         'The first address rule. An address is the least trustworthy identifier we get: addresses move between machines and are shared by load balancers. It is used only for hosts without a serial and without a usable name, inside the class the scanned OS points at, and only when exactly one CI of that class carries it.',
         IP_PAYLOAD, 'IP', '30.162.178.21', 'the OS',
-        'the sys_id of the one CI of that class whose ip_address equals the scanned address; null when none or two carry it.',
+        'the sys_id of the one CI of that class whose ip_address equals the scanned address, named with the scanned hostname when the scan carries one; null when none or two carry it or the name differs.',
         'the ESX Server CI "vsdnesxm21", whose ip_address is "30.162.178.21"; a load balancer or a Windows CI on the same address is outside the class and cannot be picked.',
         'all serial and name rules. The sample has no DNS name, so every name rule declined.',
         'DNS-less hosts, a small group in the feed, mostly ESXi management interfaces and appliances.',
         'USEM IP Hardware Match searches the address across all hardware with extra safety checks; the adapter and layered address rules follow.')
-    body = [OPEN, CHECK, ip_prep('30.162.178.21'), IGNORE_BLOCK,
+    body = [OPEN, CHECK, ip_prep('30.162.178.21'), IGNORE_BLOCK, NAME_AGREES,
         class_stage('VMware ESXi 7.0.3 build 24723872', 'cmdb_ci_esx_server', 'ESX Server', 'the hardware-wide address match'),
         stage('Address search inside that class, one CI only',
               'Inside the agreed class an address is reasonably safe: a virtual IP of a load balancer or a Windows machine that inherited the address sits outside the class and never appears. Two CIs of the class on one address (an address reused after a rebuild) still make the rule decline.',
               'the search on cmdb_ci_esx_server for ip_address "30.162.178.21" finds the ESX Server "vsdnesxm21" and no second row, so its sys_id is returned.'),
         search_lines('pref', 'the class chosen and its sub-classes', 'ip_address', 'ip', valid=True),
-        decide(), CLOSE]
+        decide_named('gr', 'the sample carries no DNS, so nothing is checked and the sys_id of "vsdnesxm21" is returned. A host scanned as "vk1660790" whose address leads to a CI named "vk1448212" would be declined here: the address has been reused.'),
+        CLOSE]
     return write('700', 'USEM IP Class Match', h + '\n' + '\n'.join(body))
 RULES.append(rule_700)
 
@@ -688,16 +747,16 @@ def rule_705():
     h = header('USEM IP Hardware Match',
         'The address across the whole hardware tree, with two extra safety checks: the CI must not be a load balancer, and its class must not contradict the scanned OS.',
         payload, 'IP', '30.162.178.24', 'the OS',
-        'the sys_id of the one hardware CI whose ip_address equals the scanned address, when it is not a load balancer and its class is the one the OS implies, a sub-class of it or a parent of it; null otherwise.',
+        'the sys_id of the one hardware CI whose ip_address equals the scanned address, when it is not a load balancer, it carries the scanned hostname when the scan has one, and its class is the one the OS implies, a sub-class of it or a parent of it; null otherwise.',
         'the CI in the generic Server class whose ip_address is "30.162.178.24"; a Load Balancer on that address would be refused, and with a known OS a CI of a contradicting class would be too.',
         'USEM IP Class Match required the address to belong to one CI of the class the OS implies; the sample OS is a list of guesses, so that rule declined without searching.',
         'DNS-less hosts whose CI is kept in a parent class or whose OS gave no class.',
         'USEM IP Adapter Match and USEM IP Layered Match.')
     body = [OPEN, CHECK, ip_prep('30.162.178.24'), IGNORE_BLOCK,
         class_pref(MULTI, '""', 'no class'),
-        AGREES, LB_HELPER,
+        AGREES, LB_HELPER, NAME_AGREES,
         stage('Address search across the hardware tree',
-              'Nothing is filtered by class here; the three checks that follow provide the safety.',
+              'Nothing is filtered by class here; the four checks that follow provide the safety.',
               'the search on cmdb_ci_hardware for ip_address "30.162.178.24" finds one CI in the generic Server class.'),
         search_lines("'cmdb_ci_hardware'", 'Hardware and every class beneath it', 'ip_address', 'ip'),
         one_owner('gr', 'an address answered by several CIs (a shared virtual IP, an address reused after a rebuild), which is never a safe match',
@@ -706,6 +765,11 @@ def rule_705():
               'A scanned address that belongs to a load balancer is a virtual IP; the findings describe a pool member behind it, not the balancer.',
               'the Server is not a Load Balancer, so the rule carries on. A Load Balancer on "30.162.178.24" would end it here.'),
         '    if (isLoadBalancer(id))',
+        '        return null;',
+        stage('The CI must carry the scanned name',
+              'An address alone is not enough when the scan also carries a hostname: the CI found must be named with it, or with it minus an interface tail. This keeps a finding scanned as one host off a record named after another, which is what a reused address produces.',
+              'the sample carries no DNS, so nothing is checked. A host scanned as "vk1660790" whose address sits on a Server named "vk1448212" would be declined here.'),
+        '    if (!nameAgrees(id))',
         '        return null;',
         contradiction('Windows Server',
                       'pref is empty for the sample, so agrees() is true and the sys_id is returned. With OS "VMware ESXi 7.0.3", pref would be cmdb_ci_esx_server; the plain Server, a parent of ESX Server, would still pass, a Windows Server or a Computer named like a router would be rejected.'),
@@ -719,14 +783,14 @@ def rule_730():
     h = header('USEM IP Adapter Match',
         'Discovery stores one Network Adapter record per network card, and a multi-homed server keeps its addresses there rather than on the CI record. This rule finds the adapter carrying the scanned address and takes its owning CI.',
         payload, 'IP', '30.162.178.22', '',
-        'the sys_id of the CI that owns the adapter carrying the scanned address, its class agreeing with the scanned OS when one is known; null when adapters of two different CIs carry it or the owner is a load balancer.',
+        'the sys_id of the CI that owns the adapter carrying the scanned address, its class agreeing with the scanned OS when one is known and its name the scanned hostname when the scan carries one; null when adapters of two different CIs carry it, the owner is a load balancer or the name differs.',
         'the Server that owns the adapter "eth0" carrying "30.162.178.22"; the address is not written on the Server record itself.',
         'the address rules so far read the ip_address field of the CI record, which holds nothing for the sample.',
         'hosts whose address is recorded on an adapter only.',
         'USEM IP Layered Match and then the broad name rule.')
     body = [OPEN, CHECK, ip_prep('30.162.178.22'), IGNORE_BLOCK,
         class_pref_chain(MULTI, '""', 'no class'),
-        AGREES, LB_HELPER,
+        AGREES, LB_HELPER, NAME_AGREES,
         stage('Adapters carrying the address',
               'Adapters with the scanned address that belong to a CI outside the ignored classes.',
               'the adapter "eth0" with ip_address "30.162.178.22" belongs to a Server; that is the one row the query returns.'),
@@ -737,7 +801,7 @@ def rule_730():
         "        nic.addQuery('cmdb_ci.sys_class_name', 'NOT IN', ignore);",
         '    nic.query();',
         owners_stage('nic', "nic.getValue('cmdb_ci')", 'nic.cmdb_ci.sys_class_name', 'one server with two adapters on the address counts once and two servers count twice',
-                     'pref is empty for the sample, so every owner counts; one adapter, one owner: count is 1, the owner is not a Load Balancer, so the sys_id of the Server is returned. A second server with an adapter on "30.162.178.22" would make the rule decline. With OS "Cisco IOS 15.9", pref would be cmdb_ci_netgear and an adapter owned by a Computer would be skipped.'),
+                     'pref is empty for the sample, so every owner counts; one adapter, one owner: count is 1, the owner is not a Load Balancer, the sample carries no DNS so no name is checked, and the sys_id of the Server is returned. A second server with an adapter on "30.162.178.22" would make the rule decline; so would a scan carrying the name "vk1660790" whose adapter belongs to a Server named "vk1448212". With OS "Cisco IOS 15.9", pref would be cmdb_ci_netgear and an adapter owned by a Computer would be skipped.'),
         CLOSE]
     return write('730', 'USEM IP Adapter Match', h + '\n' + '\n'.join(body))
 RULES.append(rule_730)
@@ -748,14 +812,14 @@ def rule_740():
     h = header('USEM IP Layered Match',
         'Newer discovery writes each address as its own IP Address record linked to the adapter, and the adapter record itself may carry no address. This rule reads those records: IP Address -> Network Adapter -> CI.',
         payload, 'IP', '30.162.178.23', '',
-        'the sys_id of the CI at the end of the chain IP Address -> adapter -> CI, its class agreeing with the scanned OS when one is known; null for several owners or a load balancer.',
+        'the sys_id of the CI at the end of the chain IP Address -> adapter -> CI, its class agreeing with the scanned OS when one is known and its name the scanned hostname when the scan carries one; null for several owners, a load balancer or a differing name.',
         'the Server at the end of the chain IP Address "30.162.178.23" -> adapter "eth0" -> CI; neither the Server record nor the adapter record carries the address itself.',
         'USEM IP Adapter Match looked for the address on the adapter records, which hold nothing for the sample.',
         'hosts whose address exists only as an IP Address record.',
         'USEM FQDN Name Broad Match, and after that the out-of-box Qualys rules.')
     body = [OPEN, CHECK, ip_prep('30.162.178.23'), IGNORE_BLOCK,
         class_pref_chain(MULTI, '""', 'no class'),
-        AGREES, LB_HELPER,
+        AGREES, LB_HELPER, NAME_AGREES,
         stage('IP Address records carrying the address',
               'nic.cmdb_ci reaches the CI two links away; the record must belong to an adapter that belongs to a CI outside the ignored classes.',
               'the IP Address record "30.162.178.23" belongs to the adapter "eth0", which belongs to a Server; that is the one row the query returns.'),
@@ -768,7 +832,7 @@ def rule_740():
         "        ipGr.addQuery('nic.cmdb_ci.sys_class_name', 'NOT IN', ignore);",
         '    ipGr.query();',
         owners_stage('ipGr', "'' + ipGr.nic.cmdb_ci", 'ipGr.nic.cmdb_ci.sys_class_name', 'one device with two address records counts once and two devices count twice',
-                     'pref is empty for the sample, so every owner counts; one record, one owner: count is 1, the owner is not a Load Balancer, so the sys_id of the Server is returned. With OS "Cisco IOS 15.9", pref would be cmdb_ci_netgear and a record owned by a Computer would be skipped.'),
+                     'pref is empty for the sample, so every owner counts; one record, one owner: count is 1, the owner is not a Load Balancer, the sample carries no DNS so no name is checked, and the sys_id of the Server is returned. A scan carrying the name "vk1660790" whose address record belongs to a Server named "vk1448212" would be declined. With OS "Cisco IOS 15.9", pref would be cmdb_ci_netgear and a record owned by a Computer would be skipped.'),
         CLOSE]
     return write('740', 'USEM IP Layered Match', h + '\n' + '\n'.join(body))
 RULES.append(rule_740)
