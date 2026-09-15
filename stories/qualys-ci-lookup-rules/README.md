@@ -237,6 +237,62 @@ loaded earlier), and no two rules pointed at different CIs for one item. One ite
 is now declined because the fixture carries another name; on the client instance the CI on that address carries the host
 name and keeps matching. No further tweak came out of the analysis.
 
+## Incident cases of 15 Sep and rule 415 (set "Qualys CI Lookup Rules Device Name Match" V1.0)
+Mihir attached eleven files to INC0010003: the export of the 10,986 unmatched items whose placeholder name contains `.cc.`,
+four discovered items and five CI exports (54 records) for hosts that looked like matches but stayed unmatched. Copies of
+the payloads and CI records: `inc_cases_sep15.json`.
+
+The `.cc.` population: every item is `<label>.cc.bofa.com`, tracking method IP, OS empty on 10,688 of them (the rest carry
+guesses such as "Foundry Networks", "Linux 2.x", "Unknown OS"); 10,941 labels are `avx` plus six hex characters, Avaya
+stations named with the tail of their MAC address, and the remaining 45 are routers, switch interfaces and hypervisor hosts
+in that domain. The CMDB (source BOFA NDC) holds each phone as `cmdb_ci_ip_phone`, named with the label in upper case and
+carrying the same address (AVXDD008A on 10.190.29.132 in the example). Mihir was right: name and address agree and nothing
+matched. The cause is the class hierarchy: `cmdb_ci_ip_phone` extends `cmdb_ci` directly, not Hardware, and
+`cmdb_ci_scanner` sits under `cmdb_ci_imaging_hardware`, also outside Hardware. The hardware-tree rules (180, 260, 310, 410,
+705) never see those records, the class rules (250, 300, 400, 700) need an OS class the phones do not report, and rule 200
+reads Cisco `sep<mac>` labels only. Each item then fell through to the IRE, which created an Unclassed Hardware placeholder
+named with the FQDN (`matching_type created_by_ire`, the item stays unmatched); that class is in `sn_sec_cmn.ignoreCIClass`,
+so the rules never see the placeholder either.
+
+Fix: one new rule, **415 USEM Device Name Match** (`gen_rules.py` rule_415, source field DNS), placed after the hardware
+name rules so a Hardware CI carrying the name still wins first. It searches the host name in `cmdb_ci_ip_phone` and
+`cmdb_ci_imaging_hardware` (an inline list, the two device classes the CMDB keeps outside Hardware), takes the one device
+carrying the name, or the one on the scanned address when the name is shared, and refuses a host whose OS names a server
+or desktop system (Windows, ESXi, AIX, Solaris, HP-UX); a Linux kernel fingerprint and anything mentioning a phone are
+accepted, as for the appliances. Deployed on its own in Global set
+`SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Device Name Match_V1.0` (`build_rules_v7.py`, `state_v7.json`); no existing
+rule changed.
+
+The four items, judged one by one:
+1. SDI000003720429 `avxdd008a.cc.bofa.com`, no OS: the phone AVXDD008A, same address. Matched by 415.
+2. SDI000003655772 `scr02tx25540101.scanners.bankofamerica.com`, no OS: the Scanner SCR02TX25540101 (BulkUpload-EET). Its
+   address moved (CI 30.223.74.181, the earlier placeholder holds the same, the scan 30.223.92.54), the name identifies it;
+   the five certificate records of that name are not devices and are not searched. Matched by 415. The item was last
+   evaluated on 12 Sep: items only re-run through the rules on re-import or reapply.
+3. SDI000003719884 `usvasdnvetpuatcms1k03`, Ubuntu/Linux: the Cisco Meeting Server is held twice, as a Communication
+   Distribution Panel and as a Server, same serial WMP2536003E-1, same address. 410 and 705 see two records and decline.
+   Left unmatched: a CMDB duplicate to resolve, not a rule matter (a class tie-break would not help, both classes agree with
+   a Linux fingerprint).
+4. SDI000002541496 `pts-zelle-transfer-va2`, F5 Big-IP: the 38 records named `pts-zelle-transfer-*` are IRE placeholders,
+   certificates and DNS Name records; no load balancer service or device carries the name or the address. Left unmatched,
+   and the same for `horizon-vip.*` (four placeholders).
+
+Tests: `test_inc_sep15.py` rebuilds the 54 CI records as marked fixtures (placeholders and certificates included; certificates
+need a subject alternative name on the PDI) plus two phones sharing a name, and runs 16 cases twice: before the rule 22 of
+32 failed, reproducing the client state; after it 32 of 32 pass (`test_inc_sep15_run.log`), including the phone scanned as
+"Foundry Networks", "Linux 2.x", "Unknown OS" and "Cisco IP Phone", refused as Windows 10, still matched on a new DHCP
+address, the shared name resolved by address, and the duplicate CMS and placeholders left alone. Regression with 415 in the
+chain: `test_v6.py` 50, `test_v5.py` 36, `test_v3.py` 36, `test_evidence.py` 356, header sweep identical, William's router
+400, BlueCat no match. Client-item sweep with 415 in the chain (`sweep_client_items.log`): 6,034 items, no script error, chain 35 ms per item, rule 415 alone 2.7 ms per item (75 ms at most), same 28 chain matches as before; the only extra single-rule hit is the Cisco phone SEP6C5E3B2925AC, which 415 also finds and 200 still resolves first.
+
+Name agreement re-read against this data: both sides are lower-cased first labels, a hyphenated tail is allowed either
+way, an FQDN-named CI is cut at the first dot, and no DNS or no CI name checks nothing. The phone labels agree with the
+upper-case phone names; the address rules never reach phones anyway. No change.
+
+Hand-over on INC0010003: the update set XML and `415_USEM_Device_Name_Match.js`. On the client instance the rule is a new
+record (source Qualys, order 415, source field DNS, lookup target CI, table sn_vul_qualys_host_attrb, method script, active,
+reapply on); the unmatched items then need a reapply or re-import to be evaluated again.
+
 ## State of play, 14 Sep (superseded by the close-out above)
 Rule of engagement: **no lookup rule is changed without Mihir's explicit go-ahead.** Everything below is
 diagnosis and proposal.
