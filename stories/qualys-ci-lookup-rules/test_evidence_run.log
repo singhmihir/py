@@ -1,0 +1,359 @@
+fixtures: 70 specs, 0 created, 70 already present
+PASS run1 SDI000003714794 tw0ppmax1088-1e31.asia.bankofamerica.com 165.41.84.116 | NetApp | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003714792 tw0ppmax1088-1e29.asia.bankofamerica.com 165.41.84.100 | NetApp | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003713319 ck808489879a42.ca.bankofamerica.com 10.169.50.26 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003713272 b3c46573-3be0-4df6-9975-56ba56fdef1c 172.23.137.237 | Ubuntu Linux 22.04.5 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003713255 sh-7055375-001t.sdi.corp.bankofamerica.com 30.39.252.59 | Red Hat Enterprise Linux 8.10 | address shared with retired records -> no match
+PASS run1 SDI000003713226 ckac3dcb9dbc6e.clients.bankofamerica.com 10.165.142.26 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003713185 ck4ca95492f4e1.ca.bankofamerica.com 10.166.65.56 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003713180 ck4ca95493c1b9.clients.bankofamerica.com 10.166.9.32 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003713117 0326f2c5-7d83-488a-973b-5810ae677ffe 172.23.137.237 | Ubuntu Linux 22.04.5 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003713113 ckec8e7741ff6e.clients.bankofamerica.com 10.166.72.30 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003713089 rjpmvr3apiadev.corp.bankofamerica.com 10.218.228.158 | Windows Server 2022 Standard 64  | address shared with retired records -> no match
+PASS run1 SDI000003713083 ckd0577ef0d2ff.clients.bankofamerica.com 10.116.25.56 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003713061 sgvmsqsvsc01.corp.bankofamerica.com 165.40.186.216 | Windows Server 2022 Standard 64  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003713059 k34fd7033e235.corp.bankofamerica.com 10.54.151.58 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003713048 (no DNS) 10.54.6.175 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712975 ckd4ab61ac7e52.ca.bankofamerica.com 10.166.12.182 | Windows 11 Enterprise 64 bit Edi | address shared with retired records -> no match
+PASS run1 SDI000003712960 ckac3dcb9cfc4d.clients.bankofamerica.com 10.166.51.44 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712955 k34fd70045975.corp.bankofamerica.com 10.54.44.199 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712951 (no DNS) 10.54.7.33 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712942 ck4ca954939e91.clients.bankofamerica.com 10.166.9.88 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712921 (no DNS) 10.54.7.30 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712916 ckac3dcb99f9e4.clients.bankofamerica.com 10.166.9.35 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712888 ckac3dcb9db020.ca.bankofamerica.com 10.165.213.26 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712863 k34fd7033f338.ny.bankofamerica.com 171.199.62.51 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712845 ckac3dcb99fa02.clients.bankofamerica.com 10.166.9.77 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712834 ckac3dcb9a12da.clients.bankofamerica.com 10.166.35.34 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712809 ckac3dcb9b724c.ca.bankofamerica.com 10.165.131.164 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712779 ny1-100-25-p113.bankofamerica.com 171.199.85.253 | HP Printer | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712758 ckac3dcb9dbc5a.ca.bankofamerica.com 10.166.65.37 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712721 (no DNS) 10.54.7.72 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712717 (no DNS) 171.199.94.160 | VxWorks Based Device | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712705 ah-1511188-001t.corp.bankofamerica.com 30.130.140.196 | Windows Server 2022 Standard 64  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712695 ckac3dcb99bae2.ca.bankofamerica.com 10.166.154.41 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712693 sgsgsinhfpez1cpogb01a.network.asia.bankofamerica.com 171.147.172.72 | F5 BIG-IP | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712681 ck4ca95496c175.clients.bankofamerica.com 10.166.9.33 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712658 ckac3dcb9dbd09.ca.bankofamerica.com 10.165.131.180 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712649 kc0a810a617d3.corp.bankofamerica.com 10.54.7.181 | Windows 2016/2019/10 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712641 ckac3dcb9a277a.ca.bankofamerica.com 10.165.131.169 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712622 ck88f4da3f1579.network.bankofamerica.com 10.52.196.45 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712600 ckac3dcb9a3440.ca.bankofamerica.com 10.165.213.30 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712587 bceatltest3.ga.bankofamerica.com 10.80.25.39 | Cisco IOS 11-15 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712586 ck4ca95493ba8e.network.bankofamerica.com 10.165.130.57 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712554 ck10b676f73a84.clients.bankofamerica.com 10.128.60.178 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712550 ckac3dcb9aef57.clients.bankofamerica.com 10.166.51.55 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712509 ckd4ab61a81d94.clients.bankofamerica.com 10.170.145.34 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712506 ckac3dcb9a344f.clients.bankofamerica.com 10.166.51.56 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712451 ck4ca954939e7d.clients.bankofamerica.com 10.166.26.33 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712446 ck4ca95498423e.network.bankofamerica.com 10.166.21.40 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712445 ck88f4da3c67f2.network.bankofamerica.com 10.166.48.28 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712428 ckac3dcb9dc8b2.clients.bankofamerica.com 10.166.51.39 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712426 ckac3dcb9dbc82.ca.bankofamerica.com 10.165.36.30 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712406 kf04ea44128ec.ny.bankofamerica.com 171.199.47.200 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712398 ckac3dcb9a1235.clients.bankofamerica.com 10.166.26.27 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712394 k28c5c87940c9.ny.bankofamerica.com 171.199.50.207 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712384 ckac3dcb9b756c.ca.bankofamerica.com 10.165.147.185 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712371 ck4ca95496b329.clients.bankofamerica.com 10.166.9.80 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712370 ck4ca954934a13.clients.bankofamerica.com 10.166.9.27 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712338 ck4ca95499de5a.clients.bankofamerica.com 10.166.26.30 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712331 ck4ca95497fc3e.clients.bankofamerica.com 10.165.17.165 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712330 kf04ea441292d.ny.bankofamerica.com 171.199.46.227 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712292 ck4ca9549302a1.clients.bankofamerica.com 10.165.22.182 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712269 ck4ca95497c034.clients.bankofamerica.com 10.166.26.50 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712252 k34fd703420f1.corp.bankofamerica.com 10.54.135.175 | Windows 11 Enterprise 64 bit Edi | address on two or more live records -> no match
+PASS run1 SDI000003712233 ck4ca9549814ee.network.bankofamerica.com 10.165.177.35 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712220 apwnunijp011p.corp.bankofamerica.com 165.38.50.90 | Windows Server 2022 Standard 64  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712210 lsg1m100xentma2.apac.sdi.corp.bankofamerica.com 165.40.130.239 | Ubuntu/Linux | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712211 ckac3dcb9dacd8.ca.bankofamerica.com 10.166.75.32 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712209 sgsgsinhfpvz1utilb01a.network.asia.bankofamerica.com 171.147.168.247 | F5 BIG-IP | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712204 apwnuniin018p.corp.bankofamerica.com 165.46.137.101 | Windows Server 2022 Standard 64  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712169 ck10b676f7f420.tx.bankofamerica.com 10.129.80.51 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712163 fs1219flde.nj.bankofamerica.com 10.66.160.50 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712120 k4ca954fef583.corp.bankofamerica.com 10.54.108.17 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712117 ck2ceafc408e40.ga.bankofamerica.com 10.80.103.43 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712053 ckd0577ef143a7.clients.bankofamerica.com 10.83.64.28 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003712002 cke862be8de0c3.network.bankofamerica.com 10.79.14.28 | Windows 11 Enterprise 64 bit Edi | address on two or more live records -> no match
+PASS run1 SDI000003711964 ck4ca95499c401.ca.bankofamerica.com 10.166.198.185 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711958 ck8084898968e0.clients.bankofamerica.com 10.79.11.172 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711951 ckac3dcb99d946.ca.bankofamerica.com 10.166.186.172 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711946 ck4ca95498a98b.ca.bankofamerica.com 10.166.198.168 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711945 ck4ca9549a3aad.ca.bankofamerica.com 10.166.167.38 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711937 sgsgsinhfpvz1utivh01b-aom.network.asia.bankofamerica.com 171.147.168.249 | VxWorks Based Device (3Com/Intel | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711933 ck4ca954933352.network.bankofamerica.com 10.166.183.157 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711923 sgsgsinhfpvz1utivh01a-aom.network.asia.bankofamerica.com 171.147.168.246 | VxWorks Based Device (3Com/Intel | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711921 jplczenorap02a.jp.apac.bankofamerica.com 165.38.42.179 | EulerOS / Ubuntu / Fedora / Tiny | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711919 ckac3dcb99fa4d.ca.bankofamerica.com 10.166.198.174 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711918 ck4ca9549a3ac1.clients.bankofamerica.com 10.166.37.34 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711916 cke862be991808.clients.bankofamerica.com 10.167.11.34 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711912 sg0chponeview01.apac.sdi.corp.bankofamerica.com 165.40.118.61 |  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711908 ck4ca95496dc69.clients.bankofamerica.com 10.166.151.203 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711905 ck4ca95494d04a.ca.bankofamerica.com 10.166.180.50 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711901 ck4ca95498d3bb.ca.bankofamerica.com 10.166.198.182 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711898 ck4ca95497cade.clients.bankofamerica.com 10.166.151.154 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711883 ck4ca954934a31.ca.bankofamerica.com 10.166.48.171 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711882 ckac3dcb9c2192.ca.bankofamerica.com 10.166.87.29 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711874 ck4ca954998ea5.clients.bankofamerica.com 10.166.37.60 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711873 ckac3dcb9ac64e.ca.bankofamerica.com 10.165.72.45 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711869 ck4ca954973e5c.clients.bankofamerica.com 10.166.151.202 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711868 ck4ca95496dcaa.ca.bankofamerica.com 10.166.87.53 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711862 ck4ca95498fc2e.clients.bankofamerica.com 10.166.76.39 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711860 ckac3dcb9a1460.ca.bankofamerica.com 10.165.197.47 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711858 ck4ca954999206.network.bankofamerica.com 10.166.21.50 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711856 ck4ca95496c049.ca.bankofamerica.com 10.166.87.39 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711848 ck4ca954973e84.ca.bankofamerica.com 10.165.72.67 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711845 ck4ca95496250d.clients.bankofamerica.com 10.166.151.199 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711828 ckac3dcb9b5055.clients.bankofamerica.com 10.166.45.44 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711818 ck4ca954952856.clients.bankofamerica.com 10.166.76.54 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711816 ckec8e773baa9c.ca.bankofamerica.com 10.165.133.172 | Windows 11 Enterprise 64 bit Edi | address on two or more live records -> no match
+PASS run1 SDI000003711812 ck4ca954970ebe.clients.bankofamerica.com 10.165.224.34 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711808 ckac3dcb99fa1b.ca.bankofamerica.com 10.165.197.50 | Windows 11 Enterprise 64 bit Edi | address shared with retired records -> no match
+PASS run1 SDI000003711805 ckec8e7753f7e6.ny.bankofamerica.com 10.52.155.55 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711801 ck4ca95499efe9.ca.bankofamerica.com 10.165.72.42 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711799 ck4ca9549a37ce.ca.bankofamerica.com 10.165.197.57 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711798 fs1219flaf.me.bankofamerica.com 10.56.123.38 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711792 ck4ca954947dde.ca.bankofamerica.com 10.165.197.48 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711791 ck4ca9549615f9.ca.bankofamerica.com 10.165.72.81 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711789 ck4ca954999c56.clients.bankofamerica.com 10.165.16.29 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711779 ck4ca95495fb28.ca.bankofamerica.com 10.166.87.42 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711775 ck4ca95497a5bd.ca.bankofamerica.com 10.165.72.60 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711769 ck4ca954973e8e.ca.bankofamerica.com 10.165.72.31 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711765 ck4ca9549396cb.clients.bankofamerica.com 10.165.17.32 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711762 ck4ca954962567.ca.bankofamerica.com 10.165.197.46 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711761 ck4ca954984ccf.network.bankofamerica.com 10.165.130.49 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711757 kf04ea44142f3.ny.bankofamerica.com 171.199.46.10 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711740 ck4ca95497c00c.clients.bankofamerica.com 10.165.16.39 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711733 utbacmacwwhb.ny.bankofamerica.com 171.199.59.105 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711726 ckac3dcb9b74e5.clients.bankofamerica.com 10.165.22.156 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711725 ck4ca954963985.ca.bankofamerica.com 10.165.197.49 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711708 ckac3dcb9c4adc.ca.bankofamerica.com 10.165.197.34 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711705 ck4ca954940f9d.clients.bankofamerica.com 10.165.46.53 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711688 ck4ca9549822d1.ca.bankofamerica.com 10.165.147.161 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711681 ckac3dcb99fa9d.ca.bankofamerica.com 10.166.48.175 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711680 ck4ca95496f2d0.ca.bankofamerica.com 10.165.167.29 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711676 gfd-sftp-bt-lta-india-nmbbt1.asia.bankofamerica.com 165.41.252.112 | EulerOS / Ubuntu / Fedora / Tiny | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711674 abproxy-sin-sslo11.asia.bankofamerica.com 171.147.243.21 |  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711673 abproxy-sin-sslo12.asia.bankofamerica.com 171.147.243.22 |  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711672 abproxy-sin-sslo13.asia.bankofamerica.com 171.147.243.23 |  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711671 abproxy-prod-sinap1-vip.asia.bankofamerica.com 171.147.243.14 |  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711670 jplczenorap02b.jp.apac.bankofamerica.com 165.38.42.180 | EulerOS / Ubuntu / Fedora / Tiny | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711667 jplczenoraq04a.jp.apac.bankofamerica.com 165.38.42.181 | EulerOS / Ubuntu / Fedora / Tiny | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711666 jplczenoraq04b.jp.apac.bankofamerica.com 165.38.42.182 | EulerOS / Ubuntu / Fedora / Tiny | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711664 ah-1512985-001t.corp.bankofamerica.com 165.46.136.113 | Windows Server 2025 Standard Ver | address on two or more live records -> no match
+PASS run1 SDI000003711652 k34fd7004e877.corp.bankofamerica.com 10.54.106.46 | Windows 2016/2019/10 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711607 (no DNS) 171.147.245.171 | Linux 2.6 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711605 sgsg02ppz1iptdr02-mgmt.network.asia.bankofamerica.com 171.147.168.234 | x86_64 Linux/5.10.0-36-amd64 | base name shared with a retired record -> no match
+PASS run1 SDI000003711603 (no DNS) 171.147.245.182 | Linux 2.6 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711598 (no DNS) 171.147.245.172 | Linux 2.6 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711596 (no DNS) 171.147.245.181 | Linux 2.6 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run1 SDI000003711585 usnjcarse01mag0001-cdn1.network.bankofamerica.com 10.253.247.133 | Ubuntu / Linux 2.x | name on one record whose class contradicts the scanned OS -> 410 usnjcarse01mag0001-cdn1 [cmdb_ci_ip_switch]
+PASS run1 SDI000003711584 usnjmtjlg01mag0001-cdn1.network.bankofamerica.com 10.253.247.69 | Ubuntu / Linux 2.x | name on one record whose class contradicts the scanned OS -> 410 usnjmtjlg01mag0001-cdn1 [cmdb_ci_ip_switch]
+PASS run1 SDI000003711583 usnjpcwqf01mlf0001-cdn1.network.bankofamerica.com 10.253.247.193 | Ubuntu / Linux 2.x | name on one record whose class contradicts the scanned OS -> 410 usnjpcwqf01mlf0001-cdn1 [cmdb_ci_ip_switch]
+PASS run1 SDI000003715638 ininmummh03sae0015.network.asia.bankofamerica.com 165.46.131.164 | Ubuntu/Linux | name on one record whose class contradicts the scanned OS -> 410 ininmummh03sae0015 [cmdb_ci_ip_switch]
+PASS run1 SDI000003719169 gdsfed-bt-prodb-rtxbt1-vip.bankofamerica.com 171.206.135.179 | F5 Big IP | address on one live record, name not in the CMDB -> no match
+PASS run1 SDI000003718774 hcpwtx22220-sc1b.bankofamerica.com 30.166.4.189 | Ubuntu/Linux | base name on one live record, tail not recognised as an interface -> no match
+PASS run1 SDI000003718772 hcpwtx22209-sc1a.bankofamerica.com 30.166.4.124 | Ubuntu/Linux | base name on one live record, tail not recognised as an interface -> no match
+PASS run1 SDI000003718771 hcpwtx22209-sc1b.bankofamerica.com 30.166.4.125 | Ubuntu/Linux | base name on one live record, tail not recognised as an interface -> no match
+PASS run1 SDI000003718764 hcprva22184-sc1b.bankofamerica.com 30.132.162.125 | Ubuntu/Linux | base name on one live record, tail not recognised as an interface -> no match
+PASS run1 SDI000003718762 hcprva22215-sc1a.bankofamerica.com 30.132.162.60 | Ubuntu/Linux | base name on one live record, tail not recognised as an interface -> no match
+PASS run1 SDI000003715867 sg0ppmx0378-2e28.asia.bankofamerica.com 165.39.18.7 | NetApp | base name on one live record, tail not recognised as an interface -> no match
+PASS run1 SDI000003715838 hk0ppmx0367-2e30.asia.bankofamerica.com 165.41.62.155 | NetApp | base name on one live record, tail not recognised as an interface -> no match
+PASS run1 SDI000003715777 hk0ppmx0367-1e29.asia.bankofamerica.com 165.41.62.136 | NetApp | base name on one live record, tail not recognised as an interface -> no match
+PASS run1 SDI000003715752 sinpbt1dedcn01-bthcplb01b.asia.bankofamerica.com 165.40.8.185 | Ubuntu/Linux | name on one record whose class contradicts the scanned OS -> 410 sinpbt1dedcn01-bthcplb01b [cmdb_ci_lb]
+PASS run1 SDI000003715738 sinpbt1uticn01-btutilb02b.asia.bankofamerica.com 165.40.8.177 | Ubuntu/Linux | name on one record whose class contradicts the scanned OS -> 410 sinpbt1uticn01-btutilb02b [cmdb_ci_lb]
+PASS run1 SDI000003715727 hk0ppmx0367-1e31.asia.bankofamerica.com 165.41.62.154 | NetApp | base name on one live record, tail not recognised as an interface -> no match
+PASS run1 SDI000003715707 sinpbt1uticn01-btltdlb01b.asia.bankofamerica.com 165.40.8.188 | Ubuntu/Linux | name on two or more live records -> no match
+PASS run1 SDI000003715699 sinpbt1uticn01-btutilb02a.asia.bankofamerica.com 165.40.8.176 | Ubuntu/Linux | name on one record whose class contradicts the scanned OS -> 410 sinpbt1uticn01-btutilb02a [cmdb_ci_lb]
+PASS run1 SDI000003715644 sg0ppmx0378-2e30.asia.bankofamerica.com 165.39.18.71 | NetApp | base name on one live record, tail not recognised as an interface -> no match
+PASS run1 SDI000003715584 ininmummh03dbm01-ininmummh03sdm0009.asia.bankofamerica.com 165.46.131.138 | Cisco Nexus Switch | base name only on a retired record -> no match
+PASS run1 SDI000003715510 ininmummh03dbm02-ininmummh03sdm0004.asia.bankofamerica.com 165.46.131.110 | Cisco Nexus Switch | base name only on a retired record -> no match
+PASS run1 SDI000003715508 ininmummh03dbm02-ininmummh03sdm0002.asia.bankofamerica.com 165.46.131.102 | Cisco Nexus Switch | base name only on a retired record -> no match
+PASS run1 SDI000003711577 usaz02ppz1entdr02-mgmt.bankofamerica.com 171.175.129.91 | x86_64 Linux/5.10.0-36-amd64 | base name on two or more live records -> no match
+PASS run1 SDI000003711506 cncnshasd03sae0002.network.asia.bankofamerica.com 10.214.1.205 | Ubuntu/Linux | name on one record whose class contradicts the scanned OS -> 410 cncnshasd03sae0002 [cmdb_ci_ip_switch]
+PASS run1 SDI000003711502 cncnshasd03sdm0012.network.asia.bankofamerica.com 10.214.1.14 | Ubuntu / Linux 2.x | name on one record whose class contradicts the scanned OS -> 410 cncnshasd03sdm0012 [cmdb_ci_ip_switch]
+PASS run1 SDI000003711501 cncnshasd03sdm0011.network.asia.bankofamerica.com 10.214.1.13 | Ubuntu / Linux 2.x | name on one record whose class contradicts the scanned OS -> 410 cncnshasd03sdm0011 [cmdb_ci_ip_switch]
+PASS run1 SDI000003711498 cncnshasd03sae0001.network.asia.bankofamerica.com 10.214.1.204 | Ubuntu/Linux | name on one record whose class contradicts the scanned OS -> 410 cncnshasd03sae0001 [cmdb_ci_ip_switch]
+PASS run1 SDI000003711483 usazphxwu01fwd001y.network.bankofamerica.com 30.204.140.125 | EulerOS / Ubuntu / Fedora / Tiny | name on two or more live records -> no match
+PASS run1 SDI000003713027 vk1660790 on the reused address of the retired vk1448212 (adapter and IP Address record) -> declined -> no match
+PASS run1 control: the retired vk1448212 scanned under its own name -> rule 400 returns it, the platform then drops the retired CI -> no match | 400 alone -> vk1448212
+PASS run1 control: the retired vk1448212 scanned by address only -> rule 740 returns it (no name to contradict), the platform then drops the retired CI -> no match | 740 alone -> vk1448212
+PASS run2 SDI000003714794 tw0ppmax1088-1e31.asia.bankofamerica.com 165.41.84.116 | NetApp | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003714792 tw0ppmax1088-1e29.asia.bankofamerica.com 165.41.84.100 | NetApp | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003713319 ck808489879a42.ca.bankofamerica.com 10.169.50.26 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003713272 b3c46573-3be0-4df6-9975-56ba56fdef1c 172.23.137.237 | Ubuntu Linux 22.04.5 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003713255 sh-7055375-001t.sdi.corp.bankofamerica.com 30.39.252.59 | Red Hat Enterprise Linux 8.10 | address shared with retired records -> no match
+PASS run2 SDI000003713226 ckac3dcb9dbc6e.clients.bankofamerica.com 10.165.142.26 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003713185 ck4ca95492f4e1.ca.bankofamerica.com 10.166.65.56 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003713180 ck4ca95493c1b9.clients.bankofamerica.com 10.166.9.32 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003713117 0326f2c5-7d83-488a-973b-5810ae677ffe 172.23.137.237 | Ubuntu Linux 22.04.5 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003713113 ckec8e7741ff6e.clients.bankofamerica.com 10.166.72.30 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003713089 rjpmvr3apiadev.corp.bankofamerica.com 10.218.228.158 | Windows Server 2022 Standard 64  | address shared with retired records -> no match
+PASS run2 SDI000003713083 ckd0577ef0d2ff.clients.bankofamerica.com 10.116.25.56 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003713061 sgvmsqsvsc01.corp.bankofamerica.com 165.40.186.216 | Windows Server 2022 Standard 64  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003713059 k34fd7033e235.corp.bankofamerica.com 10.54.151.58 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003713048 (no DNS) 10.54.6.175 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712975 ckd4ab61ac7e52.ca.bankofamerica.com 10.166.12.182 | Windows 11 Enterprise 64 bit Edi | address shared with retired records -> no match
+PASS run2 SDI000003712960 ckac3dcb9cfc4d.clients.bankofamerica.com 10.166.51.44 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712955 k34fd70045975.corp.bankofamerica.com 10.54.44.199 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712951 (no DNS) 10.54.7.33 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712942 ck4ca954939e91.clients.bankofamerica.com 10.166.9.88 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712921 (no DNS) 10.54.7.30 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712916 ckac3dcb99f9e4.clients.bankofamerica.com 10.166.9.35 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712888 ckac3dcb9db020.ca.bankofamerica.com 10.165.213.26 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712863 k34fd7033f338.ny.bankofamerica.com 171.199.62.51 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712845 ckac3dcb99fa02.clients.bankofamerica.com 10.166.9.77 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712834 ckac3dcb9a12da.clients.bankofamerica.com 10.166.35.34 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712809 ckac3dcb9b724c.ca.bankofamerica.com 10.165.131.164 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712779 ny1-100-25-p113.bankofamerica.com 171.199.85.253 | HP Printer | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712758 ckac3dcb9dbc5a.ca.bankofamerica.com 10.166.65.37 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712721 (no DNS) 10.54.7.72 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712717 (no DNS) 171.199.94.160 | VxWorks Based Device | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712705 ah-1511188-001t.corp.bankofamerica.com 30.130.140.196 | Windows Server 2022 Standard 64  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712695 ckac3dcb99bae2.ca.bankofamerica.com 10.166.154.41 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712693 sgsgsinhfpez1cpogb01a.network.asia.bankofamerica.com 171.147.172.72 | F5 BIG-IP | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712681 ck4ca95496c175.clients.bankofamerica.com 10.166.9.33 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712658 ckac3dcb9dbd09.ca.bankofamerica.com 10.165.131.180 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712649 kc0a810a617d3.corp.bankofamerica.com 10.54.7.181 | Windows 2016/2019/10 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712641 ckac3dcb9a277a.ca.bankofamerica.com 10.165.131.169 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712622 ck88f4da3f1579.network.bankofamerica.com 10.52.196.45 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712600 ckac3dcb9a3440.ca.bankofamerica.com 10.165.213.30 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712587 bceatltest3.ga.bankofamerica.com 10.80.25.39 | Cisco IOS 11-15 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712586 ck4ca95493ba8e.network.bankofamerica.com 10.165.130.57 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712554 ck10b676f73a84.clients.bankofamerica.com 10.128.60.178 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712550 ckac3dcb9aef57.clients.bankofamerica.com 10.166.51.55 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712509 ckd4ab61a81d94.clients.bankofamerica.com 10.170.145.34 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712506 ckac3dcb9a344f.clients.bankofamerica.com 10.166.51.56 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712451 ck4ca954939e7d.clients.bankofamerica.com 10.166.26.33 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712446 ck4ca95498423e.network.bankofamerica.com 10.166.21.40 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712445 ck88f4da3c67f2.network.bankofamerica.com 10.166.48.28 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712428 ckac3dcb9dc8b2.clients.bankofamerica.com 10.166.51.39 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712426 ckac3dcb9dbc82.ca.bankofamerica.com 10.165.36.30 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712406 kf04ea44128ec.ny.bankofamerica.com 171.199.47.200 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712398 ckac3dcb9a1235.clients.bankofamerica.com 10.166.26.27 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712394 k28c5c87940c9.ny.bankofamerica.com 171.199.50.207 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712384 ckac3dcb9b756c.ca.bankofamerica.com 10.165.147.185 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712371 ck4ca95496b329.clients.bankofamerica.com 10.166.9.80 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712370 ck4ca954934a13.clients.bankofamerica.com 10.166.9.27 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712338 ck4ca95499de5a.clients.bankofamerica.com 10.166.26.30 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712331 ck4ca95497fc3e.clients.bankofamerica.com 10.165.17.165 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712330 kf04ea441292d.ny.bankofamerica.com 171.199.46.227 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712292 ck4ca9549302a1.clients.bankofamerica.com 10.165.22.182 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712269 ck4ca95497c034.clients.bankofamerica.com 10.166.26.50 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712252 k34fd703420f1.corp.bankofamerica.com 10.54.135.175 | Windows 11 Enterprise 64 bit Edi | address on two or more live records -> no match
+PASS run2 SDI000003712233 ck4ca9549814ee.network.bankofamerica.com 10.165.177.35 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712220 apwnunijp011p.corp.bankofamerica.com 165.38.50.90 | Windows Server 2022 Standard 64  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712210 lsg1m100xentma2.apac.sdi.corp.bankofamerica.com 165.40.130.239 | Ubuntu/Linux | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712211 ckac3dcb9dacd8.ca.bankofamerica.com 10.166.75.32 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712209 sgsgsinhfpvz1utilb01a.network.asia.bankofamerica.com 171.147.168.247 | F5 BIG-IP | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712204 apwnuniin018p.corp.bankofamerica.com 165.46.137.101 | Windows Server 2022 Standard 64  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712169 ck10b676f7f420.tx.bankofamerica.com 10.129.80.51 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712163 fs1219flde.nj.bankofamerica.com 10.66.160.50 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712120 k4ca954fef583.corp.bankofamerica.com 10.54.108.17 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712117 ck2ceafc408e40.ga.bankofamerica.com 10.80.103.43 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712053 ckd0577ef143a7.clients.bankofamerica.com 10.83.64.28 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003712002 cke862be8de0c3.network.bankofamerica.com 10.79.14.28 | Windows 11 Enterprise 64 bit Edi | address on two or more live records -> no match
+PASS run2 SDI000003711964 ck4ca95499c401.ca.bankofamerica.com 10.166.198.185 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711958 ck8084898968e0.clients.bankofamerica.com 10.79.11.172 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711951 ckac3dcb99d946.ca.bankofamerica.com 10.166.186.172 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711946 ck4ca95498a98b.ca.bankofamerica.com 10.166.198.168 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711945 ck4ca9549a3aad.ca.bankofamerica.com 10.166.167.38 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711937 sgsgsinhfpvz1utivh01b-aom.network.asia.bankofamerica.com 171.147.168.249 | VxWorks Based Device (3Com/Intel | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711933 ck4ca954933352.network.bankofamerica.com 10.166.183.157 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711923 sgsgsinhfpvz1utivh01a-aom.network.asia.bankofamerica.com 171.147.168.246 | VxWorks Based Device (3Com/Intel | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711921 jplczenorap02a.jp.apac.bankofamerica.com 165.38.42.179 | EulerOS / Ubuntu / Fedora / Tiny | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711919 ckac3dcb99fa4d.ca.bankofamerica.com 10.166.198.174 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711918 ck4ca9549a3ac1.clients.bankofamerica.com 10.166.37.34 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711916 cke862be991808.clients.bankofamerica.com 10.167.11.34 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711912 sg0chponeview01.apac.sdi.corp.bankofamerica.com 165.40.118.61 |  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711908 ck4ca95496dc69.clients.bankofamerica.com 10.166.151.203 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711905 ck4ca95494d04a.ca.bankofamerica.com 10.166.180.50 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711901 ck4ca95498d3bb.ca.bankofamerica.com 10.166.198.182 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711898 ck4ca95497cade.clients.bankofamerica.com 10.166.151.154 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711883 ck4ca954934a31.ca.bankofamerica.com 10.166.48.171 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711882 ckac3dcb9c2192.ca.bankofamerica.com 10.166.87.29 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711874 ck4ca954998ea5.clients.bankofamerica.com 10.166.37.60 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711873 ckac3dcb9ac64e.ca.bankofamerica.com 10.165.72.45 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711869 ck4ca954973e5c.clients.bankofamerica.com 10.166.151.202 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711868 ck4ca95496dcaa.ca.bankofamerica.com 10.166.87.53 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711862 ck4ca95498fc2e.clients.bankofamerica.com 10.166.76.39 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711860 ckac3dcb9a1460.ca.bankofamerica.com 10.165.197.47 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711858 ck4ca954999206.network.bankofamerica.com 10.166.21.50 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711856 ck4ca95496c049.ca.bankofamerica.com 10.166.87.39 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711848 ck4ca954973e84.ca.bankofamerica.com 10.165.72.67 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711845 ck4ca95496250d.clients.bankofamerica.com 10.166.151.199 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711828 ckac3dcb9b5055.clients.bankofamerica.com 10.166.45.44 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711818 ck4ca954952856.clients.bankofamerica.com 10.166.76.54 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711816 ckec8e773baa9c.ca.bankofamerica.com 10.165.133.172 | Windows 11 Enterprise 64 bit Edi | address on two or more live records -> no match
+PASS run2 SDI000003711812 ck4ca954970ebe.clients.bankofamerica.com 10.165.224.34 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711808 ckac3dcb99fa1b.ca.bankofamerica.com 10.165.197.50 | Windows 11 Enterprise 64 bit Edi | address shared with retired records -> no match
+PASS run2 SDI000003711805 ckec8e7753f7e6.ny.bankofamerica.com 10.52.155.55 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711801 ck4ca95499efe9.ca.bankofamerica.com 10.165.72.42 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711799 ck4ca9549a37ce.ca.bankofamerica.com 10.165.197.57 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711798 fs1219flaf.me.bankofamerica.com 10.56.123.38 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711792 ck4ca954947dde.ca.bankofamerica.com 10.165.197.48 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711791 ck4ca9549615f9.ca.bankofamerica.com 10.165.72.81 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711789 ck4ca954999c56.clients.bankofamerica.com 10.165.16.29 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711779 ck4ca95495fb28.ca.bankofamerica.com 10.166.87.42 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711775 ck4ca95497a5bd.ca.bankofamerica.com 10.165.72.60 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711769 ck4ca954973e8e.ca.bankofamerica.com 10.165.72.31 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711765 ck4ca9549396cb.clients.bankofamerica.com 10.165.17.32 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711762 ck4ca954962567.ca.bankofamerica.com 10.165.197.46 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711761 ck4ca954984ccf.network.bankofamerica.com 10.165.130.49 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711757 kf04ea44142f3.ny.bankofamerica.com 171.199.46.10 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711740 ck4ca95497c00c.clients.bankofamerica.com 10.165.16.39 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711733 utbacmacwwhb.ny.bankofamerica.com 171.199.59.105 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711726 ckac3dcb9b74e5.clients.bankofamerica.com 10.165.22.156 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711725 ck4ca954963985.ca.bankofamerica.com 10.165.197.49 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711708 ckac3dcb9c4adc.ca.bankofamerica.com 10.165.197.34 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711705 ck4ca954940f9d.clients.bankofamerica.com 10.165.46.53 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711688 ck4ca9549822d1.ca.bankofamerica.com 10.165.147.161 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711681 ckac3dcb99fa9d.ca.bankofamerica.com 10.166.48.175 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711680 ck4ca95496f2d0.ca.bankofamerica.com 10.165.167.29 | Windows 11 Enterprise 64 bit Edi | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711676 gfd-sftp-bt-lta-india-nmbbt1.asia.bankofamerica.com 165.41.252.112 | EulerOS / Ubuntu / Fedora / Tiny | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711674 abproxy-sin-sslo11.asia.bankofamerica.com 171.147.243.21 |  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711673 abproxy-sin-sslo12.asia.bankofamerica.com 171.147.243.22 |  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711672 abproxy-sin-sslo13.asia.bankofamerica.com 171.147.243.23 |  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711671 abproxy-prod-sinap1-vip.asia.bankofamerica.com 171.147.243.14 |  | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711670 jplczenorap02b.jp.apac.bankofamerica.com 165.38.42.180 | EulerOS / Ubuntu / Fedora / Tiny | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711667 jplczenoraq04a.jp.apac.bankofamerica.com 165.38.42.181 | EulerOS / Ubuntu / Fedora / Tiny | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711666 jplczenoraq04b.jp.apac.bankofamerica.com 165.38.42.182 | EulerOS / Ubuntu / Fedora / Tiny | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711664 ah-1512985-001t.corp.bankofamerica.com 165.46.136.113 | Windows Server 2025 Standard Ver | address on two or more live records -> no match
+PASS run2 SDI000003711652 k34fd7004e877.corp.bankofamerica.com 10.54.106.46 | Windows 2016/2019/10 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711607 (no DNS) 171.147.245.171 | Linux 2.6 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711605 sgsg02ppz1iptdr02-mgmt.network.asia.bankofamerica.com 171.147.168.234 | x86_64 Linux/5.10.0-36-amd64 | base name shared with a retired record -> no match
+PASS run2 SDI000003711603 (no DNS) 171.147.245.182 | Linux 2.6 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711598 (no DNS) 171.147.245.172 | Linux 2.6 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711596 (no DNS) 171.147.245.181 | Linux 2.6 | nothing in the CMDB carries the name, the base name, the fqdn or the address -> no match
+PASS run2 SDI000003711585 usnjcarse01mag0001-cdn1.network.bankofamerica.com 10.253.247.133 | Ubuntu / Linux 2.x | name on one record whose class contradicts the scanned OS -> 410 usnjcarse01mag0001-cdn1 [cmdb_ci_ip_switch]
+PASS run2 SDI000003711584 usnjmtjlg01mag0001-cdn1.network.bankofamerica.com 10.253.247.69 | Ubuntu / Linux 2.x | name on one record whose class contradicts the scanned OS -> 410 usnjmtjlg01mag0001-cdn1 [cmdb_ci_ip_switch]
+PASS run2 SDI000003711583 usnjpcwqf01mlf0001-cdn1.network.bankofamerica.com 10.253.247.193 | Ubuntu / Linux 2.x | name on one record whose class contradicts the scanned OS -> 410 usnjpcwqf01mlf0001-cdn1 [cmdb_ci_ip_switch]
+PASS run2 SDI000003715638 ininmummh03sae0015.network.asia.bankofamerica.com 165.46.131.164 | Ubuntu/Linux | name on one record whose class contradicts the scanned OS -> 410 ininmummh03sae0015 [cmdb_ci_ip_switch]
+PASS run2 SDI000003719169 gdsfed-bt-prodb-rtxbt1-vip.bankofamerica.com 171.206.135.179 | F5 Big IP | address on one live record, name not in the CMDB -> no match
+PASS run2 SDI000003718774 hcpwtx22220-sc1b.bankofamerica.com 30.166.4.189 | Ubuntu/Linux | base name on one live record, tail not recognised as an interface -> no match
+PASS run2 SDI000003718772 hcpwtx22209-sc1a.bankofamerica.com 30.166.4.124 | Ubuntu/Linux | base name on one live record, tail not recognised as an interface -> no match
+PASS run2 SDI000003718771 hcpwtx22209-sc1b.bankofamerica.com 30.166.4.125 | Ubuntu/Linux | base name on one live record, tail not recognised as an interface -> no match
+PASS run2 SDI000003718764 hcprva22184-sc1b.bankofamerica.com 30.132.162.125 | Ubuntu/Linux | base name on one live record, tail not recognised as an interface -> no match
+PASS run2 SDI000003718762 hcprva22215-sc1a.bankofamerica.com 30.132.162.60 | Ubuntu/Linux | base name on one live record, tail not recognised as an interface -> no match
+PASS run2 SDI000003715867 sg0ppmx0378-2e28.asia.bankofamerica.com 165.39.18.7 | NetApp | base name on one live record, tail not recognised as an interface -> no match
+PASS run2 SDI000003715838 hk0ppmx0367-2e30.asia.bankofamerica.com 165.41.62.155 | NetApp | base name on one live record, tail not recognised as an interface -> no match
+PASS run2 SDI000003715777 hk0ppmx0367-1e29.asia.bankofamerica.com 165.41.62.136 | NetApp | base name on one live record, tail not recognised as an interface -> no match
+PASS run2 SDI000003715752 sinpbt1dedcn01-bthcplb01b.asia.bankofamerica.com 165.40.8.185 | Ubuntu/Linux | name on one record whose class contradicts the scanned OS -> 410 sinpbt1dedcn01-bthcplb01b [cmdb_ci_lb]
+PASS run2 SDI000003715738 sinpbt1uticn01-btutilb02b.asia.bankofamerica.com 165.40.8.177 | Ubuntu/Linux | name on one record whose class contradicts the scanned OS -> 410 sinpbt1uticn01-btutilb02b [cmdb_ci_lb]
+PASS run2 SDI000003715727 hk0ppmx0367-1e31.asia.bankofamerica.com 165.41.62.154 | NetApp | base name on one live record, tail not recognised as an interface -> no match
+PASS run2 SDI000003715707 sinpbt1uticn01-btltdlb01b.asia.bankofamerica.com 165.40.8.188 | Ubuntu/Linux | name on two or more live records -> no match
+PASS run2 SDI000003715699 sinpbt1uticn01-btutilb02a.asia.bankofamerica.com 165.40.8.176 | Ubuntu/Linux | name on one record whose class contradicts the scanned OS -> 410 sinpbt1uticn01-btutilb02a [cmdb_ci_lb]
+PASS run2 SDI000003715644 sg0ppmx0378-2e30.asia.bankofamerica.com 165.39.18.71 | NetApp | base name on one live record, tail not recognised as an interface -> no match
+PASS run2 SDI000003715584 ininmummh03dbm01-ininmummh03sdm0009.asia.bankofamerica.com 165.46.131.138 | Cisco Nexus Switch | base name only on a retired record -> no match
+PASS run2 SDI000003715510 ininmummh03dbm02-ininmummh03sdm0004.asia.bankofamerica.com 165.46.131.110 | Cisco Nexus Switch | base name only on a retired record -> no match
+PASS run2 SDI000003715508 ininmummh03dbm02-ininmummh03sdm0002.asia.bankofamerica.com 165.46.131.102 | Cisco Nexus Switch | base name only on a retired record -> no match
+PASS run2 SDI000003711577 usaz02ppz1entdr02-mgmt.bankofamerica.com 171.175.129.91 | x86_64 Linux/5.10.0-36-amd64 | base name on two or more live records -> no match
+PASS run2 SDI000003711506 cncnshasd03sae0002.network.asia.bankofamerica.com 10.214.1.205 | Ubuntu/Linux | name on one record whose class contradicts the scanned OS -> 410 cncnshasd03sae0002 [cmdb_ci_ip_switch]
+PASS run2 SDI000003711502 cncnshasd03sdm0012.network.asia.bankofamerica.com 10.214.1.14 | Ubuntu / Linux 2.x | name on one record whose class contradicts the scanned OS -> 410 cncnshasd03sdm0012 [cmdb_ci_ip_switch]
+PASS run2 SDI000003711501 cncnshasd03sdm0011.network.asia.bankofamerica.com 10.214.1.13 | Ubuntu / Linux 2.x | name on one record whose class contradicts the scanned OS -> 410 cncnshasd03sdm0011 [cmdb_ci_ip_switch]
+PASS run2 SDI000003711498 cncnshasd03sae0001.network.asia.bankofamerica.com 10.214.1.204 | Ubuntu/Linux | name on one record whose class contradicts the scanned OS -> 410 cncnshasd03sae0001 [cmdb_ci_ip_switch]
+PASS run2 SDI000003711483 usazphxwu01fwd001y.network.bankofamerica.com 30.204.140.125 | EulerOS / Ubuntu / Fedora / Tiny | name on two or more live records -> no match
+PASS run2 SDI000003713027 vk1660790 on the reused address of the retired vk1448212 (adapter and IP Address record) -> declined -> no match
+PASS run2 control: the retired vk1448212 scanned under its own name -> rule 400 returns it, the platform then drops the retired CI -> no match | 400 alone -> vk1448212
+PASS run2 control: the retired vk1448212 scanned by address only -> rule 740 returns it (no name to contradict), the platform then drops the retired CI -> no match | 740 alone -> vk1448212
+
+ALL PASS: 356 passed, 0 failed (178 items, run twice)

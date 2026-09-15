@@ -200,6 +200,43 @@ through 700 and 730, so the list decides whether the address change costs anythi
 do by hand on the client instance: rule 430 source field to DNS; rule 450 script version compared with `rules/`.
 Follow-up not built: the storage node rule (C above).
 
+## Comment layout and replay of the client runs, 15 Sep (set re-issued as V1.1)
+Mihir found the notes of the six re-issued scripts untidy. `gen_rules.py` now carries a layout pass, `polish()`, applied
+to those six rules only (the thirteen others keep their delivered text until they are next re-issued): a blank line
+before every stage note and helper note that follows code, trailing comments aligned on one column, a trailing comment
+that would push a line past the width moved above the code, a `//` separator after each Sample paragraph, the appliance
+condition wrapped, the name helper of 700 placed next to the search it guards, and the header and stage notes of 700,
+705, 730 and 740 shortened. The logic is unchanged: with comments stripped, 705, 730 and 740 are identical to the V1.0
+text, 350 and 410 differ only by the wrapped condition and 700 only by the helper's position. `compile_check.py` 19 of
+19. Redeployed into the same set renamed `..._V1.1` (V1.0 had already been handed over).
+
+`test_evidence.py` replays the client's own items: every "unmatched today and declined" and "rules decline an item
+matched today" line of runs 2 and 3 (175 items after de-duplication), each with the CMDB evidence the line reports rebuilt
+as marked fixtures (70 CIs in the classes listed, retired where the run says so, the address merged onto the named CI when
+the counts and classes agree), plus the reused-address case rebuilt by hand with two controls. 178 items, run twice,
+356 of 356 pass: the 12 appliance cases and the switch matched today by the out-of-box DNS rule resolve through 410; the
+10 storage node labels, the retired-only records, the duplicates, the F5 device on a bare address and the hosts absent
+from the CMDB stay declined; `vk1660790` on the retired `vk1448212` is declined through both the adapter and the IP
+Address record paths.
+
+Platform finding from the controls: `sn_sec_cmn.CIIdentify` drops a retired CI after a rule returns it (`install_status`
+7, `operational_status` 6 or life-cycle stage Retired) whenever the property `sn_sec_cmn.filterOutDecommissionedCI` is
+true, which is its default; the property row does not exist on the PDI. Rules 400 and 740 return the retired computer on
+their own and the chain returns nothing. Whether retired CIs are candidates is therefore decided by that property, not by
+the rules; on the client instance a retired VM is matched today (run 3), so the property is false there or the CI was
+retired after it matched.
+
+`sweep_client_items.py` runs the chain and every USEM rule on its own over the client's Qualys discovered items held on
+the PDI (100,010 items; 6,034 taken in twelve windows spread across the table, plus the 34 matched there today), output in
+`sweep_client_items.log` / `.json`. No script error in 6,034 chain runs and 114,646 single-rule runs; the chain costs 31 ms
+per item and the slowest single rule run was 137 ms (250, on a payload without a DNS). Payload shapes seen: DNS empty on
+686 items, no DNS in upper case, none shaped like an address, OS empty on 2,919, multi-guess OS on 133; tracking method
+IP on 6,024. Every CI a rule returned is the CI the item already holds today (the PDI's fixtures and the client CI extracts
+loaded earlier), and no two rules pointed at different CIs for one item. One item changed outcome, by design: the ESXi host
+`vrdna001xsdi002` on `30.162.178.23`, matched earlier through 740 to the V4 fixture server `fixv4-srv740` on that address,
+is now declined because the fixture carries another name; on the client instance the CI on that address carries the host
+name and keeps matching. No further tweak came out of the analysis.
+
 ## State of play, 14 Sep (superseded by the close-out above)
 Rule of engagement: **no lookup rule is changed without Mihir's explicit go-ahead.** Everything below is
 diagnosis and proposal.

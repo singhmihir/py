@@ -35,20 +35,24 @@
 (function process(rule, sourceValue, sourcePayload) {
     if (!sourceValue)                             // nothing to look up
         return null;
-    var fqdn = ('' + sourceValue).trim().toLowerCase();   // "hklvteqoradbp3.hk.baml.com"
+    var fqdn = ('' + sourceValue).trim().toLowerCase();  // "hklvteqoradbp3.hk.baml.com"
     if (fqdn.indexOf('.') == -1)                  // a bare label is left to the hostname rules
         return null;
-    var ip = sourcePayload.IP ? '' + sourcePayload.IP : '';   // "167.202.60.26", only used to break a tie
+    // "167.202.60.26", only used to break a tie
+    var ip = sourcePayload.IP ? '' + sourcePayload.IP : '';
+
     // Classes that must never be matched (placeholder and technical CIs); the list lives in the
     // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
     var ignore = (typeof _ignoreClass != 'undefined' && _ignoreClass) ?
         ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
+
     // -- Class the scanned OS implies, kept as a preference ---------------------------------------
     // This rule follows discovery records rather than searching a class, so the class is not a
     // filter; it is used to leave out a CI at the end of the chain whose class contradicts the
     // scan. An unknown or multi-guess OS gives no class and then nothing is left out.
     // Sample: classFor("Red Hat Enterprise Linux Server 7.9") gives Linux Server, so pref is
     //         cmdb_ci_linux_server.
+    //
     // classFor() maps the OS text Qualys reports to the CMDB class the CI should be in, e.g. "Red
     // Hat Enterprise Linux 9.8" is a Linux Server, "Windows Server 2016 Standard" a Windows Server
     // and "VMware ESXi 7.0.3" an ESX Server. A string of guesses separated by "/" comes from an
@@ -57,7 +61,7 @@
     function classFor(os) {
         if (!os) return '';
         var s = ('' + os).toLowerCase();
-        if (s.split('/').length > 2) return '';                  // multi-guess fingerprint
+        if (s.split('/').length > 2) return '';   // multi-guess fingerprint
         if (s.indexOf('esx') != -1) return 'cmdb_ci_esx_server';
         if (s.indexOf('windows') != -1)
             return s.indexOf('server') != -1 ? 'cmdb_ci_win_server' : 'cmdb_ci_computer';
@@ -74,14 +78,16 @@
         return '';
     }
     var pref = classFor(sourcePayload.OS);
+
     // agrees() decides whether a CI of class cls can be the scanned host once the OS gave a class:
     // the same class, one of its sub-classes, or one of its parents (a Cisco IOS host may be kept
-    // as a plain Network Gear or Hardware record). A Linux fingerprint is also accepted against
-    // Network Gear, Load Balancer and Storage Server records: switches, balancers and storage nodes
-    // run Linux underneath and Qualys reports that kernel, so the fingerprint says nothing against
-    // those classes. Any other class is a different kind of machine: a Windows Server named like
-    // the scanned Linux host is a namesake, never the host. With no class from the OS nothing is
-    // refused.
+    // as a plain Network Gear or Hardware record). Any other class is a different kind of machine:
+    // a Windows Server named like the scanned Linux host is a namesake, never the host. With no
+    // class from the OS nothing is refused.
+    //
+    // A Linux fingerprint is also accepted against Network Gear, Load Balancer and Storage Server
+    // records: switches, balancers and storage nodes run Linux underneath and Qualys reports that
+    // kernel, so the fingerprint says nothing against those classes.
     function parentsOf(table) {                   // the class and every class above it
         var out = [table];
         var db = new GlideRecord('sys_db_object');
@@ -100,12 +106,15 @@
         if (!pref || cls == pref)
             return true;
         var above = parentsOf(cls);
-        if (pref == 'cmdb_ci_linux_server' && (above.indexOf('cmdb_ci_netgear') != -1 || above.indexOf('cmdb_ci_lb') != -1 || above.indexOf('cmdb_ci_storage_server') != -1))
-            return true;                          // an appliance reporting the Linux it runs on
-        if (above.indexOf(pref) != -1)               // cls is a sub-class of pref
+        var appliance = above.indexOf('cmdb_ci_netgear') != -1 ||
+            above.indexOf('cmdb_ci_lb') != -1 || above.indexOf('cmdb_ci_storage_server') != -1;
+        if (pref == 'cmdb_ci_linux_server' && appliance)  // an appliance reporting its Linux
             return true;
-        return parentsOf(pref).indexOf(cls) != -1;   // cls is a parent of pref
+        if (above.indexOf(pref) != -1)            // cls is a sub-class of pref
+            return true;
+        return parentsOf(pref).indexOf(cls) != -1;  // cls is a parent of pref
     }
+
     // -- Follow the chain DNS Name -> IP Address -> adapter -> CI ---------------------------------
     // cmdb_ip_address_dns_name ties one DNS Name record to one IP Address record; dot-walking
     // reaches the rest: dns_name.name is the name on the DNS Name record and ip_address.nic.cmdb_ci
@@ -118,10 +127,11 @@
     if (!gr.isValid())                            // layered model not installed here, decline
         return null;
     gr.addQuery('dns_name.name', fqdn);           // "hklvteqoradbp3.hk.baml.com"
-    gr.addNotNullQuery('ip_address.nic.cmdb_ci'); // the chain must end on a CI
+    gr.addNotNullQuery('ip_address.nic.cmdb_ci');  // the chain must end on a CI
     if (ignore)
         gr.addQuery('ip_address.nic.cmdb_ci.sys_class_name', 'NOT IN', ignore);
     gr.query();
+
     // -- One CI at the end of the chain, class agreeing, scanned IP as the tie-break --------------
     // A CI whose class contradicts the scanned OS is skipped: a Computer at the end of the chain
     // for a Cisco IOS host is a stale or misattributed discovery record, not the router. Each
@@ -140,7 +150,8 @@
     var count = 0, first = null;
     while (gr.next()) {
         var owner = '' + gr.ip_address.nic.cmdb_ci;
-        if (!agrees('' + gr.ip_address.nic.cmdb_ci.sys_class_name))   // a class the OS rules out is not counted
+        // a class the OS rules out is not counted
+        if (!agrees('' + gr.ip_address.nic.cmdb_ci.sys_class_name))
             continue;
         if (!owners[owner]) {
             owners[owner] = true;
@@ -148,7 +159,7 @@
             if (count == 1)
                 first = owner;
         }
-        if (ip && ('' + gr.ip_address.ip_address) == ip)   // this chain runs through the scanned IP
+        if (ip && ('' + gr.ip_address.ip_address) == ip)  // this chain runs through the scanned IP
             ipOwners[owner] = true;
     }
     if (count == 1)

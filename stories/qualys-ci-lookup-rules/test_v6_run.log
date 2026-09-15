@@ -1,4 +1,4 @@
-fixtures: fixv6switch created, alias-v6sw.network.bankofamerica.com created, fixv6switchip created, fixv6bigip created, fixv6storage created, fixv6winname created, fixv6lx700 created, fixv6lxfq.corp.bankofamerica.com created, fixv6lxtail-a created, fixv6srv705 created, fixv6comp730 created, fixv6comp740 created, fixv6vk1448212 created
+fixtures: fixv6switch exists, alias-v6sw.network.bankofamerica.com exists, fixv6switchip exists, fixv6bigip exists, fixv6storage exists, fixv6winname exists, fixv6lx700 exists, fixv6lxfq.corp.bankofamerica.com exists, fixv6lxtail-a exists, fixv6srv705 exists, fixv6comp730 exists, fixv6comp740 exists, fixv6vk1448212 exists
 PASS run1 410: IP Switch named with the host, Linux fingerprint -> accepted | chain 410 fixv6switch | 410 alone -> fixv6switch
 PASS run1 410: BIG-IP device named with the host, Linux fingerprint -> accepted | chain 410 fixv6bigip | 410 alone -> fixv6bigip
 PASS run1 410: Storage Server named with the host, Linux fingerprint -> accepted | chain 410 fixv6storage | 410 alone -> fixv6storage
