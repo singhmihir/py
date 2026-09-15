@@ -1,0 +1,53 @@
+fixtures: fixv6switch exists, alias-v6sw.network.bankofamerica.com exists, fixv6switchip exists, fixv6bigip exists, fixv6storage exists, fixv6winname exists, fixv6lx700 exists, fixv6lxfq.corp.bankofamerica.com exists, fixv6lxtail-a exists, fixv6srv705 exists, fixv6comp730 exists, fixv6comp740 exists, fixv6vk1448212 exists
+PASS run1 410: IP Switch named with the host, Linux fingerprint -> accepted | chain 410 fixv6switch | 410 alone -> fixv6switch
+PASS run1 410: BIG-IP device named with the host, Linux fingerprint -> accepted | chain 410 fixv6bigip | 410 alone -> fixv6bigip
+PASS run1 410: Storage Server named with the host, Linux fingerprint -> accepted | chain 410 fixv6storage | 410 alone -> fixv6storage
+PASS run1 410: the same IP Switch, Windows OS -> still refused | chain (no match)  | 410 alone -> -
+PASS run1 410: Windows Server named with the host, Linux fingerprint -> still refused (a namesake) | chain (no match)  | 410 alone -> -
+PASS run1 350: alias of the IP Switch, Linux fingerprint -> accepted | chain 350 fixv6switch | 350 alone -> fixv6switch
+PASS run1 350: alias of the IP Switch, Windows OS -> skipped by 350 (the platform DNS rule at 940 then takes it) | chain 940 fixv6switch | 350 alone -> -
+PASS run1 705: IP Switch carrying the address on its record, Linux fingerprint, no name -> still refused (address alone) | chain (no match)  | 705 alone -> -
+PASS run1 700: Linux Server on the address, scanned with its name -> the name rule takes it; 700 alone accepts | chain 400 fixv6lx700 | 700 alone -> fixv6lx700
+PASS run1 700: the same server, no DNS -> accepted | chain 700 fixv6lx700 | 700 alone -> fixv6lx700
+PASS run1 700: the same server, scanned as its name plus an unknown tail -> accepted | chain 700 fixv6lx700 | 700 alone -> fixv6lx700
+PASS run1 700: the same server, scanned under another name -> declined (reused address) | chain (no match)  | 700 alone -> -
+PASS run1 700: CI named with its fqdn, scanned with that fqdn -> accepted | chain 450 fixv6lxfq.corp.bankofamerica.com | 700 alone -> fixv6lxfq.corp.bankofamerica.com
+PASS run1 700: CI named with the host plus a tail, scanned with the bare host -> accepted | chain 700 fixv6lxtail-a | 700 alone -> fixv6lxtail-a
+PASS run1 705: Server on the address, scanned with its name, no class -> the name rule takes it; 705 alone accepts | chain 410 fixv6srv705 | 705 alone -> fixv6srv705
+PASS run1 705: the same Server, scanned under another name -> declined | chain (no match)  | 705 alone -> -
+PASS run1 705: the same Server, no DNS -> accepted | chain 705 fixv6srv705 | 705 alone -> fixv6srv705
+PASS run1 730: Computer owning the adapter, scanned with its name -> the name rule takes it; 730 alone accepts | chain 400 fixv6comp730 | 730 alone -> fixv6comp730
+PASS run1 730: the same Computer, scanned under another name -> declined | chain (no match)  | 730 alone -> -
+PASS run1 730: the same Computer, no DNS -> accepted | chain 730 fixv6comp730 | 730 alone -> fixv6comp730
+PASS run1 740: Computer behind an IP Address record, scanned with its name -> the name rule takes it; 740 alone accepts | chain 400 fixv6comp740 | 740 alone -> fixv6comp740
+PASS run1 740: the same Computer, scanned under another name -> declined | chain (no match)  | 740 alone -> -
+PASS run1 740: the same Computer, no DNS -> accepted | chain 740 fixv6comp740 | 740 alone -> fixv6comp740
+PASS run1 740: the same Computer, scanned as its name plus an unknown tail -> accepted | chain 740 fixv6comp740 | 740 alone -> fixv6comp740
+PASS run1 the reused-address case: retired Computer named after another machine owns the adapter -> declined | chain (no match)  | 730 alone -> -
+PASS run2 410: IP Switch named with the host, Linux fingerprint -> accepted | chain 410 fixv6switch | 410 alone -> fixv6switch
+PASS run2 410: BIG-IP device named with the host, Linux fingerprint -> accepted | chain 410 fixv6bigip | 410 alone -> fixv6bigip
+PASS run2 410: Storage Server named with the host, Linux fingerprint -> accepted | chain 410 fixv6storage | 410 alone -> fixv6storage
+PASS run2 410: the same IP Switch, Windows OS -> still refused | chain (no match)  | 410 alone -> -
+PASS run2 410: Windows Server named with the host, Linux fingerprint -> still refused (a namesake) | chain (no match)  | 410 alone -> -
+PASS run2 350: alias of the IP Switch, Linux fingerprint -> accepted | chain 350 fixv6switch | 350 alone -> fixv6switch
+PASS run2 350: alias of the IP Switch, Windows OS -> skipped by 350 (the platform DNS rule at 940 then takes it) | chain 940 fixv6switch | 350 alone -> -
+PASS run2 705: IP Switch carrying the address on its record, Linux fingerprint, no name -> still refused (address alone) | chain (no match)  | 705 alone -> -
+PASS run2 700: Linux Server on the address, scanned with its name -> the name rule takes it; 700 alone accepts | chain 400 fixv6lx700 | 700 alone -> fixv6lx700
+PASS run2 700: the same server, no DNS -> accepted | chain 700 fixv6lx700 | 700 alone -> fixv6lx700
+PASS run2 700: the same server, scanned as its name plus an unknown tail -> accepted | chain 700 fixv6lx700 | 700 alone -> fixv6lx700
+PASS run2 700: the same server, scanned under another name -> declined (reused address) | chain (no match)  | 700 alone -> -
+PASS run2 700: CI named with its fqdn, scanned with that fqdn -> accepted | chain 450 fixv6lxfq.corp.bankofamerica.com | 700 alone -> fixv6lxfq.corp.bankofamerica.com
+PASS run2 700: CI named with the host plus a tail, scanned with the bare host -> accepted | chain 700 fixv6lxtail-a | 700 alone -> fixv6lxtail-a
+PASS run2 705: Server on the address, scanned with its name, no class -> the name rule takes it; 705 alone accepts | chain 410 fixv6srv705 | 705 alone -> fixv6srv705
+PASS run2 705: the same Server, scanned under another name -> declined | chain (no match)  | 705 alone -> -
+PASS run2 705: the same Server, no DNS -> accepted | chain 705 fixv6srv705 | 705 alone -> fixv6srv705
+PASS run2 730: Computer owning the adapter, scanned with its name -> the name rule takes it; 730 alone accepts | chain 400 fixv6comp730 | 730 alone -> fixv6comp730
+PASS run2 730: the same Computer, scanned under another name -> declined | chain (no match)  | 730 alone -> -
+PASS run2 730: the same Computer, no DNS -> accepted | chain 730 fixv6comp730 | 730 alone -> fixv6comp730
+PASS run2 740: Computer behind an IP Address record, scanned with its name -> the name rule takes it; 740 alone accepts | chain 400 fixv6comp740 | 740 alone -> fixv6comp740
+PASS run2 740: the same Computer, scanned under another name -> declined | chain (no match)  | 740 alone -> -
+PASS run2 740: the same Computer, no DNS -> accepted | chain 740 fixv6comp740 | 740 alone -> fixv6comp740
+PASS run2 740: the same Computer, scanned as its name plus an unknown tail -> accepted | chain 740 fixv6comp740 | 740 alone -> fixv6comp740
+PASS run2 the reused-address case: retired Computer named after another machine owns the adapter -> declined | chain (no match)  | 730 alone -> -
+
+ALL PASS: 50 passed, 0 failed

@@ -1,0 +1,83 @@
+{
+ "versions": [
+  ["Qualys Integration for Security Operations", "sn_vul_qualys", "30.6.0"],
+  ["Vulnerability Response", "sn_vul", "30.6.1"],
+  ["Configuration Compliance", "sn_vulc", "30.6.0"],
+  ["Security Integration Framework", "sn_sec_int", "13.10.3"]
+ ],
+ "columns": [
+  ["sn_sec_int_config", "Integration Parameter", "default_value", "Default value", "string", "512", "729def50934e4710e3aef0aefaba1033", "Shipped default for an integration parameter."],
+  ["sn_sec_int_impl_config", "Integration Instance Parameter", "value", "Value", "string", "512", "1b9d2390934e4710e3aef0aefaba1029", "The value an administrator sets for one integration instance. This is what the script include reads."],
+  ["sys_rest_message", "REST Message", "rest_endpoint", "Endpoint", "string", "200", "4584182cf50003100a22c0b3dfa15121", "Base endpoint on the message."],
+  ["sys_rest_message_fn", "HTTP Method", "rest_endpoint", "Endpoint", "string", "200", "7084d42cf50003100a22c0b3dfa1518f", "Endpoint on the method. Anything typed inline into the URL is bounded by this."],
+  ["sys_rest_message_fn_param_defs", "HTTP Query Parameters", "value", "Value", "string", "1000", "4d84182cf50003100a22c0b3dfa15142", "The Value column of the HTTP Query Parameters related list. A literal id list typed here sits in this field."],
+  ["sys_rest_message_fn_param_defs", "HTTP Query Parameters", "name", "Name", "string", "80", "8184182cf50003100a22c0b3dfa15141", "Parameter name."],
+  ["sys_rest_message_fn_parameters", "Variable Substitutions", "value", "Test value", "string", "1000", "dd84182cf50003100a22c0b3dfa1519a", "Test value only. Not the live value: at run time setStringParameter supplies it."],
+  ["sys_rest_message_fn_headers", "HTTP Headers", "value", "Value", "string", "1000", "c984d42cf50003100a22c0b3dfa151ad", "Header value."],
+  ["sys_properties", "System Property", "value", "Value", "string", "4000", "31931420f50003100a22c0b3dfa151f8", "The widest of the configuration stores in this chain."]
+ ],
+ "config": [
+  ["truncation_limit_pc_result", "Truncation limit PC result", "5000", "5000", "c2d8cae9ff893a10e5ecffffffffffa2", "8da468a493660754e3aef0aefaba104d", "Page size for the Posture Info calls. Substituted into the List method."],
+  ["truncation_limit", "Truncation Limit", "300", "300.0", "a6ec90bde74303006b3663c343f6a946", "d594e86493660754e3aef0aefaba1082", "Page size used by the general Qualys REST integration."],
+  ["truncation_limit_host_list_integration", "Truncation Limit Host List Integration", "2000", "2000.0", "3c273382b32633002824070416a8dc8b", "9594e86493660754e3aef0aefaba1045", "Page size for the host list integration."]
+ ],
+ "rest": {
+  "message": ["Qualys PC Posture Info", "73df601c0b400300cbf38ee337673a4e", "${apiServer}/api/2.0/fo/compliance/posture/info/"],
+  "methods": [
+   ["List", "7fdf601c0b400300cbf38ee337673a4e", "get"],
+   ["List Comprehensive", "06ef35684df9f650f877b7e146545a65", "get"]
+  ],
+  "paramsList": [
+   ["action", "list", "100", "154149100b800300cbf38ee337673a67"],
+   ["policy_id", "${policyId}", "101", "2310b01c0b400300cbf38ee337673a73"],
+   ["details", "Light", "102", "93f0701c0b400300cbf38ee337673af6"],
+   ["show_remediation_info", "1", "104", "8eca709c0b400300cbf38ee337673a67"],
+   ["truncation_limit", "${truncation_limit_pc_result}", "105", "decbc26d0b010300cbf38ee337673ae8"]
+  ],
+  "paramsComprehensive": [
+   ["action", "list", "100", "80ff39e44df9f650f877b7e146545a7e"],
+   ["policy_id", "${policyId}", "101", "db00cae44df9f650f877b7e146545ad6"],
+   ["details", "Light", "102", "181006684df9f650f877b7e146545a6d"],
+   ["show_remediation_info", "0", "103", "e1100ae44df9f650f877b7e146545a80"],
+   ["truncation_limit", "5000", "104", "a8208ee44df9f650f877b7e146545a2d"],
+   ["status", "Failed,Error", "105", "969b5e094df5ba50f877b7e146545ace"]
+  ]
+ },
+ "scripts": [
+  ["QualysPCResultsIntegration", "a54ea8d80b400300cbf38ee337673ad8", "sn_vul_qualys"],
+  ["Implementation", "4e15120053620300e8f9f745911c08f5", "sn_sec_int"]
+ ],
+ "codeLines": [
+  ["255", "restMessage.setStringParameter(\"apiServer\", this.config.url);"],
+  ["275", "parameters.processing = parameters.pending[0];"],
+  ["281", "restMessage.setStringParameter(\"policyId\", parameters.processing);"],
+  ["284", "var truncationLimit = this.config.truncation_limit_pc_result;"],
+  ["286", "restMessage.setStringParameter(\"truncation_limit_pc_result\", truncationLimit);"]
+ ],
+ "policyLoop": [
+  "_getPolicyIds: function() {",
+  "    var policyIds = [];",
+  "    var gr = new GlideRecord(\"sn_vulc_policy\");",
+  "    gr.addQuery(\"source\", this._SOURCE);",
+  "    gr.addQuery(\"is_deprecated\", \"false\");",
+  "    gr.addQuery(\"active\", \"true\");",
+  "    gr.addNotNullQuery(\"source_id_int\");",
+  "    gr.orderBy(\"source_id_int\");",
+  "    gr.query();",
+  "    while (gr.next()) {",
+  "        policyIds.push(gr.getValue(\"source_id_int\"));",
+  "    }",
+  "    return policyIds;",
+  "},",
+  "",
+  "parameters.pending = this._getPolicyIds();",
+  "parameters.processing = parameters.pending[0];",
+  "parameters.pending.splice(0, 1);"
+ ],
+ "readings": [
+  ["Longest query parameter value currently stored", "29 characters, against a declared limit of 1000", "Across every HTTP Query Parameter row on the instance. Nothing close to the limit is in use today."],
+  ["Longest system property value currently stored", "3,738 characters in glide.parameter.dump.table_denylist", "Of 4,000 sampled properties, 119 hold values longer than 1,000 characters, so the wider column is genuinely used."],
+  ["Write of 900, 1,000, 1,200 and 2,000 characters into the query parameter Value field", "All four read back at full length from a fresh query", "The declared 1,000 is applied by the form. A scripted write above it was retained on this version, so treat 1,000 as the supported ceiling rather than a hard cut."],
+  ["Endpoint read back after a 3,000 character setStringParameter call", "The ${ids} placeholder was still in the endpoint", "Substitution happens when the message is sent, not when the parameter is set, so no column length applies to a value passed this way."]
+ ]
+}

@@ -1,0 +1,116 @@
+/* USEM Network Interface Name Match
+   -------------------------------------------------------------------------------------------------
+   Network devices are scanned through their interface and VLAN addresses, and each of those carries
+   a DNS label made of the device name plus an interface tail ("-cz04-hsrp-vlan705", "-atm1-v201",
+   "-aom"), while the device CI is named with the leading part only. The rule walks the label from
+   the longest prefix to the shortest and takes the first prefix that names exactly one network
+   device.
+
+   Sample payload (one Qualys host record, used in every note below)
+   {
+     "ID": "1187423005",
+     "IP": "171.149.3.49",
+     "TRACKING_METHOD": "IP",
+     "OS": "Linux 2.6",
+     "DNS": "uspaltwrr01drm0119-cz04-hsrp-vlan705.network.bankofamerica.com"
+   }
+   Input  : sourceValue is the DNS field,
+            "uspaltwrr01drm0119-cz04-hsrp-vlan705.network.bankofamerica.com"; the rule also reads
+            the OS from sourcePayload.
+   Returns: the sys_id of the one Network Gear or Load Balancer device CI named with a prefix of the
+            label; null when the host shows no interface evidence, when no prefix names a device, or
+            when a prefix names two.
+   Sample : the IP Switch CI "uspaltwrr01drm0119", the longest prefix of the label that names a
+            device.
+
+   Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
+   Before : the hostname rules tried the whole label and USEM Management Interface Match looked for
+            a controller suffix; "vlan705" is not one.
+   Reaches: hosts whose DNS domain is an interface domain (".network." in our feed) or whose label
+            contains an interface marker segment such as "vlan705", "v201", "hsrp", "aom"; both
+            lists are declared in the script, at the top of the matching stage.
+   After  : USEM FQDN Name Hardware Match and USEM Load Balancer Service Match.
+   ------------------------------------------------------------------------------------------------- */
+(function process(rule, sourceValue, sourcePayload) {
+    if (!sourceValue)                             // nothing to look up
+        return null;
+    var full = ('' + sourceValue).trim().toLowerCase();   // "uspaltwrr01drm0119-cz04-hsrp-vlan705.network.bankofamerica.com"
+    var label = full.split('.')[0];               // "uspaltwrr01drm0119-cz04-hsrp-vlan705"
+    var segments = label.split('-');              // ["uspaltwrr01drm0119", "cz04", "hsrp", "vlan705"]
+    if (segments.length < 2)                      // no hyphen, no interface tail
+        return null;
+    // Classes that must never be matched (placeholder and technical CIs); the list lives in the
+    // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
+    var ignore = (typeof _ignoreClass != 'undefined' && _ignoreClass) ?
+        ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
+    // isMarker() says whether one hyphen segment of the label is a listed marker: the word itself
+    // ("vlan"), the word followed by digits only ("vlan705", "v201"), or, for words of three
+    // letters or more, a segment ending in the word ("multihostvip").
+    function isMarker(segment, words) {
+        for (var i = 0; i < words.length; i++) {
+            var w = words[i];
+            if (segment == w)
+                return true;
+            if (segment.indexOf(w) == 0 && /^[0-9]+$/.test(segment.substring(w.length)))
+                return true;
+            if (w.length >= 3 && segment.length > w.length && segment.substring(segment.length - w.length) == w)
+                return true;
+        }
+        return false;
+    }
+    // -- Interface evidence first -----------------------------------------------------------------
+    // The rule goes on only when the DNS domain contains a listed interface domain or one of the
+    // segments after the first is a listed marker. Plenty of ordinary server names contain hyphens
+    // ("ah-1047132-001"); without this check the prefix walk would strip real hostnames and could
+    // land on an unrelated device.
+    // Sample: the name contains ".network." and the segment "vlan705" is the marker "vlan" followed
+    //         by digits, so evidence is true on both counts.
+    //         "ah-1047132-001.corp.bankofamerica.com" has neither and the rule would decline.
+    // The domains under which devices are scanned per interface, and the label segments that mark
+    // an interface or VLAN address. Extend these two lists when a site uses another naming habit.
+    var domains = ['.network.'];
+    var markers = ['vlan', 'v', 'hsrp', 'vrrp', 'po', 'eth', 'gi', 'te', 'lo', 'mgmt', 'aom', 'vs', 'fab'];
+    var evidence = false;
+    for (var d = 0; d < domains.length; d++)
+        if (full.indexOf(domains[d]) != -1)
+            evidence = true;
+    for (var s = 1; s < segments.length; s++)
+        if (isMarker(segments[s], markers))
+            evidence = true;
+    if (!evidence)
+        return null;
+    // -- Walk the prefixes from the longest to the shortest ---------------------------------------
+    // One segment is dropped from the right at a time and the prefix is searched as a device name.
+    // The device name is the leading part of the label but its length varies by site, and trying
+    // the longest prefix first keeps "site-device-01" from being cut down to "site" when a CI with
+    // the longer name exists. The first prefix that finds anything decides: one CI is the match,
+    // two CIs mean the rule declines. Network devices live in two branches of the CMDB, Network
+    // Gear (switches, routers, firewalls) and Load Balancer, which the platform files under Server;
+    // both are searched and the hits are counted together.
+    // Sample: the prefixes tried are "uspaltwrr01drm0119-cz04-hsrp" (nothing),
+    //         "uspaltwrr01drm0119-cz04" (nothing) and "uspaltwrr01drm0119", which names the IP
+    //         Switch "uspaltwrr01drm0119" and nothing else, so its sys_id is returned. Two switches
+    //         named "ustxrdnwl01rsm004z" would make the rule decline at that prefix.
+    var tables = ['cmdb_ci_netgear', 'cmdb_ci_lb'];
+    for (var k = segments.length - 1; k >= 1; k--) {
+        var base = segments.slice(0, k).join('-');   // longest prefix first, e.g. "uspaltwrr01drm0119-cz04-hsrp"
+        var hits = [];
+        for (var t = 0; t < tables.length; t++) {
+            var gr = new GlideRecord(tables[t]);
+            if (!gr.isValid())
+                continue;
+            gr.addQuery('name', base);
+            if (ignore)
+                gr.addQuery('sys_class_name', 'NOT IN', ignore);
+            gr.query();
+            while (gr.next() && hits.length < 2)
+                hits.push(gr.getUniqueValue());
+        }
+        if (hits.length == 0)                     // nothing named like this, try a shorter prefix
+            continue;
+        if (hits.length > 1)                      // two devices carry this name, never guess
+            return null;
+        return hits[0];
+    }
+    return null;
+})(rule, sourceValue, sourcePayload);

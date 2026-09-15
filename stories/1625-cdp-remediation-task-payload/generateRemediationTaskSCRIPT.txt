@@ -1,0 +1,249 @@
+(function generateRemediationTaskPayload() {
+ 
+var TABLE_NAME = 'sn_vul_app_vulnerability';
+var TOPIC_NAME = 'sn_usem_remtask_outbound';
+var NAMESPACE = 'com.bofa.usem';
+var CORE_VERSION = '1.0.0';
+var OUTBOUND_VERSION = '1.0.0';
+ 
+/*
+* For a Background Script, specify the records to include.
+* Replace this query with your required filter.
+*/
+var encodedQuery =
+'numberINAVUL0010243,AVUL0010245,AVUL0010246,' +
+'AVUL0010247,AVUL0010248,AVUL0010249,' +
+'AVUL0010212,AVUL0010215,AVUL0010234,AVUL0010236';
+ 
+var activity = 'INSERT';
+var remediationTasks = [];
+ 
+var remTaskGR = new GlideRecord(TABLE_NAME);
+remTaskGR.addEncodedQuery(encodedQuery);
+remTaskGR.orderBy('number');
+remTaskGR.query();
+ 
+while (remTaskGR.next()) {
+remediationTasks.push({
+remediation_task: buildRemediationTask(remTaskGR)
+});
+}
+ 
+var payload = {
+envelope: {
+type: 'record',
+topic_name: TOPIC_NAME,
+namespace: NAMESPACE,
+core_version: CORE_VERSION,
+outbound_version: OUTBOUND_VERSION,
+event_id: generateUUID(),
+event_timestamp: getUTCTimestamp(),
+element_count: remediationTasks.length,
+element_activity: activity
+},
+rem_tasks: remediationTasks
+};
+ 
+var payloadString = JSON.stringify(payload, null, 2);
+ 
+gs.info('Remediation task payload:\n' + payloadString);
+ 
+/*
+* Set this value in a REST Message body, Stream Connect producer,
+* IntegrationHub action output, event parameter, or staging record.
+*/
+return payloadString;
+ 
+ 
+/**
+* Builds one remediation task object.
+*/
+function buildRemediationTask(gr) {
+var task = {};
+ 
+addDisplayValue(task, gr, 'assigned_to');
+addDisplayValue(task, gr, 'assignment_type');
+addDateTime(task, gr, 'closed_at');
+addDisplayValue(task, gr, 'closed_by');
+ 
+addValue(task, gr, 'defer_extend_count');
+addValue(task, gr, 'number');
+ 
+addDateTime(task, gr, 'opened_at');
+addDisplayValue(task, gr, 'opened_by');
+ 
+addValue(task, gr, 'reassignment_count');
+addDate(task, gr, 'resolution_date');
+addDisplayValue(task, gr, 'resolved_by');
+ 
+addValue(task, gr, 'risk_score');
+addValue(task, gr, 'short_description');
+ 
+addDisplayValue(task, gr, 'state');
+ 
+addDateTime(task, gr, 'status_updated_on');
+addValue(task, gr, 'sys_created_by');
+addDateTime(task, gr, 'sys_created_on');
+addValue(task, gr, 'sys_updated_by');
+addDateTime(task, gr, 'sys_updated_on');
+ 
+addValue(task, gr, 'total_cis');
+addDisplayValue(task, gr, 'ttr_status');
+addDateTime(task, gr, 'ttr_target_date');
+ 
+addValue(task, gr, 'defer_count');
+addValue(task, gr, 'total_vis');
+ 
+/*
+* Send a plain URL. Do not send the HTML anchor markup shown
+* in the sample because it makes the JSON invalid.
+*/
+task.u_avul_record_url = buildWorkspaceURL(gr);
+ 
+addDisplayValue(task, gr, 'u_verification_status');
+ 
+return task;
+}
+ 
+ 
+/**
+* Adds the raw database value when the field has a value.
+*/
+function addValue(target, gr, fieldName) {
+if (!gr.isValidField(fieldName)) {
+return;
+}
+ 
+var value = gr.getValue(fieldName);
+ 
+if (!gs.nil(value)) {
+target[fieldName] = String(value);
+}
+}
+ 
+ 
+/**
+* Adds the display value for choice and reference fields.
+*/
+function addDisplayValue(target, gr, fieldName) {
+if (!gr.isValidField(fieldName)) {
+return;
+}
+ 
+var rawValue = gr.getValue(fieldName);
+ 
+if (gs.nil(rawValue)) {
+return;
+}
+ 
+var displayValue = gr.getDisplayValue(fieldName);
+ 
+target[fieldName] = !gs.nil(displayValue)
+? String(displayValue)
+: String(rawValue);
+}
+ 
+ 
+/**
+* Formats a Glide date/time as MM-dd-yyyy HH:mm:ss.
+*/
+function addDateTime(target, gr, fieldName) {
+if (!gr.isValidField(fieldName)) {
+return;
+}
+ 
+var value = gr.getValue(fieldName);
+ 
+if (!gs.nil(value)) {
+target[fieldName] = formatDateTime(value);
+}
+}
+ 
+ 
+/**
+* Formats a date-only value as MM-dd-yyyy.
+*/
+function addDate(target, gr, fieldName) {
+if (!gr.isValidField(fieldName)) {
+return;
+}
+ 
+var value = gr.getValue(fieldName);
+ 
+if (!gs.nil(value)) {
+target[fieldName] = formatDate(value);
+}
+}
+ 
+ 
+function formatDateTime(value) {
+if (gs.nil(value)) {
+return '';
+}
+ 
+var text = String(value);
+var parts = text.split(' ');
+ 
+return formatDate(parts[0]) +
+(parts.length > 1 ? ' ' + parts[1] : '');
+}
+ 
+ 
+function formatDate(value) {
+if (gs.nil(value)) {
+return '';
+}
+ 
+var datePart = String(value).split(' ')[0];
+var pieces = datePart.split('-');
+ 
+if (pieces.length !== 3) {
+return datePart;
+}
+ 
+return pieces[1] + '-' + pieces[2] + '-' + pieces[0];
+}
+ 
+ 
+/**
+* Builds the workspace record URL using the instance URL property.
+*/
+function buildWorkspaceURL(gr) {
+var instanceURL = gs.getProperty('glide.servlet.uri');
+ 
+if (!instanceURL.endsWith('/')) {
+instanceURL += '/';
+}
+ 
+return instanceURL +
+'now/vr-analysis/record/' +
+gr.getTableName() +
+'/' +
+gr.getUniqueValue();
+}
+ 
+ 
+/**
+* gs.generateGUID() returns a 32-character value.
+* This formats it as a standard UUID.
+*/
+function generateUUID() {
+var guid = String(gs.generateGUID()).replace(/-/g, '');
+ 
+return guid.substring(0, 8) + '-' +
+guid.substring(8, 12) + '-' +
+guid.substring(12, 16) + '-' +
+guid.substring(16, 20) + '-' +
+guid.substring(20, 32);
+}
+ 
+ 
+/**
+* Returns UTC timestamp in ISO-8601 format.
+*/
+function getUTCTimestamp() {
+return String(new GlideDateTime().getValue())
+.replace(' ', 'T') + 'Z';
+}
+ 
+})();

@@ -1,0 +1,64 @@
+{
+ "field_creation": {
+  "note": "u_primary_ait reference column added to cmdb_ci (103,308 rows)",
+  "wall_s": 137.8
+ },
+ "walk_ci_to_services": {
+  "cis": 93,
+  "services_found": 253,
+  "total_ms": 2008,
+  "ms_per_ci": 21.6,
+  "api": "global.CIUtils().servicesAffectedByCI(ci, {maxDepth: 10, maxSize: 1000})"
+ },
+ "ci_stamp_updateMultiple": {
+  "rows": 100001,
+  "ms": 295652,
+  "ms_per_row": 2.96,
+  "note": "cmdb_ci_unclassed_hardware, setWorkflow(false), autoSysFields(false); per-row because the table hierarchy/audit disables the single-statement mode"
+ },
+ "ci_stamp_in_list": {
+  "rows": 11127,
+  "ms": 16613,
+  "ms_per_row": 1.49
+ },
+ "di_join_count": {
+  "rows": 11134,
+  "ms": 198,
+  "query": "cmdb_ci.u_primary_ait=<AIT>"
+ },
+ "di_stamp_from_ci": {
+  "rows": 11136,
+  "ms": 25555,
+  "ms_per_row": 2.29,
+  "query": "cmdb_ci.u_primary_ait=<AIT>^u_primary_ait!=<AIT>^ORu_primary_aitISEMPTY",
+  "note": "audited table (whitelist) -> per-row updates even with rules off"
+ },
+ "di_stamp_idempotent_rerun": {
+  "rows": 0,
+  "ms": 1375,
+  "note": "same statement when nothing is stale: pure query cost over 281,857 rows"
+ },
+ "drift_count_per_ait": {
+  "rows": 0,
+  "ms": 1366
+ },
+ "ait_flip_2000_cis": {
+  "ci_flip_ms": 6184,
+  "cis": 2001,
+  "di_restamp_ms": 4089,
+  "dis": 2004
+ },
+ "per_record_rules_off": {
+  "rows": 2000,
+  "ms": 3919,
+  "ms_per_row": 1.96
+ },
+ "per_record_rules_on": {
+  "rows": 300,
+  "ms": 1292,
+  "ms_per_row": 4.31
+ },
+ "null_semantics": {
+  "finding": "field!=value excludes rows where the field is empty; the condition must add ^ORfieldISEMPTY. Clearing through updateMultiple needs setValue(field, 'NULL')."
+ }
+}

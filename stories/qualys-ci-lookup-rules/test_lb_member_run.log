@@ -1,0 +1,29 @@
+fixtures created: none (all present)
+PASS run1 one member behind the virtual server, address on the server record -> the server | chain 455 lbsrv-one | 455 alone -> lbsrv-one
+PASS run1 the same virtual server scanned by address only -> the server | chain 455 lbsrv-one | 455 alone -> lbsrv-one
+PASS run1 the same virtual server with a Linux fingerprint and a -vip label -> the server | chain 455 lbsrv-one | 455 alone -> lbsrv-one
+PASS run1 three members behind the virtual server -> declined, the service rule attaches the virtual server | chain 460 vip-many | 455 alone -> -
+PASS run1 virtual server without a pool -> declined, the virtual server record | chain 460 vip-nopool | 455 alone -> -
+PASS run1 pool and member linked by relationships only, member address on an adapter -> the server | chain 455 lbsrv-rel | 455 alone -> lbsrv-rel
+PASS run1 member address on an IP Address record of the server -> the server | chain 455 lbsrv-ipr | 455 alone -> lbsrv-ipr
+PASS run1 member without an address, related to the server -> the server | chain 455 lbsrv-relsrv | 455 alone -> lbsrv-relsrv
+PASS run1 member address carried by two device records -> declined, the virtual server record | chain 460 vip-dup | 455 alone -> -
+PASS run1 the only member is the load balancer itself -> declined, the virtual server record | chain 460 vip-lbonly | 455 alone -> -
+PASS run1 a virtual address with no service record -> no match | chain (no match)  | 455 alone -> -
+PASS run1 no VIP sign: a Red Hat host on the virtual address -> the rule does not run | chain (no match)  | 455 alone -> -
+PASS run1 the real server scanned on its own address and name -> the name rule, untouched | chain 400 lbsrv-one
+PASS run2 one member behind the virtual server, address on the server record -> the server | chain 455 lbsrv-one | 455 alone -> lbsrv-one
+PASS run2 the same virtual server scanned by address only -> the server | chain 455 lbsrv-one | 455 alone -> lbsrv-one
+PASS run2 the same virtual server with a Linux fingerprint and a -vip label -> the server | chain 455 lbsrv-one | 455 alone -> lbsrv-one
+PASS run2 three members behind the virtual server -> declined, the service rule attaches the virtual server | chain 460 vip-many | 455 alone -> -
+PASS run2 virtual server without a pool -> declined, the virtual server record | chain 460 vip-nopool | 455 alone -> -
+PASS run2 pool and member linked by relationships only, member address on an adapter -> the server | chain 455 lbsrv-rel | 455 alone -> lbsrv-rel
+PASS run2 member address on an IP Address record of the server -> the server | chain 455 lbsrv-ipr | 455 alone -> lbsrv-ipr
+PASS run2 member without an address, related to the server -> the server | chain 455 lbsrv-relsrv | 455 alone -> lbsrv-relsrv
+PASS run2 member address carried by two device records -> declined, the virtual server record | chain 460 vip-dup | 455 alone -> -
+PASS run2 the only member is the load balancer itself -> declined, the virtual server record | chain 460 vip-lbonly | 455 alone -> -
+PASS run2 a virtual address with no service record -> no match | chain (no match)  | 455 alone -> -
+PASS run2 no VIP sign: a Red Hat host on the virtual address -> the rule does not run | chain (no match)  | 455 alone -> -
+PASS run2 the real server scanned on its own address and name -> the name rule, untouched | chain 400 lbsrv-one
+
+ALL PASS: 26 passed, 0 failed
