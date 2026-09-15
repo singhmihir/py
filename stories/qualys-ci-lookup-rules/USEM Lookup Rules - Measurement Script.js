@@ -161,6 +161,18 @@ function evidence(p) {
 function clip(s, n) { s = '' + (s || ''); return s.length > n ? s.substring(0, n - 1) + '~' : s; }
 
 var byRule = {}, agree = { same: 0, different: 0, usemOnly: 0, prodOnly: 0, none: 0 }, reasons = {}, pairs = {}, errors = 0;
+var nameConflicts = {}, conflictLines = [];
+// does the CI found carry the scanned host name? (same label, or the label is the CI name plus an interface tail)
+function nameAgrees(ciId, dns) {
+    var label = ('' + (dns || '')).toLowerCase().split('.')[0];
+    if (!label) return 'no label';
+    var ci = new GlideRecord('cmdb_ci');
+    if (!ci.get(ciId)) return 'no ci';
+    var name = ('' + ci.getValue('name')).toLowerCase().split('.')[0];
+    if (!name) return 'ci without name';
+    if (name == label || label.indexOf(name + '-') == 0 || name.indexOf(label) == 0) return 'agrees';
+    return 'differs: ci ' + name;
+}
 var ABSENT = 'nothing in the CMDB carries the name, the base name, the fqdn or the address';
 function notePair(e) {
     if (e.reason.indexOf('contradicts') == -1) return;
@@ -191,7 +203,14 @@ for (var s = 0; s < states.length; s++) {
         var res = runChain(p);
         if (res && res.error) { errors++; res = null; }
         var line = di.getValue('number') + ' | ' + clip(p.DNS, 60) + ' | ' + (p.IP || '') + ' | ' + clip(p.OS, 40);
-        if (res) byRule[res.rule.order + ' ' + res.rule.name] = (byRule[res.rule.order + ' ' + res.rule.name] || 0) + 1;
+        if (res) {
+            byRule[res.rule.order + ' ' + res.rule.name] = (byRule[res.rule.order + ' ' + res.rule.name] || 0) + 1;
+            var verdict = nameAgrees(res.ci, p.DNS);
+            if (verdict.indexOf('differs') == 0) {
+                nameConflicts[res.rule.order + ' ' + res.rule.name] = (nameConflicts[res.rule.order + ' ' + res.rule.name] || 0) + 1;
+                conflictLines.push(line + ' | ' + res.rule.order + ' -> ' + ciLabel(res.ci) + ' | ' + verdict);
+            }
+        }
         if (res && prodCi && states[s][0] == 'matched') {
             if (res.ci == prodCi) agree.same++;
             else { agree.different++; lists.different.push(line + ' | today: ' + ciLabel(prodCi) + ' via ' + (prodRule || prodType) + ' | usem: ' + res.rule.order + ' -> ' + ciLabel(res.ci)); }
@@ -219,6 +238,9 @@ out.push('');
 out.push('--- matches per rule ---');
 for (var k in byRule) out.push('  ' + k + ': ' + byRule[k]);
 out.push('');
+out.push('--- matches where the CI name differs from the scanned host name, per rule ---');
+for (var nk in nameConflicts) out.push('  ' + nameConflicts[nk] + '  ' + nk);
+out.push('');
 out.push('--- against what the items hold today ---');
 out.push('  same CI: ' + agree.same + ' | different CI: ' + agree.different + ' | rules match an item that is unmatched today: ' + agree.usemOnly + ' | rules decline an item matched today: ' + agree.prodOnly + ' | both unmatched: ' + agree.none);
 out.push('');
@@ -231,6 +253,7 @@ function list(title, arr) {
     out.push(''); out.push('--- ' + title + ' (' + arr.length + (arr.length > LIST_CAP ? ', first ' + LIST_CAP : '') + ') ---');
     for (var i = 0; i < arr.length && i < LIST_CAP; i++) out.push('  ' + arr[i]);
 }
+list('matches where the CI name differs from the scanned host name', conflictLines);
 list('different CI than today', lists.different);
 list('rules decline an item matched today', lists.prodOnly);
 list('rules match an item unmatched today', lists.usemOnly);
