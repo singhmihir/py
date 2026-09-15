@@ -19,8 +19,9 @@
    Input  : sourceValue is the DNS field, "hklvteqoradbp3.hk.baml.com"; the rule also reads the OS
             and the IP from sourcePayload.
    Returns: the sys_id of the CI at the end of the chain DNS Name -> IP Address -> adapter -> CI,
-            its class agreeing with the scanned OS when one is known; when several CIs answer to the
-            name, the one whose chain runs through the scanned IP; null otherwise.
+            its class agreeing with the scanned OS when one is known (a Linux fingerprint agrees
+            with Network Gear, Load Balancer and Storage Server records too); when several CIs
+            answer to the name, the one whose chain runs through the scanned IP; null otherwise.
    Sample : the Linux Server "hklvteqoradbp3", reached through DNS Name "hklvteqoradbp3.hk.baml.com"
             -> IP Address "167.202.60.26" -> adapter "eth0".
 
@@ -75,9 +76,12 @@
     var pref = classFor(sourcePayload.OS);
     // agrees() decides whether a CI of class cls can be the scanned host once the OS gave a class:
     // the same class, one of its sub-classes, or one of its parents (a Cisco IOS host may be kept
-    // as a plain Network Gear or Hardware record). Any other class is a different kind of machine:
-    // a Computer named or addressed like a router is a namesake or a reused address, never the
-    // router. With no class from the OS nothing is refused.
+    // as a plain Network Gear or Hardware record). A Linux fingerprint is also accepted against
+    // Network Gear, Load Balancer and Storage Server records: switches, balancers and storage nodes
+    // run Linux underneath and Qualys reports that kernel, so the fingerprint says nothing against
+    // those classes. Any other class is a different kind of machine: a Windows Server named like
+    // the scanned Linux host is a namesake, never the host. With no class from the OS nothing is
+    // refused.
     function parentsOf(table) {                   // the class and every class above it
         var out = [table];
         var db = new GlideRecord('sys_db_object');
@@ -95,7 +99,10 @@
     function agrees(cls) {
         if (!pref || cls == pref)
             return true;
-        if (parentsOf(cls).indexOf(pref) != -1)     // cls is a sub-class of pref
+        var above = parentsOf(cls);
+        if (pref == 'cmdb_ci_linux_server' && (above.indexOf('cmdb_ci_netgear') != -1 || above.indexOf('cmdb_ci_lb') != -1 || above.indexOf('cmdb_ci_storage_server') != -1))
+            return true;                          // an appliance reporting the Linux it runs on
+        if (above.indexOf(pref) != -1)               // cls is a sub-class of pref
             return true;
         return parentsOf(pref).indexOf(cls) != -1;   // cls is a parent of pref
     }
@@ -124,9 +131,11 @@
     // otherwise the rule declines.
     // Sample: the chain ends on a Linux Server, the class pref holds, so it is counted: count is 1
     //         and the sys_id of "hklvteqoradbp3" is returned. A Computer at the end of the chain
-    //         would also count (a parent of Linux Server); an IP Router would be skipped. Were the
-    //         name also linked to an address of a second Linux Server, ipOwners would hold only the
-    //         CI reached through "167.202.60.26" and that one would be returned.
+    //         would also count (a parent of Linux Server), and so would an IP Switch or a Load
+    //         Balancer, appliances that report the Linux they run on; a Windows Server would be
+    //         skipped. Were the name also linked to an address of a second Linux Server, ipOwners
+    //         would hold only the CI reached through "167.202.60.26" and that one would be
+    //         returned.
     var owners = {}, ipOwners = {};
     var count = 0, first = null;
     while (gr.next()) {

@@ -13,8 +13,8 @@
    }
    Input  : sourceValue is the IP field, "30.162.178.23".
    Returns: the sys_id of the CI at the end of the chain IP Address -> adapter -> CI, its class
-            agreeing with the scanned OS when one is known; null for several owners or a load
-            balancer.
+            agreeing with the scanned OS when one is known and its name the scanned hostname when
+            the scan carries one; null for several owners, a load balancer or a differing name.
    Sample : the Server at the end of the chain IP Address "30.162.178.23" -> adapter "eth0" -> CI;
             neither the Server record nor the adapter record carries the address itself.
 
@@ -97,6 +97,23 @@
         var lb = new GlideRecord('cmdb_ci_lb');
         return lb.isValid() && lb.get(id);
     }
+    // nameAgrees() checks the CI found against the name the scan carries. With no DNS in the
+    // payload there is nothing to check. Otherwise the first label of the CI name must be the
+    // scanned label, or the scanned label must be that name plus an interface tail ("<name>-mgmt"),
+    // or the CI name must be the label plus a tail. A CI named differently sits on a reused address
+    // (a lease that moved, a decommissioned machine whose address was handed on) and is not the
+    // scanned host, whatever its class.
+    function nameAgrees(ciId) {
+        var label = ('' + (sourcePayload.DNS || '')).trim().toLowerCase().split('.')[0];
+        if (!label)
+            return true;
+        var ci = new GlideRecord('cmdb_ci');
+        ci.get(ciId);
+        var name = ('' + ci.getValue('name')).trim().toLowerCase().split('.')[0];
+        if (!name)
+            return true;
+        return name == label || label.indexOf(name + '-') == 0 || name.indexOf(label + '-') == 0;
+    }
     // -- IP Address records carrying the address --------------------------------------------------
     // nic.cmdb_ci reaches the CI two links away; the record must belong to an adapter that belongs
     // to a CI outside the ignored classes.
@@ -110,15 +127,18 @@
     if (ignore)
         ipGr.addQuery('nic.cmdb_ci.sys_class_name', 'NOT IN', ignore);
     ipGr.query();
-    // -- One owning CI whose class agrees, and not a load balancer --------------------------------
+    // -- One owning CI whose class agrees, not a load balancer, carrying the scanned name ---------
     // An owner whose class contradicts the scanned OS is skipped: the address record then belongs
     // to a different kind of machine, most often a stale or misattributed discovery record. Each
     // remaining owner is counted once, so one device with two address records counts once and two
     // devices count twice. Two different owners cannot be told apart by the address and the rule
     // declines; a single owner that is a load balancer is refused too, because the address is then
-    // a virtual IP and the scanned host sits behind it.
+    // a virtual IP and the scanned host sits behind it; and when the scan carries a hostname the
+    // owner must be named with it, otherwise the address has been reused by another machine.
     // Sample: pref is empty for the sample, so every owner counts; one record, one owner: count is
-    //         1, the owner is not a Load Balancer, so the sys_id of the Server is returned. With OS
+    //         1, the owner is not a Load Balancer, the sample carries no DNS so no name is checked,
+    //         and the sys_id of the Server is returned. A scan carrying the name "vk1660790" whose
+    //         address record belongs to a Server named "vk1448212" would be declined. With OS
     //         "Cisco IOS 15.9", pref would be cmdb_ci_netgear and a record owned by a Computer
     //         would be skipped.
     var owners = {};
@@ -134,7 +154,7 @@
                 first = owner;
         }
     }
-    if (count == 1 && !isLoadBalancer(first))
+    if (count == 1 && !isLoadBalancer(first) && nameAgrees(first))
         return first;
     return null;
 })(rule, sourceValue, sourcePayload);

@@ -16,8 +16,9 @@
    Input  : sourceValue is the DNS field, "va2ausapabw0.bankofamerica.com"; the rule also reads the
             OS from sourcePayload.
    Returns: the sys_id of the one hardware CI named with the short hostname, accepted when its class
-            is the one the OS implies, a sub-class of it or a parent of it; null when the name is
-            shared or the class contradicts the scan.
+            is the one the OS implies, a sub-class of it or a parent of it, or an appliance class
+            (Network Gear, Load Balancer, Storage Server) for a Linux fingerprint; null when the
+            name is shared or the class contradicts the scan.
    Sample : the CI named "va2ausapabw0" in the plain Server class, a parent of AIX Server; it would
             also be accepted as an AIX Server, and rejected as, say, a Windows Server or an IP
             Router.
@@ -73,9 +74,12 @@
     var pref = classFor(sourcePayload.OS);
     // agrees() decides whether a CI of class cls can be the scanned host once the OS gave a class:
     // the same class, one of its sub-classes, or one of its parents (a Cisco IOS host may be kept
-    // as a plain Network Gear or Hardware record). Any other class is a different kind of machine:
-    // a Computer named or addressed like a router is a namesake or a reused address, never the
-    // router. With no class from the OS nothing is refused.
+    // as a plain Network Gear or Hardware record). A Linux fingerprint is also accepted against
+    // Network Gear, Load Balancer and Storage Server records: switches, balancers and storage nodes
+    // run Linux underneath and Qualys reports that kernel, so the fingerprint says nothing against
+    // those classes. Any other class is a different kind of machine: a Windows Server named like
+    // the scanned Linux host is a namesake, never the host. With no class from the OS nothing is
+    // refused.
     function parentsOf(table) {                   // the class and every class above it
         var out = [table];
         var db = new GlideRecord('sys_db_object');
@@ -93,7 +97,10 @@
     function agrees(cls) {
         if (!pref || cls == pref)
             return true;
-        if (parentsOf(cls).indexOf(pref) != -1)     // cls is a sub-class of pref
+        var above = parentsOf(cls);
+        if (pref == 'cmdb_ci_linux_server' && (above.indexOf('cmdb_ci_netgear') != -1 || above.indexOf('cmdb_ci_lb') != -1 || above.indexOf('cmdb_ci_storage_server') != -1))
+            return true;                          // an appliance reporting the Linux it runs on
+        if (above.indexOf(pref) != -1)               // cls is a sub-class of pref
             return true;
         return parentsOf(pref).indexOf(cls) != -1;   // cls is a parent of pref
     }
@@ -125,7 +132,8 @@
     // Sample: pref is cmdb_ci_aix_server and cls is cmdb_ci_server, a parent of AIX Server, so
     //         agrees() is true and the sys_id is returned. A Windows Server or an IP Router named
     //         "va2ausapabw0" is neither a sub-class nor a parent of AIX Server and the rule would
-    //         decline.
+    //         decline. An IP Switch named "cncnshasd03sae0002" scanned as "Ubuntu/Linux" is
+    //         accepted: the switch reports the Linux it runs on.
     if (!agrees(cls))
         return null;
     return id;

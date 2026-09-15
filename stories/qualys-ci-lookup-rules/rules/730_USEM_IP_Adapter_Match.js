@@ -13,8 +13,9 @@
    }
    Input  : sourceValue is the IP field, "30.162.178.22".
    Returns: the sys_id of the CI that owns the adapter carrying the scanned address, its class
-            agreeing with the scanned OS when one is known; null when adapters of two different CIs
-            carry it or the owner is a load balancer.
+            agreeing with the scanned OS when one is known and its name the scanned hostname when
+            the scan carries one; null when adapters of two different CIs carry it, the owner is a
+            load balancer or the name differs.
    Sample : the Server that owns the adapter "eth0" carrying "30.162.178.22"; the address is not
             written on the Server record itself.
 
@@ -97,6 +98,23 @@
         var lb = new GlideRecord('cmdb_ci_lb');
         return lb.isValid() && lb.get(id);
     }
+    // nameAgrees() checks the CI found against the name the scan carries. With no DNS in the
+    // payload there is nothing to check. Otherwise the first label of the CI name must be the
+    // scanned label, or the scanned label must be that name plus an interface tail ("<name>-mgmt"),
+    // or the CI name must be the label plus a tail. A CI named differently sits on a reused address
+    // (a lease that moved, a decommissioned machine whose address was handed on) and is not the
+    // scanned host, whatever its class.
+    function nameAgrees(ciId) {
+        var label = ('' + (sourcePayload.DNS || '')).trim().toLowerCase().split('.')[0];
+        if (!label)
+            return true;
+        var ci = new GlideRecord('cmdb_ci');
+        ci.get(ciId);
+        var name = ('' + ci.getValue('name')).trim().toLowerCase().split('.')[0];
+        if (!name)
+            return true;
+        return name == label || label.indexOf(name + '-') == 0 || name.indexOf(label + '-') == 0;
+    }
     // -- Adapters carrying the address ------------------------------------------------------------
     // Adapters with the scanned address that belong to a CI outside the ignored classes.
     // Sample: the adapter "eth0" with ip_address "30.162.178.22" belongs to a Server; that is the
@@ -107,18 +125,21 @@
     if (ignore)
         nic.addQuery('cmdb_ci.sys_class_name', 'NOT IN', ignore);
     nic.query();
-    // -- One owning CI whose class agrees, and not a load balancer --------------------------------
+    // -- One owning CI whose class agrees, not a load balancer, carrying the scanned name ---------
     // An owner whose class contradicts the scanned OS is skipped: the address record then belongs
     // to a different kind of machine, most often a stale or misattributed discovery record. Each
     // remaining owner is counted once, so one server with two adapters on the address counts once
     // and two servers count twice. Two different owners cannot be told apart by the address and the
     // rule declines; a single owner that is a load balancer is refused too, because the address is
-    // then a virtual IP and the scanned host sits behind it.
+    // then a virtual IP and the scanned host sits behind it; and when the scan carries a hostname
+    // the owner must be named with it, otherwise the address has been reused by another machine.
     // Sample: pref is empty for the sample, so every owner counts; one adapter, one owner: count is
-    //         1, the owner is not a Load Balancer, so the sys_id of the Server is returned. A
-    //         second server with an adapter on "30.162.178.22" would make the rule decline. With OS
-    //         "Cisco IOS 15.9", pref would be cmdb_ci_netgear and an adapter owned by a Computer
-    //         would be skipped.
+    //         1, the owner is not a Load Balancer, the sample carries no DNS so no name is checked,
+    //         and the sys_id of the Server is returned. A second server with an adapter on
+    //         "30.162.178.22" would make the rule decline; so would a scan carrying the name
+    //         "vk1660790" whose adapter belongs to a Server named "vk1448212". With OS "Cisco IOS
+    //         15.9", pref would be cmdb_ci_netgear and an adapter owned by a Computer would be
+    //         skipped.
     var owners = {};
     var count = 0, first = null;
     while (nic.next()) {
@@ -132,7 +153,7 @@
                 first = owner;
         }
     }
-    if (count == 1 && !isLoadBalancer(first))
+    if (count == 1 && !isLoadBalancer(first) && nameAgrees(first))
         return first;
     return null;
 })(rule, sourceValue, sourcePayload);
