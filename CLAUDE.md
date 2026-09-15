@@ -121,9 +121,13 @@ Follow it without being asked again.
   reads the IP field (dead rule) and 450 runs a longer script than delivered. `measure_rules.js` (read-only, run by
   Mihir on the client instance, output attached to INC0010003) is the agreed way to judge the rules: 499/500 matched
   items reproduce, unmatched are 87% hosts absent from the CMDB, then class contradictions (44/500), address
-  duplicates and retired records. Closed out 15 Sep with **no rule change**: retired CIs stay candidates by the client's design expectation (do not
-  propose excluding them again); two proposals parked for a future story (Linux fingerprint compatible with Network
-  Gear / Load Balancer classes; a storage node rule). Rule 430 on the client instance reads the IP field and must be
+  duplicates and retired records. Decisions 15 Sep: retired CIs stay candidates by the client's design expectation (do not propose excluding them
+  again; the platform property `sn_sec_cmn.filterOutDecommissionedCI` governs it anyway); the appliance change was built the
+  same day; a storage node rule stays a follow-up. `cmdb_ci_ip_phone` extends `cmdb_ci` directly and `cmdb_ci_scanner` sits
+  under `cmdb_ci_imaging_hardware`, both outside the Hardware tree, so rule 415 `USEM Device Name Match` (set Device Name
+  Match V1.0) resolves the contact-centre Avaya phones (`avx<mac tail>.cc.bofa.com`, no OS) and scanners by name. Unmatched
+  items get an IRE placeholder in `cmdb_ci_unclassed_hardware` (ignored class, `matching_type created_by_ire`) and are only
+  re-evaluated on re-import or reapply. Rule 430 on the client instance reads the IP field and must be
   set back to DNS by their administrator. **Never change a lookup rule without asking him first.** Full state in
   `stories/qualys-ci-lookup-rules/README.md`.
 - Kafka outbound (SNOWUSEMTP-1625): topic `sn_usem_remtask_outbound`, namespace `com.bofa.usem`,

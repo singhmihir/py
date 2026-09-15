@@ -393,7 +393,7 @@ def class_pref_chain(os_text, cls, label):
     ])
 
 
-POLISHED = {'350', '410', '700', '705', '730', '740'}   # re-issued 15 Sep with the aligned layout; the rest keep their delivered text
+POLISHED = {'350', '410', '415', '700', '705', '730', '740'}   # re-issued 15 Sep with the aligned layout; the rest keep their delivered text
 TRAIL = re.compile(r'^(\s*)(\S.*?\S)\s*// (.*)$')
 
 
@@ -735,6 +735,60 @@ def rule_410():
         CLOSE]
     return write('410', 'USEM Hostname Hardware Match', h + '\n' + '\n'.join(body))
 RULES.append(rule_410)
+
+
+def rule_415():
+    value = 'avxdd008a.cc.bofa.com'
+    payload = {"ID": "753026617", "IP": "10.190.29.132", "TRACKING_METHOD": "IP", "DNS": value}
+    h = header('USEM Device Name Match',
+        'Two device classes sit outside the Hardware tree of the CMDB: IP Phone extends the base CI class directly and Scanner sits under Imaging Hardware. The hardware-wide name rules never see those records, and the class rules need an OS that a phone or a scanner does not report to an unauthenticated scan. This rule looks for the scanned host name in exactly those classes: one device carrying the name is the match, and when the name is shared the scanned address breaks the tie.',
+        payload, 'DNS', value, 'the OS and the IP',
+        'the sys_id of the one IP Phone or Imaging Hardware CI named with the host name; when several carry it, the one whose ip_address is the scanned address; null otherwise, and null when the scanned OS names a server or desktop system.',
+        'the IP Phone CI "AVXDD008A" (an Avaya station named "avx" plus the tail of its MAC address), whose ip_address is also "10.190.29.132".',
+        'USEM Hostname Hardware Match searched the Hardware tree for the plain host name; the phone and scanner classes are not in that tree, so it declined, and every earlier rule needed an OS class, a serial or a Cisco phone label.',
+        'phones and scanners named in DNS, which in our feed scan without an OS; in the contact-centre domain cc.bofa.com nearly every host is such a phone.',
+        'USEM Management Interface Match, then the interface, service and address rules.')
+    body = [OPEN, CHECK, short_prep(value, 'avxdd008a'),
+        "    var ip = sourcePayload.IP ? '' + sourcePayload.IP : '';   // \"10.190.29.132\", only used to break a tie",
+        IGNORE_BLOCK,
+        stage('The scanned OS must not name a different kind of machine',
+              'A phone or a scanner reports no OS to an unauthenticated scan, or a guess such as an embedded Linux kernel, "Unknown OS" or a vendor name. Only an OS that clearly names a server or desktop system (Windows, ESXi, AIX, Solaris, HP-UX) rules the device out; a Linux kernel fingerprint is what an appliance shows and is accepted, and so is anything that mentions a phone.',
+              'the sample carries no OS, so nothing rules the device out; "Foundry Networks", "Unknown OS" or "Linux 2.x" on a phone would pass too, "Windows 10 Enterprise" would end the rule here.'),
+        CLASSFOR,
+        "    var os = ('' + (sourcePayload.OS || '')).toLowerCase();",
+        '    var pref = classFor(os);',
+        "    if (pref && pref != 'cmdb_ci_linux_server' && os.indexOf('phone') == -1)",
+        '        return null;',
+        stage('Search the device classes outside the Hardware tree',
+              'Each class is searched by name, sub-classes included, with the ignored classes left out. The classes are listed here rather than derived because they are exactly the device classes the CMDB keeps outside the Hardware tree; a scanner or phone record loaded elsewhere is not the concern of this rule.',
+              'cmdb_ci_ip_phone holds one record named "AVXDD008A" (the query is not case-sensitive) with ip_address "10.190.29.132"; cmdb_ci_imaging_hardware holds none, so found has one entry and onAddress the same one.'),
+        "    var classes = ['cmdb_ci_ip_phone', 'cmdb_ci_imaging_hardware'];   // IP phones; scanners and other imaging devices",
+        '    var found = [], onAddress = [];',
+        '    for (var i = 0; i < classes.length; i++) {',
+        '        var gr = new GlideRecord(classes[i]);',
+        '        if (!gr.isValid())                        // class not installed here, try the next one',
+        '            continue;',
+        "        gr.addQuery('name', host);",
+        '        if (ignore)',
+        "            gr.addQuery('sys_class_name', 'NOT IN', ignore);",
+        '        gr.query();',
+        '        while (gr.next()) {',
+        '            found.push(gr.getUniqueValue());',
+        "            if (ip && ('' + gr.getValue('ip_address')) == ip)",
+        '                onAddress.push(gr.getUniqueValue());',
+        '        }',
+        '    }',
+        stage('One device carrying the name, the scanned address as the tie-break',
+              'One device named with the host is the match: a phone name is built from its MAC address and a scanner name from its asset label, so the name alone identifies the device even after its DHCP address has changed. When the name is shared (a phone re-registered under a new record, a scanner loaded twice) the one whose ip_address is the scanned address is taken, and only when exactly one carries it; otherwise the rule declines.',
+              'found holds the one IP Phone "AVXDD008A", so its sys_id is returned. Were a second phone named "avxdd008a", only the one on "10.190.29.132" would be taken; two phones on that address would make the rule decline.'),
+        '    if (found.length == 1)',
+        '        return found[0];',
+        '    if (found.length > 1 && onAddress.length == 1)',
+        '        return onAddress[0];',
+        '    return null;',
+        CLOSE]
+    return write('415', 'USEM Device Name Match', h + '\n' + '\n'.join(body))
+RULES.append(rule_415)
 
 
 def rule_450():
