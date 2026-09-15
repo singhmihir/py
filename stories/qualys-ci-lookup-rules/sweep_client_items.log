@@ -1,21 +1,21 @@
 matched today: 34 items, 24 chain matches, 13s
-batch 1/12 offset 0: 500 items, chain matches 2, rule hits 6, errors 0, 48s
-batch 2/12 offset 8334: 500 items, chain matches 0, rule hits 0, errors 0, 45s
-batch 3/12 offset 16668: 500 items, chain matches 0, rule hits 0, errors 0, 47s
-batch 4/12 offset 25002: 500 items, chain matches 0, rule hits 0, errors 0, 54s
-batch 5/12 offset 33336: 500 items, chain matches 0, rule hits 0, errors 0, 43s
-batch 6/12 offset 41670: 500 items, chain matches 0, rule hits 0, errors 0, 46s
+batch 1/12 offset 0: 500 items, chain matches 2, rule hits 6, errors 0, 116s
+batch 2/12 offset 8334: 500 items, chain matches 0, rule hits 0, errors 0, 43s
+batch 3/12 offset 16668: 500 items, chain matches 0, rule hits 0, errors 0, 46s
+batch 4/12 offset 25002: 500 items, chain matches 0, rule hits 0, errors 0, 46s
+batch 5/12 offset 33336: 500 items, chain matches 0, rule hits 0, errors 0, 45s
+batch 6/12 offset 41670: 500 items, chain matches 0, rule hits 0, errors 0, 52s
 batch 7/12 offset 50005: 500 items, chain matches 1, rule hits 1, errors 0, 45s
-batch 8/12 offset 58339: 500 items, chain matches 1, rule hits 1, errors 0, 44s
-batch 9/12 offset 66673: 500 items, chain matches 0, rule hits 0, errors 0, 44s
-batch 10/12 offset 75007: 500 items, chain matches 0, rule hits 0, errors 0, 45s
-batch 11/12 offset 83341: 500 items, chain matches 0, rule hits 0, errors 0, 46s
-batch 12/12 offset 91675: 500 items, chain matches 0, rule hits 0, errors 0, 46s
+batch 8/12 offset 58339: 500 items, chain matches 1, rule hits 1, errors 0, 43s
+batch 9/12 offset 66673: 500 items, chain matches 0, rule hits 0, errors 0, 41s
+batch 10/12 offset 75007: 500 items, chain matches 0, rule hits 0, errors 0, 43s
+batch 11/12 offset 83341: 500 items, chain matches 0, rule hits 0, errors 0, 42s
+batch 12/12 offset 91675: 500 items, chain matches 0, rule hits 0, errors 0, 42s
 
-items 6034 of 100010 | chain 35 ms/item | all rules alone 26 ms/item
+items 6034 of 100010 | chain 38 ms/item | all rules alone 28 ms/item
 payload shapes: {"dns_empty": 686, "dns_ip": 0, "dns_upper": 0, "dns_nodot": 0, "ip_empty": 5, "os_empty": 2919, "os_multi": 133, "tracking": {"IP": 6024, "AGENT": 2, "NETBIOS": 1, "Cloud Agent": 7}, "keys": {"tags": 6025, "q_tags": 6025, "ID": 6034, "IP": 6029, "TRACKING_METHOD": 6034, "DNS": 5348, "DNS_DATA": 5342, "OS": 3115, "FIRST_FOUND_DATE": 6025, "LAST_VULN_SCAN_DATETIME": 6025, "LAST_VM_SCANNED_DATE": 6025, "LAST_VM_SCANNED_DURATION": 6024, "LAST_COMPLIANCE_SCAN_DATETIME": 6025, "ASSET_GROUP_IDS": 6025, "LAST_VM_AUTH_SCANNED_DATE": 6025, "TAGS": 6025, "NETBIOS": 28, "LAST_VM_AUTH_SCANNED_DURATION": 181, "QG_HOSTID": 17, "USER_DEF": 3, "SERIAL_NUMBER": 16, "LAST_BOOT": 7, "HARDWARE_UUID": 7, "LAST_ACTIVITY": 7, "AGENT_STATUS": 7, "CLOUD_AGENT_RUNNING_ON": 7}}
 errors: none
-per rule ms total / max: 175: 1294 / 39, 180: 922 / 6, 200: 7446 / 80, 250: 4990 / 58, 260: 9700 / 75, 300: 4910 / 52, 310: 9816 / 52, 350: 12775 / 70, 400: 4870 / 43, 410: 9780 / 42, 415: 16173 / 75, 420: 1827 / 21, 430: 3852 / 71, 450: 9626 / 74, 460: 6153 / 79, 700: 4978 / 72, 705: 11201 / 62, 730: 12254 / 87, 740: 13372 / 71, 850: 9402 / 61
+per rule ms total / max: 175: 1140 / 44, 180: 1028 / 61, 200: 7811 / 75, 250: 5019 / 55, 260: 10284 / 64, 300: 5242 / 75, 310: 10415 / 71, 350: 13534 / 111, 400: 5021 / 47, 410: 10434 / 77, 415: 17047 / 85, 420: 1872 / 41, 430: 4221 / 104, 450: 10024 / 96, 455: 6030 / 126, 460: 5865 / 110, 700: 5317 / 110, 705: 11970 / 100, 730: 12879 / 126, 740: 13140 / 70, 850: 10229 / 108
 
 chain matches (28):
   SDI000000404786 | gfsmq-lta-wynbt1-vip.bankofamerica.com | 167.202.156.24 | F5 Networks Big-IP -> 260 gfsmq-lta-wynbt1-vip [cmdb_ci_lb_bigip] null

@@ -127,7 +127,11 @@ Follow it without being asked again.
   under `cmdb_ci_imaging_hardware`, both outside the Hardware tree, so rule 415 `USEM Device Name Match` (set Device Name
   Match V1.0) resolves the contact-centre Avaya phones (`avx<mac tail>.cc.bofa.com`, no OS) and scanners by name. Unmatched
   items get an IRE placeholder in `cmdb_ci_unclassed_hardware` (ignored class, `matching_type created_by_ire`) and are only
-  re-evaluated on re-import or reapply. Rule 430 on the client instance reads the IP field and must be
+  re-evaluated on re-import or reapply. Rule 455 `USEM Load Balancer Member Match` (set Load Balancer Member Match V1.0, before 460) walks Load Balancer
+  Service -> Pool -> Pool Member -> server and returns the real server only when exactly one sits behind the virtual server;
+  otherwise 460 attaches the VIP record. Rule 350 still lacks the load balancer refusal (open, needs Mihir's word).
+  Rhino/GlideRecord trap: `'' + gr.getValue(f)` is the string "null" for an empty field and `addQuery(f, 'null')` selects the
+  empty values; coerce with `|| ''` first. Rule 430 on the client instance reads the IP field and must be
   set back to DNS by their administrator. **Never change a lookup rule without asking him first.** Full state in
   `stories/qualys-ci-lookup-rules/README.md`.
 - Kafka outbound (SNOWUSEMTP-1625): topic `sn_usem_remtask_outbound`, namespace `com.bofa.usem`,

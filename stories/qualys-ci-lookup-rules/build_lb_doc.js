@@ -22,15 +22,16 @@ function table(headers, rows, widths, monoCols) {
 }
 const K = [];
 K.push(p(t('Load Balancer Addresses in USEM CI Matching', { bold: true, size: 32 }), { after: 30 }));
-K.push(p(t('How a scanned virtual address is resolved today, what is not in place, and what the check with the network team’s examples has to show', { color: MUTED }), { after: 120 }));
+K.push(p(t('How a scanned virtual address is resolved, how the real server behind a virtual server is reached, and what the check with the network team’s examples has to show', { color: MUTED }), { after: 120 }));
 
 K.push(h('1. In short'));
-K.push(p(t('Three things are in place for addresses that belong to a load balancer:')));
+K.push(p(t('Four things are in place for addresses that belong to a load balancer:')));
 K.push(n(t('A load balancer device is never matched through an address it answers on. The three address rules decline as soon as the address search lands on a Load Balancer record.')));
 K.push(n(t('A virtual server is matched to its Load Balancer Service record when the CMDB holds one. That record is the virtual IP itself, not the device and not the servers behind it.')));
 K.push(n(t('A DNS name that discovery has tied to an address recorded on a device’s network adapter is matched to that device. This resolves aliases to the machine that owns the address.')));
-K.push(p(t('One thing is not in place: turning a virtual address into the real addresses of the servers behind it (the “VIP to RIP” mapping). No rule reads the pool and pool member records, and the CMDB extracts looked at so far hold no such records for the virtual servers in question. A finding scanned on a virtual address therefore lands on the Load Balancer Service record when one exists, and stays unmatched otherwise. It is not attributed to the pool members.'), { fill: NOTE }));
-K.push(p(t('The mechanism described to the client, “DNS Name, then IP Address record, then adapter, then CI”, is mechanism 3 above. It reaches the device whose own adapter carries the address in the chain. A virtual address sits on the load balancer, not on a pool member’s adapter, so that chain cannot land on the real server behind a virtual IP. Whether the network data collection feed puts a virtual-to-real mapping anywhere in the CMDB is exactly what the examples will show; section 6 lists where to look.')));
+K.push(n(t('A virtual server with exactly one real server behind it in the CMDB is matched to that server. The rule walks the platform’s own load balancer model, Load Balancer Service to Pool to Pool Member to server, and hands the finding to the real server only when it is the single one; with several servers, or without pool data, the virtual server record keeps the finding.')));
+K.push(p(t('What this depends on: the pool and pool member records, or the equivalent relationships, must be in the CMDB. The CMDB extracts looked at so far hold no such records for the virtual servers in question, so for those the finding lands on the Load Balancer Service record when one exists and stays unmatched otherwise. Whether the network data collection feed puts the virtual-to-real mapping anywhere in the CMDB is exactly what the examples will show; section 6 describes the model the rule reads and section 7 how to check.'), { fill: NOTE }));
+K.push(p(t('The mechanism described to the client, “DNS Name, then IP Address record, then adapter, then CI”, is mechanism 3 above. It reaches the device whose own adapter carries the address in the chain. A virtual address sits on the load balancer, not on a pool member’s adapter, so that chain does not lead to the real server behind a virtual IP; mechanism 4 is the one that does, and it needs the pool records.')));
 
 K.push(h('2. What the rules read'));
 K.push(p(t('Every rule receives one Qualys host record. For a virtual server it looks like this:')));
@@ -77,16 +78,27 @@ K.push(table(['Link', 'Table', 'Sample'], [
 K.push(p(t('The chain has a class check (a Cisco IOS host is not accepted on a Computer at the end of the chain) and a tie-break: when a name leads to two devices, the one reached through the scanned address is taken.'), { before: 60 }));
 K.push(p(t('What this chain does not do: it only reaches a device whose own adapter carries the address in the chain. A virtual address is not on a pool member’s adapter; it sits on the load balancer. So this rule cannot translate a virtual IP into a real server. And if discovery has tied a virtual server’s DNS name to the address on the load balancer’s own interface, the chain ends on the load balancer device, which this rule does not refuse today; the address rules do. Section 8 proposes the one-line correction.'), { fill: NOTE }));
 
-K.push(h('6. What a virtual-to-real translation would need'));
-K.push(p(t('The platform’s own load balancer model already has the shape for it:')));
+K.push(h('6. Mechanism 4: the one real server behind the virtual server'));
+K.push(p(t('Rule Load Balancer Member Match runs just before the service rule, for the same hosts (a VIP sign is required) and finds the virtual server the same way. It then walks the platform’s own load balancer model:')));
 K.push(table(['Record', 'Table', 'Fields that carry the mapping'], [
   ['Load Balancer Service (the virtual server)', 'cmdb_ci_lb_service', 'ip_address, port, fqdn, pool (reference to the pool), load_balancer (the device)'],
   ['Load Balancer Pool', 'cmdb_ci_lb_pool', 'service (reference to the virtual server), load_balancer'],
   ['Load Balancer Pool Member (one real server address)', 'cmdb_ci_lb_pool_member', 'pool (reference to the pool), ip_address, service_port, load_balancer'],
   ['the real server', 'a device class, usually Server or Linux / Windows Server', 'ip_address, or its adapters and IP Address records carrying the member address; a Depends on::Used by relationship from the pool member is the usual link'],
 ], [3000, 2900, 4100], [1]));
-K.push(p(t('A rule that walked this model would: find the service for the scanned virtual IP (as today), read its pool, read the pool members, and resolve each member address to one server. That raises the design question that has to be answered before anything is built: a virtual server usually fronts several servers, and the platform attaches one CI to one discovered item. The choices are to keep the finding on the service record (today), to give the finding to the pool members (one finding per member, which the Qualys feed does not produce), or to keep the service record as the CI and use the members for ownership. That is a decision for the client, not a rule setting.'), { before: 60 }));
-K.push(p(t('What the extracts show so far: for the virtual servers pts-zelle-transfer-* and horizon-vip.* the CMDB holds DNS Name records and the placeholder records the import creates for unmatched hosts, and nothing in the three tables above. If the network data collection feed carries a virtual-to-real mapping, it is either loaded elsewhere or not loaded at all; the integration agreement does not mention it.')));
+K.push(p(t('Each hop is read both through the reference fields and through relationships, because a bulk load may fill one and not the other: the pool field on the service, pools pointing at the service, pools related to it; members pointing at the pool or related to it; each member address looked up on device records, adapters and IP Address records, and each member followed through its relationships to hardware. Load balancer devices and ignored classes are never counted as real servers. The distinct servers are then counted: exactly one is the match; none, or two or more, and the rule declines so that the service rule attaches the virtual server record.'), { before: 60 }));
+K.push(table(['Payload', 'What the CMDB holds', 'Result'], [
+  ['IP 171.203.142.26, OS "F5 Big IP", DNS crisp-tx.bankofamerica.com', 'service crisp-tx, pool crisp-tx-pool, one member 10.10.20.31, Linux Server usvacrispweb01 on that address', 'the Linux Server'],
+  ['the same virtual server scanned by address only', 'the same records', 'the Linux Server (service found by address)'],
+  ['a virtual server whose pool holds three members on three servers', 'service, pool, three members, three servers', 'declined; the service rule attaches the virtual server'],
+  ['a virtual server without a pool', 'service only', 'declined; the virtual server record'],
+  ['a member address carried by two device records', 'two servers on one member address', 'declined; the virtual server record'],
+  ['the only member is the load balancer itself', 'member address on the BIG-IP', 'declined; the virtual server record'],
+  ['pool and member linked by relationships only, no reference fields', 'relationships Depends on::Used by, member address on an adapter', 'the server'],
+  ['a Red Hat host on the virtual address without a VIP sign', 'not searched', 'rule does not run'],
+], [3600, 3700, 2700]));
+K.push(p(t('Why exactly one: the platform attaches one CI to one discovered item, and a virtual server that fronts several servers cannot be given to all of them by a lookup rule. One finding per member would need the Qualys feed to produce one item per member, which it does not. Keeping the virtual server record for those cases is the safe choice; if the client prefers another policy for shared pools (for example the pool members as related CIs for ownership), that is a separate piece of work outside the lookup rules.'), { before: 60 }));
+K.push(p(t('What the extracts show so far: for the virtual servers pts-zelle-transfer-* and horizon-vip.* the CMDB holds DNS Name records and the placeholder records the import creates for unmatched hosts, and nothing in the three tables above. For those the new rule declines and nothing changes. If the network data collection feed carries a virtual-to-real mapping, it is either loaded elsewhere or not loaded at all; the integration agreement does not mention it.')));
 
 K.push(h('7. How to run the check with the examples'));
 K.push(p(t('For each example the network team gives (a virtual address and the real servers they expect behind it), the attached read-only script prints everything the CMDB holds. Paste the virtual addresses into the list at the top and run it as a background script. It writes nothing. For each address it lists:')));
@@ -95,7 +107,7 @@ K.push(n(t('the Load Balancer Service records on the address or the name, with t
 K.push(n(t('the load balancer devices carrying the address, and the DNS Name and IP Address records tied to it, with the device at the end of that chain;'), 'steps'));
 K.push(n(t('the relationships that start or end at any of those records;'), 'steps'));
 K.push(n(t('the servers carrying each pool member address, so the expected real servers can be recognised.'), 'steps'));
-K.push(p(t('Reading the output: if the service, pool and members are there, the mapping exists and a rule can be written once the attribution choice is made. If only the service exists, the mapping is not in the CMDB. If nothing exists, the virtual server is not modelled at all and matching it to anything would be a guess.'), { before: 60 }));
+K.push(p(t('Reading the output: if the service, pool and members are there, the mapping exists and mechanism 4 applies as soon as the items are evaluated again. If only the service exists, the mapping is not in the CMDB and the finding stays on the virtual server record. If nothing exists, the virtual server is not modelled at all and matching it to anything would be a guess. When the mapping is kept elsewhere, the probe output shows where the hops break and the rule can be pointed at that place.'), { before: 60 }));
 
 K.push(h('8. One correction to make in the rules'));
 K.push(p(t('Layered DNS Match should refuse a Load Balancer device at the end of the chain, exactly as the address rules do. It is one condition in the last stage of that rule and changes nothing else. It closes the only way a virtual server’s DNS name could land on the load balancer device, and makes the statement “we never map the load balancer through a virtual address” hold for every rule. Not applied yet; to be applied on request.')));
