@@ -293,6 +293,43 @@ Hand-over on INC0010003: the update set XML and `415_USEM_Device_Name_Match.js`.
 record (source Qualys, order 415, source field DNS, lookup target CI, table sn_vul_qualys_host_attrb, method script, active,
 reapply on); the unmatched items then need a reapply or re-import to be evaluated again.
 
+## Load balancer addresses: the document and rule 455 (set "Qualys CI Lookup Rules Load Balancer Member Match" V1.0)
+Patrick Jungers asked where the virtual-IP-to-real-IP mapping Lori referred to lives in ServiceNow; William Tran asked Mihir to
+validate the scenario with her examples. What the delivered rules do with a virtual address: the address rules (705, 730, 740)
+refuse a load balancer device; 460 attaches the Load Balancer Service record (the VIP itself) when the host shows a VIP sign;
+350 follows DNS Name -> IP Address -> adapter -> CI, which resolves aliases to the device owning the address but cannot reach
+a pool member behind a virtual address. No rule read the pool model, and the CI extracts for `pts-zelle-transfer-*` and
+`horizon-vip.*` hold no service, pool or member records at all. Written up in `Load Balancer Addresses in CI Matching.docx`
+(`build_lb_doc.js`, four pages, plain words, payload samples and table-by-table mapping) with the read-only
+`Load Balancer Mapping - Probe Script.js` (paste the virtual addresses into VIPS; prints the discovered items, services,
+pools, members, devices, DNS chain, relationships and the servers on each member address). Both on INC0010003.
+
+On Mihir's "can we build the relationship": new rule **455 USEM Load Balancer Member Match** (`gen_rules.py` rule_455, IP field,
+just before 460). Same VIP sign and same service search as 460; then Load Balancer Service -> Pool -> Pool Member -> server,
+each hop read through the reference fields (`service.pool`, `pool.service`, `member.pool`) and through `cmdb_rel_ci`
+relationships in either direction; each member address looked up on device records, adapters and IP Address records, each
+member followed to hardware through relationships; load balancer devices and ignored classes never count. Exactly one distinct
+server is the match; none or several, and the rule declines so 460 attaches the virtual server record as before. Policy: one CI
+per discovered item, so a shared pool keeps the VIP record; any other policy for shared pools is outside the lookup rules.
+Deployed on its own in Global set `SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Load Balancer Member Match_V1.0`
+(`build_rules_v8.py`, `state_v8.json`).
+
+A trap found while testing: a pool member without an address gave the string "null" through `'' + getValue()`, and
+`addQuery('ip_address', 'null')` selects every device with an empty address (hundreds of servers). The rule keeps an empty
+address as an empty string and runs no address search for it.
+
+Tests `test_lb_member.py` (13 cases, run twice, 26 of 26 pass, `test_lb_member_run.log`; `remove` deletes the fixtures): a
+BIG-IP device, eight virtual servers and their pools, members and servers as marked fixtures. One member on the server record,
+by DNS, by address only and with a Linux fingerprint plus a `-vip` label; three members (declined, 460 attaches the VIP); no
+pool; pool and member linked by relationships only with the address on an adapter; the address on an IP Address record; a
+member without an address related to the server; a member address on two device records (declined); the balancer as the only
+member (declined); no service; no VIP sign; the real server scanned on its own name still resolved by 400. Regression with 455
+in the chain: `test_v6.py` 50, `test_v5.py` 36, `test_v3.py` 36 (the 460 cases unchanged), `test_evidence.py` 356,
+`test_inc_sep15.py` 32, header sweep identical, William's router 400, BlueCat no match. Client-item sweep with 455 in the chain (`sweep_client_items.log`): 6,034 items, no script error, rule 455 alone 1 ms per item (126 ms at most), no hit on the PDI where no pool data exists, same 28 chain matches as before.
+
+Still open from the document: rule 350 does not refuse a load balancer device at the end of its DNS chain (the address rules
+do); one condition, to be applied on Mihir's word.
+
 ## State of play, 14 Sep (superseded by the close-out above)
 Rule of engagement: **no lookup rule is changed without Mihir's explicit go-ahead.** Everything below is
 diagnosis and proposal.
