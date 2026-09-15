@@ -147,7 +147,28 @@ rules with the framework's evaluator (first CI wins), compares with the CI the i
 decline records the evidence the CMDB offers (name, base name, fqdn and address counts, retired records among
 them, class implied by the OS) with a one-line cause. `measure_rules.py` dry-runs it here with small limits.
 
-## State of play, 14 Sep (paused at Mihir's request)
+## Close-out, 15 Sep
+Run 3 on the client dev instance (`bofadev_runs/run3_2026-09-15_2000_items.txt`, 1,000 matched + 1,000 unmatched, last 30
+days): 997 of 1,000 matched items reproduce; 1 different (retired VM through the address, seen before); 2 matched today
+by the out-of-box DNS rule are declined by ours (IP Switch reporting Ubuntu/Linux). Of the 1,000 unmatched, 965 name hosts
+absent from the CMDB. The 35 with evidence: 12 Linux fingerprint against a Network Gear or Load Balancer CI, 10 storage
+node labels (`hcpwtx22220-sc1b`, `hk0ppmx0367-1e29`: base name on exactly one Storage Server), 7 retired records
+(4 addresses shared with retired CIs, 3 Cisco Nexus link labels whose base exists only on a retired switch), 6 genuine
+duplicates (two live CIs). Rule 430 on the client instance matched 0 of 2,000 because it reads the IP field.
+
+Decisions (Mihir, 15 Sep): **no rule change**. Retired CIs stay candidates, by the client's design expectation; the two
+possible changes are parked for a future story if the client asks:
+- A. Class agreement accepting Network Gear and Load Balancer CIs for a Linux fingerprint (appliances report Linux):
+  12 of the 35 cases.
+- C. A storage node rule: label with a hyphen tail, base name on exactly one Storage Server, storage evidence in the OS
+  text or the CI class: 10 of the 35 cases.
+Configuration items for the instance administrator: rule 430 `BOFA Network Interface Name Match` source field back to
+DNS (delivered with DNS); rule 450 `BOFA FQDN Name Hardware Match` runs a 7,079-character script against 3,155 delivered,
+worth comparing with the V2.4 file in `rules/`.
+
+The measurement script stays on INC0010003 as the way to re-check the rules on the client instance after any change.
+
+## State of play, 14 Sep (superseded by the close-out above)
 Rule of engagement: **no lookup rule is changed without Mihir's explicit go-ahead.** Everything below is
 diagnosis and proposal.
 
