@@ -1,0 +1,10 @@
+flowchart LR
+    classDef tbl fill:#EEF1F5,stroke:#9AA0A6,color:#111
+    classDef win fill:#E6F4EA,stroke:#2E7D32,color:#111
+    H["host record<br/>IP 171.203.142.26<br/>OS F5 Big IP<br/>DNS crisp-tx.bankofamerica.com"] --> S1["VIP sign: os contains f5"]
+    S1 --> S2[("cmdb_ci_lb_service<br/>fqdn = crisp-tx.bankofamerica.com<br/>one row: crisp-tx")]:::tbl
+    S2 --> S3[("cmdb_ci_lb_pool<br/>crisp-tx.pool -> crisp-tx-pool<br/>(and crisp-tx-pool.service = crisp-tx)")]:::tbl
+    S3 --> S4[("cmdb_ci_lb_pool_member<br/>pool = crisp-tx-pool<br/>one member, ip_address 10.10.20.31")]:::tbl
+    S4 --> S5[("cmdb_ci_hardware<br/>ip_address = 10.10.20.31<br/>one row: usvacrispweb01, Linux Server")]:::tbl
+    S5 --> S6["real server check: in the Hardware tree,<br/>not ignored, not a balancer"]
+    S6 --> W(["1 server: return usvacrispweb01"]):::win
