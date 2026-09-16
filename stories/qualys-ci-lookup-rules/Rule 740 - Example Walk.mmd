@@ -1,0 +1,22 @@
+flowchart LR
+    classDef tbl fill:#EEF1F5,stroke:#9AA0A6,color:#111
+    classDef win fill:#E6F4EA,stroke:#2E7D32,color:#111
+    classDef stop fill:#FBE9E7,stroke:#C0392B,color:#111
+    subgraph one["The sample host: matched"]
+        direction LR
+        A1["host record<br/>IP 30.162.178.23<br/>OS: seven guesses separated by /<br/>no DNS"] --> A2["pref = none<br/>(multi-guess fingerprint)"]
+        A2 --> A3[("cmdb_ci_ip_address<br/>ip_address = 30.162.178.23<br/>one record")]:::tbl
+        A3 --> A4[("nic -> adapter eth0<br/>nic.cmdb_ci -> the Server")]:::tbl
+        A4 --> A5["agrees: no pref, so yes<br/>owners = {the Server}, count 1"]
+        A5 --> A6["not a balancer;<br/>no DNS, so the name check passes"]
+        A6 --> A7(["return the Server"]):::win
+    end
+    subgraph two["The reused-address host: declined"]
+        direction LR
+        B1["host record<br/>IP 165.40.47.119<br/>OS Windows 11<br/>DNS vk1660790.corp.bankofamerica.com"] --> B2["pref = cmdb_ci_computer"]
+        B2 --> B3[("cmdb_ci_ip_address<br/>ip_address = 165.40.47.119<br/>one record")]:::tbl
+        B3 --> B4[("nic -> adapter eth0<br/>nic.cmdb_ci -> Computer vk1448212")]:::tbl
+        B4 --> B5["agrees: same class, yes<br/>count 1; not a balancer"]
+        B5 --> B6["nameAgrees: label vk1660790<br/>CI name vk1448212<br/>neither equals nor extends the other"]
+        B6 --> B7(["null: the address was reused;<br/>next rule"]):::stop
+    end

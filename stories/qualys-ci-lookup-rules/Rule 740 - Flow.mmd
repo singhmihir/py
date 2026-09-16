@@ -1,0 +1,30 @@
+flowchart TD
+    classDef tbl fill:#EEF1F5,stroke:#9AA0A6,color:#111
+    classDef chk fill:#FFF6DC,stroke:#C9A227,color:#111
+    classDef stop fill:#FBE9E7,stroke:#C0392B,color:#111
+    classDef win fill:#E6F4EA,stroke:#2E7D32,color:#111
+
+    A["Qualys host record<br/>IP, OS, DNS"] --> B{"IP present,<br/>not 127.x, not 169.254.x?"}
+    B -- no --> S0(["null: next rule"]):::stop
+    B -- yes --> C["Notes: ip<br/>ignore list = sn_sec_cmn.ignoreCIClass"]
+    C --> D["pref = classFor(OS)<br/>the class the OS implies, or none<br/>(empty OS or 3+ guesses give none)<br/>kept as a check, not a filter"]
+    D --> E{"cmdb_ci_ip_address<br/>table installed?"}:::chk
+    E -- no --> S1(["null: layered model absent"]):::stop
+
+    E -- yes --> F[("cmdb_ci_ip_address<br/>IP Address records where<br/>ip_address = scanned IP<br/>and nic.cmdb_ci is not empty<br/>and nic.cmdb_ci class not ignored")]:::tbl
+    F --> F1[("dot-walk nic<br/>cmdb_ci_network_adapter<br/>the adapter the record belongs to")]:::tbl
+    F1 --> F2[("dot-walk nic.cmdb_ci<br/>the owning CI of the adapter")]:::tbl
+
+    F2 --> G["for each IP Address record found"]
+    G --> H{"agrees(owner class)?<br/>no pref: yes<br/>same class, sub-class or parent of pref: yes<br/>(hierarchy read from sys_db_object)"}:::chk
+    H -- "no: skip this record" --> G
+    H -- yes --> I["owners set: each owner counted once<br/>count, first"]
+    I --> G
+    G -- "no record left" --> J{"count == 1?"}:::chk
+    J -- "0" --> S2(["null: no agreeing owner"]):::stop
+    J -- "2 or more" --> S3(["null: two owners, never guess"]):::stop
+    J -- "1" --> K{"isLoadBalancer(first)?<br/>cmdb_ci_lb.get(first)"}:::chk
+    K -- "yes: a virtual IP" --> S4(["null: balancer device refused"]):::stop
+    K -- no --> L{"nameAgrees(first)?<br/>no DNS in the scan: yes<br/>CI name from cmdb_ci: first label equals the scanned label,<br/>or one is the other plus a hyphen tail"}:::chk
+    L -- "no: named after another machine" --> S5(["null: reused address"]):::stop
+    L -- yes --> W(["return first:<br/>the owner of the adapter, the real CI"]):::win
