@@ -330,6 +330,37 @@ in the chain: `test_v6.py` 50, `test_v5.py` 36, `test_v3.py` 36 (the 460 cases u
 Still open from the document: rule 350 does not refuse a load balancer device at the end of its DNS chain (the address rules
 do); one condition, to be applied on Mihir's word.
 
+## Client results for 455 and 460, 17 Sep
+Mihir attached the items matched on the client instance by `BOFA Load Balancer Service Match` (634) and
+`BOFA Load Balancer Member Match` (6), the 950 service records of the matched names, 1,293 CIs of those names (services,
+332 pools, the 6 servers and 5 VM twins), one service by address and 83,446 pool members of the balancers involved.
+Ravali (client architect) is sceptical and wants the CIs confirmed, in particular that 455 tags the server, not the balancer.
+
+- 460: 634 items, every one tagged a Load Balancer Service whose ip_address equals the scanned address; VIP sign from the OS
+  text on 357, OS and label on 240, label only on 37. No balancer device, no server: correct by construction.
+- 455: 6 items, 4 Linux Servers and 2 Windows Servers, never the balancer (class check). Corroborated from the exports for
+  four: the three ihscore VIPs (ccgw sit1, ccgw dev, multi-benefits dev) have vip1 siblings whose single pool member address
+  equals the tagged server's address (10.143.72.200 lva71pwbolcc01v, 10.143.72.198 lva68pwbolcc01v, 10.143.72.171
+  wva68pwbolts51v); cbswfm7appll-uat-tx's six sibling WFM VIPs all point at 30.166.40.80 = ltx77bhiexws02v. turbotmt-tx
+  (wva41bwtmtas01v) and boluiv4-dev2 (lva62pwbolws51v) cannot be checked from the exports (no service on their address in a
+  name-based export).
+- Behind the 634: 221 pools with several member addresses (455 declines by design), 89 services without a pool, 304 pools
+  whose members are not in the export, 20 with exactly one member address. Of those 20, six point at ltx77bhiexws02v and were
+  evaluated 14/15 Sep, before the first 455 match on the client instance (16 Sep 06:00), so they still hold the VIP record;
+  three vip1 siblings (ccgw sit1, ccgw dev, de-benefits-ltm10) were evaluated after the rule existed and still hold the VIP
+  record while their vip2 siblings got the server: to be explained on the instance.
+- 140 service names are duplicated (the same F5 object on two balancers of a pair, mostly on the same VIP address): the
+  address clue finds two, both rules decline, the VIP stays unmatched. None of the 634 matched items sits on such an
+  address. Proposal, pending: treat identically named services on one address as one record.
+- Design point to raise honestly: 455 counts the servers found, not the members. A pool with several members of which only
+  one address resolves to a CMDB server would be tagged with that server. Proposal, pending Ravali and Mihir: require one
+  distinct member address (all members on one server) before accepting.
+
+Hand-over: `Load Balancer Member Match - Explain Script.js` (read-only; replays the walk for a list of item numbers, every
+hop and candidate printed, plus a survey of unmatched items with a VIP sign by decline reason) and
+`Discovered Item Classes - Export Script.js` (read-only; CSV of the CI classes the items were matched into, by rule, state and
+matching type, attached to a record or printed). Both dry-run here (`inc3` data in the scratchpad only).
+
 ## State of play, 14 Sep (superseded by the close-out above)
 Rule of engagement: **no lookup rule is changed without Mihir's explicit go-ahead.** Everything below is
 diagnosis and proposal.
