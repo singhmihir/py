@@ -322,5 +322,14 @@
   "file": "SNOWUSEMTP-895_MS_Qualys_CI_Lookup_Rules_Load_Balancer_Member_Match_V1.0.xml",
   "created": "2026-09-15 15:10:24",
   "scrub": []
+ },
+ {
+  "name": "SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Load Balancer Refinements_V1.0",
+  "app": "global",
+  "rows": 3,
+  "exported": 3,
+  "file": "SNOWUSEMTP-895_MS_Qualys_CI_Lookup_Rules_Load_Balancer_Refinements_V1.0.xml",
+  "created": "2026-09-17 10:36:40",
+  "scrub": []
  }
 ]
