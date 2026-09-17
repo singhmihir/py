@@ -156,7 +156,13 @@ Follow it without being asked again.
   ones; the platform compares exact class names (`_checkCIIgnored`, no hierarchy). `cmdb_ci_lb` on the list removes the
   client's Linux-on-balancer matches (three in `test_evidence.py`, expected) and 850's vm_instance sample; Mihir ships it
   as listed and will have the client drop `cmdb_ci_lb` later. A property in a scoped app is captured by running the update
-  in that scope (`ui.js(code, scope=<scope sys_id>)`) into a set whose application is that scope.
+  in that scope (`ui.js(code, scope=<scope sys_id>)`) into a set whose application is that scope. Certificates (17 Sep
+  evening): 2,370 client items sat on `cmdb_ci_certificate` via 850/NetBIOS; Ravali wants the class ignored, AIT logic is
+  off limits; certificates on bofadev link to devices only through `cmdb_rel_ci` "Used by::Uses" (the Installed
+  Certificate table never sets `server`); 244 lead to one live device, 194 of them out-of-band devices the existing rules
+  match by name/address once re-evaluated; decision: no certificate rule, reapply the items with the list action. Reapply
+  facts: the job takes unmatched items plus items of rules flagged `reapply`; the list action re-runs selected items
+  regardless; `sn_sec_cmn.update_on_ci_change` true keeps vulnerable items and moves them in place.
 - Kafka outbound (SNOWUSEMTP-1625): topic `sn_usem_remtask_outbound`, namespace `com.bofa.usem`,
   envelope + `rem_tasks[].remediation_task`, dates `MM-dd-yyyy HH:mm:ss`, mapping sheet
   *Outbound to CDP (RemTask)* — only rows with *CDP Required? = Yes*; one property per table with one

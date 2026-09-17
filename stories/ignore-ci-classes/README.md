@@ -34,3 +34,29 @@ cmdb_ci_endpoint_tcp,cmdb_ci_print_queue,cmdb_ci_certificate`. Every class exist
 - Exact class names only: `cmdb_ci_lb_bigip` devices are not covered by `cmdb_ci_lb`, and `cmdb_ci_vm_instance`
   covers that class alone (`cmdb_ci_vmware_instance` is listed separately). Rule 455 reads pool member records
   directly, so `cmdb_ci_lb_pool_member` on the list does not affect it.
+
+## Certificate class, 17 Sep evening
+Ravali's position settled on keeping `cmdb_ci_certificate` on the list; AIT logic is not available (the Primary AIT on a
+discovered item comes from its CI). The 2,370 items on Unique Certificate records (2,328 by the broad-name rule 850, 42 by
+the platform's NetBIOS rule; certificate named with the host's fqdn in 2,330) were analysed from bofadev exports on
+INC0010003:
+- Certificate Inventory and Management 3.14.0 is installed. Its Installed Certificate table
+  (`sn_disco_certmgmt_cmdb_installed_certificate`) never sets `server` (0 rows instance-wide, confirmed by count); the rows
+  hold the probed address (`source`) and port only. There is no `cmdb_certificate_instance` table; that name was wrong.
+- `cmdb_rel_ci`: 346,068 "Used by::Uses" rows between certificates and hardware. `Certificate Relationships - Export
+  Script.js` (story folder, on the incident; tested on the PDI with five fixture shapes, attachment path exercised) ran on
+  bofadev and gave, per item: 1,714 relationships to non-devices (1,598 only `cmdb_ci_service_auto`), 311 no relationship,
+  101 several live devices (shared certificates), 244 exactly one live device (195 `cmdb_ci_outofband_device`, 24
+  `cmdb_ci_msd`), of which 196 carry the scanned host's name and 194 also its IP.
+- `cmdb_ci_outofband_device` and `cmdb_ci_msd` extend `cmdb_ci_hardware`; on the PDI, iLO/iDRAC/HMC payloads against such
+  records match through 410 (name), 450 (fqdn) or 705 (address) with no certificate involved. So the 194 were missed on
+  bofadev because the device records were absent or shaped differently at evaluation time; re-evaluation with certificates
+  ignored lands them through the existing rules.
+- Decision recorded on the incident: no certificate rule; keep the class ignored; re-evaluate the 2,370 items with the
+  list action "Reapply CI lookup rules" (re-runs selected items regardless of the rule flag); expect ~190-240 on real
+  devices, ~100 shared-certificate hosts and the rest as placeholders (one per host; the CMDB work list by cause).
+- Platform mechanics read for this: reapply job scope (`ci_lookup_ruleISEMPTY^ORci_lookup_ruleIN<flagged rules>`, 90-day
+  scan window), `_processDiscoveredItem` handing unmatched items to the IRE placeholder, `sn_sec_cmn.update_on_ci_change`
+  (default true: vulnerable items updated in place on a CI change; a duplicate VI on the new CI absorbs the detections and
+  the old one closes as invalid CI), auto-promotion (`sn_sec_cmn.autoPromoteFields`, a reference field on the matched
+  class, nothing for certificates).
