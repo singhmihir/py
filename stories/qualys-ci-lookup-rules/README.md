@@ -361,7 +361,7 @@ hop and candidate printed, plus a survey of unmatched items with a VIP sign by d
 `Discovered Item Classes - Export Script.js` (read-only; CSV of the CI classes the items were matched into, by rule, state and
 matching type, attached to a record or printed). Both dry-run here (`inc3` data in the scratchpad only).
 
-## Load balancer refinements, 17 Sep (set "Qualys CI Lookup Rules Load Balancer Refinements" V1.0)
+## Load balancer refinements, 17 Sep (set "Qualys CI Lookup Rules Load Balancer Refinements" V1.0, re-issued as V1.1)
 Mihir's decisions on the 17 Sep analysis: 455 exists to map "the original server which is using the pool", he needs "one
 exact CI", duplicates in the dev CMDB may be test records and must be resolved "smartly"; the 350 refusal is to be applied.
 Then, on review: "I need perfection in mapping. I don't want to match records unless the code is confident and finds the
@@ -390,8 +390,28 @@ returns anyway). Three rules re-issued in Global set
   machine with a retired record beside a live one returns the live record; two live records of one machine decline. No
   class-depth or last-update tie-break. An empty name counts as its own machine.
 
-Tests: `test_lb_member.py` grew to 25 cases (50 of 50 pass, `test_lb_member_run.log`); a Load Balancer Service result now
-prints as `name@address[+pool]` so the record chosen is visible. New fixtures: the HA pair `/Common/vip-pair-443` on two
+**V1.1, same day, on Mihir's "Decline both then"** (the shared-pool and partial-pool questions below): the pool walk moved into
+shared generator blocks (`LB_WALK`, `lb_sign_stage`, `lb_service_stage`, `lb_pools_stage`, `lb_members_stage`,
+`lb_servers_stage`) used by both rules. The servers stage now counts, per member, whether it led to a server (`unresolved`)
+and the distinct member identities (addresses; an address-less member by record).
+- **455** returns the machine only when every member leads to it: an unplaced member (no CI on its address, no relationship
+  to hardware) leaves the pool partly unknown and the rule declines; the server it did find may not be the one scanned.
+- **460** finds the virtual server the same way (two live records still decline), then walks the same pool and attaches the
+  record only when the pool is unknown, empty, or fronts one server (one machine every member leads to, or one identity the
+  CMDB cannot place). Several identities or several machines leave the host unmatched: the finding belongs to one of several
+  hosts and nothing can say which. Its sample payload is now `horizon-vip.bankofamerica.com`, a VIP without pool data.
+- Consequence on the client data of 17 Sep: of the 634 items on 460, the 221 whose pool holds several member addresses
+  would go unmatched on re-evaluation; the 304 whose members were not in the export depend on what the CMDB holds. Told to
+  Mihir with the change.
+- The platform's own rule 900 `FQDN` (after the USEM chain) would still attach a service record whose `fqdn` equals the
+  scanned name; the client's 950 service records carry no fqdn (names are `/Common/...` objects), so on the client the host
+  stays unmatched. The five ambiguous fixtures were given client-like records (no fqdn) once this showed up on the PDI.
+
+Tests: `test_lb_member.py` grew to 29 cases (58 of 58 pass, `test_lb_member_run.log`); a Load Balancer Service result now
+prints as `name@address[+pool]` so the record chosen is visible. V1.1 cases: three members on three servers, a member address
+on two differently named servers, three members with one known server, two unknown member addresses, and one known plus one
+unknown member all end unmatched; one unknown member and the balancer as the only member get the virtual server record;
+two member records of one address (ports 80 and 443) on one server give the server. New fixtures: the HA pair `/Common/vip-pair-443` on two
 BIG-IP devices, both live, the pool on one (455 -> lbsrv-pair through the union of the pools; 460 alone declines); `vip-rtwin`
 where only the retired twin holds the pool (the live twin is kept, it has no pool, 455 declines, 460 attaches the live twin);
 `vip-far` on two addresses (each scan lands on the server behind the record on its own address); `vip-x1`/`vip-x2` on one
@@ -405,12 +425,12 @@ matches as before, no rule disagreeing with another; 455 and 460 alone 1 ms per 
 
 `Load Balancer Member Match - Explain Script.js` mirrors the delivered logic (records per clue with live/retired and pool,
 which were kept and why, what each rule does with them; machines by name with live/retired per record); exercised on the
-fixture shapes above. The flow diagrams and the two Word documents describe the single-record path and predate the twin
-handling; not redrawn (Mihir: no unasked work).
+fixture shapes above, including the two policies. The flow diagrams and the two Word documents describe the single-record
+path and predate the twin handling and the two policies; not redrawn (Mihir: no unasked work).
 
-Open, put to Mihir: the shared-pool policy (several distinct machines behind one VIP: keep the VIP record as today, or leave
-unmatched) and the partial-pool policy (several members, only one resolves to a CMDB server: tagged today; under the
-"exact record" standard it should probably decline); plus the bofadev extracts that would settle the six 455 matches.
+Decided by Mihir ("Decline both then"): a VIP with several distinct machines behind it stays unmatched; a pool where only
+one of several members resolves to a CMDB server declines. Still open: the bofadev extracts that would settle the six 455
+matches.
 
 ## State of play, 14 Sep (superseded by the close-out above)
 Rule of engagement: **no lookup rule is changed without Mihir's explicit go-ahead.** Everything below is
