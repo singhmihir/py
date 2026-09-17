@@ -131,13 +131,16 @@ Follow it without being asked again.
   Service -> Pool -> Pool Member -> server and returns the real server only when exactly one sits behind the virtual server;
   otherwise 460 attaches the VIP record. Client data 17 Sep: 634 items on 460, 6 on 455 (all servers). Set Load Balancer
   Refinements V1.0 (17 Sep, `build_rules_v9.py`): 350 refuses a load balancer device at the end of its chain; 455/460 treat
-  several service records of one name (HA pair, test copy) as one virtual server (`service_one()` in the generator: two
-  different names still decline; 460 returns the fittest record, live > on the scanned address > with a pool > latest update;
-  455 walks the pools of every twin on the scanned address); 455 treats server records of one name (first label,
-  case-insensitive) as one machine and returns the fittest (live > deeper class > latest update), two different names still
-  decline. `retired()` mirrors the platform's decommissioned test (install_status 7, operational_status 6, life cycle stage
-  Retired); the platform drops a retired CI a rule returns, so live always wins. Open with Mihir: the shared-pool policy
-  (several machines behind one VIP) and the partial-pool policy (several members, one known server: tagged today).
+  several service records of one name (HA pair, test copy) as one virtual server recorded more than once (`service_one()` +
+  `narrow()` in the generator: records on the scanned address kept, then the live ones; 460 returns the one record left and
+  declines when two live records compete; 455 walks the pools of every record kept; two different names still decline);
+  455 treats server records of one name (first label, case-insensitive) as one machine: a retired record is set aside for
+  the live one, two live records decline, two different names decline. **Mihir's standard (17 Sep): "perfection in mapping",
+  never match unless the exact record is found, leave ambiguity unmatched; no fitness heuristics (class depth, last update,
+  "fittest twin") in any rule.** `retired()` mirrors the platform's decommissioned test (install_status 7, operational_status
+  6, life cycle stage Retired). Open with Mihir: the shared-pool policy (several machines behind one VIP) and the partial-pool
+  policy (several members, one known server: tagged today, probably should decline). He also asked for no unrequested work
+  (no diagrams, documents) alongside a rule change.
   `Load Balancer Member Match - Explain Script.js` replays the walk per item on the client instance.
   Rhino/GlideRecord trap: `'' + gr.getValue(f)` is the string "null" for an empty field and `addQuery(f, 'null')` selects the
   empty values; coerce with `|| ''` first. Rule 430 on the client instance reads the IP field and must be

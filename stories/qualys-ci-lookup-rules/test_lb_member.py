@@ -1,7 +1,7 @@
 """Cases for the load balancer rules on a marked fixture model of virtual servers, pools, members and real
 servers (reference fields and relationships, addresses on device records, adapters and IP Address records),
 including twin service records of one name (an HA pair, a copy on another address, a retired twin), twin
-server records of one name (retired, less specific, older) and a virtual address held on the balancer
+server records of one name (retired beside live, two live) and a virtual address held on the balancer
 itself through the discovery records. Runs the platform chain and one rule on its own, twice; a Load
 Balancer Service result is shown as name@address, "+pool" when the record carries a pool.
 `python3 test_lb_member.py remove` deletes the fixtures."""
@@ -31,14 +31,14 @@ CASES = [  # label, payload, expected chain rule ('' = no match), expected CI, (
     ('the real server scanned on its own address and name -> the name rule, untouched', P('10.230.2.11', 'Red Hat Enterprise Linux 9.8', 'lbsrv-one.corp.bankofamerica.com'), '400', 'lbsrv-one'),
     ('three members of which only one address is a server in the CMDB -> the one server today (flips to the virtual server record if the member-count tightening is adopted)', P('10.230.1.80', F5, 'vip-partial.bankofamerica.com'), '455', 'lbsrv-partial-only', '455', 'lbsrv-partial-only'),
     ('an HA pair: two records of one virtual server on one address, the pool on one of them -> the server', P('10.230.1.90', F5), '455', 'lbsrv-pair', '455', 'lbsrv-pair'),
-    ('the same HA pair, the service rule alone -> the twin that carries the pool', P('10.230.1.90', F5), '455', 'lbsrv-pair', '460', '/Common/vip-pair-443@10.230.1.90+pool'),
-    ('twins of one name where only the retired twin carries the pool -> the server; the service rule alone returns the live twin', P('10.230.1.92', F5, 'vip-rtwin.bankofamerica.com'), '455', 'lbsrv-rtwin', '460', 'vip-rtwin@10.230.1.92'),
+    ('the same HA pair, the service rule alone -> declined, two live records of one virtual server compete', P('10.230.1.90', F5), '455', 'lbsrv-pair', '460', ''),
+    ('twins of one name where only the retired twin carries the pool -> the live twin is kept, it has no pool, the member rule declines; the service rule attaches the live twin', P('10.230.1.92', F5, 'vip-rtwin.bankofamerica.com'), '460', 'vip-rtwin@10.230.1.92', '455', ''),
     ('one name on two addresses (a copy on another site) -> the server behind the record on the scanned address', P('10.230.1.93', F5, 'vip-far.bankofamerica.com'), '455', 'lbsrv-far', '455', 'lbsrv-far'),
     ('the same name scanned on the other address -> the server behind that record; the service rule alone picks the record on the address', P('10.230.1.94', F5, 'vip-far.bankofamerica.com'), '455', 'lbsrv-far2', '460', 'vip-far@10.230.1.94+pool'),
     ('two differently named services on one address -> no match', P('10.230.1.95', F5), '', '', '460', ''),
     ('member address on a retired Server and a live Linux Server of one name -> the live record', P('10.230.1.96', F5, 'vip-twin.bankofamerica.com'), '455', 'lbsrv-twin', '455', 'lbsrv-twin'),
-    ('member address on a live Server and a live Linux Server of one name -> the more specific class', P('10.230.1.97', F5, 'vip-depth.bankofamerica.com'), '455', 'lbsrv-depth', '455', 'lbsrv-depth'),
-    ('member address on two live Linux Servers of one name -> the most recently updated', P('10.230.1.98', F5, 'vip-time.bankofamerica.com'), '455', 'LBSRV-TIME', '455', 'LBSRV-TIME'),
+    ('member address on a live Server and a live Linux Server of one name -> declined, two live records compete; the virtual server record', P('10.230.1.97', F5, 'vip-depth.bankofamerica.com'), '460', 'vip-depth@10.230.1.97+pool', '455', ''),
+    ('member address on two live Linux Servers of one name -> declined, two live records compete; the virtual server record', P('10.230.1.98', F5, 'vip-time.bankofamerica.com'), '460', 'vip-time@10.230.1.98+pool', '455', ''),
     ('member address on a retired Linux Server and a live plain Server of one name -> the live record, even though less specific', P('10.230.1.100', F5, 'vip-twin2.bankofamerica.com'), '455', 'LBSRV-TWIN2', '455', 'LBSRV-TWIN2'),
     ('a virtual address held on the balancer itself through the discovery records, Linux fingerprint -> the layered rule refuses the balancer, the member rule finds the server', P('10.230.1.101', 'Linux 2.6', 'vip-layer.bankofamerica.com'), '455', 'lbsrv-layer', '350', ''),
 ]

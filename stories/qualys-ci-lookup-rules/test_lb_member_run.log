@@ -1,4 +1,4 @@
-fixtures created: vip-rtwin, vip-rtwin-pool, vip-rtwin, vip-rtwin-pool_10.230.2.93_443, lbsrv-rtwin, vip-far, vip-far-pool, vip-far-pool_10.230.2.94_443, lbsrv-far, vip-far, vip-far-pool, vip-far-pool_10.230.2.95_443, lbsrv-far2, vip-x1, vip-x2, vip-twin, vip-twin-pool, vip-twin-pool_10.230.2.96_443, LBSRV-TWIN, lbsrv-twin, vip-depth, vip-depth-pool, vip-depth-pool_10.230.2.97_443, LBSRV-DEPTH, lbsrv-depth, vip-time, vip-time-pool, vip-time-pool_10.230.2.98_443, lbsrv-time, LBSRV-TIME, vip-twin2, vip-twin2-pool, vip-twin2-pool_10.230.2.100_443, lbsrv-twin2, LBSRV-TWIN2, vip-layer.bankofamerica.com, dnslink, vip-layer, vip-layer-pool, vip-layer-pool_10.230.2.101_443, lbsrv-layer
+fixtures created: none (all present)
 PASS run1 one member behind the virtual server, address on the server record -> the server | chain 455 lbsrv-one | 455 alone -> lbsrv-one
 PASS run1 the same virtual server scanned by address only -> the server | chain 455 lbsrv-one | 455 alone -> lbsrv-one
 PASS run1 the same virtual server with a Linux fingerprint and a -vip label -> the server | chain 455 lbsrv-one | 455 alone -> lbsrv-one
@@ -14,14 +14,14 @@ PASS run1 no VIP sign: a Red Hat host on the virtual address -> the rule does no
 PASS run1 the real server scanned on its own address and name -> the name rule, untouched | chain 400 lbsrv-one
 PASS run1 three members of which only one address is a server in the CMDB -> the one server today (flips to the virtual server record if the member-count tightening is adopted) | chain 455 lbsrv-partial-only | 455 alone -> lbsrv-partial-only
 PASS run1 an HA pair: two records of one virtual server on one address, the pool on one of them -> the server | chain 455 lbsrv-pair | 455 alone -> lbsrv-pair
-PASS run1 the same HA pair, the service rule alone -> the twin that carries the pool | chain 455 lbsrv-pair | 460 alone -> /Common/vip-pair-443@10.230.1.90+pool
-PASS run1 twins of one name where only the retired twin carries the pool -> the server; the service rule alone returns the live twin | chain 455 lbsrv-rtwin | 460 alone -> vip-rtwin@10.230.1.92
+PASS run1 the same HA pair, the service rule alone -> declined, two live records of one virtual server compete | chain 455 lbsrv-pair | 460 alone -> -
+PASS run1 twins of one name where only the retired twin carries the pool -> the live twin is kept, it has no pool, the member rule declines; the service rule attaches the live twin | chain 460 vip-rtwin@10.230.1.92 | 455 alone -> -
 PASS run1 one name on two addresses (a copy on another site) -> the server behind the record on the scanned address | chain 455 lbsrv-far | 455 alone -> lbsrv-far
 PASS run1 the same name scanned on the other address -> the server behind that record; the service rule alone picks the record on the address | chain 455 lbsrv-far2 | 460 alone -> vip-far@10.230.1.94+pool
 PASS run1 two differently named services on one address -> no match | chain (no match)  | 460 alone -> -
 PASS run1 member address on a retired Server and a live Linux Server of one name -> the live record | chain 455 lbsrv-twin | 455 alone -> lbsrv-twin
-PASS run1 member address on a live Server and a live Linux Server of one name -> the more specific class | chain 455 lbsrv-depth | 455 alone -> lbsrv-depth
-PASS run1 member address on two live Linux Servers of one name -> the most recently updated | chain 455 LBSRV-TIME | 455 alone -> LBSRV-TIME
+PASS run1 member address on a live Server and a live Linux Server of one name -> declined, two live records compete; the virtual server record | chain 460 vip-depth@10.230.1.97+pool | 455 alone -> -
+PASS run1 member address on two live Linux Servers of one name -> declined, two live records compete; the virtual server record | chain 460 vip-time@10.230.1.98+pool | 455 alone -> -
 PASS run1 member address on a retired Linux Server and a live plain Server of one name -> the live record, even though less specific | chain 455 LBSRV-TWIN2 | 455 alone -> LBSRV-TWIN2
 PASS run1 a virtual address held on the balancer itself through the discovery records, Linux fingerprint -> the layered rule refuses the balancer, the member rule finds the server | chain 455 lbsrv-layer | 350 alone -> -
 PASS run2 one member behind the virtual server, address on the server record -> the server | chain 455 lbsrv-one | 455 alone -> lbsrv-one
@@ -39,14 +39,14 @@ PASS run2 no VIP sign: a Red Hat host on the virtual address -> the rule does no
 PASS run2 the real server scanned on its own address and name -> the name rule, untouched | chain 400 lbsrv-one
 PASS run2 three members of which only one address is a server in the CMDB -> the one server today (flips to the virtual server record if the member-count tightening is adopted) | chain 455 lbsrv-partial-only | 455 alone -> lbsrv-partial-only
 PASS run2 an HA pair: two records of one virtual server on one address, the pool on one of them -> the server | chain 455 lbsrv-pair | 455 alone -> lbsrv-pair
-PASS run2 the same HA pair, the service rule alone -> the twin that carries the pool | chain 455 lbsrv-pair | 460 alone -> /Common/vip-pair-443@10.230.1.90+pool
-PASS run2 twins of one name where only the retired twin carries the pool -> the server; the service rule alone returns the live twin | chain 455 lbsrv-rtwin | 460 alone -> vip-rtwin@10.230.1.92
+PASS run2 the same HA pair, the service rule alone -> declined, two live records of one virtual server compete | chain 455 lbsrv-pair | 460 alone -> -
+PASS run2 twins of one name where only the retired twin carries the pool -> the live twin is kept, it has no pool, the member rule declines; the service rule attaches the live twin | chain 460 vip-rtwin@10.230.1.92 | 455 alone -> -
 PASS run2 one name on two addresses (a copy on another site) -> the server behind the record on the scanned address | chain 455 lbsrv-far | 455 alone -> lbsrv-far
 PASS run2 the same name scanned on the other address -> the server behind that record; the service rule alone picks the record on the address | chain 455 lbsrv-far2 | 460 alone -> vip-far@10.230.1.94+pool
 PASS run2 two differently named services on one address -> no match | chain (no match)  | 460 alone -> -
 PASS run2 member address on a retired Server and a live Linux Server of one name -> the live record | chain 455 lbsrv-twin | 455 alone -> lbsrv-twin
-PASS run2 member address on a live Server and a live Linux Server of one name -> the more specific class | chain 455 lbsrv-depth | 455 alone -> lbsrv-depth
-PASS run2 member address on two live Linux Servers of one name -> the most recently updated | chain 455 LBSRV-TIME | 455 alone -> LBSRV-TIME
+PASS run2 member address on a live Server and a live Linux Server of one name -> declined, two live records compete; the virtual server record | chain 460 vip-depth@10.230.1.97+pool | 455 alone -> -
+PASS run2 member address on two live Linux Servers of one name -> declined, two live records compete; the virtual server record | chain 460 vip-time@10.230.1.98+pool | 455 alone -> -
 PASS run2 member address on a retired Linux Server and a live plain Server of one name -> the live record, even though less specific | chain 455 LBSRV-TWIN2 | 455 alone -> LBSRV-TWIN2
 PASS run2 a virtual address held on the balancer itself through the discovery records, Linux fingerprint -> the layered rule refuses the balancer, the member rule finds the server | chain 455 lbsrv-layer | 350 alone -> -
 

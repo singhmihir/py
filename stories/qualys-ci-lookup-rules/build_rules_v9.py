@@ -12,16 +12,17 @@ NAME = 'SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Load Balancer Refinements_V1.0'
 DESC = ('Three USEM Qualys CI lookup rules re-issued. 350 Layered DNS Match refuses a load balancer device at the end of the DNS Name -> IP '
         'Address -> adapter -> CI chain, because the name then belongs to a virtual address the balancer answers on; the host goes on to the '
         'load balancer rules. 455 Load Balancer Member Match and 460 Load Balancer Service Match treat several Load Balancer Service records '
-        'carrying one name (an HA pair keeps the same virtual server on both devices; a test leaves a copy) as one virtual server: the member '
-        'rule walks the pool of every record on the scanned address, the service rule returns the fittest record (live, on the scanned address, '
-        'with a pool, most recently updated); two different names on one value still decline. 455 also treats several server records of one '
-        'name as one machine and returns its fittest record (live over retired, the more specific class, the most recently updated); two '
-        'differently named machines still decline. No system property is read or shipped.')
+        'carrying one name (an HA pair keeps the same virtual server on both devices; a test leaves a copy) as the same virtual server recorded '
+        'more than once: the records answering on the scanned address are kept, then the live ones; the member rule walks the pools of every '
+        'record kept, the service rule returns the one record left and declines when two live records still compete; two different names on '
+        'one value still decline. 455 also treats several server records of one name as one machine: a retired record is set aside for the '
+        'live one, two live records decline, two differently named machines decline. No guess is made anywhere: an ambiguity the CMDB cannot '
+        'settle leaves the item unmatched. No system property is read or shipped.')
 QUALYS = 'ed44bdc453220300e8f9f745911c0801'
 RULES = [
     ('350', 'USEM Layered DNS Match', 'DNS', 'DNS Name record -> IP Address record -> Network Adapter -> CI, for hosts whose name is not on the CI record; a CI whose class contradicts the scanned OS is left out (a Linux fingerprint agrees with Network Gear, Load Balancer and Storage Server records); several CIs resolved by the scanned IP or declined; a load balancer device at the end of the chain is refused, the name then belongs to a virtual address.'),
-    ('455', 'USEM Load Balancer Member Match', 'IP', 'Virtual server found as the service rule does (records of one name on the scanned address are one virtual server), then Load Balancer Service -> Pool -> Pool Member -> server; the one machine behind the virtual server, its fittest record when it is recorded more than once, or null so that the service rule attaches the virtual server record.'),
-    ('460', 'USEM Load Balancer Service Match', 'IP', 'Virtual IP matched to its Load Balancer Service CI: load balancer OS word or VIP label marker required, service found by fqdn, then name, then address; records of one name are one virtual server and the fittest is returned, two different names decline. The product and marker lists are declared in the script.'),
+    ('455', 'USEM Load Balancer Member Match', 'IP', 'Virtual server found as the service rule does (records of one name on the scanned address are one virtual server, retired copies set aside), then Load Balancer Service -> Pool -> Pool Member -> server; the one machine behind the virtual server, its live record when a retired duplicate exists, or null (no machine, two machines, two live records of one machine) so that the service rule attaches the virtual server record.'),
+    ('460', 'USEM Load Balancer Service Match', 'IP', 'Virtual IP matched to its Load Balancer Service CI: load balancer OS word or VIP label marker required, service found by fqdn, then name, then address; records of one name are one virtual server, the one on the scanned address and live is returned, two live records or two different names decline. The product and marker lists are declared in the script.'),
 ]
 rules = [{'order': o, 'name': n, 'field': f, 'description': d, 'script': open(os.path.join(HERE, 'rules', '%s_%s.js' % (o, n.replace(' ', '_')))).read()} for o, n, f, d in RULES]
 STATE = os.path.join(HERE, 'state_v9.json')

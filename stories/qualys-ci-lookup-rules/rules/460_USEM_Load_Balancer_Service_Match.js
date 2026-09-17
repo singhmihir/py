@@ -16,9 +16,9 @@
    Input  : sourceValue is the IP field, "171.203.142.26"; the rule also reads the OS and the DNS
             name from sourcePayload.
    Returns: the sys_id of the one Load Balancer Service CI found by fqdn, then by name, then by
-            address (several records of one name are one virtual server and the fittest of them is
-            returned); null when the host shows no VIP evidence, when no service matches, or when
-            two differently named services carry the value.
+            address (a retired copy of the record found is set aside); null when the host shows no
+            VIP evidence, when no service matches, when two differently named services carry the
+            value, or when two live records of one virtual server compete.
    Sample : the Load Balancer Service CI "crisp-tx", whose fqdn is "crisp-tx.bankofamerica.com".
 
    Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
@@ -93,20 +93,33 @@
             ci.life_cycle_stage_status.getDisplayValue() == 'Retired';
     }
 
+    // narrow() keeps the records carrying a flag when any does, so a record answering on the
+    // scanned address, or a live record, is preferred to the others without dropping the only
+    // records there are.
+    function narrow(list, flag) {
+        var out = [];
+        for (var i = 0; i < list.length; i++)
+            if (list[i][flag])
+                out.push(list[i]);
+        return out.length ? out : list;
+    }
+
     // -- The one service, by fqdn, then name, then address ----------------------------------------
     // The scanned DNS name is tried in the fqdn field, then in the name field, then the label in
     // the name field, then the scanned address in ip_address. Each step accepts one virtual server.
-    // Several records carrying one name are one virtual server defined on more than one balancer
-    // (an HA pair keeps the same configuration on both devices) or a copy left behind by a test,
-    // and the fittest of them is returned: a live record over a retired one, then the record on the
-    // scanned address, then one with a pool, the most recently updated among equals. Two different
-    // names on the same value end the rule with null, because a weaker piece of evidence could
-    // otherwise pick a different service; a step that finds nothing hands over to the next.
+    // Several records carrying one name are the same virtual server recorded more than once (an HA
+    // pair keeps the same object on both devices; a test leaves a copy): the records answering on
+    // the scanned address are kept, then the live ones, and the one record left is returned. Two
+    // records still standing, both devices of a pair live, are an ambiguity nothing here can
+    // settle, so the rule declines; two different names on the same value decline as well, because
+    // a weaker piece of evidence could otherwise pick a different service. A step that finds
+    // nothing hands over to the next.
     // Sample: the first step, fqdn "crisp-tx.bankofamerica.com", finds the Load Balancer Service
-    //         "crisp-tx" and no second row, so its sys_id is returned. Two records named
-    //         "crisp-tx", one per balancer of the pair, would give the live one on "171.203.142.26"
-    //         that carries a pool; a VIP without a DNS name and two differently named services on
-    //         "171.203.142.26" would reach the last step and decline there.
+    //         "crisp-tx" and no second row, so its sys_id is returned. Two live records named
+    //         "crisp-tx" on "171.203.142.26", one per balancer of the pair, would make the rule
+    //         decline; were one of them retired, the live one would be returned. A VIP without a
+    //         DNS name and two differently named services on "171.203.142.26" would reach the last
+    //         step and decline there.
     function one(field, value) {
         if (!value)
             return undefined;                     // nothing to search, next step
@@ -116,23 +129,23 @@
         gr.addQuery(field, value);
         if (ignore)
             gr.addQuery('sys_class_name', 'NOT IN', ignore);
-        gr.orderByDesc('sys_updated_on');         // the latest record wins a tie
         gr.query();
-        var names = {}, best = null, bestScore = -1;
+        var rows = [], names = {};
         while (gr.next()) {
             names[('' + (gr.getValue('name') || '')).trim().toLowerCase()] = true;
-            var here = gr.getValue('ip_address') == ip;
-            var score = (retired(gr) ? 0 : 4) + (here ? 2 : 0) + (gr.getValue('pool') ? 1 : 0);
-            if (score > bestScore) {
-                best = gr.getUniqueValue();
-                bestScore = score;
-            }
+            rows.push({id: gr.getUniqueValue(), here: gr.getValue('ip_address') == ip,
+                live: !retired(gr)});
         }
-        if (!best)
+        if (!rows.length)
             return undefined;                     // nothing found, next step
         if (Object.keys(names).length > 1)
             return null;                          // two different services, never guess
-        return best;
+        rows = narrow(rows, 'here');              // the records answering on the scanned address
+        if (rows.length > 1)
+            rows = narrow(rows, 'live');          // the live records, a retired copy set aside
+        if (rows.length > 1)
+            return null;                          // two records still compete, never guess
+        return rows[0].id;
     }
     var steps = [['fqdn', dns], ['name', dns], ['name', label], ['ip_address', ip]];
     for (var t = 0; t < steps.length; t++) {
