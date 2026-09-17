@@ -363,47 +363,53 @@ matching type, attached to a record or printed). Both dry-run here (`inc3` data 
 
 ## Load balancer refinements, 17 Sep (set "Qualys CI Lookup Rules Load Balancer Refinements" V1.0)
 Mihir's decisions on the 17 Sep analysis: 455 exists to map "the original server which is using the pool", he needs "one
-exact CI", duplicates in the dev CMDB may be test records and must be resolved "smartly"; for HA pairs the same ("I need
-one ci"); and the 350 refusal is to be applied. Three rules re-issued in Global set
+exact CI", duplicates in the dev CMDB may be test records and must be resolved "smartly"; the 350 refusal is to be applied.
+Then, on review: "I need perfection in mapping. I don't want to match records unless the code is confident and finds the
+exact record" and "should we leave the matching in case of ambiguity?". The first build carried two heuristics (460
+returning the "fittest" of an HA pair's records; 455 picking a server record by class depth and last update); both were
+taken out the same day. The delivered principle: an ambiguity the CMDB cannot settle leaves the item unmatched; the only
+duplicate resolved is a retired record beside a live one, which is not a guess (the platform drops a retired CI a rule
+returns anyway). Three rules re-issued in Global set
 `SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Load Balancer Refinements_V1.0` (`build_rules_v9.py`, `state_v9.json`, file
 `Qualys CI Lookup Rules Load Balancer Refinements - Update Set.xml`):
 
 - **350 Layered DNS Match** refuses a load balancer device at the end of the DNS Name -> IP Address -> adapter -> CI chain
   (`LB_HELPER` `isLoadBalancer`, applied to the single owner and to the IP-confirmed owner): the name then belongs to a
   virtual address the balancer answers on, and the host goes on to 455/460. Before, a Linux fingerprint on such a name
-  landed on the balancer through the appliance acceptance.
-- **455 and 460**, shared `service_one()` in the generator: `one(field, value)` collects every service carrying the clue;
-  two or more *different* names still decline; several records of *one* name are one virtual server (an HA pair keeps the
-  same object on both devices, a test leaves a copy). 460 returns the fittest record: live (the platform's own decommissioned
-  test, `retired()`: install status 7, operational status 6 or life cycle stage Retired) over retired, then on the scanned
-  address, then with a pool, latest `sys_updated_on` among equals (a retired record would be dropped by the platform after
-  the rule returned it, which is why live comes first). 455 keeps the twins (those on the scanned address when any, else
-  all) and walks the pools of every twin, so the members are found whichever record carries the pool.
+  landed on the balancer through the appliance acceptance. A refusal only; it adds no match.
+- **455 and 460**, shared `service_one()` and `NARROW` in the generator: `one(field, value)` collects every service carrying
+  the clue; two or more *different* names still decline; several records of *one* name are the same virtual server recorded
+  more than once (an HA pair keeps the same object on both devices, a test leaves a copy). `narrow()` keeps the records on
+  the scanned address when any carries it, then the live ones when any is live (`retired()` mirrors the platform's own
+  decommissioned test: install status 7, operational status 6, life cycle stage Retired). 460 returns the one record left and
+  declines when two live records still compete (both devices of a pair live: nothing in the CMDB says which one answered).
+  455 walks the pools of every record kept, so the members are found whichever record carries the pool, and a stale pool on
+  a second record shows up as a second machine and declines.
 - **455**, servers: every candidate that passes `isRealServer` is kept with the first label of its name; records of one name
-  (case-insensitive) are one machine recorded more than once; two differently named machines still decline (shared pool);
-  one machine with several records returns `fittest()`: live over retired, then the deeper class (`parentsOf` length, a
-  Linux Server over a plain Server), then the latest update. An empty name counts as its own machine.
+  (case-insensitive) are one machine recorded more than once; two differently named machines decline (shared pool); one
+  machine with a retired record beside a live one returns the live record; two live records of one machine decline. No
+  class-depth or last-update tie-break. An empty name counts as its own machine.
 
 Tests: `test_lb_member.py` grew to 25 cases (50 of 50 pass, `test_lb_member_run.log`); a Load Balancer Service result now
-prints as `name@address[+pool]` so the twin chosen is visible. New fixtures: the HA pair `/Common/vip-pair-443` on two
-BIG-IP devices with the pool on one (455 -> lbsrv-pair; 460 alone -> the twin with the pool); `vip-rtwin` where only the
-retired twin holds the pool (455 -> the server through the retired twin's pool; 460 alone -> the live twin); `vip-far` on
-two addresses (each scan lands on the server behind the record on its own address); `vip-x1`/`vip-x2` on one address (no
-match, both rules); server twins behind one member address: retired Server + live Linux Server (the live one), live Server +
-live Linux Server (the Linux Server), two live Linux Servers (the later update), retired Linux Server + live Server (the
-live one although less specific); and `vip-layer`, a virtual address held on the balancer's own adapter through DNS Name ->
-IP Address (350 alone declines, the chain reaches 455 and the server). Regression unchanged: `test_v6.py` 50, `test_v5.py`
-36, `test_v3.py` 36, `test_evidence.py` 356, `test_inc_sep15.py` 32, header sweep identical, William's router 400, BlueCat
-no match. Client-item sweep: see the line below once it completes.
+prints as `name@address[+pool]` so the record chosen is visible. New fixtures: the HA pair `/Common/vip-pair-443` on two
+BIG-IP devices, both live, the pool on one (455 -> lbsrv-pair through the union of the pools; 460 alone declines); `vip-rtwin`
+where only the retired twin holds the pool (the live twin is kept, it has no pool, 455 declines, 460 attaches the live twin);
+`vip-far` on two addresses (each scan lands on the server behind the record on its own address); `vip-x1`/`vip-x2` on one
+address (no match, both rules); server twins behind one member address: retired Server + live Linux Server (the live one),
+retired Linux Server + live Server (the live one), live Server + live Linux Server (declined, 460 attaches the VIP), two live
+Linux Servers (declined); and `vip-layer`, a virtual address held on the balancer's own adapter through DNS Name -> IP
+Address (350 alone declines, the chain reaches 455 and the server). Regression unchanged: `test_v6.py` 50, `test_v5.py` 36,
+`test_v3.py` 36, `test_evidence.py` 356, `test_inc_sep15.py` 32, header sweep identical, William's router 400, BlueCat no
+match. SWEEP_LINE
 
-`Load Balancer Member Match - Explain Script.js` mirrors the new logic (twins printed per clue with live/retired, pool and
-update time, the fittest twin 460 would return, machines by name and the fittest record with its reasons); exercised on the
-eight fixture shapes above. `Rule 455 - Flow` and `Rule 460 - Flow` diagrams redrawn for the twin branches and the
-machine grouping (the example walks are unchanged, a single record).
+`Load Balancer Member Match - Explain Script.js` mirrors the delivered logic (records per clue with live/retired and pool,
+which were kept and why, what each rule does with them; machines by name with live/retired per record); exercised on the
+fixture shapes above. The flow diagrams and the two Word documents describe the single-record path and predate the twin
+handling; not redrawn (Mihir: no unasked work).
 
-Open, put to Mihir: the shared-pool policy (several distinct machines behind one VIP: keep the VIP record as today, or pick
-one member by a fixed rule) and the partial-pool policy (several members, only one resolves to a CMDB server: tag it as
-today, or require one distinct member address); plus the bofadev extracts that would settle the six 455 matches.
+Open, put to Mihir: the shared-pool policy (several distinct machines behind one VIP: keep the VIP record as today, or leave
+unmatched) and the partial-pool policy (several members, only one resolves to a CMDB server: tagged today; under the
+"exact record" standard it should probably decline); plus the bofadev extracts that would settle the six 455 matches.
 
 ## State of play, 14 Sep (superseded by the close-out above)
 Rule of engagement: **no lookup rule is changed without Mihir's explicit go-ahead.** Everything below is

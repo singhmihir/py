@@ -179,9 +179,23 @@ PARENTS_OF = '\n'.join([
 ])
 
 
+NARROW = '\n'.join([
+    c('narrow() keeps the records carrying a flag when any does, so a record answering on the scanned address, or a live record, is preferred to the others without dropping the only records there are.'),
+    '    function narrow(list, flag) {',
+    '        var out = [];',
+    '        for (var i = 0; i < list.length; i++)',
+    '            if (list[i][flag])',
+    '                out.push(list[i]);',
+    '        return out.length ? out : list;',
+    '    }',
+])
+
+
 def service_one(with_twins):
-    """one(field, value): the virtual server carrying the value. Several records of one name are one
-    virtual server (an HA pair, a test copy) and the fittest stands for it; two names decline."""
+    """one(field, value): the virtual server carrying the value. Several records of one name are the
+    same virtual server recorded more than once (an HA pair, a test copy): the records on the scanned
+    address are kept, then the live ones. The service rule needs one record left; the member rule walks
+    the pools of all of them. Two names decline."""
     L = ['    function one(field, value) {',
          '        if (!value)',
          '            return undefined;                     // nothing to search, next step',
@@ -191,32 +205,30 @@ def service_one(with_twins):
          '        gr.addQuery(field, value);',
          '        if (ignore)',
          "            gr.addQuery('sys_class_name', 'NOT IN', ignore);",
-         "        gr.orderByDesc('sys_updated_on');         // the latest record wins a tie",
          '        gr.query();',
-         '        var names = {}, best = null, bestScore = -1;']
+         '        var rows = [], names = {};',
+         '        while (gr.next()) {',
+         "            names[('' + (gr.getValue('name') || '')).trim().toLowerCase()] = true;",
+         "            rows.push({id: gr.getUniqueValue(), here: gr.getValue('ip_address') == ip,",
+         '                live: !retired(gr)});',
+         '        }',
+         '        if (!rows.length)',
+         '            return undefined;                     // nothing found, next step',
+         '        if (Object.keys(names).length > 1)',
+         '            return null;                          // two different services, never guess',
+         "        rows = narrow(rows, 'here');              // the records answering on the scanned address",
+         '        if (rows.length > 1)',
+         "            rows = narrow(rows, 'live');          // the live records, a retired copy set aside"]
     if with_twins:
-        L.append('        var all = [], onAddress = [];')
-    L += ['        while (gr.next()) {',
-          "            names[('' + (gr.getValue('name') || '')).trim().toLowerCase()] = true;",
-          "            var here = gr.getValue('ip_address') == ip;",
-          "            var score = (retired(gr) ? 0 : 4) + (here ? 2 : 0) + (gr.getValue('pool') ? 1 : 0);"]
-    if with_twins:
-        L += ['            all.push(gr.getUniqueValue());',
-              '            if (here)',
-              '                onAddress.push(gr.getUniqueValue());']
-    L += ['            if (score > bestScore) {',
-          '                best = gr.getUniqueValue();',
-          '                bestScore = score;',
-          '            }',
-          '        }',
-          '        if (!best)',
-          '            return undefined;                     // nothing found, next step',
-          '        if (Object.keys(names).length > 1)',
-          '            return null;                          // two different services, never guess']
-    if with_twins:
-        L.append('        twins = onAddress.length ? onAddress : all;')
-    L += ['        return best;',
-          '    }']
+        L += ['        twins = [];',
+              '        for (var w = 0; w < rows.length; w++)',
+              '            twins.push(rows[w].id);',
+              '        return twins[0];']
+    else:
+        L += ['        if (rows.length > 1)',
+              '            return null;                          // two records still compete, never guess',
+              '        return rows[0].id;']
+    L.append('    }')
     return '\n'.join(L)
 
 
@@ -1161,7 +1173,7 @@ def rule_455():
     h = header('USEM Load Balancer Member Match',
         'A virtual server usually fronts several real servers, but many front exactly one. When the CMDB holds the pool behind the virtual server and exactly one real server sits in it, the findings scanned on the virtual address belong to that server. This rule finds the virtual server the way the service rule does, walks Load Balancer Service to Pool to Pool Member to server, and returns the server only when it is the single one. With several servers, or without pool data, it declines and the service rule attaches the virtual server record instead.',
         payload, 'IP', value, 'the OS and the DNS name',
-        'the sys_id of the one real server behind the virtual server (a machine recorded more than once in the CMDB counts once, and its fittest record is returned); null when the host shows no VIP sign, no virtual server matches or two differently named ones carry the value, the virtual server has no pool or no members, or two or more machines sit behind it.',
+        'the sys_id of the one real server behind the virtual server (a machine recorded more than once counts once, its live record standing for it); null when the host shows no VIP sign, no virtual server matches or two differently named ones carry the value, the virtual server has no pool or no members, two or more machines sit behind it, or two live records of the one machine compete.',
         'the Linux Server "usvacrispweb01", the only member of the pool "crisp-tx-pool" behind the Load Balancer Service "crisp-tx", reached through the member address "10.10.20.31".',
         'the hardware rules declined: a VIP has no serial, "crisp-tx" is not a server name, and the address belongs to a load balancer device.',
         'virtual servers whose pool holds exactly one real server in the CMDB.',
@@ -1187,11 +1199,11 @@ def rule_455():
         '            sign = true;',
         '    if (!sign)',
         '        return null;',
-        RETIRED,
+        RETIRED, NARROW,
         stage('The one virtual server, by fqdn, then name, then address',
-              'The same search as the service rule: the scanned DNS name in the fqdn field, then in the name field, then the label in the name field, then the scanned address in ip_address. Each step accepts one virtual server. Several records carrying one name are one virtual server defined on more than one balancer (an HA pair keeps the same configuration on both devices) or a copy left behind by a test: those on the scanned address are kept as twins, and the pool of every twin is walked below, so the members are found whichever record carries the pool. Two different names on the same value end the rule; a step that finds nothing hands over to the next.',
-              'the first step, fqdn "crisp-tx.bankofamerica.com", finds the Load Balancer Service "crisp-tx" and no second row, so service holds its sys_id and twins that one record. Two records named "crisp-tx", one per balancer of the pair, would both go into twins.'),
-        '    var twins = [];                               // every record of the virtual server found',
+              'The same search as the service rule: the scanned DNS name in the fqdn field, then in the name field, then the label in the name field, then the scanned address in ip_address. Each step accepts one virtual server. Several records carrying one name are the same virtual server recorded more than once (an HA pair keeps the same object on both devices; a test leaves a copy): the records answering on the scanned address are kept, then the live ones, and the pool of every record kept is walked below, so the members are found whichever record carries the pool, and a stale pool on a second record shows up as a second machine. Two different names on the same value end the rule; a step that finds nothing hands over to the next.',
+              'the first step, fqdn "crisp-tx.bankofamerica.com", finds the Load Balancer Service "crisp-tx" and no second row, so twins holds that one record. Two live records named "crisp-tx" on "171.203.142.26", one per balancer of the pair, would both be kept; a retired copy beside a live one would be set aside.'),
+        '    var twins = [];                               // every record kept of the virtual server found',
         service_one(True),
         "    var steps = [['fqdn', dns], ['name', dns], ['name', label], ['ip_address', ip]];",
         '    var service = null;',
@@ -1276,26 +1288,9 @@ def rule_455():
         '    var memberIds = Object.keys(members);',
         '    if (!memberIds.length)',
         '        return null;',
-        c('fittest() picks one record when a machine is recorded more than once: a live record over a retired one, then the more specific class (a Linux Server over a plain Server), then the most recently updated. parentsOf() lists a class and every class above it, so its length is the depth of the class.'),
-        PARENTS_OF,
-        '    function fittest(records) {',
-        "        var best = null, bestScore = -1, bestTime = '';",
-        '        for (var f = 0; f < records.length; f++) {',
-        "            var ci = new GlideRecord('cmdb_ci_hardware');",
-        '            ci.get(records[f]);',
-        "            var score = (retired(ci) ? 0 : 100) + parentsOf('' + ci.getValue('sys_class_name')).length;",
-        "            var time = '' + ci.getValue('sys_updated_on');",
-        '            if (score > bestScore || (score == bestScore && time > bestTime)) {',
-        '                best = records[f];',
-        '                bestScore = score;',
-        '                bestTime = time;',
-        '            }',
-        '        }',
-        '        return best;',
-        '    }',
-        stage('The real servers: one machine',
-              'Each member address is looked for on device records, on network adapters and on IP Address records, and each member is followed through its relationships to hardware; load balancer devices and ignored classes are left out. Every server found is kept with the first label of its name. Several records of one name are one machine recorded more than once (a rebuilt server, a copy left by a test) and the fittest of them stands for it. One machine is the match; none, or two differently named machines, and the rule declines, leaving the virtual server record to the service rule.',
-              'the Linux Server "usvacrispweb01" carries "10.10.20.31" in its ip_address field, so servers holds one entry and its sys_id is returned. A retired Server record also named "usvacrispweb01" would be set aside for the live Linux Server; a second member on "10.10.20.32" owned by "usvacrispweb02" would make the rule decline and the service rule attach "crisp-tx".'),
+        stage('The real servers: one machine, one live record',
+              'Each member address is looked for on device records, on network adapters and on IP Address records, and each member is followed through its relationships to hardware; load balancer devices and ignored classes are left out. Every server found is kept with the first label of its name. Several records of one name are one machine recorded more than once (a rebuilt server whose old record was retired, a copy left by a test): its live record stands for it when it is the only live one. One machine is the match; none, two differently named machines, or two live records of the one machine, and the rule declines, leaving the virtual server record to the service rule.',
+              'the Linux Server "usvacrispweb01" carries "10.10.20.31" in its ip_address field, so servers holds one entry and its sys_id is returned. A retired Server record also named "usvacrispweb01" would be set aside for the live Linux Server; two live records of that name, or a second member on "10.10.20.32" owned by "usvacrispweb02", would make the rule decline and the service rule attach "crisp-tx".'),
         '    var servers = {};                             // sys_id -> first label of the name',
         '    function keep(id) {',
         '        if (!id || servers[id] !== undefined || !isRealServer(id))',
@@ -1338,7 +1333,17 @@ def rule_455():
         '    var labels = Object.keys(machines);',
         '    if (labels.length != 1)',
         '        return null;                              // no server, or two different machines',
-        '    return fittest(machines[labels[0]]);',
+        '    var records = machines[labels[0]];',
+        '    if (records.length == 1)',
+        '        return records[0];',
+        '    var live = [];                                // one machine recorded more than once',
+        '    for (var f = 0; f < records.length; f++) {',
+        "        var ci = new GlideRecord('cmdb_ci_hardware');",
+        '        ci.get(records[f]);',
+        '        if (!retired(ci))',
+        '            live.push(records[f]);',
+        '    }',
+        '    return live.length == 1 ? live[0] : null;     // two live records compete, never guess',
         CLOSE]
     return write('455', 'USEM Load Balancer Member Match', h + '\n' + '\n'.join(body))
 RULES.append(rule_455)
@@ -1350,7 +1355,7 @@ def rule_460():
     h = header('USEM Load Balancer Service Match',
         'A virtual IP answered by a load balancer is not the balancer, and the hardware rules refuse the balancer device on purpose. Such hosts belong to the Load Balancer Service CI that models the VIP, and this rule finds it. It runs on the IP field so that VIPs without a DNS name are covered too.',
         payload, 'IP', value, 'the OS and the DNS name',
-        'the sys_id of the one Load Balancer Service CI found by fqdn, then by name, then by address (several records of one name are one virtual server and the fittest of them is returned); null when the host shows no VIP evidence, when no service matches, or when two differently named services carry the value.',
+        'the sys_id of the one Load Balancer Service CI found by fqdn, then by name, then by address (a retired copy of the record found is set aside); null when the host shows no VIP evidence, when no service matches, when two differently named services carry the value, or when two live records of one virtual server compete.',
         'the Load Balancer Service CI "crisp-tx", whose fqdn is "crisp-tx.bankofamerica.com".',
         'the hardware rules declined: a VIP has no serial, "crisp-tx" is not a server name, and the address belongs to a load balancer device.',
         'hosts with VIP evidence: an OS text naming a load balancer product, or a DNS label with a VIP marker segment such as "-vip" or "vs1"; both lists are declared in the script, at the top of the matching stage.',
@@ -1376,10 +1381,10 @@ def rule_460():
         '            evidence = true;',
         '    if (!evidence)',
         '        return null;',
-        RETIRED,
+        RETIRED, NARROW,
         stage('The one service, by fqdn, then name, then address',
-              'The scanned DNS name is tried in the fqdn field, then in the name field, then the label in the name field, then the scanned address in ip_address. Each step accepts one virtual server. Several records carrying one name are one virtual server defined on more than one balancer (an HA pair keeps the same configuration on both devices) or a copy left behind by a test, and the fittest of them is returned: a live record over a retired one, then the record on the scanned address, then one with a pool, the most recently updated among equals. Two different names on the same value end the rule with null, because a weaker piece of evidence could otherwise pick a different service; a step that finds nothing hands over to the next.',
-              'the first step, fqdn "crisp-tx.bankofamerica.com", finds the Load Balancer Service "crisp-tx" and no second row, so its sys_id is returned. Two records named "crisp-tx", one per balancer of the pair, would give the live one on "171.203.142.26" that carries a pool; a VIP without a DNS name and two differently named services on "171.203.142.26" would reach the last step and decline there.'),
+              'The scanned DNS name is tried in the fqdn field, then in the name field, then the label in the name field, then the scanned address in ip_address. Each step accepts one virtual server. Several records carrying one name are the same virtual server recorded more than once (an HA pair keeps the same object on both devices; a test leaves a copy): the records answering on the scanned address are kept, then the live ones, and the one record left is returned. Two records still standing, both devices of a pair live, are an ambiguity nothing here can settle, so the rule declines; two different names on the same value decline as well, because a weaker piece of evidence could otherwise pick a different service. A step that finds nothing hands over to the next.',
+              'the first step, fqdn "crisp-tx.bankofamerica.com", finds the Load Balancer Service "crisp-tx" and no second row, so its sys_id is returned. Two live records named "crisp-tx" on "171.203.142.26", one per balancer of the pair, would make the rule decline; were one of them retired, the live one would be returned. A VIP without a DNS name and two differently named services on "171.203.142.26" would reach the last step and decline there.'),
         service_one(False),
         "    var steps = [['fqdn', dns], ['name', dns], ['name', label], ['ip_address', ip]];",
         '    for (var t = 0; t < steps.length; t++) {',

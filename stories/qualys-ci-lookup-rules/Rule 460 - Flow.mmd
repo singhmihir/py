@@ -24,22 +24,18 @@ flowchart TD
     T --> Q1["clue 1: fqdn = dns"]
     Q1 --> R1{"one(): rows?"}:::chk
     R1 -- "value empty or no row" --> Q2["clue 2: name = dns"]
-    R1 -- "two or more, different names" --> S2(["null: two services, never guess"]):::stop
+    R1 -- "two or more" --> S2(["null: two services, never guess"]):::stop
     R1 -- "exactly one" --> W1(["return the service"]):::win
-    R1 -- "two or more, one name" --> W2(["one virtual server on several balancers<br/>(HA pair) or a test copy:<br/>return the fittest record,<br/>live, on the scanned address,<br/>with a pool, latest update"]):::win
     Q2 --> R2{"one(): rows?"}:::chk
     R2 -- "value empty or no row" --> Q3["clue 3: name = label"]
-    R2 -- "two or more, different names" --> S2
+    R2 -- "two or more" --> S2
     R2 -- "exactly one" --> W1
-    R2 -- "two or more, one name" --> W2
     Q3 --> R3{"one(): rows?"}:::chk
     R3 -- "value empty or no row" --> Q4["clue 4: ip_address = ip"]
-    R3 -- "two or more, different names" --> S2
+    R3 -- "two or more" --> S2
     R3 -- "exactly one" --> W1
-    R3 -- "two or more, one name" --> W2
     Q4 --> R4{"one(): rows?"}:::chk
     R4 -- "no row" --> S3(["null: no service carries<br/>the name or the address"]):::stop
-    R4 -- "two or more, different names" --> S2
+    R4 -- "two or more" --> S2
     R4 -- "exactly one" --> W1
-    R4 -- "two or more, one name" --> W2
     T -. "table not installed" .-> S4(["null: service class absent"]):::stop

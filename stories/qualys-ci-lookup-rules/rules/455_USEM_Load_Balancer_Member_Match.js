@@ -18,10 +18,10 @@
    Input  : sourceValue is the IP field, "171.203.142.26"; the rule also reads the OS and the DNS
             name from sourcePayload.
    Returns: the sys_id of the one real server behind the virtual server (a machine recorded more
-            than once in the CMDB counts once, and its fittest record is returned); null when the
-            host shows no VIP sign, no virtual server matches or two differently named ones carry
-            the value, the virtual server has no pool or no members, or two or more machines sit
-            behind it.
+            than once counts once, its live record standing for it); null when the host shows no VIP
+            sign, no virtual server matches or two differently named ones carry the value, the
+            virtual server has no pool or no members, two or more machines sit behind it, or two
+            live records of the one machine compete.
    Sample : the Linux Server "usvacrispweb01", the only member of the pool "crisp-tx-pool" behind
             the Load Balancer Service "crisp-tx", reached through the member address "10.10.20.31".
 
@@ -95,19 +95,31 @@
             ci.life_cycle_stage_status.getDisplayValue() == 'Retired';
     }
 
+    // narrow() keeps the records carrying a flag when any does, so a record answering on the
+    // scanned address, or a live record, is preferred to the others without dropping the only
+    // records there are.
+    function narrow(list, flag) {
+        var out = [];
+        for (var i = 0; i < list.length; i++)
+            if (list[i][flag])
+                out.push(list[i]);
+        return out.length ? out : list;
+    }
+
     // -- The one virtual server, by fqdn, then name, then address ---------------------------------
     // The same search as the service rule: the scanned DNS name in the fqdn field, then in the name
     // field, then the label in the name field, then the scanned address in ip_address. Each step
-    // accepts one virtual server. Several records carrying one name are one virtual server defined
-    // on more than one balancer (an HA pair keeps the same configuration on both devices) or a copy
-    // left behind by a test: those on the scanned address are kept as twins, and the pool of every
-    // twin is walked below, so the members are found whichever record carries the pool. Two
-    // different names on the same value end the rule; a step that finds nothing hands over to the
-    // next.
+    // accepts one virtual server. Several records carrying one name are the same virtual server
+    // recorded more than once (an HA pair keeps the same object on both devices; a test leaves a
+    // copy): the records answering on the scanned address are kept, then the live ones, and the
+    // pool of every record kept is walked below, so the members are found whichever record carries
+    // the pool, and a stale pool on a second record shows up as a second machine. Two different
+    // names on the same value end the rule; a step that finds nothing hands over to the next.
     // Sample: the first step, fqdn "crisp-tx.bankofamerica.com", finds the Load Balancer Service
-    //         "crisp-tx" and no second row, so service holds its sys_id and twins that one record.
-    //         Two records named "crisp-tx", one per balancer of the pair, would both go into twins.
-    var twins = [];                               // every record of the virtual server found
+    //         "crisp-tx" and no second row, so twins holds that one record. Two live records named
+    //         "crisp-tx" on "171.203.142.26", one per balancer of the pair, would both be kept; a
+    //         retired copy beside a live one would be set aside.
+    var twins = [];                               // every record kept of the virtual server found
     function one(field, value) {
         if (!value)
             return undefined;                     // nothing to search, next step
@@ -117,28 +129,24 @@
         gr.addQuery(field, value);
         if (ignore)
             gr.addQuery('sys_class_name', 'NOT IN', ignore);
-        gr.orderByDesc('sys_updated_on');         // the latest record wins a tie
         gr.query();
-        var names = {}, best = null, bestScore = -1;
-        var all = [], onAddress = [];
+        var rows = [], names = {};
         while (gr.next()) {
             names[('' + (gr.getValue('name') || '')).trim().toLowerCase()] = true;
-            var here = gr.getValue('ip_address') == ip;
-            var score = (retired(gr) ? 0 : 4) + (here ? 2 : 0) + (gr.getValue('pool') ? 1 : 0);
-            all.push(gr.getUniqueValue());
-            if (here)
-                onAddress.push(gr.getUniqueValue());
-            if (score > bestScore) {
-                best = gr.getUniqueValue();
-                bestScore = score;
-            }
+            rows.push({id: gr.getUniqueValue(), here: gr.getValue('ip_address') == ip,
+                live: !retired(gr)});
         }
-        if (!best)
+        if (!rows.length)
             return undefined;                     // nothing found, next step
         if (Object.keys(names).length > 1)
             return null;                          // two different services, never guess
-        twins = onAddress.length ? onAddress : all;
-        return best;
+        rows = narrow(rows, 'here');              // the records answering on the scanned address
+        if (rows.length > 1)
+            rows = narrow(rows, 'live');          // the live records, a retired copy set aside
+        twins = [];
+        for (var w = 0; w < rows.length; w++)
+            twins.push(rows[w].id);
+        return twins[0];
     }
     var steps = [['fqdn', dns], ['name', dns], ['name', label], ['ip_address', ip]];
     var service = null;
@@ -239,53 +247,20 @@
     if (!memberIds.length)
         return null;
 
-    // fittest() picks one record when a machine is recorded more than once: a live record over a
-    // retired one, then the more specific class (a Linux Server over a plain Server), then the most
-    // recently updated. parentsOf() lists a class and every class above it, so its length is the
-    // depth of the class.
-    function parentsOf(table) {                   // the class and every class above it
-        var out = [table];
-        var db = new GlideRecord('sys_db_object');
-        db.addQuery('name', table);
-        db.query();
-        while (db.next() && db.getValue('super_class')) {
-            var parent = '' + db.super_class.name;
-            out.push(parent);
-            db = new GlideRecord('sys_db_object');
-            db.addQuery('name', parent);
-            db.query();
-        }
-        return out;
-    }
-    function fittest(records) {
-        var best = null, bestScore = -1, bestTime = '';
-        for (var f = 0; f < records.length; f++) {
-            var ci = new GlideRecord('cmdb_ci_hardware');
-            ci.get(records[f]);
-            var score = (retired(ci) ? 0 : 100) + parentsOf('' + ci.getValue('sys_class_name')).length;
-            var time = '' + ci.getValue('sys_updated_on');
-            if (score > bestScore || (score == bestScore && time > bestTime)) {
-                best = records[f];
-                bestScore = score;
-                bestTime = time;
-            }
-        }
-        return best;
-    }
-
-    // -- The real servers: one machine ------------------------------------------------------------
+    // -- The real servers: one machine, one live record -------------------------------------------
     // Each member address is looked for on device records, on network adapters and on IP Address
     // records, and each member is followed through its relationships to hardware; load balancer
     // devices and ignored classes are left out. Every server found is kept with the first label of
     // its name. Several records of one name are one machine recorded more than once (a rebuilt
-    // server, a copy left by a test) and the fittest of them stands for it. One machine is the
-    // match; none, or two differently named machines, and the rule declines, leaving the virtual
-    // server record to the service rule.
+    // server whose old record was retired, a copy left by a test): its live record stands for it
+    // when it is the only live one. One machine is the match; none, two differently named machines,
+    // or two live records of the one machine, and the rule declines, leaving the virtual server
+    // record to the service rule.
     // Sample: the Linux Server "usvacrispweb01" carries "10.10.20.31" in its ip_address field, so
     //         servers holds one entry and its sys_id is returned. A retired Server record also
-    //         named "usvacrispweb01" would be set aside for the live Linux Server; a second member
-    //         on "10.10.20.32" owned by "usvacrispweb02" would make the rule decline and the
-    //         service rule attach "crisp-tx".
+    //         named "usvacrispweb01" would be set aside for the live Linux Server; two live records
+    //         of that name, or a second member on "10.10.20.32" owned by "usvacrispweb02", would
+    //         make the rule decline and the service rule attach "crisp-tx".
     var servers = {};                             // sys_id -> first label of the name
     function keep(id) {
         if (!id || servers[id] !== undefined || !isRealServer(id))
@@ -328,5 +303,15 @@
     var labels = Object.keys(machines);
     if (labels.length != 1)
         return null;                              // no server, or two different machines
-    return fittest(machines[labels[0]]);
+    var records = machines[labels[0]];
+    if (records.length == 1)
+        return records[0];
+    var live = [];                                // one machine recorded more than once
+    for (var f = 0; f < records.length; f++) {
+        var ci = new GlideRecord('cmdb_ci_hardware');
+        ci.get(records[f]);
+        if (!retired(ci))
+            live.push(records[f]);
+    }
+    return live.length == 1 ? live[0] : null;     // two live records compete, never guess
 })(rule, sourceValue, sourcePayload);
