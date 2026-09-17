@@ -1,0 +1,7 @@
+{
+ "set": "0bf36c47935f4390e3aef0aefaba10cb",
+ "name": "SNOWUSEMTP-1825_MS_Ignore CI Classes for Lookup Rules_V1.0",
+ "rows": 1,
+ "file": "Ignore CI Classes for Lookup Rules - Update Set.xml",
+ "value": "sn_sec_cmn_unmatched_ci,sn_vul_qualys_ci,cmdb_ci_unclassed_hardware,cmdb_ci_incomplete_ip,cmdb_ci_dns_name,cmdb_ci_ip_address,cmdb_ci_network_adapter,cmdb_ci_nic,cmdb_ci_vmware_nic,cmdb_ci_storage_volume,cmdb_ci_disk_partition,cmdb_ci_lb,cmdb_ci_file_system,cmdb_ci_vm_instance,cmdb_ci_vm_template,cmdb_ci_vmware_instance,cmdb_ci_storage_pool,cmdb_ci_lb_pool_member,dscy_router_interface,dscy_swtch_fwd_rule,cmdb_ci_endpoint_tcp,cmdb_ci_print_queue,cmdb_ci_certificate"
+}

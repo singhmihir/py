@@ -151,6 +151,12 @@ Follow it without being asked again.
   empty values; coerce with `|| ''` first. Rule 430 on the client instance reads the IP field and must be
   set back to DNS by their administrator. **Never change a lookup rule without asking him first.** Full state in
   `stories/qualys-ci-lookup-rules/README.md`.
+- Ignore classes (SNOWUSEMTP-1825, `stories/ignore-ci-classes/`): `sn_sec_cmn.ignoreCIClass` (scope sn_sec_cmn, set
+  `..._MS_Ignore CI Classes for Lookup Rules_V1.0` in that scope) now carries the story's 19 classes on top of the five OOB
+  ones; the platform compares exact class names (`_checkCIIgnored`, no hierarchy). `cmdb_ci_lb` on the list removes the
+  client's Linux-on-balancer matches (three in `test_evidence.py`, expected) and 850's vm_instance sample; Mihir ships it
+  as listed and will have the client drop `cmdb_ci_lb` later. A property in a scoped app is captured by running the update
+  in that scope (`ui.js(code, scope=<scope sys_id>)`) into a set whose application is that scope.
 - Kafka outbound (SNOWUSEMTP-1625): topic `sn_usem_remtask_outbound`, namespace `com.bofa.usem`,
   envelope + `rem_tasks[].remediation_task`, dates `MM-dd-yyyy HH:mm:ss`, mapping sheet
   *Outbound to CDP (RemTask)* — only rows with *CDP Required? = Yes*; one property per table with one
