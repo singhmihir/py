@@ -400,7 +400,8 @@ retired Linux Server + live Server (the live one), live Server + live Linux Serv
 Linux Servers (declined); and `vip-layer`, a virtual address held on the balancer's own adapter through DNS Name -> IP
 Address (350 alone declines, the chain reaches 455 and the server). Regression unchanged: `test_v6.py` 50, `test_v5.py` 36,
 `test_v3.py` 36, `test_evidence.py` 356, `test_inc_sep15.py` 32, header sweep identical, William's router 400, BlueCat no
-match. SWEEP_LINE
+match. Client-item sweep with the corrected rules (`sweep_client_items.log`): 6,034 items, no script error, the same 28 chain
+matches as before, no rule disagreeing with another; 455 and 460 alone 1 ms per item (111 and 91 ms at most).
 
 `Load Balancer Member Match - Explain Script.js` mirrors the delivered logic (records per clue with live/retired and pool,
 which were kept and why, what each rule does with them; machines by name with live/retired per record); exercised on the
