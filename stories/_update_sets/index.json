@@ -349,5 +349,14 @@
   "file": "SNOWUSEMTP-895_MS_Qualys_CI_Lookup_Rules_Load_Balancer_Refinements_V1.2.xml",
   "created": "2026-09-17 12:12:14",
   "scrub": []
+ },
+ {
+  "name": "SNOWUSEMTP-1825_MS_Ignore CI Classes for Lookup Rules_V1.0",
+  "app": "sn_sec_cmn",
+  "rows": 1,
+  "exported": 1,
+  "file": "SNOWUSEMTP-1825_MS_Ignore_CI_Classes_for_Lookup_Rules_V1.0.xml",
+  "created": "2026-09-17 12:55:57",
+  "scrub": []
  }
 ]
