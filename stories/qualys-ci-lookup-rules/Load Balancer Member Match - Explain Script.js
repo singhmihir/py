@@ -6,8 +6,11 @@
    by each of the three paths for each record kept, the members with their addresses, the candidate
    servers found through each of the four places, the real-server check on each candidate, the
    machines they make (records of one name are one machine; a retired record is set aside for the
-   live one, two live records are an ambiguity), the answer the rule gives today, and the CI the item
-   holds. SURVEY_DAYS > 0 adds a survey of every unmatched item of the Qualys source
+   live one, two live records are an ambiguity), whether every member was placed, and what each of
+   the two rules answers: Member Match returns the machine only when every member leads to it;
+   Service Match attaches the virtual server record only when the pool is unknown, empty, or fronts
+   one server, and leaves the host unmatched when several member addresses or several machines sit
+   behind it. Then the CI the item holds today. SURVEY_DAYS > 0 adds a survey of every unmatched item of the Qualys source
    updated in the last SURVEY_DAYS days that shows a VIP sign, grouped by the reason the two load
    balancer rules decline it. Nothing is written.
    ------------------------------------------------------------------------------------------------- */
@@ -117,7 +120,7 @@ function explain(p, itemLabel) {
     for (var i = 0; i < s.trace.length; i++) line('  ' + s.trace[i]);
     if (!s.twins.length) return;
     var svc = new GlideRecord('cmdb_ci_lb_service'); svc.get(s.twins[0]);
-    var attach = s.service ? 'Service Match attaches ' + svc.getValue('name') : 'Service Match declines too (two live records), the item stays unmatched';
+    var attach = s.service ? 'Service Match attaches ' + svc.getValue('name') + ' (no pool known behind it)' : 'Service Match declines too (two live records), the item stays unmatched';
     var pools = {};
     for (var w = 0; w < s.twins.length; w++) {
         var tw = new GlideRecord('cmdb_ci_lb_service'); tw.get(s.twins[w]);
@@ -141,9 +144,10 @@ function explain(p, itemLabel) {
     }
     var memberIds = Object.keys(members);
     if (!memberIds.length) { line('  members: NONE -> Member Match declines; ' + attach); return; }
-    var servers = {};
+    var servers = {}, identities = {}, unresolved = 0;
     for (var k = 0; k < memberIds.length; k++) {
         var m = members[memberIds[k]];
+        identities[m.ip || memberIds[k]] = true;
         line('  member: ' + m.name + ' | address ' + (m.ip || '(empty)') + ' | found through ' + m.how);
         var cands = [];
         if (m.ip) {
@@ -154,8 +158,10 @@ function explain(p, itemLabel) {
         var relServers = related(memberIds[k], 'cmdb_ci_hardware');
         for (var r3 = 0; r3 < relServers.length; r3++) cands.push({ id: relServers[r3].id, via: 'relationship ' + relServers[r3].via });
         if (!cands.length) line('     candidates: none (no record carries ' + (m.ip || 'an address') + ', no relationship to hardware)');
+        var led = false;
         for (var c = 0; c < cands.length; c++) { var verdict = isRealServer(cands[c].id); line('     candidate via ' + cands[c].via + ': ' + label(cands[c].id) + ' -> ' + verdict);
-            if (verdict == 'real server' && servers[cands[c].id] === undefined) { var hwc = new GlideRecord('cmdb_ci_hardware'); hwc.get(cands[c].id); servers[cands[c].id] = ('' + (hwc.getValue('name') || '')).trim().toLowerCase().split('.')[0] || cands[c].id; } }
+            if (verdict == 'real server') { led = true; if (servers[cands[c].id] === undefined) { var hwc = new GlideRecord('cmdb_ci_hardware'); hwc.get(cands[c].id); servers[cands[c].id] = ('' + (hwc.getValue('name') || '')).trim().toLowerCase().split('.')[0] || cands[c].id; } } }
+        if (!led) { unresolved++; line('     this member leads to no server in the CMDB: unplaced'); }
     }
     var ids = Object.keys(servers);
     var machines = {};
@@ -163,7 +169,10 @@ function explain(p, itemLabel) {
     var labels = Object.keys(machines);
     line('  server records: ' + ids.length + (ids.length ? ' -> ' + ids.map(label).join(' ; ') : '') + ' | machines by name: ' + labels.length + (labels.length ? ' (' + labels.join(', ') + ')' : ''));
     var answer = null, why = labels.length ? 'two differently named machines' : 'no server';
-    if (labels.length == 1) {
+    var nIdent = Object.keys(identities).length;
+    line('  members placed: ' + (memberIds.length - unresolved) + ' of ' + memberIds.length + ' | distinct member identities: ' + nIdent);
+    if (unresolved) why = unresolved + ' member(s) the CMDB cannot place, the pool is partly unknown';
+    if (labels.length == 1 && !unresolved) {
         var records = machines[labels[0]], liveRecords = [];
         for (var f = 0; f < records.length; f++) {
             var ci = new GlideRecord('cmdb_ci_hardware'); ci.get(records[f]);
@@ -174,7 +183,12 @@ function explain(p, itemLabel) {
         else if (liveRecords.length == 1) { answer = liveRecords[0]; line('     one machine recorded ' + records.length + ' times; the live record stands for it: ' + label(answer)); }
         else why = 'one machine recorded ' + records.length + ' times, ' + liveRecords.length + ' live records compete';
     }
-    line('  ANSWER: ' + (answer ? 'Member Match returns ' + label(answer) : 'Member Match declines (' + why + '); ' + attach));
+    var serviceAnswer;
+    if (!s.service) serviceAnswer = 'Service Match declines too (two live records): the item stays unmatched';
+    else if (labels.length == 1 && !unresolved) serviceAnswer = 'Service Match attaches ' + svc.getValue('name') + ' (one machine every member leads to)';
+    else if (labels.length > 1 || nIdent > 1) serviceAnswer = 'Service Match declines (' + (labels.length > 1 ? labels.length + ' machines' : nIdent + ' member identities') + ' behind the virtual server): the item stays unmatched';
+    else serviceAnswer = 'Service Match attaches ' + svc.getValue('name') + ' (one member the CMDB cannot place)';
+    line('  ANSWER: ' + (answer ? 'Member Match returns ' + label(answer) : 'Member Match declines (' + why + '); ' + serviceAnswer));
 }
 for (var i = 0; i < ITEMS.length; i++) {
     var di = new GlideRecord('sn_sec_cmn_src_ci'); di.addQuery('number', ITEMS[i]); di.query();
@@ -194,7 +208,7 @@ if (SURVEY_DAYS > 0) {
         var r = serviceSearch(q); var reason;
         if (r.stopped) { var last = r.trace[r.trace.length - 2] || ''; reason = 'two differently named services carry the value' + (last.indexOf('ip_address') != -1 ? ' (on the address)' : ' (on the name)'); }
         else if (!r.service) reason = 'no service carries the name or the address';
-        else reason = 'a service exists but the item is unmatched (evaluated before the rules?)';
+        else reason = 'a service exists but the item is unmatched (several servers behind it, or evaluated before the rules)';
         reasons[reason] = (reasons[reason] || 0) + 1;
         lists[reason] = lists[reason] || [];
         if (lists[reason].length < SURVEY_LIMIT) lists[reason].push(u.getValue('number') + ' | ' + (q.DNS || '-') + ' | ' + q.IP + ' | ' + ('' + (q.OS || '')).substring(0, 30) + ' | updated ' + u.getValue('sys_updated_on'));

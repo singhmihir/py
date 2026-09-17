@@ -138,9 +138,12 @@ Follow it without being asked again.
   the live one, two live records decline, two different names decline. **Mihir's standard (17 Sep): "perfection in mapping",
   never match unless the exact record is found, leave ambiguity unmatched; no fitness heuristics (class depth, last update,
   "fittest twin") in any rule.** `retired()` mirrors the platform's decommissioned test (install_status 7, operational_status
-  6, life cycle stage Retired). Open with Mihir: the shared-pool policy (several machines behind one VIP) and the partial-pool
-  policy (several members, one known server: tagged today, probably should decline). He also asked for no unrequested work
-  (no diagrams, documents) alongside a rule change.
+  6, life cycle stage Retired). Set V1.1 ("Decline both then"): 455 declines when any member leads to no server (partly
+  unknown pool); 460 walks the same pool and attaches the VIP record only when the pool is unknown, empty, or fronts one
+  server; several member addresses or several machines leave the host unmatched (221 of the client's 634 items would go
+  unmatched). Client service records carry no fqdn and are named `/Common/...`, so the OOB rule 900 FQDN cannot pick them
+  up after 460 declines; fixtures must mimic that (no fqdn) or 900 matches them on the PDI. He also asked for no unrequested
+  work (no diagrams, documents) alongside a rule change.
   `Load Balancer Member Match - Explain Script.js` replays the walk per item on the client instance.
   Rhino/GlideRecord trap: `'' + gr.getValue(f)` is the string "null" for an empty field and `addQuery(f, 'null')` selects the
   empty values; coerce with `|| ''` first. Rule 430 on the client instance reads the IP field and must be
