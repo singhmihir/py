@@ -33,7 +33,9 @@ Pool behind it (the service record's Pool field): /Common/ait71454-pt1-mlonefeeu
    https://bofasecopsdev.service-now.com/cmdb_ci_lb_pool.do?sys_id=5c29dc43931183d03854f05ea903d6b6
 Pool members (Pool Member records whose Pool field is this pool): https://bofasecopsdev.service-now.com/cmdb_ci_lb_pool_member_list.do?sysparm_query=pool%3D5c29dc43931183d03854f05ea903d6b6
    /Common/ait71454-pt1-wva41bmsgsws01v-node | address 171.128.218.80 port 443  https://bofasecopsdev.service-now.com/cmdb_ci_lb_pool_member.do?sys_id=466c6ce02f1ec710f8fdb18e8ea4e3ef
-Outcome: the item was evaluated on 15 September at 22:22, before the member rule was in place, so the service rule attached the virtual server record. The pool holds one member address, 171.128.218.80; when the item is re-evaluated, the member rule will look that address up on the server records and, if one server carries it, tag that server instead.
+Outcome: the pool holds one member address, 171.128.218.80. The member rule tags a server only when that address is found on a server record (its IP Address field), on a Network Adapter record, or on an IP Address record, and the record found is a server rather than a placeholder class. The item carries the virtual server record, so that lookup found no server for 171.128.218.80; the two lists below show what the CMDB holds for it today.
+   servers: https://bofasecopsdev.service-now.com/cmdb_ci_hardware_list.do?sysparm_query=ip_address%3D171.128.218.80
+   adapters: https://bofasecopsdev.service-now.com/cmdb_ci_network_adapter_list.do?sysparm_query=ip_address%3D171.128.218.80
 
 Example 2 - SDI000003726690
 
@@ -105,7 +107,7 @@ Load Balancer Service chosen: /Common/ait48001-pt1-dtlapp-va-443-vip (port 443, 
 Pool behind it (the service record's Pool field): /Common/ait48001-pt1-dtlapp-va-443-pool
    https://bofasecopsdev.service-now.com/cmdb_ci_lb_pool.do?sys_id=da6c6828cf960b10becc38db5d851c5d
 Pool members (Pool Member records whose Pool field is this pool): https://bofasecopsdev.service-now.com/cmdb_ci_lb_pool_member_list.do?sysparm_query=pool%3Dda6c6828cf960b10becc38db5d851c5d
-Outcome: the service carries a pool, but no Pool Member record points at that pool (the member list link above opens empty). With no members there is no address to follow, so the member rule declines and the service rule attached the virtual server record. This is a discovery gap rather than a matching decision: once the pool members are discovered, the item resolves like example 1.
+Outcome: the service carries a pool, but in the data I extracted no Pool Member record points at that pool (the member list link above shows the current state). With no members there is no address to follow, so the member rule declines and the service rule attached the virtual server record. This is a discovery gap rather than a matching decision: once the pool members are discovered, the item is resolved through them.
 
 
 === BOFA Load Balancer Member Match (rule 455) ===
@@ -125,7 +127,7 @@ Pool (the service record's Pool field): /Common/ihscore-sit1-ccgw-6011-pool
 Pool members: https://bofasecopsdev.service-now.com/cmdb_ci_lb_pool_member_list.do?sysparm_query=pool%3D36381f963bfd2e50489ce5d964e45a84
    the members of this pool point at one address, 10.143.72.200
 Server found: the address 10.143.72.200 is the IP Address field of the server record lva71pwbolcc01v (Linux Server)
-   https://bofasecopsdev.service-now.com/cmdb_ci_hardware.do?sys_id=ddcdddf02b462294d50dffbdbe91bf9b
+   https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=ddcdddf02b462294d50dffbdbe91bf9b
 Outcome: one address, one server, so the member rule returned lva71pwbolcc01v; the discovered item now carries that server as its CI, not the balancer and not the virtual server record. The balancer svedpz1rp4lb10 is a separate CI and is never returned.
 
 Example 2 - SDI000002411394
@@ -141,7 +143,7 @@ Pool (the service record's Pool field): /Common/ihscore-dev-ccgw-6011-pool
 Pool members: https://bofasecopsdev.service-now.com/cmdb_ci_lb_pool_member_list.do?sysparm_query=pool%3D3a381f963bfd2e50489ce5d964e45a85
    the members of this pool point at one address, 10.143.72.198
 Server found: the address 10.143.72.198 is the IP Address field of the server record lva68pwbolcc01v (Linux Server)
-   https://bofasecopsdev.service-now.com/cmdb_ci_hardware.do?sys_id=d78e25b82b8e2294d50dffbdbe91bf32
+   https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=d78e25b82b8e2294d50dffbdbe91bf32
 Outcome: one address, one server, so the member rule returned lva68pwbolcc01v; the discovered item now carries that server as its CI, not the balancer and not the virtual server record. Same application as example 1 in the dev environment: a different virtual server, a different pool, a different server.
 
 Example 3 - SDI000002375027
@@ -157,7 +159,7 @@ Pool (the service record's Pool field): /Common/ihscore-dev-multilang_benefits-6
 Pool members: https://bofasecopsdev.service-now.com/cmdb_ci_lb_pool_member_list.do?sysparm_query=pool%3D36381f963bfd2e50489ce5d964e45a1d
    the members of this pool point at one address, 10.143.72.171
 Server found: the address 10.143.72.171 is the IP Address field of the server record wva68pwbolts51v (Windows Server)
-   https://bofasecopsdev.service-now.com/cmdb_ci_hardware.do?sys_id=813bd5383b0e6254a052e71864e45a35
+   https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=813bd5383b0e6254a052e71864e45a35
 Outcome: one address, one server, so the member rule returned wva68pwbolts51v; the discovered item now carries that server as its CI, not the balancer and not the virtual server record. The class of the server does not matter to the rule; it takes what the pool points at, here a Windows Server.
 
 Example 4 - SDI000002993687
@@ -173,7 +175,7 @@ Pool (the service record's Pool field): /Common/ihscore-dev2-boluiv4_benefits-60
 Pool members: https://bofasecopsdev.service-now.com/cmdb_ci_lb_pool_member_list.do?sysparm_query=pool%3D3066482d3b68c710ae0c4047f4e45aac
    the members of this pool point at one address, 171.184.193.14
 Server found: the address 171.184.193.14 is the IP Address field of the server record lva62pwbolws51v (Linux Server)
-   https://bofasecopsdev.service-now.com/cmdb_ci_hardware.do?sys_id=f2130b8693966a107fb5f842ed03d653
+   https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=f2130b8693966a107fb5f842ed03d653
 Outcome: one address, one server, so the member rule returned lva62pwbolws51v; the discovered item now carries that server as its CI, not the balancer and not the virtual server record. The member address here is on a different network from the virtual address, which is normal: the pool member address is the server's own address, the virtual address belongs to the balancer.
 
 Example 5 - SDI000003028419
@@ -188,7 +190,7 @@ Pool: open the service record above and follow its Pool field.
 Pool members: the pool's members carry the address 171.128.217.213 (the Pool Member list filtered by that address shows them, with their pool)
    https://bofasecopsdev.service-now.com/cmdb_ci_lb_pool_member_list.do?sysparm_query=ip_address%3D171.128.217.213
 Server found: the address 171.128.217.213 is the IP Address field of the server record wva41bwtmtas01v (Windows Server)
-   https://bofasecopsdev.service-now.com/cmdb_ci_hardware.do?sys_id=602822843bcc8710ef3892e643e45a97
+   https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=602822843bcc8710ef3892e643e45a97
 Outcome: one address, one server, so the member rule returned wva41bwtmtas01v; the discovered item now carries that server as its CI, not the balancer and not the virtual server record. The host label (turbotmt-tx) carries no marker; the OS text alone qualified the host. The service record is reached through the address filter link above.
 
 
@@ -197,11 +199,15 @@ How to check any item yourself
 1. Open the discovered item and read IP, DNS and OS in its source data; confirm the sign (a load balancer word in OS, or a vip / vs segment in the label).
 2. Open the Load Balancer Service list filtered by that IP address: exactly one record must come back.
 3. Open that record and follow its Pool field to the pool; then open the Pool Member list filtered by that pool.
-4. For each member address, search the server records (cmdb_ci_hardware) by IP Address. One server across all members means the member rule tags that server; several servers, or an address no server carries, means the member rule declines and the item shows what the service rule attached.
+4. For each member address, search the server records (cmdb_ci_hardware) by IP Address. One server across all members means the member rule tags that server; several servers, or an address no server carries, means the member rule declines and the item shows the virtual server record from the service rule.
 
-What changes with the refinement set that is being prepared
+When a discovered item is evaluated again
 
-The refinement set tightens both rules in the direction of never guessing. The member rule will decline when any pool member cannot be placed on a server, so a partly known pool no longer tags the one server it happens to find. The service rule will walk the same pool and attach the virtual server record only when the pool is unknown, empty, or fronts one server; a pool with several member addresses (examples 2 and 3 above) will leave the item unmatched rather than carry a CI that is not the scanned host. Records of one virtual server that exist on both devices of an HA pair are treated as one virtual server; when both are live neither rule picks one. I will send the set with its notes once it is ready for the development instance.
+An item that already holds a CI keeps it until it is evaluated again. That happens when its host arrives in a new import, when the rule that matched it carries the Reapply flag and the "Reapply CI lookup rules" job runs (the job takes the unmatched items plus the items matched by the flagged rules, scanned in the last 90 days), or when the item is selected in the Discovered Items list and "Reapply CI lookup rules" is chosen there. An item evaluated again is only written when the chain returns a different CI or a different rule.
+
+What changes with the refinement set
+
+The refinement set tightens the rules in the direction of never guessing, and the division of work stays as described above: the member rule finds the real server, the service rule attaches the virtual server record when the member rule cannot. The member rule will decline when any pool member cannot be placed on a server, so a partly known pool no longer tags the one server it happens to find. Records of one virtual server that exist on both devices of an HA pair are treated as one virtual server: a retired copy is set aside for the live record, and when both records are live neither rule picks one. The layered DNS rule stops returning a load balancer device when a virtual server's name resolves to it, so such hosts reach the two rules above. I will send the set with its notes for the development instance.
 
 Happy to walk through any of these on a call.
 

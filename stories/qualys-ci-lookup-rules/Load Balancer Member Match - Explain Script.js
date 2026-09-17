@@ -8,9 +8,8 @@
    machines they make (records of one name are one machine; a retired record is set aside for the
    live one, two live records are an ambiguity), whether every member was placed, and what each of
    the two rules answers: Member Match returns the machine only when every member leads to it;
-   Service Match attaches the virtual server record only when the pool is unknown, empty, or fronts
-   one server, and leaves the host unmatched when several member addresses or several machines sit
-   behind it. Then the CI the item holds today. SURVEY_DAYS > 0 adds a survey of every unmatched item of the Qualys source
+   Service Match attaches the virtual server record whenever the member rule declined (it does not
+   read the pool). Then the CI the item holds today. SURVEY_DAYS > 0 adds a survey of every unmatched item of the Qualys source
    updated in the last SURVEY_DAYS days that shows a VIP sign, grouped by the reason the two load
    balancer rules decline it. Nothing is written.
    ------------------------------------------------------------------------------------------------- */
@@ -120,7 +119,7 @@ function explain(p, itemLabel) {
     for (var i = 0; i < s.trace.length; i++) line('  ' + s.trace[i]);
     if (!s.twins.length) return;
     var svc = new GlideRecord('cmdb_ci_lb_service'); svc.get(s.twins[0]);
-    var attach = s.service ? 'Service Match attaches ' + svc.getValue('name') + ' (no pool known behind it)' : 'Service Match declines too (two live records), the item stays unmatched';
+    var attach = s.service ? 'Service Match attaches ' + svc.getValue('name') : 'Service Match declines too (two live records), the item stays unmatched';
     var pools = {};
     for (var w = 0; w < s.twins.length; w++) {
         var tw = new GlideRecord('cmdb_ci_lb_service'); tw.get(s.twins[w]);
@@ -183,11 +182,7 @@ function explain(p, itemLabel) {
         else if (liveRecords.length == 1) { answer = liveRecords[0]; line('     one machine recorded ' + records.length + ' times; the live record stands for it: ' + label(answer)); }
         else why = 'one machine recorded ' + records.length + ' times, ' + liveRecords.length + ' live records compete';
     }
-    var serviceAnswer;
-    if (!s.service) serviceAnswer = 'Service Match declines too (two live records): the item stays unmatched';
-    else if (labels.length == 1 && !unresolved) serviceAnswer = 'Service Match attaches ' + svc.getValue('name') + ' (one machine every member leads to)';
-    else if (labels.length > 1 || nIdent > 1) serviceAnswer = 'Service Match declines (' + (labels.length > 1 ? labels.length + ' machines' : nIdent + ' member identities') + ' behind the virtual server): the item stays unmatched';
-    else serviceAnswer = 'Service Match attaches ' + svc.getValue('name') + ' (one member the CMDB cannot place)';
+    var serviceAnswer = s.service ? 'Service Match attaches ' + svc.getValue('name') : 'Service Match declines too (two live records): the item stays unmatched';
     line('  ANSWER: ' + (answer ? 'Member Match returns ' + label(answer) : 'Member Match declines (' + why + '); ' + serviceAnswer));
 }
 for (var i = 0; i < ITEMS.length; i++) {
@@ -208,7 +203,7 @@ if (SURVEY_DAYS > 0) {
         var r = serviceSearch(q); var reason;
         if (r.stopped) { var last = r.trace[r.trace.length - 2] || ''; reason = 'two differently named services carry the value' + (last.indexOf('ip_address') != -1 ? ' (on the address)' : ' (on the name)'); }
         else if (!r.service) reason = 'no service carries the name or the address';
-        else reason = 'a service exists but the item is unmatched (several servers behind it, or evaluated before the rules)';
+        else reason = 'a service exists but the item is unmatched (evaluated before the rules?)';
         reasons[reason] = (reasons[reason] || 0) + 1;
         lists[reason] = lists[reason] || [];
         if (lists[reason].length < SURVEY_LIMIT) lists[reason].push(u.getValue('number') + ' | ' + (q.DNS || '-') + ' | ' + q.IP + ' | ' + ('' + (q.OS || '')).substring(0, 30) + ' | updated ' + u.getValue('sys_updated_on'));

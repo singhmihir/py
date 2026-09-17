@@ -361,7 +361,7 @@ hop and candidate printed, plus a survey of unmatched items with a VIP sign by d
 `Discovered Item Classes - Export Script.js` (read-only; CSV of the CI classes the items were matched into, by rule, state and
 matching type, attached to a record or printed). Both dry-run here (`inc3` data in the scratchpad only).
 
-## Load balancer refinements, 17 Sep (set "Qualys CI Lookup Rules Load Balancer Refinements" V1.0, re-issued as V1.1)
+## Load balancer refinements, 17 Sep (set "Qualys CI Lookup Rules Load Balancer Refinements" V1.0, re-issued as V1.1 and V1.2)
 Mihir's decisions on the 17 Sep analysis: 455 exists to map "the original server which is using the pool", he needs "one
 exact CI", duplicates in the dev CMDB may be test records and must be resolved "smartly"; the 350 refusal is to be applied.
 Then, on review: "I need perfection in mapping. I don't want to match records unless the code is confident and finds the
@@ -396,13 +396,12 @@ shared generator blocks (`LB_WALK`, `lb_sign_stage`, `lb_service_stage`, `lb_poo
 and the distinct member identities (addresses; an address-less member by record).
 - **455** returns the machine only when every member leads to it: an unplaced member (no CI on its address, no relationship
   to hardware) leaves the pool partly unknown and the rule declines; the server it did find may not be the one scanned.
-- **460** finds the virtual server the same way (two live records still decline), then walks the same pool and attaches the
-  record only when the pool is unknown, empty, or fronts one server (one machine every member leads to, or one identity the
-  CMDB cannot place). Several identities or several machines leave the host unmatched: the finding belongs to one of several
-  hosts and nothing can say which. Its sample payload is now `horizon-vip.bankofamerica.com`, a VIP without pool data.
-- Consequence on the client data of 17 Sep: of the 634 items on 460, the 221 whose pool holds several member addresses
-  would go unmatched on re-evaluation; the 304 whose members were not in the export depend on what the CMDB holds. Told to
-  Mihir with the change.
+- **460** in V1.1 walked the same pool and attached the record only when the pool was unknown, empty, or fronted one server
+  (my reading of "Decline both" for the shared-pool question). **V1.2, same day, on Mihir's "service match is supposed to
+  match lbservice right? Why are you gliding pool and pool members"**: 460 is back to the record-only rule of the morning
+  (sign, four clues, twin handling: two live records decline, a retired copy set aside), the pool walk belongs to 455 alone,
+  and a VIP the member rule cannot resolve keeps the virtual server record as before. "Decline both" therefore meant: 455
+  declines a partly known pool, and the VIP stays on the service record. The 460 sample is `crisp-tx` again.
 - The platform's own rule 900 `FQDN` (after the USEM chain) would still attach a service record whose `fqdn` equals the
   scanned name; the client's 950 service records carry no fqdn (names are `/Common/...` objects), so on the client the host
   stays unmatched. The five ambiguous fixtures were given client-like records (no fqdn) once this showed up on the PDI.
@@ -428,9 +427,23 @@ which were kept and why, what each rule does with them; machines by name with li
 fixture shapes above, including the two policies. The flow diagrams and the two Word documents describe the single-record
 path and predate the twin handling and the two policies; not redrawn (Mihir: no unasked work).
 
-Decided by Mihir ("Decline both then"): a VIP with several distinct machines behind it stays unmatched; a pool where only
-one of several members resolves to a CMDB server declines. Still open: the bofadev extracts that would settle the six 455
-matches.
+Decided by Mihir: a pool where only one of several members resolves to a CMDB server makes 455 decline; the service rule
+attaches the virtual server record whenever the member rule cannot name the machine (V1.2). Still open: the bofadev
+extracts that would settle the six 455 matches.
+
+Re-evaluation on the client instance (read from `sn_sec_cmn.CILookupUtil`): the "Reapply CI lookup rules" job takes the
+items with an empty rule plus the items whose rule carries `reapply = true` (set by the before business rule "Set reapply
+flag" when script, order, method, field or condition change, and pushed to every later rule by `updateReapplyFlag`),
+scanned in the last 90 days, not matched manually; each is re-run through `CIIdentify.identify` and written only when the
+CI or the rule differs (`_updateCIAndLookupRule`); an item that no rule matches any more is handed to the IRE placeholder
+path. The list action "Reapply CI lookup rules" re-runs the selected items regardless of flags (`reRunCILookupRules`).
+Mihir reran after pasting the refinements on bofadev and saw no change on the discovered items: with V1.2 that is the
+expected result (the matched VIPs keep their record, nothing new matches), with V1.1 the shared-pool items should have
+moved unless the flagged-rule condition was not met.
+
+Email for Ravali (`Load Balancer Rules - Walkthrough Email.md`, posted as a comment on INC0010003): eleven items walked
+record by record with links on bofasecopsdev, five service-rule shapes and five member-rule items; no time-of-evaluation
+claims (bofadev shows US time, exports carry UTC), server links on the class table of the record.
 
 ## State of play, 14 Sep (superseded by the close-out above)
 Rule of engagement: **no lookup rule is changed without Mihir's explicit go-ahead.** Everything below is
