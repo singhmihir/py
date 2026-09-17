@@ -5,7 +5,9 @@
    adapter belongs to the CI. This rule follows that chain, which is the only way to find a host
    whose name is not written on the CI record at all, and it resolves aliases to the real machine. A
    CI at the end of the chain whose class contradicts the scanned OS is left out, because the
-   discovery records then describe a different kind of machine.
+   discovery records then describe a different kind of machine, and a load balancer device at the
+   end of the chain is refused, because the name then belongs to a virtual address the balancer
+   answers on.
 
    Sample payload (one Qualys host record, used in every note below)
    {
@@ -21,7 +23,8 @@
    Returns: the sys_id of the CI at the end of the chain DNS Name -> IP Address -> adapter -> CI,
             its class agreeing with the scanned OS when one is known (a Linux fingerprint agrees
             with Network Gear, Load Balancer and Storage Server records too); when several CIs
-            answer to the name, the one whose chain runs through the scanned IP; null otherwise.
+            answer to the name, the one whose chain runs through the scanned IP; null otherwise, and
+            null when the CI reached is a load balancer device.
    Sample : the Linux Server "hklvteqoradbp3", reached through DNS Name "hklvteqoradbp3.hk.baml.com"
             -> IP Address "167.202.60.26" -> adapter "eth0".
 
@@ -115,6 +118,13 @@
         return parentsOf(pref).indexOf(cls) != -1;  // cls is a parent of pref
     }
 
+    // A load balancer answers on virtual addresses for the servers behind it, so it is never the
+    // host that was scanned.
+    function isLoadBalancer(id) {
+        var lb = new GlideRecord('cmdb_ci_lb');
+        return lb.isValid() && lb.get(id);
+    }
+
     // -- Follow the chain DNS Name -> IP Address -> adapter -> CI ---------------------------------
     // cmdb_ip_address_dns_name ties one DNS Name record to one IP Address record; dot-walking
     // reaches the rest: dns_name.name is the name on the DNS Name record and ip_address.nic.cmdb_ci
@@ -132,20 +142,23 @@
         gr.addQuery('ip_address.nic.cmdb_ci.sys_class_name', 'NOT IN', ignore);
     gr.query();
 
-    // -- One CI at the end of the chain, class agreeing, scanned IP as the tie-break --------------
+    // -- One CI at the end of the chain: class agreeing, not a load balancer, IP as the tie-break ---
     // A CI whose class contradicts the scanned OS is skipped: a Computer at the end of the chain
     // for a Cisco IOS host is a stale or misattributed discovery record, not the router. Each
     // remaining CI is counted once, and the CIs reached through the scanned address are noted. One
     // CI is the match. A name that resolves to two devices (an alias moved between hosts, an old
     // and a new record) is taken only when exactly one of them is reached through the scanned IP;
-    // otherwise the rule declines.
+    // otherwise the rule declines. The CI chosen is refused when it is a load balancer device: the
+    // name then belongs to a virtual address the balancer answers on, the scanned host sits behind
+    // it, and the load balancer rules take over.
     // Sample: the chain ends on a Linux Server, the class pref holds, so it is counted: count is 1
     //         and the sys_id of "hklvteqoradbp3" is returned. A Computer at the end of the chain
-    //         would also count (a parent of Linux Server), and so would an IP Switch or a Load
-    //         Balancer, appliances that report the Linux they run on; a Windows Server would be
-    //         skipped. Were the name also linked to an address of a second Linux Server, ipOwners
-    //         would hold only the CI reached through "167.202.60.26" and that one would be
-    //         returned.
+    //         would also count (a parent of Linux Server), and so would an IP Switch, an appliance
+    //         that reports the Linux it runs on; a Windows Server would be skipped. Were the name
+    //         also linked to an address of a second Linux Server, ipOwners would hold only the CI
+    //         reached through "167.202.60.26" and that one would be returned. Were the chain to end
+    //         on the Load Balancer "hklvf5lb01", the rule would decline and the host would go on to
+    //         the load balancer rules.
     var owners = {}, ipOwners = {};
     var count = 0, first = null;
     while (gr.next()) {
@@ -163,10 +176,10 @@
             ipOwners[owner] = true;
     }
     if (count == 1)
-        return first;
+        return isLoadBalancer(first) ? null : first;
     if (count > 1) {
         var confirmed = Object.keys(ipOwners);
-        if (confirmed.length == 1)
+        if (confirmed.length == 1 && !isLoadBalancer(confirmed[0]))
             return confirmed[0];
     }
     return null;

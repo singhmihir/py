@@ -129,9 +129,16 @@ Follow it without being asked again.
   items get an IRE placeholder in `cmdb_ci_unclassed_hardware` (ignored class, `matching_type created_by_ire`) and are only
   re-evaluated on re-import or reapply. Rule 455 `USEM Load Balancer Member Match` (set Load Balancer Member Match V1.0, before 460) walks Load Balancer
   Service -> Pool -> Pool Member -> server and returns the real server only when exactly one sits behind the virtual server;
-  otherwise 460 attaches the VIP record. Rule 350 still lacks the load balancer refusal (open, needs Mihir's word). Client data 17 Sep: 634 items on 460, 6 on 455 (all servers); duplicated service records
-  (HA pairs, same name and VIP on two balancers) make both rules decline; 455 counts servers not members (tightening
-  proposed, pending); `Load Balancer Member Match - Explain Script.js` replays the walk per item on the client instance.
+  otherwise 460 attaches the VIP record. Client data 17 Sep: 634 items on 460, 6 on 455 (all servers). Set Load Balancer
+  Refinements V1.0 (17 Sep, `build_rules_v9.py`): 350 refuses a load balancer device at the end of its chain; 455/460 treat
+  several service records of one name (HA pair, test copy) as one virtual server (`service_one()` in the generator: two
+  different names still decline; 460 returns the fittest record, live > on the scanned address > with a pool > latest update;
+  455 walks the pools of every twin on the scanned address); 455 treats server records of one name (first label,
+  case-insensitive) as one machine and returns the fittest (live > deeper class > latest update), two different names still
+  decline. `retired()` mirrors the platform's decommissioned test (install_status 7, operational_status 6, life cycle stage
+  Retired); the platform drops a retired CI a rule returns, so live always wins. Open with Mihir: the shared-pool policy
+  (several machines behind one VIP) and the partial-pool policy (several members, one known server: tagged today).
+  `Load Balancer Member Match - Explain Script.js` replays the walk per item on the client instance.
   Rhino/GlideRecord trap: `'' + gr.getValue(f)` is the string "null" for an empty field and `addQuery(f, 'null')` selects the
   empty values; coerce with `|| ''` first. Rule 430 on the client instance reads the IP field and must be
   set back to DNS by their administrator. **Never change a lookup rule without asking him first.** Full state in

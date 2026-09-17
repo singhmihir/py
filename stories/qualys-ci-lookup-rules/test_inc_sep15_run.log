@@ -1,4 +1,4 @@
-fixtures: 56 records, 32 created, 24 already present
+fixtures: 56 records, 0 created, 56 already present
 PASS run1 SDI000003720429 avxdd008a.cc.bofa.com, no OS: Avaya phone named AVXDD008A on the same address -> Device Name Match | chain 415 AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone] | 415 alone -> AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone]
 PASS run1 the same phone scanned as "Foundry Networks" -> still the phone | chain 415 AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone] | 415 alone -> AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone]
 PASS run1 the same phone scanned as "Linux 2.x" (embedded Linux) -> still the phone | chain 415 AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone] | 415 alone -> AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone]
