@@ -26,6 +26,7 @@ CASES = [  # label, payload, expected chain rule ('' = no match), expected CI, (
     ('a virtual address with no service record -> no match', P('10.230.1.99', F5, 'vip-none.bankofamerica.com'), '', '', '455', ''),
     ('no VIP sign: a Red Hat host on the virtual address -> the rule does not run', P('10.230.1.10', 'Red Hat Enterprise Linux 9.8', 'somehost.corp.bankofamerica.com'), '', '', '455', ''),
     ('the real server scanned on its own address and name -> the name rule, untouched', P('10.230.2.11', 'Red Hat Enterprise Linux 9.8', 'lbsrv-one.corp.bankofamerica.com'), '400', 'lbsrv-one'),
+    ('three members of which only one address is a server in the CMDB -> the one server today (flips to the virtual server record if the member-count tightening is adopted)', P('10.230.1.80', F5, 'vip-partial.bankofamerica.com'), '455', 'lbsrv-partial-only', '455', 'lbsrv-partial-only'),
 ]
 TABLES = ['cmdb_ci_ip_address', 'cmdb_ci_network_adapter', 'cmdb_ci_lb_pool_member', 'cmdb_ci_lb_pool', 'cmdb_ci_lb_service', 'cmdb_ci_lb_bigip', 'cmdb_ci_linux_server', 'cmdb_ci_win_server', 'cmdb_ci_server']
 ui = SNUI(); ui.app('global')
@@ -64,6 +65,7 @@ var v5 = vip('vip-ipr', '10.230.1.50', true); member(v5.pool, 'vip-ipr-pool_10.2
 var v6 = vip('vip-relsrv', '10.230.1.55', true); var m6 = member(v6.pool, 'vip-relsrv-pool_member', ''); var s6 = one('cmdb_ci_linux_server', 'lbsrv-relsrv', {}); rel(m6, s6);
 var v7 = vip('vip-dup', '10.230.1.60', true); member(v7.pool, 'vip-dup-pool_10.230.2.61_443', '10.230.2.61'); one('cmdb_ci_linux_server', 'lbsrv-dup1', {ip_address: '10.230.2.61'}); one('cmdb_ci_win_server', 'lbsrv-dup2', {ip_address: '10.230.2.61'});
 var v8 = vip('vip-lbonly', '10.230.1.70', true); member(v8.pool, 'vip-lbonly-pool_10.230.0.1_443', '10.230.0.1');
+var v9 = vip('vip-partial', '10.230.1.80', true); member(v9.pool, 'vip-partial-pool_10.230.2.81_443', '10.230.2.81'); member(v9.pool, 'vip-partial-pool_10.230.2.82_443', '10.230.2.82'); member(v9.pool, 'vip-partial-pool_10.230.2.83_443', '10.230.2.83'); one('cmdb_ci_linux_server', 'lbsrv-partial-only', {ip_address: '10.230.2.81'});
 gs.print('X::' + JSON.stringify(__f));''' % json.dumps(MARK))
 print('fixtures created:', ', '.join(f['out']) or 'none (all present)')
 passed = failed = 0
