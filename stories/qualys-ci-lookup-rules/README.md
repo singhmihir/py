@@ -327,8 +327,7 @@ member (declined); no service; no VIP sign; the real server scanned on its own n
 in the chain: `test_v6.py` 50, `test_v5.py` 36, `test_v3.py` 36 (the 460 cases unchanged), `test_evidence.py` 356,
 `test_inc_sep15.py` 32, header sweep identical, William's router 400, BlueCat no match. Client-item sweep with 455 in the chain (`sweep_client_items.log`): 6,034 items, no script error, rule 455 alone 1 ms per item (126 ms at most), no hit on the PDI where no pool data exists, same 28 chain matches as before.
 
-Still open from the document: rule 350 does not refuse a load balancer device at the end of its DNS chain (the address rules
-do); one condition, to be applied on Mihir's word.
+Rule 350's missing refusal of a load balancer device was applied on 17 Sep (see the refinements section below).
 
 ## Client results for 455 and 460, 17 Sep
 Mihir attached the items matched on the client instance by `BOFA Load Balancer Service Match` (634) and
@@ -350,16 +349,61 @@ Ravali (client architect) is sceptical and wants the CIs confirmed, in particula
   three vip1 siblings (ccgw sit1, ccgw dev, de-benefits-ltm10) were evaluated after the rule existed and still hold the VIP
   record while their vip2 siblings got the server: to be explained on the instance.
 - 140 service names are duplicated (the same F5 object on two balancers of a pair, mostly on the same VIP address): the
-  address clue finds two, both rules decline, the VIP stays unmatched. None of the 634 matched items sits on such an
-  address. Proposal, pending: treat identically named services on one address as one record.
-- Design point to raise honestly: 455 counts the servers found, not the members. A pool with several members of which only
-  one address resolves to a CMDB server would be tagged with that server. Proposal, pending Ravali and Mihir: require one
-  distinct member address (all members on one server) before accepting.
+  address clue found two, both rules declined, the VIP stayed unmatched. None of the 634 matched items sits on such an
+  address. Mihir's answer ("I need one ci"): treat identically named services as one virtual server; built on 17 Sep, see
+  the refinements section below.
+- Design point raised honestly: 455 counts the servers found, not the members. A pool with several members of which only
+  one address resolves to a CMDB server is tagged with that server. Still open (Mihir asked for "one exact CI which invoked
+  the load balancer"; the shared-pool and partial-pool policies need his decision, questions put to him with the numbers).
 
 Hand-over: `Load Balancer Member Match - Explain Script.js` (read-only; replays the walk for a list of item numbers, every
 hop and candidate printed, plus a survey of unmatched items with a VIP sign by decline reason) and
 `Discovered Item Classes - Export Script.js` (read-only; CSV of the CI classes the items were matched into, by rule, state and
 matching type, attached to a record or printed). Both dry-run here (`inc3` data in the scratchpad only).
+
+## Load balancer refinements, 17 Sep (set "Qualys CI Lookup Rules Load Balancer Refinements" V1.0)
+Mihir's decisions on the 17 Sep analysis: 455 exists to map "the original server which is using the pool", he needs "one
+exact CI", duplicates in the dev CMDB may be test records and must be resolved "smartly"; for HA pairs the same ("I need
+one ci"); and the 350 refusal is to be applied. Three rules re-issued in Global set
+`SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Load Balancer Refinements_V1.0` (`build_rules_v9.py`, `state_v9.json`, file
+`Qualys CI Lookup Rules Load Balancer Refinements - Update Set.xml`):
+
+- **350 Layered DNS Match** refuses a load balancer device at the end of the DNS Name -> IP Address -> adapter -> CI chain
+  (`LB_HELPER` `isLoadBalancer`, applied to the single owner and to the IP-confirmed owner): the name then belongs to a
+  virtual address the balancer answers on, and the host goes on to 455/460. Before, a Linux fingerprint on such a name
+  landed on the balancer through the appliance acceptance.
+- **455 and 460**, shared `service_one()` in the generator: `one(field, value)` collects every service carrying the clue;
+  two or more *different* names still decline; several records of *one* name are one virtual server (an HA pair keeps the
+  same object on both devices, a test leaves a copy). 460 returns the fittest record: live (the platform's own decommissioned
+  test, `retired()`: install status 7, operational status 6 or life cycle stage Retired) over retired, then on the scanned
+  address, then with a pool, latest `sys_updated_on` among equals (a retired record would be dropped by the platform after
+  the rule returned it, which is why live comes first). 455 keeps the twins (those on the scanned address when any, else
+  all) and walks the pools of every twin, so the members are found whichever record carries the pool.
+- **455**, servers: every candidate that passes `isRealServer` is kept with the first label of its name; records of one name
+  (case-insensitive) are one machine recorded more than once; two differently named machines still decline (shared pool);
+  one machine with several records returns `fittest()`: live over retired, then the deeper class (`parentsOf` length, a
+  Linux Server over a plain Server), then the latest update. An empty name counts as its own machine.
+
+Tests: `test_lb_member.py` grew to 25 cases (50 of 50 pass, `test_lb_member_run.log`); a Load Balancer Service result now
+prints as `name@address[+pool]` so the twin chosen is visible. New fixtures: the HA pair `/Common/vip-pair-443` on two
+BIG-IP devices with the pool on one (455 -> lbsrv-pair; 460 alone -> the twin with the pool); `vip-rtwin` where only the
+retired twin holds the pool (455 -> the server through the retired twin's pool; 460 alone -> the live twin); `vip-far` on
+two addresses (each scan lands on the server behind the record on its own address); `vip-x1`/`vip-x2` on one address (no
+match, both rules); server twins behind one member address: retired Server + live Linux Server (the live one), live Server +
+live Linux Server (the Linux Server), two live Linux Servers (the later update), retired Linux Server + live Server (the
+live one although less specific); and `vip-layer`, a virtual address held on the balancer's own adapter through DNS Name ->
+IP Address (350 alone declines, the chain reaches 455 and the server). Regression unchanged: `test_v6.py` 50, `test_v5.py`
+36, `test_v3.py` 36, `test_evidence.py` 356, `test_inc_sep15.py` 32, header sweep identical, William's router 400, BlueCat
+no match. Client-item sweep: see the line below once it completes.
+
+`Load Balancer Member Match - Explain Script.js` mirrors the new logic (twins printed per clue with live/retired, pool and
+update time, the fittest twin 460 would return, machines by name and the fittest record with its reasons); exercised on the
+eight fixture shapes above. `Rule 455 - Flow` and `Rule 460 - Flow` diagrams redrawn for the twin branches and the
+machine grouping (the example walks are unchanged, a single record).
+
+Open, put to Mihir: the shared-pool policy (several distinct machines behind one VIP: keep the VIP record as today, or pick
+one member by a fixed rule) and the partial-pool policy (several members, only one resolves to a CMDB server: tag it as
+today, or require one distinct member address); plus the bofadev extracts that would settle the six 455 matches.
 
 ## State of play, 14 Sep (superseded by the close-out above)
 Rule of engagement: **no lookup rule is changed without Mihir's explicit go-ahead.** Everything below is

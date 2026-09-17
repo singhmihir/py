@@ -1,10 +1,11 @@
 /* Load Balancer Member Match, explained per discovered item (read-only)
    -------------------------------------------------------------------------------------------------
    Replays the walk of the Load Balancer Member Match rule for the discovered items listed in ITEMS
-   and prints every hop: the VIP sign, the service search clue by clue, the pools found by each of
-   the three paths, the members with their addresses, the candidate servers found through each of
-   the four places, the real-server check on each candidate, the answer the rule gives today, and the
-   CI the item holds. SURVEY_DAYS > 0 adds a survey of every unmatched item of the Qualys source
+   and prints every hop: the VIP sign, the service search clue by clue (several records of one name
+   are one virtual server, its twins), the pools found by each of the three paths for each twin, the
+   members with their addresses, the candidate servers found through each of the four places, the
+   real-server check on each candidate, the machines they make (records of one name are one machine
+   and the fittest record stands for it), the answer the rule gives today, and the CI the item holds. SURVEY_DAYS > 0 adds a survey of every unmatched item of the Qualys source
    updated in the last SURVEY_DAYS days that shows a VIP sign, grouped by the reason the two load
    balancer rules decline it. Nothing is written.
    ------------------------------------------------------------------------------------------------- */
@@ -41,27 +42,47 @@ function vipSign(p) {
     for (var s = 0; s < segments.length; s++) if (isMarker(segments[s], labelMarkers)) hits.push('label segment "' + segments[s] + '"');
     return hits;
 }
-function serviceSearch(p) {                       // the four clues, as in both rules
+function retired(ci) {                             // the platform's own decommissioned test
+    return ci.getValue('install_status') == '7' || ci.getValue('operational_status') == '6' || ci.life_cycle_stage_status.getDisplayValue() == 'Retired';
+}
+function serviceSearch(p) {                       // the four clues, as in both rules; records of one name are twins
     var ip = ('' + (p.IP || '')).trim();
     var dns = ('' + (p.DNS || '')).trim().toLowerCase();
     var label0 = dns.split('.')[0];
     var steps = [['fqdn', dns], ['name', dns], ['name', label0], ['ip_address', ip]];
-    var result = { service: null, stopped: false, trace: [] };
+    var result = { service: null, twins: [], stopped: false, trace: [] };
     for (var t = 0; t < steps.length; t++) {
         if (!steps[t][1]) { result.trace.push('clue ' + (t + 1) + ' ' + steps[t][0] + ': value empty, skipped'); continue; }
         var gr = new GlideRecord('cmdb_ci_lb_service');
         gr.addQuery(steps[t][0], steps[t][1]);
         if (ignore) gr.addQuery('sys_class_name', 'NOT IN', ignore);
+        gr.orderByDesc('sys_updated_on');
         gr.query();
-        var rows = [];
-        while (gr.next() && rows.length < 5) rows.push(gr.getValue('name') + ' on ' + gr.getValue('ip_address') + ' (' + gr.load_balancer.getDisplayValue() + ', ' + gr.getUniqueValue() + ')');
-        var n = gr.getRowCount();
+        var rows = [], names = {}, all = [], onAddress = [], best = null, bestScore = -1, bestWhy = '';
+        while (gr.next()) {
+            var id = gr.getUniqueValue(), here = gr.getValue('ip_address') == ip, live = !retired(gr), pool = !!gr.getValue('pool');
+            names[('' + (gr.getValue('name') || '')).trim().toLowerCase()] = true;
+            all.push(id); if (here) onAddress.push(id);
+            if (rows.length < 6) rows.push(gr.getValue('name') + ' on ' + gr.getValue('ip_address') + ' (' + gr.load_balancer.getDisplayValue() + (live ? '' : ', retired') + (pool ? ', pool' : ', no pool') + ', updated ' + gr.getValue('sys_updated_on') + ')');
+            var score = (live ? 4 : 0) + (here ? 2 : 0) + (pool ? 1 : 0);
+            if (score > bestScore) { best = id; bestScore = score; bestWhy = (live ? 'live' : 'retired') + (here ? ', on the scanned address' : ', another address') + (pool ? ', has a pool' : ', no pool'); }
+        }
+        var n = all.length;
         result.trace.push('clue ' + (t + 1) + ' ' + steps[t][0] + ' = "' + steps[t][1] + '": ' + n + ' row(s)' + (rows.length ? ' -> ' + rows.join(' | ') : ''));
-        if (n > 1) { result.stopped = true; result.trace.push('   two or more services carry the value: both rules stop here (never guess)'); return result; }
-        if (n == 1) { gr.query(); gr.next(); result.service = gr.getUniqueValue(); return result; }
+        if (!n) continue;
+        if (Object.keys(names).length > 1) { result.stopped = true; result.trace.push('   two differently named services carry the value: both rules stop here (never guess)'); return result; }
+        result.service = best; result.twins = onAddress.length ? onAddress : all;
+        if (n > 1) result.trace.push('   ' + n + ' records of one name = one virtual server; ' + result.twins.length + ' twin(s) kept' + (onAddress.length ? ' (those on the scanned address)' : ' (none on the scanned address, all kept)') + '; Service Match would return the fittest: ' + bestWhy);
+        return result;
     }
     result.trace.push('no clue found a service: both rules stop here');
     return result;
+}
+function parentsOf(table) {
+    var out = [table];
+    var db = new GlideRecord('sys_db_object'); db.addQuery('name', table); db.query();
+    while (db.next() && db.getValue('super_class')) { var parent = '' + db.super_class.name; out.push(parent); db = new GlideRecord('sys_db_object'); db.addQuery('name', parent); db.query(); }
+    return out;
 }
 function related(id, table) {
     var found = [];
@@ -94,13 +115,16 @@ function explain(p, itemLabel) {
     for (var i = 0; i < s.trace.length; i++) line('  ' + s.trace[i]);
     if (!s.service) return;
     var svc = new GlideRecord('cmdb_ci_lb_service'); svc.get(s.service);
-    line('  service: ' + svc.getValue('name') + ' | address ' + svc.getValue('ip_address') + ' port ' + svc.getValue('port') + ' | balancer ' + svc.load_balancer.getDisplayValue() + ' | pool field -> ' + (svc.getValue('pool') ? svc.pool.getDisplayValue() : '(empty)'));
     var pools = {};
-    if (svc.getValue('pool')) pools[svc.getValue('pool')] = 'the pool field of the service';
-    var byService = new GlideRecord('cmdb_ci_lb_pool'); byService.addQuery('service', s.service); byService.query();
-    while (byService.next()) if (!pools[byService.getUniqueValue()]) pools[byService.getUniqueValue()] = 'a pool whose service field points at the service';
-    var relPools = related(s.service, 'cmdb_ci_lb_pool');
-    for (var r1 = 0; r1 < relPools.length; r1++) if (!pools[relPools[r1].id]) pools[relPools[r1].id] = 'a pool related to the service (' + relPools[r1].via + ')';
+    for (var w = 0; w < s.twins.length; w++) {
+        var tw = new GlideRecord('cmdb_ci_lb_service'); tw.get(s.twins[w]);
+        line('  service' + (s.twins.length > 1 ? ' (twin ' + (w + 1) + ')' : '') + ': ' + tw.getValue('name') + ' | address ' + tw.getValue('ip_address') + ' port ' + tw.getValue('port') + ' | balancer ' + tw.load_balancer.getDisplayValue() + (retired(tw) ? ' | retired' : '') + ' | pool field -> ' + (tw.getValue('pool') ? tw.pool.getDisplayValue() : '(empty)'));
+        if (tw.getValue('pool') && !pools[tw.getValue('pool')]) pools[tw.getValue('pool')] = 'the pool field of the service';
+        var byService = new GlideRecord('cmdb_ci_lb_pool'); byService.addQuery('service', s.twins[w]); byService.query();
+        while (byService.next()) if (!pools[byService.getUniqueValue()]) pools[byService.getUniqueValue()] = 'a pool whose service field points at the service';
+        var relPools = related(s.twins[w], 'cmdb_ci_lb_pool');
+        for (var r1 = 0; r1 < relPools.length; r1++) if (!pools[relPools[r1].id]) pools[relPools[r1].id] = 'a pool related to the service (' + relPools[r1].via + ')';
+    }
     var poolIds = Object.keys(pools);
     if (!poolIds.length) { line('  pools: NONE -> Member Match declines; Service Match attaches the service ' + svc.getValue('name')); return; }
     var members = {};
@@ -127,11 +151,27 @@ function explain(p, itemLabel) {
         var relServers = related(memberIds[k], 'cmdb_ci_hardware');
         for (var r3 = 0; r3 < relServers.length; r3++) cands.push({ id: relServers[r3].id, via: 'relationship ' + relServers[r3].via });
         if (!cands.length) line('     candidates: none (no record carries ' + (m.ip || 'an address') + ', no relationship to hardware)');
-        for (var c = 0; c < cands.length; c++) { var verdict = isRealServer(cands[c].id); line('     candidate via ' + cands[c].via + ': ' + label(cands[c].id) + ' -> ' + verdict); if (verdict == 'real server') servers[cands[c].id] = true; }
+        for (var c = 0; c < cands.length; c++) { var verdict = isRealServer(cands[c].id); line('     candidate via ' + cands[c].via + ': ' + label(cands[c].id) + ' -> ' + verdict);
+            if (verdict == 'real server' && servers[cands[c].id] === undefined) { var hwc = new GlideRecord('cmdb_ci_hardware'); hwc.get(cands[c].id); servers[cands[c].id] = ('' + (hwc.getValue('name') || '')).trim().toLowerCase().split('.')[0] || cands[c].id; } }
     }
     var ids = Object.keys(servers);
-    line('  distinct real servers: ' + ids.length + (ids.length ? ' -> ' + ids.map(label).join(' ; ') : ''));
-    line('  ANSWER: ' + (ids.length == 1 ? 'Member Match returns ' + label(ids[0]) : 'Member Match declines (' + (ids.length ? 'several servers' : 'no server') + '); Service Match attaches ' + svc.getValue('name')));
+    var machines = {};
+    for (var n = 0; n < ids.length; n++) machines[servers[ids[n]]] = (machines[servers[ids[n]]] || []).concat(ids[n]);
+    var labels = Object.keys(machines);
+    line('  server records: ' + ids.length + (ids.length ? ' -> ' + ids.map(label).join(' ; ') : '') + ' | machines by name: ' + labels.length + (labels.length ? ' (' + labels.join(', ') + ')' : ''));
+    var answer = null;
+    if (labels.length == 1) {
+        var records = machines[labels[0]], best = null, bestScore = -1, bestTime = '';
+        for (var f = 0; f < records.length; f++) {
+            var ci = new GlideRecord('cmdb_ci_hardware'); ci.get(records[f]);
+            var depth = parentsOf('' + ci.getValue('sys_class_name')).length, live = !retired(ci), score = (live ? 100 : 0) + depth, time = '' + ci.getValue('sys_updated_on');
+            if (records.length > 1) line('     record ' + label(records[f]) + ': ' + (live ? 'live' : 'retired') + ', class depth ' + depth + ', updated ' + time);
+            if (score > bestScore || (score == bestScore && time > bestTime)) { best = records[f]; bestScore = score; bestTime = time; }
+        }
+        answer = best;
+        if (records.length > 1) line('     one machine recorded ' + records.length + ' times; the fittest record (live first, then the more specific class, then the latest update): ' + label(best));
+    }
+    line('  ANSWER: ' + (answer ? 'Member Match returns ' + label(answer) : 'Member Match declines (' + (labels.length ? 'two differently named machines' : 'no server') + '); Service Match attaches ' + svc.getValue('name')));
 }
 for (var i = 0; i < ITEMS.length; i++) {
     var di = new GlideRecord('sn_sec_cmn_src_ci'); di.addQuery('number', ITEMS[i]); di.query();
@@ -149,7 +189,7 @@ if (SURVEY_DAYS > 0) {
         if (!vipSign(q).length) continue;
         seen++;
         var r = serviceSearch(q); var reason;
-        if (r.stopped) { var last = r.trace[r.trace.length - 2] || ''; reason = 'two or more services carry the value' + (last.indexOf('ip_address') != -1 ? ' (on the address)' : ' (on the name)'); }
+        if (r.stopped) { var last = r.trace[r.trace.length - 2] || ''; reason = 'two differently named services carry the value' + (last.indexOf('ip_address') != -1 ? ' (on the address)' : ' (on the name)'); }
         else if (!r.service) reason = 'no service carries the name or the address';
         else reason = 'a service exists but the item is unmatched (evaluated before the rules?)';
         reasons[reason] = (reasons[reason] || 0) + 1;

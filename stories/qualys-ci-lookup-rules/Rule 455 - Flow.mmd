@@ -14,12 +14,14 @@ flowchart TD
     E --> F["Clues in order:<br/>1 fqdn = DNS name<br/>2 name = DNS name<br/>3 name = label<br/>4 ip_address = IP<br/>(ignored classes left out)"]
     F --> G{"rows for the clue?"}:::chk
     G -- "none" --> F
-    G -- "two or more" --> S2(["null: never guess"]):::stop
+    G -- "two or more,<br/>different names" --> S2(["null: never guess"]):::stop
     G -- "no clue left" --> S2
-    G -- "exactly one" --> H["service = the desk record"]
+    G -- "exactly one" --> H["twins = that one desk record"]
+    G -- "two or more,<br/>one name (HA pair, test copy)" --> H2["twins = the records of that name,<br/>those on the scanned address when any"]
 
     H --> P[("cmdb_ci_lb_pool<br/>Load Balancer Pool")]:::tbl
-    P --> P1["pools =<br/>service.pool field<br/>+ pools whose service field = desk<br/>+ pools related to the desk (cmdb_rel_ci, either direction)"]
+    H2 --> P
+    P --> P1["pools, for each twin =<br/>twin.pool field<br/>+ pools whose service field = twin<br/>+ pools related to the twin (cmdb_rel_ci, either direction)"]
     P1 --> P2{"any pool?"}:::chk
     P2 -- no --> S3(["null: no room list;<br/>rule 460 attaches the desk"]):::stop
 
@@ -38,8 +40,11 @@ flowchart TD
     T3 --> K
     T4 --> K
     K{"keep only a real server:<br/>in the cmdb_ci_hardware tree,<br/>not an ignored class,<br/>not cmdb_ci_lb (balancer device)"}:::chk
-    K --> N["distinct servers found"]
-    N --> Q{"how many?"}:::chk
+    K --> N["server records found,<br/>each with the first label of its name"]
+    N --> N2["machines = the records grouped by name<br/>(records of one name are one machine<br/>recorded more than once)"]
+    N2 --> Q{"how many machines?"}:::chk
     Q -- "0" --> S5(["null: rooms lead nowhere;<br/>rule 460 attaches the desk"]):::stop
-    Q -- "2 or more" --> S6(["null: shared pool;<br/>rule 460 attaches the desk"]):::stop
-    Q -- "exactly 1" --> W(["return the server:<br/>the real CI"]):::win
+    Q -- "2 or more" --> S6(["null: two different machines (shared pool);<br/>rule 460 attaches the desk"]):::stop
+    Q -- "exactly 1, one record" --> W(["return the server:<br/>the real CI"]):::win
+    Q -- "exactly 1, several records" --> F2["fittest record:<br/>live over retired,<br/>then the more specific class,<br/>then the latest update"]
+    F2 --> W
