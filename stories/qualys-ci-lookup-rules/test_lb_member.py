@@ -2,8 +2,8 @@
 servers (reference fields and relationships, addresses on device records, adapters and IP Address records),
 including twin service records of one name (an HA pair, a copy on another address, a retired twin), twin
 server records of one name (retired beside live, two live), a virtual address held on the balancer itself
-through the discovery records, and pools the CMDB cannot place in full (the service rule attaches the
-virtual server record only when the CMDB does not show several servers behind it). Runs the platform chain and one rule on its own, twice; a Load
+through the discovery records, and pools the CMDB cannot place in full (the member rule declines, the service
+rule attaches the virtual server record). Runs the platform chain and one rule on its own, twice; a Load
 Balancer Service result is shown as name@address, "+pool" when the record carries a pool.
 `python3 test_lb_member.py remove` deletes the fixtures."""
 import os, sys, json
@@ -20,17 +20,17 @@ CASES = [  # label, payload, expected chain rule ('' = no match), expected CI, (
     ('one member behind the virtual server, address on the server record -> the server', P('10.230.1.10', F5, 'vip-one.bankofamerica.com'), '455', 'lbsrv-one', '455', 'lbsrv-one'),
     ('the same virtual server scanned by address only -> the server', P('10.230.1.10', F5), '455', 'lbsrv-one', '455', 'lbsrv-one'),
     ('the same virtual server with a Linux fingerprint and a -vip label -> the server', P('10.230.1.10', 'Linux 2.6', 'vip-one.bankofamerica.com'), '455', 'lbsrv-one', '455', 'lbsrv-one'),
-    ('three members on three servers behind the virtual server (service record without fqdn, as on the client) -> no match: the service rule declines too, several servers behind the VIP', P('10.230.1.20', F5, 'vip-many.bankofamerica.com'), '', '', '460', ''),
+    ('three members on three servers behind the virtual server (service record without fqdn, as on the client) -> the member rule declines, the service rule attaches the virtual server record', P('10.230.1.20', F5, 'vip-many.bankofamerica.com'), '460', 'vip-many@10.230.1.20+pool', '455', ''),
     ('virtual server without a pool -> declined, the virtual server record', P('10.230.1.30', F5, 'vip-nopool.bankofamerica.com'), '460', 'vip-nopool@10.230.1.30', '455', ''),
     ('pool and member linked by relationships only, member address on an adapter -> the server', P('10.230.1.40', F5, 'vip-rel.bankofamerica.com'), '455', 'lbsrv-rel', '455', 'lbsrv-rel'),
     ('member address on an IP Address record of the server -> the server', P('10.230.1.50', F5, 'vip-ipr.bankofamerica.com'), '455', 'lbsrv-ipr', '455', 'lbsrv-ipr'),
     ('member without an address, related to the server -> the server', P('10.230.1.55', F5, 'vip-relsrv.bankofamerica.com'), '455', 'lbsrv-relsrv', '455', 'lbsrv-relsrv'),
-    ('member address carried by two differently named device records -> no match: two machines behind one member address', P('10.230.1.60', F5, 'vip-dup.bankofamerica.com'), '', '', '460', ''),
-    ('the only member is the load balancer itself -> the member rule declines; one identity the CMDB cannot place, the virtual server record', P('10.230.1.70', F5, 'vip-lbonly.bankofamerica.com'), '460', 'vip-lbonly@10.230.1.70+pool', '455', ''),
+    ('member address carried by two differently named device records -> the member rule declines, the virtual server record', P('10.230.1.60', F5, 'vip-dup.bankofamerica.com'), '460', 'vip-dup@10.230.1.60+pool', '455', ''),
+    ('the only member is the load balancer itself -> the member rule declines, the virtual server record', P('10.230.1.70', F5, 'vip-lbonly.bankofamerica.com'), '460', 'vip-lbonly@10.230.1.70+pool', '455', ''),
     ('a virtual address with no service record -> no match', P('10.230.1.99', F5, 'vip-none.bankofamerica.com'), '', '', '455', ''),
     ('no VIP sign: a Red Hat host on the virtual address -> the rule does not run', P('10.230.1.10', 'Red Hat Enterprise Linux 9.8', 'somehost.corp.bankofamerica.com'), '', '', '455', ''),
     ('the real server scanned on its own address and name -> the name rule, untouched', P('10.230.2.11', 'Red Hat Enterprise Linux 9.8', 'lbsrv-one.corp.bankofamerica.com'), '400', 'lbsrv-one'),
-    ('three members of which only one address is a server in the CMDB -> no match: two members unplaced, three identities', P('10.230.1.80', F5, 'vip-partial.bankofamerica.com'), '', '', '455', ''),
+    ('three members of which only one address is a server in the CMDB -> the member rule declines (two members unplaced), the virtual server record', P('10.230.1.80', F5, 'vip-partial.bankofamerica.com'), '460', 'vip-partial@10.230.1.80+pool', '455', ''),
     ('an HA pair: two records of one virtual server on one address, the pool on one of them -> the server', P('10.230.1.90', F5), '455', 'lbsrv-pair', '455', 'lbsrv-pair'),
     ('the same HA pair, the service rule alone -> declined, two live records of one virtual server compete', P('10.230.1.90', F5), '455', 'lbsrv-pair', '460', ''),
     ('twins of one name where only the retired twin carries the pool -> the live twin is kept, it has no pool, the member rule declines; the service rule attaches the live twin', P('10.230.1.92', F5, 'vip-rtwin.bankofamerica.com'), '460', 'vip-rtwin@10.230.1.92', '455', ''),
@@ -43,9 +43,9 @@ CASES = [  # label, payload, expected chain rule ('' = no match), expected CI, (
     ('member address on a retired Linux Server and a live plain Server of one name -> the live record, even though less specific', P('10.230.1.100', F5, 'vip-twin2.bankofamerica.com'), '455', 'LBSRV-TWIN2', '455', 'LBSRV-TWIN2'),
     ('a virtual address held on the balancer itself through the discovery records, Linux fingerprint -> the layered rule refuses the balancer, the member rule finds the server', P('10.230.1.101', 'Linux 2.6', 'vip-layer.bankofamerica.com'), '455', 'lbsrv-layer', '350', ''),
     ('two member records of one address, ports 80 and 443, on one server -> the server', P('10.230.1.102', F5, 'vip-ports.bankofamerica.com'), '455', 'lbsrv-ports', '455', 'lbsrv-ports'),
-    ('one member whose address no CI carries -> the member rule declines; one identity the CMDB cannot place, the virtual server record', P('10.230.1.103', F5, 'vip-unknown.bankofamerica.com'), '460', 'vip-unknown@10.230.1.103+pool', '455', ''),
-    ('two members whose addresses no CI carries -> no match: two identities, several servers behind the VIP', P('10.230.1.104', F5, 'vip-unknown2.bankofamerica.com'), '', '', '460', ''),
-    ('two members, one on a server and one that no CI carries -> no match: an unplaced member, two identities', P('10.230.1.105', F5, 'vip-half.bankofamerica.com'), '', '', '460', ''),
+    ('one member whose address no CI carries -> the member rule declines (an unplaced member), the virtual server record', P('10.230.1.103', F5, 'vip-unknown.bankofamerica.com'), '460', 'vip-unknown@10.230.1.103+pool', '455', ''),
+    ('two members whose addresses no CI carries -> the member rule declines, the virtual server record', P('10.230.1.104', F5, 'vip-unknown2.bankofamerica.com'), '460', 'vip-unknown2@10.230.1.104+pool', '455', ''),
+    ('two members, one on a server and one that no CI carries -> the member rule declines (an unplaced member), the virtual server record', P('10.230.1.105', F5, 'vip-half.bankofamerica.com'), '460', 'vip-half@10.230.1.105+pool', '455', ''),
 ]
 TABLES = ['cmdb_ip_address_dns_name', 'cmdb_ci_dns_name', 'cmdb_ci_ip_address', 'cmdb_ci_network_adapter', 'cmdb_ci_lb_pool_member', 'cmdb_ci_lb_pool', 'cmdb_ci_lb_service', 'cmdb_ci_lb_bigip', 'cmdb_ci_linux_server', 'cmdb_ci_win_server', 'cmdb_ci_server']
 ui = SNUI(); ui.app('global')

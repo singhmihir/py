@@ -1,18 +1,18 @@
-fixtures created: vip-many fqdn cleared, vip-dup fqdn cleared, vip-partial fqdn cleared, vip-unknown2 fqdn cleared, vip-half fqdn cleared
+fixtures created: none (all present)
 PASS run1 one member behind the virtual server, address on the server record -> the server | chain 455 lbsrv-one | 455 alone -> lbsrv-one
 PASS run1 the same virtual server scanned by address only -> the server | chain 455 lbsrv-one | 455 alone -> lbsrv-one
 PASS run1 the same virtual server with a Linux fingerprint and a -vip label -> the server | chain 455 lbsrv-one | 455 alone -> lbsrv-one
-PASS run1 three members on three servers behind the virtual server (service record without fqdn, as on the client) -> no match: the service rule declines too, several servers behind the VIP | chain (no match)  | 460 alone -> -
+PASS run1 three members on three servers behind the virtual server (service record without fqdn, as on the client) -> the member rule declines, the service rule attaches the virtual server record | chain 460 vip-many@10.230.1.20+pool | 455 alone -> -
 PASS run1 virtual server without a pool -> declined, the virtual server record | chain 460 vip-nopool@10.230.1.30 | 455 alone -> -
 PASS run1 pool and member linked by relationships only, member address on an adapter -> the server | chain 455 lbsrv-rel | 455 alone -> lbsrv-rel
 PASS run1 member address on an IP Address record of the server -> the server | chain 455 lbsrv-ipr | 455 alone -> lbsrv-ipr
 PASS run1 member without an address, related to the server -> the server | chain 455 lbsrv-relsrv | 455 alone -> lbsrv-relsrv
-PASS run1 member address carried by two differently named device records -> no match: two machines behind one member address | chain (no match)  | 460 alone -> -
-PASS run1 the only member is the load balancer itself -> the member rule declines; one identity the CMDB cannot place, the virtual server record | chain 460 vip-lbonly@10.230.1.70+pool | 455 alone -> -
+PASS run1 member address carried by two differently named device records -> the member rule declines, the virtual server record | chain 460 vip-dup@10.230.1.60+pool | 455 alone -> -
+PASS run1 the only member is the load balancer itself -> the member rule declines, the virtual server record | chain 460 vip-lbonly@10.230.1.70+pool | 455 alone -> -
 PASS run1 a virtual address with no service record -> no match | chain (no match)  | 455 alone -> -
 PASS run1 no VIP sign: a Red Hat host on the virtual address -> the rule does not run | chain (no match)  | 455 alone -> -
 PASS run1 the real server scanned on its own address and name -> the name rule, untouched | chain 400 lbsrv-one
-PASS run1 three members of which only one address is a server in the CMDB -> no match: two members unplaced, three identities | chain (no match)  | 455 alone -> -
+PASS run1 three members of which only one address is a server in the CMDB -> the member rule declines (two members unplaced), the virtual server record | chain 460 vip-partial@10.230.1.80+pool | 455 alone -> -
 PASS run1 an HA pair: two records of one virtual server on one address, the pool on one of them -> the server | chain 455 lbsrv-pair | 455 alone -> lbsrv-pair
 PASS run1 the same HA pair, the service rule alone -> declined, two live records of one virtual server compete | chain 455 lbsrv-pair | 460 alone -> -
 PASS run1 twins of one name where only the retired twin carries the pool -> the live twin is kept, it has no pool, the member rule declines; the service rule attaches the live twin | chain 460 vip-rtwin@10.230.1.92 | 455 alone -> -
@@ -25,23 +25,23 @@ PASS run1 member address on two live Linux Servers of one name -> declined, two 
 PASS run1 member address on a retired Linux Server and a live plain Server of one name -> the live record, even though less specific | chain 455 LBSRV-TWIN2 | 455 alone -> LBSRV-TWIN2
 PASS run1 a virtual address held on the balancer itself through the discovery records, Linux fingerprint -> the layered rule refuses the balancer, the member rule finds the server | chain 455 lbsrv-layer | 350 alone -> -
 PASS run1 two member records of one address, ports 80 and 443, on one server -> the server | chain 455 lbsrv-ports | 455 alone -> lbsrv-ports
-PASS run1 one member whose address no CI carries -> the member rule declines; one identity the CMDB cannot place, the virtual server record | chain 460 vip-unknown@10.230.1.103+pool | 455 alone -> -
-PASS run1 two members whose addresses no CI carries -> no match: two identities, several servers behind the VIP | chain (no match)  | 460 alone -> -
-PASS run1 two members, one on a server and one that no CI carries -> no match: an unplaced member, two identities | chain (no match)  | 460 alone -> -
+PASS run1 one member whose address no CI carries -> the member rule declines (an unplaced member), the virtual server record | chain 460 vip-unknown@10.230.1.103+pool | 455 alone -> -
+PASS run1 two members whose addresses no CI carries -> the member rule declines, the virtual server record | chain 460 vip-unknown2@10.230.1.104+pool | 455 alone -> -
+PASS run1 two members, one on a server and one that no CI carries -> the member rule declines (an unplaced member), the virtual server record | chain 460 vip-half@10.230.1.105+pool | 455 alone -> -
 PASS run2 one member behind the virtual server, address on the server record -> the server | chain 455 lbsrv-one | 455 alone -> lbsrv-one
 PASS run2 the same virtual server scanned by address only -> the server | chain 455 lbsrv-one | 455 alone -> lbsrv-one
 PASS run2 the same virtual server with a Linux fingerprint and a -vip label -> the server | chain 455 lbsrv-one | 455 alone -> lbsrv-one
-PASS run2 three members on three servers behind the virtual server (service record without fqdn, as on the client) -> no match: the service rule declines too, several servers behind the VIP | chain (no match)  | 460 alone -> -
+PASS run2 three members on three servers behind the virtual server (service record without fqdn, as on the client) -> the member rule declines, the service rule attaches the virtual server record | chain 460 vip-many@10.230.1.20+pool | 455 alone -> -
 PASS run2 virtual server without a pool -> declined, the virtual server record | chain 460 vip-nopool@10.230.1.30 | 455 alone -> -
 PASS run2 pool and member linked by relationships only, member address on an adapter -> the server | chain 455 lbsrv-rel | 455 alone -> lbsrv-rel
 PASS run2 member address on an IP Address record of the server -> the server | chain 455 lbsrv-ipr | 455 alone -> lbsrv-ipr
 PASS run2 member without an address, related to the server -> the server | chain 455 lbsrv-relsrv | 455 alone -> lbsrv-relsrv
-PASS run2 member address carried by two differently named device records -> no match: two machines behind one member address | chain (no match)  | 460 alone -> -
-PASS run2 the only member is the load balancer itself -> the member rule declines; one identity the CMDB cannot place, the virtual server record | chain 460 vip-lbonly@10.230.1.70+pool | 455 alone -> -
+PASS run2 member address carried by two differently named device records -> the member rule declines, the virtual server record | chain 460 vip-dup@10.230.1.60+pool | 455 alone -> -
+PASS run2 the only member is the load balancer itself -> the member rule declines, the virtual server record | chain 460 vip-lbonly@10.230.1.70+pool | 455 alone -> -
 PASS run2 a virtual address with no service record -> no match | chain (no match)  | 455 alone -> -
 PASS run2 no VIP sign: a Red Hat host on the virtual address -> the rule does not run | chain (no match)  | 455 alone -> -
 PASS run2 the real server scanned on its own address and name -> the name rule, untouched | chain 400 lbsrv-one
-PASS run2 three members of which only one address is a server in the CMDB -> no match: two members unplaced, three identities | chain (no match)  | 455 alone -> -
+PASS run2 three members of which only one address is a server in the CMDB -> the member rule declines (two members unplaced), the virtual server record | chain 460 vip-partial@10.230.1.80+pool | 455 alone -> -
 PASS run2 an HA pair: two records of one virtual server on one address, the pool on one of them -> the server | chain 455 lbsrv-pair | 455 alone -> lbsrv-pair
 PASS run2 the same HA pair, the service rule alone -> declined, two live records of one virtual server compete | chain 455 lbsrv-pair | 460 alone -> -
 PASS run2 twins of one name where only the retired twin carries the pool -> the live twin is kept, it has no pool, the member rule declines; the service rule attaches the live twin | chain 460 vip-rtwin@10.230.1.92 | 455 alone -> -
@@ -54,8 +54,8 @@ PASS run2 member address on two live Linux Servers of one name -> declined, two 
 PASS run2 member address on a retired Linux Server and a live plain Server of one name -> the live record, even though less specific | chain 455 LBSRV-TWIN2 | 455 alone -> LBSRV-TWIN2
 PASS run2 a virtual address held on the balancer itself through the discovery records, Linux fingerprint -> the layered rule refuses the balancer, the member rule finds the server | chain 455 lbsrv-layer | 350 alone -> -
 PASS run2 two member records of one address, ports 80 and 443, on one server -> the server | chain 455 lbsrv-ports | 455 alone -> lbsrv-ports
-PASS run2 one member whose address no CI carries -> the member rule declines; one identity the CMDB cannot place, the virtual server record | chain 460 vip-unknown@10.230.1.103+pool | 455 alone -> -
-PASS run2 two members whose addresses no CI carries -> no match: two identities, several servers behind the VIP | chain (no match)  | 460 alone -> -
-PASS run2 two members, one on a server and one that no CI carries -> no match: an unplaced member, two identities | chain (no match)  | 460 alone -> -
+PASS run2 one member whose address no CI carries -> the member rule declines (an unplaced member), the virtual server record | chain 460 vip-unknown@10.230.1.103+pool | 455 alone -> -
+PASS run2 two members whose addresses no CI carries -> the member rule declines, the virtual server record | chain 460 vip-unknown2@10.230.1.104+pool | 455 alone -> -
+PASS run2 two members, one on a server and one that no CI carries -> the member rule declines (an unplaced member), the virtual server record | chain 460 vip-half@10.230.1.105+pool | 455 alone -> -
 
 ALL PASS: 58 passed, 0 failed
