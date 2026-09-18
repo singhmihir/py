@@ -1,14 +1,17 @@
 """Deploys the VAMP outbound build into the stand-in scope on the PDI under a pinned update set:
-the two script includes, the ten properties and the after insert/update rule on the application
+the two script includes, the two properties and the after insert/update rule on the application
 vulnerable item table. The repository files carry the client application prefix; the deployment
-swaps it for the stand-in prefix. Re-runnable: reopens the set recorded in state.json."""
+swaps it for the stand-in prefix. V1.1 is a fresh set: the nine section properties of V1.0 are
+removed under the scope's Default set first. Re-runnable: reopens the set recorded in state.json
+when its name matches."""
 import os, sys, json
 HERE = os.path.dirname(os.path.abspath(__file__)); BASE = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(BASE, 'tools'))
 from snui import SNUI
 SCOPE = '9d1e03de930b8310e3aef0aefaba10d5'          # stand-in scoped app on the PDI
 CLIENT_PREFIX, PDI_PREFIX = 'x_boar_bofa_usem_1', 'x_196061_bofasim'
-NAME = 'SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.0'
+NAME = 'SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.1'
+DEFAULT_SET = 'a91e03de930b8310e3aef0aefaba10de'      # Default update set of the stand-in scope
 BR_NAME = 'BOFA_BR_AVIT_VampOutbound'
 SI_NAMES = ['BOFASIVampOutboundProcessor', 'BOFASIKafkaProducerVamp']
 DESC = {
@@ -21,6 +24,14 @@ br_script = pdi(open(os.path.join(HERE, BR_NAME + '.js')).read())
 props = json.load(open(os.path.join(HERE, 'properties.json')))
 ui = SNUI(); ui.app('global')
 st_path = os.path.join(HERE, 'state.json'); ST = json.load(open(st_path)) if os.path.exists(st_path) else {}
+reuse = ST.get('set_name') == NAME
+c = ui.js('''
+var o = {removed: []};
+new GlideUpdateSet().set(%s);
+var p = new GlideRecord('sys_properties'); p.addQuery('name', 'STARTSWITH', %s); p.query();
+while (p.next()) { o.removed.push('' + p.getValue('name')); p.deleteRecord(); }
+gs.print('X::' + JSON.stringify(o));''' % (json.dumps(DEFAULT_SET), json.dumps(PDI_PREFIX + '.usem.vamp.avit.')), scope=SCOPE)
+print('stale section properties removed under the Default set:', len(c['removed']))
 d = ui.js('''
 var o = {rows: [], si: {}, props: {}};
 var us = new GlideRecord('sys_update_set');
@@ -55,12 +66,19 @@ br.setValue('active', true); br.setValue('abort_action', false); br.setValue('fi
 br.setValue('description', 'Builds the VAMP payload for the application vulnerable item with BOFASIVampOutboundProcessor and sends it with BOFASIKafkaProducerVamp on every insert and update.');
 br.update() || br.insert();
 o.br = {sys_id: br.getUniqueValue(), scope: '' + br.sys_scope.getDisplayValue(), when: '' + br.getValue('when'), order: '' + br.getValue('order'), insert: '' + br.getValue('action_insert'), update: '' + br.getValue('action_update'), active: '' + br.getValue('active')};
-var ux = new GlideRecord('sys_update_xml'); ux.addQuery('update_set', o.set); ux.orderBy('target_name'); ux.query();
-while (ux.next()) o.rows.push('' + ux.getValue('target_name') + ' | ' + ux.getValue('action') + ' | ' + ux.application.getDisplayValue());
-gs.print('X::' + JSON.stringify(o));''' % dict(has=json.dumps(bool(ST.get('set'))), set=json.dumps(ST.get('set', '')), name=json.dumps(NAME), scope=json.dumps(SCOPE),
+gs.print('X::' + JSON.stringify(o));''' % dict(has=json.dumps(reuse), set=json.dumps(ST.get('set', '')), name=json.dumps(NAME), scope=json.dumps(SCOPE),
                                             scripts=json.dumps(scripts), desc=json.dumps(DESC), props=json.dumps(props), prefix=json.dumps(PDI_PREFIX),
                                             br=json.dumps(BR_NAME), br_script=json.dumps(br_script)), scope=SCOPE)
-print('update set:', d['set'], '|', d['set_scope'], '|', NAME)
+a = ui.js('''
+var o = {rows: [], captured: 0};
+new GlideUpdateSet().set(%s);
+var ids = %s;
+for (var i = 0; i < ids.length; i++) { var gr = new GlideRecord(ids[i][0]); if (gr.get(ids[i][1])) { new GlideUpdateManager2().saveRecord(gr); o.captured++; } }
+var ux = new GlideRecord('sys_update_xml'); ux.addQuery('update_set', %s); ux.orderBy('target_name'); ux.query();
+while (ux.next()) o.rows.push('' + ux.getValue('target_name') + ' | ' + ux.getValue('action') + ' | ' + ux.application.getDisplayValue());
+gs.print('X::' + JSON.stringify(o));''' % (json.dumps(d['set']), json.dumps([['sys_script_include', i['sys_id']] for i in d['si'].values()] + [['sys_properties', i['sys_id']] for i in d['props'].values()] + [['sys_script', d['br']['sys_id']]]), json.dumps(d['set'])))
+d['rows'] = a['rows']
+print('update set:', d['set'], '|', d['set_scope'], '|', NAME, '| records captured explicitly:', a['captured'])
 for n, i in d['si'].items(): print('  script include:', i['api_name'], i['sys_id'], '|', i['scope'], '| access', i['access'])
 for s, i in d['props'].items():
     expect = props[s]['value'] if s != 'usem.vamp.kafka.topic_sys_id' else i['read_back']
@@ -68,10 +86,10 @@ for s, i in d['props'].items():
     assert i['read_back'] == expect and i['scope'] == 'BofA Sim' and (s != 'usem.vamp.kafka.topic_sys_id' or len(i['read_back']) == 32), (s, i)
 print('  rule:', BR_NAME, d['br']['sys_id'], '|', d['br'])
 print('\n'.join('  captured: ' + r for r in d['rows']))
-assert d['set_scope'] == 'BofA Sim' and all(r.endswith('| BofA Sim') for r in d['rows']) and len(d['rows']) == 13, d['rows']
+assert d['set_scope'] == 'BofA Sim' and all(r.endswith('| BofA Sim') for r in d['rows']) and len(d['rows']) == 2 + len(props) + 1, d['rows']
 assert all(i['scope'] == 'BofA Sim' and i['access'] == 'public' and i['api_name'] == PDI_PREFIX + '.' + n for n, i in d['si'].items())
 assert d['br'] == dict(sys_id=d['br']['sys_id'], scope='BofA Sim', when='after', order='100', insert='1', update='1', active='1')
-json.dump({'set': d['set'], 'set_name': NAME, 'scope': SCOPE, 'si': {n: i['sys_id'] for n, i in d['si'].items()}, 'props': {s: i['sys_id'] for s, i in d['props'].items()},
+json.dump({'set': d['set'], 'set_name': NAME, 'previous_set': ST.get('set') if not reuse else ST.get('previous_set'), 'scope': SCOPE, 'si': {n: i['sys_id'] for n, i in d['si'].items()}, 'props': {s: i['sys_id'] for s, i in d['props'].items()},
            'topic': d['props']['usem.vamp.kafka.topic_sys_id']['read_back'], 'br': d['br']['sys_id'], 'rows': len(d['rows'])}, open(st_path, 'w'), indent=1)
 ui.app('global')
 print('deployed: 2 script includes, %d properties, 1 rule; update set scope matches every captured row' % len(props))
