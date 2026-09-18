@@ -358,5 +358,16 @@
   "file": "SNOWUSEMTP-1825_MS_Ignore_CI_Classes_for_Lookup_Rules_V1.0.xml",
   "created": "2026-09-17 12:55:57",
   "scrub": []
+ },
+ {
+  "name": "SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.0",
+  "app": "x_196061_bofasim (stand-in for the client application)",
+  "rows": 13,
+  "exported": 13,
+  "file": "SNOWUSEMTP-1804_MS_VAMP_AVIT_Outbound_Payload_V1.0.xml",
+  "created": "2026-09-18 09:28:39",
+  "scrub": [
+   "stand-in scope kept: internal record only, client receives the record XML"
+  ]
  }
 ]

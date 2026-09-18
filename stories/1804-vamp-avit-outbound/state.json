@@ -1,0 +1,24 @@
+{
+ "set": "f1db745b935b0790e3aef0aefaba1092",
+ "set_name": "SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.0",
+ "scope": "9d1e03de930b8310e3aef0aefaba10d5",
+ "si": {
+  "BOFASIVampOutboundProcessor": "79db78d7939b0790e3aef0aefaba10a3",
+  "BOFASIKafkaProducerVamp": "06db78d7939b0790e3aef0aefaba10aa"
+ },
+ "props": {
+  "usem.vamp.kafka.topic_sys_id": "8edb78d7939b0790e3aef0aefaba10df",
+  "usem.vamp.avit.sections": "66eb7cd7939b0790e3aef0aefaba1058",
+  "usem.vamp.avit.fields.finding": "24fbbcd7939b0790e3aef0aefaba10ad",
+  "usem.vamp.avit.fields.tpe": "1efb301b939b0790e3aef0aefaba1093",
+  "usem.vamp.avit.fields.remediation_task": "400cb01b939b0790e3aef0aefaba1015",
+  "usem.vamp.avit.fields.ait": "1c0cf01b939b0790e3aef0aefaba1009",
+  "usem.vamp.avit.fields.ci": "fd0c341b939b0790e3aef0aefaba1076",
+  "usem.vamp.avit.fields.exception": "960c341b939b0790e3aef0aefaba10e7",
+  "usem.vamp.avit.fields.consequence": "620c741b939b0790e3aef0aefaba109f",
+  "usem.vamp.avit.fields.ptreq": "be0cb41b939b0790e3aef0aefaba109c"
+ },
+ "topic": "4edb78d7939b0790e3aef0aefaba10df",
+ "br": "0f0cf41b939b0790e3aef0aefaba106f",
+ "rows": 13
+}

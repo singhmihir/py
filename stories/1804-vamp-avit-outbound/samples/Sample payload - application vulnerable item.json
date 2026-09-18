@@ -1,0 +1,55 @@
+{
+  "envelope": {
+    "type": "record",
+    "topic_name": "sn_usem_verification_outbound",
+    "namespace": "com.bofa.usem",
+    "core_version": "1.0.0",
+    "outbound_version": "1.0.0",
+    "event_id": "289ef0df-939b-0790-e3ae-f0aefaba104c",
+    "event_timestamp": "2026-09-18T09:29:59Z",
+    "element_count": 1,
+    "element_activity": "INSERT"
+  },
+  "findings": [
+    {
+      "finding": {
+        "number": "AVIT0001119",
+        "sys_created_on": "09-18-2026 09:19:43",
+        "sys_updated_on": "09-18-2026 09:27:59",
+        "state": "Open",
+        "configuration_item": "Trade Processing Portal",
+        "u_verification_status": "",
+        "source_avit_id": "VAMP-FIXTURE-001"
+      },
+      "tpe": {
+        "number": ""
+      },
+      "remediation_task": {
+        "number": "AVUL0010093",
+        "primary_ait": ""
+      },
+      "ait": {
+        "number": "AIT57152"
+      },
+      "ci": {
+        "name": "Trade Processing Portal",
+        "class_name": "Business Application"
+      },
+      "exception": {
+        "number": "CA0010007",
+        "approval_state": "Approved",
+        "desired_validity_date": "03-31-2027 00:00:00"
+      },
+      "consequence": {
+        "number": "CONSEQ-L2-OPEN",
+        "state": "Open",
+        "u_consequence_level": "2"
+      },
+      "ptreq": {
+        "number": "PTREQ0012001",
+        "sys_created_on": "07-04-2026 08:35:53",
+        "u_assessment_id": ""
+      }
+    }
+  ]
+}
