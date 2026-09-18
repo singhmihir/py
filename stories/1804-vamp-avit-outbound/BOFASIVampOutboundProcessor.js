@@ -22,12 +22,15 @@ BOFASIVampOutboundProcessor.prototype = {
 
     buildPayload: function(record) {
         try {
+            var missing = [];
             var payload = {
                 envelope: this._buildEnvelope(this._activity(record)),
-                findings: [this._buildFinding(record)]
+                findings: [this._buildFinding(record, missing)]
             };
             var message = JSON.stringify(payload);
             gs.addInfoMessage('VAMP payload for ' + record.getValue('number') + ': ' + message)
+            if (missing.length)
+                gs.addInfoMessage('VAMP fields not found on this instance, sent as "": ' + missing.join(', '))
             return message;
         } catch (e) {
             gs.error(this.type + ': payload not built for ' + record.getTableName() + ' ' + record.getUniqueValue() + ' - ' + (e.message || e));
@@ -56,7 +59,7 @@ BOFASIVampOutboundProcessor.prototype = {
         };
     },
 
-    _buildFinding: function(record) {
+    _buildFinding: function(record, missing) {
         var mapping = this._fieldMapping(record.getTableName());
         var finding = {};
         var records = {};
@@ -69,6 +72,8 @@ BOFASIVampOutboundProcessor.prototype = {
                 throw new Error('table ' + table + ' in property ' + this.FIELDS_PROPERTY_PREFIX + record.getTableName() + ' is not a source of the payload');
             if (!records.hasOwnProperty(table))
                 records[table] = this._sectionRecord(record, table, section);
+            if (!new GlideRecord(table).isValidField(field))
+                missing.push(table + '.' + field);
             if (!finding[section.key])
                 finding[section.key] = {};
             finding[section.key][mapping[i].json] = this._fieldValue(records[table], field);

@@ -1,0 +1,160 @@
+[
+ {
+  "table": "sn_vul_app_vul_entry",
+  "payload": "number",
+  "label": "Record Number",
+  "type": "String",
+  "field": "",
+  "how": "",
+  "found_type": "",
+  "reference": "",
+  "type_ok": false,
+  "candidates": []
+ },
+ {
+  "table": "sn_vul_app_vulnerability",
+  "payload": "number",
+  "label": "Record Number",
+  "type": "String",
+  "field": "number",
+  "how": "same name",
+  "found_type": "string",
+  "reference": "",
+  "type_ok": true,
+  "candidates": []
+ },
+ {
+  "table": "sn_vul_app_vulnerability",
+  "payload": "primary_ait",
+  "label": "Primary AIT",
+  "type": "Reference",
+  "field": "",
+  "how": "",
+  "found_type": "",
+  "reference": "",
+  "type_ok": false,
+  "candidates": []
+ },
+ {
+  "table": "sn_vul_app_vulnerable_item",
+  "payload": "number",
+  "label": "Record Number",
+  "type": "String",
+  "field": "number",
+  "how": "same name",
+  "found_type": "string",
+  "reference": "",
+  "type_ok": true,
+  "candidates": []
+ },
+ {
+  "table": "sn_vul_app_vulnerable_item",
+  "payload": "sys_created_on",
+  "label": "Created",
+  "type": "Date/Time",
+  "field": "sys_created_on",
+  "how": "same name",
+  "found_type": "glide_date_time",
+  "reference": "",
+  "type_ok": true,
+  "candidates": []
+ },
+ {
+  "table": "sn_vul_app_vulnerable_item",
+  "payload": "sys_updated_on",
+  "label": "Updated",
+  "type": "Date/Time",
+  "field": "sys_updated_on",
+  "how": "same name",
+  "found_type": "glide_date_time",
+  "reference": "",
+  "type_ok": true,
+  "candidates": []
+ },
+ {
+  "table": "sn_vul_app_vulnerable_item",
+  "payload": "state",
+  "label": "State",
+  "type": "Integer",
+  "field": "state",
+  "how": "same name",
+  "found_type": "integer",
+  "reference": "",
+  "type_ok": true,
+  "candidates": []
+ },
+ {
+  "table": "sn_vul_app_vulnerable_item",
+  "payload": "configuration_item",
+  "label": "Configuration Item",
+  "type": "Reference",
+  "field": "cmdb_ci",
+  "how": "label \"Configuration item\"",
+  "found_type": "reference",
+  "reference": "cmdb_ci",
+  "type_ok": true,
+  "candidates": []
+ },
+ {
+  "table": "sn_vul_app_vulnerable_item",
+  "payload": "u_verification_status",
+  "label": "Verification Status",
+  "type": "String",
+  "field": "",
+  "how": "",
+  "found_type": "",
+  "reference": "",
+  "type_ok": false,
+  "candidates": []
+ },
+ {
+  "table": "sn_vul_app_vulnerable_item",
+  "payload": "source_avit_id",
+  "label": "Source AVIT ID",
+  "type": "String",
+  "field": "source_avit_id",
+  "how": "same name",
+  "found_type": "string",
+  "reference": "",
+  "type_ok": true,
+  "candidates": []
+ },
+ {
+  "table": "sn_vul_pen_test_assessment_request",
+  "payload": "number",
+  "label": "Record Number",
+  "type": "String",
+  "field": "number",
+  "how": "same name",
+  "found_type": "string",
+  "reference": "",
+  "type_ok": true,
+  "candidates": []
+ },
+ {
+  "table": "sn_vul_pen_test_assessment_request",
+  "payload": "sys_created_on",
+  "label": "Created",
+  "type": "Date/Time",
+  "field": "sys_created_on",
+  "how": "same name",
+  "found_type": "glide_date_time",
+  "reference": "",
+  "type_ok": true,
+  "candidates": []
+ },
+ {
+  "table": "sn_vul_pen_test_assessment_request",
+  "payload": "u_assessment_id",
+  "label": "Assessment ID",
+  "type": "String",
+  "field": "",
+  "how": "",
+  "found_type": "",
+  "reference": "",
+  "type_ok": false,
+  "candidates": [
+   "risk_assessment_id (\"Risk assessment ID\")"
+  ]
+ }
+]

@@ -1,7 +1,7 @@
 [
  {
   "table": "sn_vul_app_vul_entry",
-  "field": "number",
+  "payload": "number",
   "label": "Record Number",
   "type": "String",
   "required": "Yes",
@@ -9,7 +9,7 @@
  },
  {
   "table": "sn_vul_app_vulnerability",
-  "field": "number",
+  "payload": "number",
   "label": "Record Number",
   "type": "String",
   "required": "Yes",
@@ -17,7 +17,7 @@
  },
  {
   "table": "sn_vul_app_vulnerability",
-  "field": "primary_ait",
+  "payload": "primary_ait",
   "label": "Primary AIT",
   "type": "Reference",
   "required": "Yes",
@@ -25,7 +25,7 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
-  "field": "number",
+  "payload": "number",
   "label": "Record Number",
   "type": "String",
   "required": "Yes",
@@ -33,7 +33,7 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
-  "field": "sys_created_on",
+  "payload": "sys_created_on",
   "label": "Created",
   "type": "Date/Time",
   "required": "Yes",
@@ -41,7 +41,7 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
-  "field": "sys_updated_on",
+  "payload": "sys_updated_on",
   "label": "Updated",
   "type": "Date/Time",
   "required": "Yes",
@@ -49,7 +49,7 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
-  "field": "state",
+  "payload": "state",
   "label": "State",
   "type": "Integer",
   "required": "Yes",
@@ -57,7 +57,7 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
-  "field": "configuration_item",
+  "payload": "configuration_item",
   "label": "Configuration Item",
   "type": "Reference",
   "required": "Yes",
@@ -65,7 +65,7 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
-  "field": "u_verification_status",
+  "payload": "u_verification_status",
   "label": "Verification Status",
   "type": "String",
   "required": "Yes",
@@ -73,7 +73,7 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
-  "field": "source_avit_id",
+  "payload": "source_avit_id",
   "label": "Source AVIT ID",
   "type": "String",
   "required": "Yes",
@@ -81,7 +81,7 @@
  },
  {
   "table": "sn_vul_pen_test_assessment_request",
-  "field": "number",
+  "payload": "number",
   "label": "Record Number",
   "type": "String",
   "required": "Yes",
@@ -89,7 +89,7 @@
  },
  {
   "table": "sn_vul_pen_test_assessment_request",
-  "field": "sys_created_on",
+  "payload": "sys_created_on",
   "label": "Created",
   "type": "Date/Time",
   "required": "Yes",
@@ -97,7 +97,7 @@
  },
  {
   "table": "sn_vul_pen_test_assessment_request",
-  "field": "u_assessment_id",
+  "payload": "u_assessment_id",
   "label": "Assessment ID",
   "type": "String",
   "required": "Yes",
