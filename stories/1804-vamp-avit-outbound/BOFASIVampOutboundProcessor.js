@@ -8,11 +8,16 @@ BOFASIVampOutboundProcessor.prototype = {
         this.OUTBOUND_VERSION = '1.0.0';
         this.DATE_FORMAT = 'MM-dd-yyyy';
         this.TIME_FORMAT = 'HH:mm:ss';
-        this.FIELDS_PROPERTY_PREFIX = 'x_boar_bofa_usem_1.usem.vamp.finding.fields.';
-        this.TASK_KEY = 'remediation_task';
+        this.FIELDS_PROPERTY_PREFIX = 'x_boar_bofa_usem_1.usem.vamp.fields.';
         this.GROUP_ITEM_TABLE = 'sn_vul_app_m2m_vul_group_item';
         this.GROUP_ITEM_FIELD = 'sn_vul_app_vulnerable_item';
         this.GROUP_FIELD = 'sn_vul_app_vulnerability';
+        this.SECTIONS = [
+            { key: 'finding',          table: 'sn_vul_app_vulnerable_item' },
+            { key: 'tpe',              table: 'sn_vul_app_vul_entry',               field: 'vulnerability' },
+            { key: 'remediation_task', table: 'sn_vul_app_vulnerability' },
+            { key: 'ptreq',            table: 'sn_vul_pen_test_assessment_request', field: 'assessment_request' }
+        ];
     },
 
     buildPayload: function(record) {
@@ -52,12 +57,28 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     _buildFinding: function(record) {
-        var mapping = this._fieldMapping(record.getTableName());
-        var task = this._remediationTask(record);
         var finding = {};
-        for (var i = 0; i < mapping.length; i++)
-            this._assign(finding, mapping[i].json, this._fieldValue(record, task, mapping[i].field));
+        for (var i = 0; i < this.SECTIONS.length; i++) {
+            var section = this.SECTIONS[i];
+            finding[section.key] = this._renderFields(this._sectionRecord(record, section), this._fieldMapping(section.table));
+        }
         return finding;
+    },
+
+    _sectionRecord: function(record, section) {
+        if (section.table == record.getTableName())
+            return record;
+        if (section.table == this.GROUP_FIELD)
+            return this._remediationTask(record);
+        return record.getElement(section.field).getRefRecord();
+    },
+
+    _remediationTask: function(record) {
+        var item = new GlideRecord(this.GROUP_ITEM_TABLE);
+        item.addQuery(this.GROUP_ITEM_FIELD, record.getUniqueValue());
+        item.orderByDesc('sys_created_on');
+        item.query();
+        return item.next() ? item.getElement(this.GROUP_FIELD).getRefRecord() : null;
     },
 
     _fieldMapping: function(table) {
@@ -77,45 +98,20 @@ BOFASIVampOutboundProcessor.prototype = {
         return mapping;
     },
 
-    _remediationTask: function(record) {
-        var item = new GlideRecord(this.GROUP_ITEM_TABLE);
-        item.addQuery(this.GROUP_ITEM_FIELD, record.getUniqueValue());
-        item.orderByDesc('sys_created_on');
-        item.query();
-        return item.next() ? item.getElement(this.GROUP_FIELD).getRefRecord() : null;
+    _renderFields: function(record, mapping) {
+        var values = {};
+        for (var i = 0; i < mapping.length; i++)
+            values[mapping[i].json] = this._fieldValue(record, mapping[i].field);
+        return values;
     },
 
-    _fieldValue: function(record, task, path) {
-        var at = path.lastIndexOf('.');
-        var source = this._source(record, task, at < 0 ? '' : path.substring(0, at));
-        var field = at < 0 ? path : path.substring(at + 1);
-        if (!source || !source.isValidRecord() || !source.isValidField(field))
+    _fieldValue: function(record, field) {
+        if (!record || !record.isValidRecord() || !record.isValidField(field))
             return '';
-        var element = source.getElement(field);
+        var element = record.getElement(field);
         if (element === null || element.nil())
             return '';
         return this._renderElement(element);
-    },
-
-    _source: function(record, task, path) {
-        var root = record;
-        if (path == this.TASK_KEY || path.indexOf(this.TASK_KEY + '.') == 0) {
-            root = task;
-            path = path.substring(this.TASK_KEY.length + 1);
-        }
-        if (!root || !path)
-            return root;
-        return root.getElement(path).getRefRecord();
-    },
-
-    _assign: function(target, path, value) {
-        var keys = path.split('.');
-        for (var i = 0; i < keys.length - 1; i++) {
-            if (!target[keys[i]])
-                target[keys[i]] = {};
-            target = target[keys[i]];
-        }
-        target[keys[keys.length - 1]] = value;
     },
 
     _renderElement: function(element) {
@@ -124,18 +120,6 @@ BOFASIVampOutboundProcessor.prototype = {
                 return this._formatDateTime(element.getValue());
             case 'glide_date':
                 return this._formatDate(element.getValue());
-            case 'journal_input':
-                return String(element.getJournalEntry(1)).trim();
-            case 'reference':
-            case 'glide_list':
-            case 'boolean':
-            case 'glide_duration':
-            case 'timer':
-            case 'domain_id':
-            case 'sys_class_name':
-            case 'integer':
-            case 'string':
-                return String(element.getDisplayValue());
             default:
                 return String(element.getValue());
         }

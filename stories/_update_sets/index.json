@@ -380,5 +380,16 @@
   "scrub": [
    "stand-in scope kept: internal record only, client receives the record XML"
   ]
+ },
+ {
+  "name": "SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.2",
+  "app": "x_196061_bofasim (stand-in for the client application)",
+  "rows": 8,
+  "exported": 8,
+  "file": "SNOWUSEMTP-1804_MS_VAMP_AVIT_Outbound_Payload_V1.2.xml",
+  "created": "2026-09-18 10:21:19",
+  "scrub": [
+   "stand-in scope kept: internal record only, client receives the record XML"
+  ]
  }
 ]
