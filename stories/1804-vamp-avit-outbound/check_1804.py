@@ -55,8 +55,8 @@ for key, table in sections.items():
     if list(element.get(key, {})) != by_table[table]:
         problems.append('sample payload %s keys %s differ from the sheet payload names of %s' % (key, list(element.get(key, {})), table))
 ci = next(e for e in resolution if e['payload'] == 'configuration_item')
-if ci['field'] != 'cmdb_ci' or len(element[ITEM]['configuration_item']) != 32:
-    problems.append('configuration_item does not resolve to cmdb_ci with a sys_id in the sample')
+if ci['field'] != 'cmdb_ci' or element[ITEM]['configuration_item'] != 'Trade Processing Portal':
+    problems.append('configuration_item does not resolve to cmdb_ci with the display value in the sample')
 processor = open(os.path.join(HERE, 'BOFASIVampOutboundProcessor.js')).read()
 for table in by_table:
     if table not in processor:

@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(BASE, 'tools'))
 from snui import SNUI
 SCOPE = '9d1e03de930b8310e3aef0aefaba10d5'          # stand-in scoped app on the PDI
 CLIENT_PREFIX, PDI_PREFIX = 'x_boar_bofa_usem_1', 'x_196061_bofasim'
-NAME = 'SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.5'
+NAME = 'SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.6'
 DEFAULT_SET = 'a91e03de930b8310e3aef0aefaba10de'      # Default update set of the stand-in scope
 BR_NAME = 'BOFA_BR_AVIT_VampOutbound'
 SI_NAMES = ['BOFASIVampOutboundProcessor', 'BOFASIKafkaProducerVamp']

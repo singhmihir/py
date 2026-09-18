@@ -23,7 +23,7 @@ stand-in scope on the PDI, delivered as import-ready record XML for the client a
   `usem.vamp.fields.sn_vul_app_vulnerable_item` in the CDP line format and parser
   (`servicenow_field=payload_field,`): the ServiceNow field on the left, the sheet's payload name on
   the right, the item's own fields plain, the other tables' fields as `<table>.<field>`, which the
-  code places in that table's section. Values as the sheet types them: references as the sys_id,
+  code places in that table's section. Values: references as the display value,
   integers and strings as stored, date/times `MM-dd-yyyy HH:mm:ss`; a field missing on the table, an
   empty field or a section without a record is sent as `""`.
 - `BOFASIKafkaProducerVamp.js` — `sendPayload(payload, record)`: topic sys_id from
@@ -42,12 +42,12 @@ stand-in scope on the PDI, delivered as import-ready record XML for the client a
   (similar label there: `risk_assessment_id`).
 - No payload validation and no comments, as asked for the first iteration.
 
-Drivers: `build_1804.py` (set `SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.5`, fresh set,
+Drivers: `build_1804.py` (set `SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.6`, fresh set,
 properties of earlier versions removed under the scope's Default set, records captured explicitly,
 scope audit), `fixtures_1804.py` (two fixture items, rules off: one linked to every source, one
 bare), `test_1804.py` (50 checks per run, run twice: the property equals the resolution, the payload
 carries exactly the sheet payload names per table and every value, the configuration item as the
-sys_id of its CI, the not-found message, the bare item, the rule on a real update and a real insert
+display value of its CI, the not-found message, the bare item, the rule on a real update and a real insert
 with the processor and producer messages, rendering by type), `export_1804.py` (native export,
 upload proof, archive — stand-in scope, internal record only), `package_1804.py` (`VAMP AVIT
 Outbound Payload - Records.xml`: the five records re-pointed to the client application, topic
@@ -58,7 +58,8 @@ payload built from the linked fixture.
 Earlier versions the same day: V1.0 (sections property plus one field property per section), V1.1
 (one property with dotted paths, related sections beyond the sheet), V1.2 (one field property per
 sheet table), V1.3 (one property, column B used as the field name, so `configuration_item` never
-resolved). V1.4 verifies the field behind every payload name; V1.5 keys the sections by table name.
+resolved). V1.4 verifies the field behind every payload name; V1.5 keys the sections by table name;
+V1.6 sends references as display values (client decision).
 
 The PDI has no Stream Connect: the producer's send fails there and is caught (`message not sent for
 <key> - ...`), which is what the rule tests look for after the processor message.
