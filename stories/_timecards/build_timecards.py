@@ -162,6 +162,50 @@ WEEK_5 = dict(ending=date(2026, 9, 12), days=[
         'builder (V2.5), and produced the plain-English primer on the lookup rules for the demo.'),
 ])
 
+WEEK_6 = dict(ending=date(2026, 9, 19), days=[
+    day(date(2026, 9, 14), 8, 0, 8, 0, 'Analysis', 'SNOWUSEMTP-895',
+        'Analysis - SNOWUSEMTP-895: built the read-only measurement script that replays the Qualys CI lookup chain over a '
+        'sample of discovered items on the client development instance and reports, per item, the rule that matched, the '
+        'agreement between the CI found and the scanned host, and the cause of every decline; across two runs of five '
+        'hundred items the chain reproduced 499 matches, and the unmatched population resolved to hosts absent from the '
+        'CMDB (87%), class contradictions, duplicate addresses and retired records. Also delivered SNOWUSEMTP-1552: an '
+        'application vulnerable item keeps its deferral when the scanner closes and re-opens it, exercised through the '
+        'exception request and approval path. V1.0 delivered.'),
+    day(date(2026, 9, 15), 8, 0, 8, 0, 'Configurations', 'SNOWUSEMTP-895',
+        'Configurations - SNOWUSEMTP-895: closed out the third measurement run with no rule change agreed (retired '
+        'records stay candidates by the client design expectation) and delivered three rule sets: appliance acceptance '
+        'on the discovery chain and hardware rules with a host name agreement check on the address rules (V1.1), a '
+        'device name rule that resolves the contact centre phones and the scanners that sit outside the hardware tree '
+        '(V1.0), and the load balancer member rule that walks a virtual server through its pool to the one real server '
+        'behind it (V1.0). Re-issued the six rule scripts in the agreed comment layout and swept the client items for '
+        'any change in outcome.'),
+    day(date(2026, 9, 16), 8, 0, 8, 0, 'Documentation', 'SNOWUSEMTP-895',
+        'Documentation - SNOWUSEMTP-895: produced the walkthrough material on the CI lookup rules for the architect '
+        'review: a preparation document covering the chain from the discovery rules through to the NetBIOS rule, a '
+        'line-by-line explanation of the load balancer member and service rules in everyday words, and flow diagrams of '
+        'the member, owner and service rules, each walked through with worked examples taken from real discovered items.'),
+    day(date(2026, 9, 17), 8, 0, 8, 0, 'Configurations', 'SNOWUSEMTP-895',
+        'Configurations - SNOWUSEMTP-895: reviewed the client load balancer matches (634 items on the service rule, six '
+        'on the member rule) and tightened both rules to the exact record standard with no fitness heuristics: the '
+        'discovery chain rule refuses a balancer at the end of its chain, several service records carrying one name are '
+        'treated as one virtual server recorded more than once, a pool member the CMDB cannot place makes the member '
+        'rule decline, and the service rule attaches the virtual server record whenever the machine cannot be named. '
+        'V1.2 delivered with the per-item explain script and a per-example walkthrough document for the architect. Also '
+        'delivered SNOWUSEMTP-1825 (nineteen classes added to the ignored CI class property in its own scope) and the '
+        'certificate class analysis: the relationship export over the 2,370 items on the certificate class showed 244 '
+        'leading to a single live device, so those items are re-evaluated with the existing rules and no certificate '
+        'rule is added.'),
+    day(date(2026, 9, 18), 8, 0, 8, 0, 'Configurations', 'SNOWUSEMTP-1804',
+        'Configurations - SNOWUSEMTP-1804: built the VAMP outbound for application vulnerable items: the after insert '
+        'and update business rule, the payload processor and the Kafka producer script include for the verification '
+        'topic, with the topic and the field mapping held in system properties. The payload carries the envelope and one '
+        'finding element whose sections are keyed by table name, holding exactly the fields of the mapping sheet with '
+        'reference fields sent as display values; the ServiceNow field behind every payload name is resolved on the '
+        'instance rather than assumed. Also produced the read-only field check script that reports, per sheet row, the '
+        'field found, its type and the rows to raise with the integration team. Tested on findings with and without '
+        'related records, on insert and on update. V1.6 delivered.'),
+])
+
 FILES = [
     dict(file='BofA_USEM_Timecard_10Aug21Aug_2026.xlsx', weeks=[WEEK_1, WEEK_2],
          notes_footer='Week ending 15-Aug carries a single Project line Mon to Thu and a Sick line on Fri 14-Aug (9.00h). '
@@ -201,6 +245,18 @@ FILES = [
              'Week ending 12-Sep: Mon to Fri 8.00h on the India Kolkata worked line; weekly 40.00, Worked 40.00, Absence 0.00.',
              'Mapping rule: SN Project + SN Training reconcile to Deloitte Worked; SN Sick reconciles to Deloitte Absence; daily and weekly totals are identical.',
              'Activity notes are drawn from the engagement work on SNOWUSEMTP-895 (Qualys CI lookup rules), the Primary AIT resolution design and SNOWUSEMTP-1625 (CDP remediation task payload and Kafka producer).',
+         ]),
+    dict(file='BofA_USEM_Timecard_14Sep18Sep_2026.xlsx', weeks=[WEEK_6],
+         notes_footer='Week ending 19-Sep carries a single Project line Mon to Fri (8.00h each). See the Reconciliation sheet for the '
+                      'line-by-line tie-out; the Deloitte columns hold the planned 8.00h per day until the approved T&E is available.',
+         recon_intro='Deloitte is the system of record. Every daily and weekly total below is computed live and must read MATCH. '
+                     'SN Project + SN Training = Deloitte Worked. SN Sick = Deloitte Absence. The Deloitte columns hold the planned '
+                     '8.00h per day for the week ending 19-Sep; replace them with the approved T&E figures when available.',
+         recon_notes=[
+             'Source of record: Deloitte T&E timesheet, week ending 19-Sep-2026 (Deloitte columns entered as the planned 8.00h per day; confirm against the approved timesheet).',
+             'Week ending 19-Sep: Mon to Fri 8.00h on the India Kolkata worked line; weekly 40.00, Worked 40.00, Absence 0.00.',
+             'Mapping rule: SN Project + SN Training reconcile to Deloitte Worked; SN Sick reconciles to Deloitte Absence; daily and weekly totals are identical.',
+             'Activity notes are drawn from the engagement work on SNOWUSEMTP-895 (Qualys CI lookup rules and the load balancer refinements), SNOWUSEMTP-1552 (deferral kept on scanner reopen), SNOWUSEMTP-1825 (ignored CI classes) and SNOWUSEMTP-1804 (VAMP outbound payload).',
          ]),
 ]
 
