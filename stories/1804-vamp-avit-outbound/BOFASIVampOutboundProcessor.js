@@ -12,11 +12,9 @@ BOFASIVampOutboundProcessor.prototype = {
         this.GROUP_ITEM_TABLE = 'sn_vul_app_m2m_vul_group_item';
         this.GROUP_ITEM_FIELD = 'sn_vul_app_vulnerable_item';
         this.GROUP_FIELD = 'sn_vul_app_vulnerability';
-        this.SECTIONS = {
-            sn_vul_app_vulnerable_item:         { key: 'finding' },
-            sn_vul_app_vul_entry:               { key: 'tpe', field: 'vulnerability' },
-            sn_vul_app_vulnerability:           { key: 'remediation_task' },
-            sn_vul_pen_test_assessment_request: { key: 'ptreq', field: 'assessment_request' }
+        this.REFERENCES = {
+            sn_vul_app_vul_entry: 'vulnerability',
+            sn_vul_pen_test_assessment_request: 'assessment_request'
         };
     },
 
@@ -67,26 +65,25 @@ BOFASIVampOutboundProcessor.prototype = {
             var at = mapping[i].field.indexOf('.');
             var table = at < 0 ? record.getTableName() : mapping[i].field.substring(0, at);
             var field = at < 0 ? mapping[i].field : mapping[i].field.substring(at + 1);
-            var section = this.SECTIONS[table];
-            if (!section)
-                throw new Error('table ' + table + ' in property ' + this.FIELDS_PROPERTY_PREFIX + record.getTableName() + ' is not a source of the payload');
             if (!records.hasOwnProperty(table))
-                records[table] = this._sectionRecord(record, table, section);
+                records[table] = this._sectionRecord(record, table);
             if (!new GlideRecord(table).isValidField(field))
                 missing.push(table + '.' + field);
-            if (!finding[section.key])
-                finding[section.key] = {};
-            finding[section.key][mapping[i].json] = this._fieldValue(records[table], field);
+            if (!finding[table])
+                finding[table] = {};
+            finding[table][mapping[i].json] = this._fieldValue(records[table], field);
         }
         return finding;
     },
 
-    _sectionRecord: function(record, table, section) {
+    _sectionRecord: function(record, table) {
         if (table == record.getTableName())
             return record;
-        if (section.field)
-            return record.getElement(section.field).getRefRecord();
-        return this._remediationTask(record);
+        if (this.REFERENCES[table])
+            return record.getElement(this.REFERENCES[table]).getRefRecord();
+        if (table == this.GROUP_FIELD)
+            return this._remediationTask(record);
+        throw new Error('table ' + table + ' in property ' + this.FIELDS_PROPERTY_PREFIX + record.getTableName() + ' is not a source of the payload');
     },
 
     _remediationTask: function(record) {

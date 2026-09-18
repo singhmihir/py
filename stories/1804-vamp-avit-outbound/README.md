@@ -11,15 +11,15 @@ stand-in scope on the PDI, delivered as import-ready record XML for the client a
 - `BOFA_BR_AVIT_VampOutbound.js` — after insert/update rule on `sn_vul_app_vulnerable_item`, order
   100, no condition yet: processor → producer, one try/catch.
 - `BOFASIVampOutboundProcessor.js` — `buildPayload(record)` returns the JSON text
-  `{envelope, findings: [{finding, tpe, remediation_task, ptreq}]}` and shows it with
+  `{envelope, findings: [{sn_vul_app_vulnerable_item, sn_vul_app_vul_entry, sn_vul_app_vulnerability,
+  sn_vul_pen_test_assessment_request}]}` (sections keyed by table name) and shows it with
   `gs.addInfoMessage` on the item (lines without semicolon, on purpose, to spot them later); a second
   message names any configured field the instance does not have. Envelope as CDP (topic
   `sn_usem_verification_outbound`, namespace `com.bofa.usem`, versions 1.0.0, UUID event id, UTC
   timestamp, element_count 1, element_activity from `current.operation()`). The four sections are
-  the four sheet tables: `finding` the item itself, `tpe` the item's `vulnerability`
-  (sn_vul_app_vul_entry), `remediation_task` the task reached through
-  `sn_vul_app_m2m_vul_group_item` (sn_vul_app_vulnerability, carries `primary_ait`), `ptreq` the
-  item's `assessment_request`. Every field comes from the one property
+  the four sheet tables: the item itself, its `vulnerability` (sn_vul_app_vul_entry), the task reached
+  through `sn_vul_app_m2m_vul_group_item` (sn_vul_app_vulnerability, carries `primary_ait`) and its
+  `assessment_request` (sn_vul_pen_test_assessment_request). Every field comes from the one property
   `usem.vamp.fields.sn_vul_app_vulnerable_item` in the CDP line format and parser
   (`servicenow_field=payload_field,`): the ServiceNow field on the left, the sheet's payload name on
   the right, the item's own fields plain, the other tables' fields as `<table>.<field>`, which the
@@ -42,7 +42,7 @@ stand-in scope on the PDI, delivered as import-ready record XML for the client a
   (similar label there: `risk_assessment_id`).
 - No payload validation and no comments, as asked for the first iteration.
 
-Drivers: `build_1804.py` (set `SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.4`, fresh set,
+Drivers: `build_1804.py` (set `SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.5`, fresh set,
 properties of earlier versions removed under the scope's Default set, records captured explicitly,
 scope audit), `fixtures_1804.py` (two fixture items, rules off: one linked to every source, one
 bare), `test_1804.py` (50 checks per run, run twice: the property equals the resolution, the payload
@@ -58,7 +58,7 @@ payload built from the linked fixture.
 Earlier versions the same day: V1.0 (sections property plus one field property per section), V1.1
 (one property with dotted paths, related sections beyond the sheet), V1.2 (one field property per
 sheet table), V1.3 (one property, column B used as the field name, so `configuration_item` never
-resolved). V1.4 verifies the field behind every payload name.
+resolved). V1.4 verifies the field behind every payload name; V1.5 keys the sections by table name.
 
 The PDI has no Stream Connect: the producer's send fails there and is caught (`message not sent for
 <key> - ...`), which is what the rule tests look for after the processor message.
