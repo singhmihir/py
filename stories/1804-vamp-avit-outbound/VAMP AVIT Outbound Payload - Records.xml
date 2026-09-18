@@ -34,12 +34,15 @@ BOFASIVampOutboundProcessor.prototype = {
 
     buildPayload: function(record) {
         try {
+            var missing = [];
             var payload = {
                 envelope: this._buildEnvelope(this._activity(record)),
-                findings: [this._buildFinding(record)]
+                findings: [this._buildFinding(record, missing)]
             };
             var message = JSON.stringify(payload);
             gs.addInfoMessage('VAMP payload for ' + record.getValue('number') + ': ' + message)
+            if (missing.length)
+                gs.addInfoMessage('VAMP fields not found on this instance, sent as "": ' + missing.join(', '))
             return message;
         } catch (e) {
             gs.error(this.type + ': payload not built for ' + record.getTableName() + ' ' + record.getUniqueValue() + ' - ' + (e.message || e));
@@ -68,7 +71,7 @@ BOFASIVampOutboundProcessor.prototype = {
         };
     },
 
-    _buildFinding: function(record) {
+    _buildFinding: function(record, missing) {
         var mapping = this._fieldMapping(record.getTableName());
         var finding = {};
         var records = {};
@@ -81,6 +84,8 @@ BOFASIVampOutboundProcessor.prototype = {
                 throw new Error('table ' + table + ' in property ' + this.FIELDS_PROPERTY_PREFIX + record.getTableName() + ' is not a source of the payload');
             if (!records.hasOwnProperty(table))
                 records[table] = this._sectionRecord(record, table, section);
+            if (!new GlideRecord(table).isValidField(field))
+                missing.push(table + '.' + field);
             if (!finding[section.key])
                 finding[section.key] = {};
             finding[section.key][mapping[i].json] = this._fieldValue(records[table], field);
@@ -237,7 +242,7 @@ BOFASIKafkaProducerVamp.prototype = {
 </sys_properties>
 <sys_properties action="INSERT_OR_UPDATE">
 <choices/>
-<description>VAMP payload fields, one servicenow_field=json_field pair per line in payload order, exactly the rows of the sheet "SN to VAMP": the fields of the application vulnerable item, then the fields of the related tables as &lt;table&gt;.&lt;field&gt; (sn_vul_app_vul_entry, sn_vul_app_vulnerability, sn_vul_pen_test_assessment_request); a field missing on the table or empty is sent as "".</description>
+<description>VAMP payload fields, one servicenow_field=payload_field pair per line in payload order: the ServiceNow field on the left (verified with the field check script), the payload name of the sheet "SN to VAMP" on the right; the fields of the application vulnerable item first, then the fields of the related tables as &lt;table&gt;.&lt;field&gt; (sn_vul_app_vul_entry, sn_vul_app_vulnerability, sn_vul_pen_test_assessment_request). A field missing on the table or empty is sent as "".</description>
 <ignore_cache>false</ignore_cache>
 <is_private>false</is_private>
 <name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</name>
@@ -255,7 +260,7 @@ BOFASIKafkaProducerVamp.prototype = {
 sys_created_on=sys_created_on,
 sys_updated_on=sys_updated_on,
 state=state,
-configuration_item=configuration_item,
+cmdb_ci=configuration_item,
 u_verification_status=u_verification_status,
 source_avit_id=source_avit_id,
 sn_vul_app_vul_entry.number=number,
