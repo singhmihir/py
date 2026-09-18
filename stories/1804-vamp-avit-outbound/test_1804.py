@@ -12,7 +12,7 @@ from snui import SNUI
 ST = json.load(open(os.path.join(HERE, 'state.json'))); FX = json.load(open(os.path.join(HERE, 'fixtures.json')))
 SHEET = json.load(open(os.path.join(HERE, 'vamp_mapping.json'))); PROPS = json.load(open(os.path.join(HERE, 'properties.json'))); RESOLUTION = json.load(open(os.path.join(HERE, 'field_resolution.json')))
 P = 'x_196061_bofasim'
-SECTIONS = [('finding', 'sn_vul_app_vulnerable_item'), ('tpe', 'sn_vul_app_vul_entry'), ('remediation_task', 'sn_vul_app_vulnerability'), ('ptreq', 'sn_vul_pen_test_assessment_request')]
+SECTIONS = [(t, t) for t in ['sn_vul_app_vulnerable_item', 'sn_vul_app_vul_entry', 'sn_vul_app_vulnerability', 'sn_vul_pen_test_assessment_request']]
 FIELDS = {key: [r['payload'] for r in SHEET if r['table'] == table] for key, table in SECTIONS}
 NOT_FOUND = ['%s.%s' % (e['table'], e['payload']) for p in (0, 1) for e in RESOLUTION if not e['field'] and (p == 0) == (e['table'] == 'sn_vul_app_vulnerable_item')]
 ENVELOPE = ['type', 'topic_name', 'namespace', 'core_version', 'outbound_version', 'event_id', 'event_timestamp', 'element_count', 'element_activity']
@@ -67,13 +67,13 @@ def shape(tag, r):
     check(tag + ' envelope keys in order', list(e.keys()) == ENVELOPE, list(e.keys()))
     check(tag + ' envelope constants', (e['type'], e['topic_name'], e['namespace'], e['core_version'], e['outbound_version'], e['element_count']) == ('record', 'sn_usem_verification_outbound', 'com.bofa.usem', '1.0.0', '1.0.0', 1), e)
     check(tag + ' event_id is a UUID and timestamp is UTC ISO', UUID.match(e['event_id']) and re.match(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$', e['event_timestamp']), e)
-    check(tag + ' one element with the four sheet tables in order', len(p['findings']) == 1 and list(p['findings'][0].keys()) == [k for k, t in SECTIONS], list(p['findings'][0].keys()) if p['findings'] else p)
+    check(tag + ' one element keyed by the four sheet table names in property order', len(p['findings']) == 1 and list(p['findings'][0].keys()) == [k for k, t in SECTIONS], list(p['findings'][0].keys()) if p['findings'] else p)
     el = p['findings'][0]
     for key, table in SECTIONS:
         check(tag + ' %s carries exactly the sheet fields of %s in sheet order' % (key, table), list(el[key].keys()) == FIELDS[key], (list(el[key].keys()), FIELDS[key]))
     check(tag + ' every value is a string', all(isinstance(v, str) for k, t in SECTIONS for v in el[k].values()), el)
     check(tag + ' no processor error logged', r['errors_after'] == r['errors_before'], (r['errors_before'], r['errors_after']))
-    check(tag + ' first info message holds exactly the payload', r['messages'][:1] == ['VAMP payload for ' + el['finding']['number'] + ': ' + r['text']], r['messages'])
+    check(tag + ' first info message holds exactly the payload', r['messages'][:1] == ['VAMP payload for ' + el['sn_vul_app_vulnerable_item']['number'] + ': ' + r['text']], r['messages'])
     check(tag + ' second info message names the fields this instance does not have, nothing else', r['messages'][1:] == ['VAMP fields not found on this instance, sent as "": ' + ', '.join(NOT_FOUND)] and len(NOT_FOUND) == 4, (r['messages'][1:], NOT_FOUND))
     return p, el, e
 
@@ -83,20 +83,20 @@ for run in (1, 2):
     r = build(FX['linked']); x = r['expect']
     p, el, e = shape('A', r)
     check('A element_activity from sys_mod_count', e['element_activity'] == ('UPDATE' if x['mod'] > 0 else 'INSERT'), (e['element_activity'], x['mod']))
-    f = el['finding']
+    f = el['sn_vul_app_vulnerable_item']
     check('A finding number, state as the stored integer, source_avit_id', (f['number'], f['state'], f['source_avit_id']) == (x['number'], x['state'], 'VAMP-FIXTURE-001') and x['state'] == '1', (f, x))
     check('A finding dates MM-dd-yyyy HH:mm:ss', f['sys_created_on'] == x['created'] and f['sys_updated_on'] == x['updated'] and STAMP.match(f['sys_created_on']), (f, x['created'], x['updated']))
     check('A configuration_item resolves through cmdb_ci to the sys_id of Trade Processing Portal', f['configuration_item'] == x['ci'] and len(x['ci']) == 32 and x['ci_display'] == 'Trade Processing Portal' and not x['has_ci_field'], (f['configuration_item'], x))
     check('A u_verification_status absent from this instance renders ""', f['u_verification_status'] == '' and not x['has_status_field'], (f, x))
-    check('A tpe reached through vulnerability, number "" (no number field on the entry table here)', el['tpe'] == {'number': ''} and x['entry'] == 'VULNENT123451', (el['tpe'], x['entry']))
-    check('A remediation task through the group item table, primary_ait "" (field absent here)', el['remediation_task'] == {'number': x['avul'], 'primary_ait': ''} and x['avul'] == FX['avul'] and not x['avul_has_ait_field'], (el['remediation_task'], x))
-    check('A ptreq number, created, u_assessment_id ""', el['ptreq'] == {'number': x['ptreq'], 'sys_created_on': x['ptreq_created'], 'u_assessment_id': ''} and x['ptreq'] == 'PTREQ0012001' and STAMP.match(x['ptreq_created']), (el['ptreq'], x))
+    check('A tpe reached through vulnerability, number "" (no number field on the entry table here)', el['sn_vul_app_vul_entry'] == {'number': ''} and x['entry'] == 'VULNENT123451', (el['sn_vul_app_vul_entry'], x['entry']))
+    check('A remediation task through the group item table, primary_ait "" (field absent here)', el['sn_vul_app_vulnerability'] == {'number': x['avul'], 'primary_ait': ''} and x['avul'] == FX['avul'] and not x['avul_has_ait_field'], (el['sn_vul_app_vulnerability'], x))
+    check('A ptreq number, created, u_assessment_id ""', el['sn_vul_pen_test_assessment_request'] == {'number': x['ptreq'], 'sys_created_on': x['ptreq_created'], 'u_assessment_id': ''} and x['ptreq'] == 'PTREQ0012001' and STAMP.match(x['ptreq_created']), (el['sn_vul_pen_test_assessment_request'], x))
 
     print('B. bare fixture', FX['bare_number'])
     r = build(FX['bare']); x = r['expect']
     p, el, e = shape('B', r)
-    check('B tpe, remediation_task and ptreq render "" for every field', all(v == '' for k in ['tpe', 'remediation_task', 'ptreq'] for v in el[k].values()), el)
-    check('B finding still carries its own values, configuration_item "" with no CI', el['finding']['number'] == x['number'] and el['finding']['state'] == '1' and el['finding']['source_avit_id'] == '' and el['finding']['configuration_item'] == '' and x['ci'] == '', el['finding'])
+    check('B tpe, remediation_task and ptreq render "" for every field', all(v == '' for k in ['sn_vul_app_vul_entry', 'sn_vul_app_vulnerability', 'sn_vul_pen_test_assessment_request'] for v in el[k].values()), el)
+    check('B finding still carries its own values, configuration_item "" with no CI', el['sn_vul_app_vulnerable_item']['number'] == x['number'] and el['sn_vul_app_vulnerable_item']['state'] == '1' and el['sn_vul_app_vulnerable_item']['source_avit_id'] == '' and el['sn_vul_app_vulnerable_item']['configuration_item'] == '' and x['ci'] == '', el['sn_vul_app_vulnerable_item'])
 
     print('C. rule on a real update and a real insert')
     r, messages = js('''
@@ -124,9 +124,9 @@ gs.print('X::' + JSON.stringify(o));''' % dict(linked=json.dumps(FX['linked']), 
     not_found = [m for m in messages if m.startswith('VAMP fields not found')]
     check('C info messages on the page: one payload per item plus the not-found list (the page shows an identical message once), nothing else', sorted(payloads) == sorted([FX['linked_number'], r['inserted']['number']]) and 1 <= len(not_found) <= 2 and all(m == 'VAMP fields not found on this instance, sent as "": ' + ', '.join(NOT_FOUND) for m in not_found) and len(messages) == len(payloads) + len(not_found), (len(messages), len(payloads), len(not_found), messages))
     upd = payloads.get(FX['linked_number']); ins = payloads.get(r['inserted']['number'])
-    check('C update: info message shows the payload with element_activity UPDATE, the sheet sections and the CI sys_id', bool(upd) and upd['envelope']['element_activity'] == 'UPDATE' and upd['findings'][0]['finding']['number'] == FX['linked_number'] and list(upd['findings'][0].keys()) == [k for k, t in SECTIONS] and len(upd['findings'][0]['finding']['configuration_item']) == 32, upd)
+    check('C update: info message shows the payload with element_activity UPDATE, the sheet sections and the CI sys_id', bool(upd) and upd['envelope']['element_activity'] == 'UPDATE' and upd['findings'][0]['sn_vul_app_vulnerable_item']['number'] == FX['linked_number'] and list(upd['findings'][0].keys()) == [k for k, t in SECTIONS] and len(upd['findings'][0]['sn_vul_app_vulnerable_item']['configuration_item']) == 32, upd)
     check('C insert: producer logged one send failure for the new item', r['after_insert']['producer'] == 1 and r['after_insert']['processor'] == r['before']['processor'] and r['after_insert']['rule'] == r['before']['rule'], (r['before'], r['after_insert']))
-    check('C insert: info message shows the payload with element_activity INSERT and the new number', bool(ins) and ins['envelope']['element_activity'] == 'INSERT' and ins['findings'][0]['finding']['number'] == r['inserted']['number'] and ins['findings'][0]['finding']['source_avit_id'] == 'VAMP-FIXTURE-INSERT', ins)
+    check('C insert: info message shows the payload with element_activity INSERT and the new number', bool(ins) and ins['envelope']['element_activity'] == 'INSERT' and ins['findings'][0]['sn_vul_app_vulnerable_item']['number'] == r['inserted']['number'] and ins['findings'][0]['sn_vul_app_vulnerable_item']['source_avit_id'] == 'VAMP-FIXTURE-INSERT', ins)
     check('C insert: fixture retired afterwards', r['retired'] == '0', r['retired'])
 
     print('D. rendering by dictionary type')

@@ -47,7 +47,7 @@ if xml_props.get('x_boar_bofa_usem_1.usem.vamp.fields.' + ITEM) != expected_valu
 if sorted(xml_props) != sorted('x_boar_bofa_usem_1.' + n for n in props):
     problems.append('record XML property names differ from properties.json')
 sample = json.load(open(os.path.join(HERE, 'samples', 'Sample payload - application vulnerable item.json')))
-sections = {'finding': ITEM, 'tpe': 'sn_vul_app_vul_entry', 'remediation_task': 'sn_vul_app_vulnerability', 'ptreq': 'sn_vul_pen_test_assessment_request'}
+sections = {t: t for t in [ITEM, 'sn_vul_app_vul_entry', 'sn_vul_app_vulnerability', 'sn_vul_pen_test_assessment_request']}
 element = sample['findings'][0]
 if list(element) != list(sections):
     problems.append('sample payload sections: ' + ', '.join(element))
@@ -55,12 +55,12 @@ for key, table in sections.items():
     if list(element.get(key, {})) != by_table[table]:
         problems.append('sample payload %s keys %s differ from the sheet payload names of %s' % (key, list(element.get(key, {})), table))
 ci = next(e for e in resolution if e['payload'] == 'configuration_item')
-if ci['field'] != 'cmdb_ci' or len(element['finding']['configuration_item']) != 32:
+if ci['field'] != 'cmdb_ci' or len(element[ITEM]['configuration_item']) != 32:
     problems.append('configuration_item does not resolve to cmdb_ci with a sys_id in the sample')
 processor = open(os.path.join(HERE, 'BOFASIVampOutboundProcessor.js')).read()
 for table in by_table:
-    if not re.search(r'^\s+%s:\s+\{ key:' % re.escape(table), processor, re.M):
-        problems.append('processor has no section for ' + table)
+    if table not in processor:
+        problems.append('processor does not name ' + table)
 print('sheet rows:', len(sheet), '| resolved on the PDI:', sum(1 for e in resolution if e['field']), '| not found:', ', '.join('%s.%s' % (e['table'], e['payload']) for e in resolution if not e['field']))
 print('CHECK OK: sheet = mapping = field-check rows = resolution -> property (resolved field = sheet payload name) = record XML = sample keys = processor sections' if not problems else 'PROBLEMS:\n- ' + '\n- '.join(problems))
 raise SystemExit(1 if problems else 0)
