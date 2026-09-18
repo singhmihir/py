@@ -3,40 +3,8 @@
   "value": "",
   "description": "sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_verification_outbound, read by BOFASIKafkaProducerVamp."
  },
- "usem.vamp.avit.sections": {
-  "value": "finding=,\ntpe=vulnerability,\nremediation_task=remediation_task,\nait=application_release.u_primary_ait,\nci=cmdb_ci,\nexception=change_approval,\nconsequence=u_consequence,\nptreq=assessment_request,",
-  "description": "Sections of the VAMP finding payload in order, one json_key=path per line: the path is dot-walked from the application vulnerable item (empty path = the item itself, remediation_task = the item's remediation task). The fields of each section come from usem.vamp.avit.fields.<json_key>."
- },
- "usem.vamp.avit.fields.finding": {
-  "value": "number=number,\nsys_created_on=sys_created_on,\nsys_updated_on=sys_updated_on,\nstate=state,\ncmdb_ci=configuration_item,\nu_verification_status=u_verification_status,\nsource_avit_id=source_avit_id,",
-  "description": "Fields of the finding section (sn_vul_app_vulnerable_item), one servicenow_field=json_field per line in payload order; a field missing on the table or empty is sent as \"\"."
- },
- "usem.vamp.avit.fields.tpe": {
-  "value": "number=number,",
-  "description": "Fields of the tpe section (third party entry, sn_vul_app_vul_entry), one servicenow_field=json_field per line."
- },
- "usem.vamp.avit.fields.remediation_task": {
-  "value": "number=number,\nprimary_ait=primary_ait,",
-  "description": "Fields of the remediation_task section (sn_vul_app_vulnerability), one servicenow_field=json_field per line."
- },
- "usem.vamp.avit.fields.ait": {
-  "value": "number=number,",
-  "description": "Fields of the ait section (Primary AIT of the finding), one servicenow_field=json_field per line."
- },
- "usem.vamp.avit.fields.ci": {
-  "value": "name=name,\nsys_class_name=class_name,",
-  "description": "Fields of the ci section (configuration item of the finding), one servicenow_field=json_field per line."
- },
- "usem.vamp.avit.fields.exception": {
-  "value": "number=number,\napproval_state=approval_state,\ndesired_validity_date=desired_validity_date,",
-  "description": "Fields of the exception section (sn_sec_exception_change_approval), one servicenow_field=json_field per line."
- },
- "usem.vamp.avit.fields.consequence": {
-  "value": "number=number,\nstate=state,\nu_consequence_level=u_consequence_level,",
-  "description": "Fields of the consequence section, one servicenow_field=json_field per line."
- },
- "usem.vamp.avit.fields.ptreq": {
-  "value": "number=number,\nsys_created_on=sys_created_on,\nu_assessment_id=u_assessment_id,",
-  "description": "Fields of the ptreq section (sn_vul_pen_test_assessment_request), one servicenow_field=json_field per line."
+ "usem.vamp.finding.fields.sn_vul_app_vulnerable_item": {
+  "value": "number=finding.number,\nsys_created_on=finding.sys_created_on,\nsys_updated_on=finding.sys_updated_on,\nstate=finding.state,\ncmdb_ci=finding.configuration_item,\nu_verification_status=finding.u_verification_status,\nsource_avit_id=finding.source_avit_id,\nvulnerability.number=tpe.number,\nremediation_task.number=remediation_task.number,\nremediation_task.primary_ait=remediation_task.primary_ait,\napplication_release.u_primary_ait.number=ait.number,\ncmdb_ci.name=ci.name,\ncmdb_ci.sys_class_name=ci.class_name,\nchange_approval.number=exception.number,\nchange_approval.approval_state=exception.approval_state,\nchange_approval.desired_validity_date=exception.desired_validity_date,\nu_consequence.number=consequence.number,\nu_consequence.state=consequence.state,\nu_consequence.u_consequence_level=consequence.u_consequence_level,\nassessment_request.number=ptreq.number,\nassessment_request.sys_created_on=ptreq.sys_created_on,\nassessment_request.u_assessment_id=ptreq.u_assessment_id,",
+  "description": "Fields of the VAMP finding payload for sn_vul_app_vulnerable_item, one servicenow_field=json_field pair per line in payload order. The ServiceNow field may dot-walk from the item (cmdb_ci.name; remediation_task.number reaches the item's remediation task); a dot in the json field nests it (ci.name). A field missing on the table or empty is sent as \"\"."
  }
 }

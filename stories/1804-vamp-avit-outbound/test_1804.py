@@ -1,6 +1,7 @@
-"""Checks the VAMP outbound build on the PDI against the two fixture items: payload shape and every
-section value (A), an item with nothing linked (B), and the rule firing on a real update and a real
-insert with the processor and producer messages (C). Run twice."""
+"""Checks the VAMP outbound build on the PDI against the two fixture items: the two properties, payload
+shape with the sections nested from the dotted json names and every value (A), an item with nothing
+linked (B), and the rule firing on a real update and a real insert with the processor and producer
+messages (C). Run twice."""
 import os, sys, json, re, html
 HERE = os.path.dirname(os.path.abspath(__file__)); BASE = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(BASE, 'tools'))
@@ -51,17 +52,19 @@ o.expect = {number: '' + a.getValue('number'), created: stamp(a.getValue('sys_cr
     cons: '' + a.getDisplayValue('u_consequence'), cons_state: '' + a.u_consequence.state.getDisplayValue(), cons_level: '' + a.u_consequence.u_consequence_level.getDisplayValue(),
     ptreq: '' + a.getDisplayValue('assessment_request'), ptreq_created: stamp(a.assessment_request.sys_created_on.getValue())};
 var m = new GlideRecord('sn_vul_app_m2m_vul_group_item'); m.addQuery('sn_vul_app_vulnerable_item', a.getUniqueValue()); m.orderByDesc('sys_created_on'); m.query(); o.expect.avul = m.next() ? '' + m.getDisplayValue('sn_vul_app_vulnerability') : '';
+o.vamp_props = []; var p = new GlideRecord('sys_properties'); p.addQuery('name', 'STARTSWITH', 'x_196061_bofasim.usem.vamp.'); p.orderBy('name'); p.query(); while (p.next()) o.vamp_props.push('' + p.getValue('name'));
 gs.print('X::' + JSON.stringify(o));''' % json.dumps(sys_id))
     r['messages'] = messages
     return r
 
 def shape(tag, r):
     p = json.loads(r['text']); e = p['envelope']
+    check(tag + ' exactly two properties: topic and the AVIT field mapping', r['vamp_props'] == [P + '.usem.vamp.finding.fields.sn_vul_app_vulnerable_item', P + '.usem.vamp.kafka.topic_sys_id'], r['vamp_props'])
     check(tag + ' payload is JSON with envelope and findings only', sorted(p.keys()) == ['envelope', 'findings'], list(p.keys()))
     check(tag + ' envelope keys in order', list(e.keys()) == ENVELOPE, list(e.keys()))
     check(tag + ' envelope constants', (e['type'], e['topic_name'], e['namespace'], e['core_version'], e['outbound_version'], e['element_count']) == ('record', 'sn_usem_verification_outbound', 'com.bofa.usem', '1.0.0', '1.0.0', 1), e)
     check(tag + ' event_id is a UUID and timestamp is UTC ISO', bool(UUID.match(e['event_id'])) and bool(re.match(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$', e['event_timestamp'])), e)
-    check(tag + ' one element with the eight sections in property order', len(p['findings']) == 1 and list(p['findings'][0].keys()) == SECTIONS, list(p['findings'][0].keys()) if p['findings'] else p)
+    check(tag + ' one element with the eight sections nested from the dotted json names, in property order', len(p['findings']) == 1 and list(p['findings'][0].keys()) == SECTIONS and all(isinstance(p['findings'][0][s], dict) for s in SECTIONS), list(p['findings'][0].keys()) if p['findings'] else p)
     el = p['findings'][0]
     for s in SECTIONS:
         check(tag + ' section %s carries its mapped json fields in order' % s, list(el[s].keys()) == FIELDS[s], list(el[s].keys()))
