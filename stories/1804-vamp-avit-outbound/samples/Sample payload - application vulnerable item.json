@@ -5,8 +5,8 @@
     "namespace": "com.bofa.usem",
     "core_version": "1.0.0",
     "outbound_version": "1.0.0",
-    "event_id": "13a4159b-939f-0790-e3ae-f0aefaba10bc",
-    "event_timestamp": "2026-09-18T11:06:33Z",
+    "event_id": "2856d59f-939f-0790-e3ae-f0aefaba10b6",
+    "event_timestamp": "2026-09-18T11:13:45Z",
     "element_count": 1,
     "element_activity": "INSERT"
   },
@@ -15,9 +15,9 @@
       "sn_vul_app_vulnerable_item": {
         "number": "AVIT0001119",
         "sys_created_on": "09-18-2026 09:19:43",
-        "sys_updated_on": "09-18-2026 11:05:31",
+        "sys_updated_on": "09-18-2026 11:12:56",
         "state": "1",
-        "configuration_item": "3bd3511193f2c750e3aef0aefaba10f1",
+        "configuration_item": "Trade Processing Portal",
         "u_verification_status": "",
         "source_avit_id": "VAMP-FIXTURE-001"
       },

@@ -1,7 +1,7 @@
 {
- "set": "2024d51b939f0790e3aef0aefaba105d",
- "set_name": "SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.5",
- "previous_set": "580fcd9b935f0790e3aef0aefaba1058",
+ "set": "edd5d15f939f0790e3aef0aefaba1048",
+ "set_name": "SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.6",
+ "previous_set": "2024d51b939f0790e3aef0aefaba105d",
  "scope": "9d1e03de930b8310e3aef0aefaba10d5",
  "si": {
   "BOFASIVampOutboundProcessor": "79db78d7939b0790e3aef0aefaba10a3",

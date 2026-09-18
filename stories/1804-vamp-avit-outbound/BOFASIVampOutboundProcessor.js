@@ -126,6 +126,8 @@ BOFASIVampOutboundProcessor.prototype = {
                 return this._formatDateTime(element.getValue());
             case 'glide_date':
                 return this._formatDate(element.getValue());
+            case 'reference':
+                return String(element.getDisplayValue());
             default:
                 return String(element.getValue());
         }
