@@ -12,12 +12,12 @@ BOFASIVampOutboundProcessor.prototype = {
         this.GROUP_ITEM_TABLE = 'sn_vul_app_m2m_vul_group_item';
         this.GROUP_ITEM_FIELD = 'sn_vul_app_vulnerable_item';
         this.GROUP_FIELD = 'sn_vul_app_vulnerability';
-        this.SECTIONS = [
-            { key: 'finding',          table: 'sn_vul_app_vulnerable_item' },
-            { key: 'tpe',              table: 'sn_vul_app_vul_entry',               field: 'vulnerability' },
-            { key: 'remediation_task', table: 'sn_vul_app_vulnerability' },
-            { key: 'ptreq',            table: 'sn_vul_pen_test_assessment_request', field: 'assessment_request' }
-        ];
+        this.SECTIONS = {
+            sn_vul_app_vulnerable_item:         { key: 'finding' },
+            sn_vul_app_vul_entry:               { key: 'tpe', field: 'vulnerability' },
+            sn_vul_app_vulnerability:           { key: 'remediation_task' },
+            sn_vul_pen_test_assessment_request: { key: 'ptreq', field: 'assessment_request' }
+        };
     },
 
     buildPayload: function(record) {
@@ -57,20 +57,31 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     _buildFinding: function(record) {
+        var mapping = this._fieldMapping(record.getTableName());
         var finding = {};
-        for (var i = 0; i < this.SECTIONS.length; i++) {
-            var section = this.SECTIONS[i];
-            finding[section.key] = this._renderFields(this._sectionRecord(record, section), this._fieldMapping(section.table));
+        var records = {};
+        for (var i = 0; i < mapping.length; i++) {
+            var at = mapping[i].field.indexOf('.');
+            var table = at < 0 ? record.getTableName() : mapping[i].field.substring(0, at);
+            var field = at < 0 ? mapping[i].field : mapping[i].field.substring(at + 1);
+            var section = this.SECTIONS[table];
+            if (!section)
+                throw new Error('table ' + table + ' in property ' + this.FIELDS_PROPERTY_PREFIX + record.getTableName() + ' is not a source of the payload');
+            if (!records.hasOwnProperty(table))
+                records[table] = this._sectionRecord(record, table, section);
+            if (!finding[section.key])
+                finding[section.key] = {};
+            finding[section.key][mapping[i].json] = this._fieldValue(records[table], field);
         }
         return finding;
     },
 
-    _sectionRecord: function(record, section) {
-        if (section.table == record.getTableName())
+    _sectionRecord: function(record, table, section) {
+        if (table == record.getTableName())
             return record;
-        if (section.table == this.GROUP_FIELD)
-            return this._remediationTask(record);
-        return record.getElement(section.field).getRefRecord();
+        if (section.field)
+            return record.getElement(section.field).getRefRecord();
+        return this._remediationTask(record);
     },
 
     _remediationTask: function(record) {
@@ -96,13 +107,6 @@ BOFASIVampOutboundProcessor.prototype = {
             mapping.push({ field: field, json: pair.length > 1 && pair[1].trim() ? pair[1].trim() : field });
         }
         return mapping;
-    },
-
-    _renderFields: function(record, mapping) {
-        var values = {};
-        for (var i = 0; i < mapping.length; i++)
-            values[mapping[i].json] = this._fieldValue(record, mapping[i].field);
-        return values;
     },
 
     _fieldValue: function(record, field) {

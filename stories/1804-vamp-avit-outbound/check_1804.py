@@ -18,7 +18,8 @@ mapping = json.load(open(os.path.join(HERE, 'vamp_mapping.json')))
 if [(r['table'], r['field'], r['label'], r['type']) for r in mapping] != sheet:
     problems.append('vamp_mapping.json differs from the sheet')
 props = json.load(open(os.path.join(HERE, 'properties.json')))
-expected_props = {'usem.vamp.fields.' + t: '\n'.join('%s=%s,' % (f, f) for f in fields) for t, fields in by_table.items()}
+AVIT = 'sn_vul_app_vulnerable_item'
+expected_props = {'usem.vamp.fields.' + AVIT: '\n'.join(['%s=%s,' % (f, f) for f in by_table[AVIT]] + ['%s.%s=%s,' % (t, f, f) for t, fields in by_table.items() if t != AVIT for f in fields])}
 for name, value in expected_props.items():
     if props.get(name, {}).get('value') != value:
         problems.append('properties.json: ' + name + ' differs from the sheet')
@@ -46,8 +47,8 @@ for key, table in sections.items():
         problems.append('sample payload %s keys %s differ from the sheet fields of %s' % (key, list(element.get(key, {})), table))
 processor = open(os.path.join(HERE, 'BOFASIVampOutboundProcessor.js')).read()
 for table in by_table:
-    if "table: '%s'" % table not in processor:
+    if not re.search(r'^\s+%s:\s+\{ key:' % re.escape(table), processor, re.M):
         problems.append('processor has no section for ' + table)
 print('sheet rows:', len(sheet), '| tables:', ', '.join('%s (%d)' % (t, len(f)) for t, f in by_table.items()))
-print('CHECK OK: sheet = mapping = properties.json = record XML = field-check script = sample payload keys = processor sections' if not problems else 'PROBLEMS:\n- ' + '\n- '.join(problems))
+print('CHECK OK: sheet = mapping = properties.json (one field property) = record XML = field-check script = sample payload keys = processor sections' if not problems else 'PROBLEMS:\n- ' + '\n- '.join(problems))
 raise SystemExit(1 if problems else 0)

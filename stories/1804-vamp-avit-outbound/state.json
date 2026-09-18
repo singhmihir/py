@@ -1,7 +1,7 @@
 {
- "set": "3f79cddb931f0790e3aef0aefaba106a",
- "set_name": "SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.2",
- "previous_set": "86ff74d393db0790e3aef0aefaba10db",
+ "set": "9b2b8d13935f0790e3aef0aefaba10bd",
+ "set_name": "SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.3",
+ "previous_set": "3f79cddb931f0790e3aef0aefaba106a",
  "scope": "9d1e03de930b8310e3aef0aefaba10d5",
  "si": {
   "BOFASIVampOutboundProcessor": "79db78d7939b0790e3aef0aefaba10a3",
@@ -9,12 +9,9 @@
  },
  "props": {
   "usem.vamp.kafka.topic_sys_id": "8edb78d7939b0790e3aef0aefaba10df",
-  "usem.vamp.fields.sn_vul_app_vul_entry": "ff79cddb931f0790e3aef0aefaba1084",
-  "usem.vamp.fields.sn_vul_app_vulnerability": "4c89011f931f0790e3aef0aefaba1074",
-  "usem.vamp.fields.sn_vul_app_vulnerable_item": "0e89811f931f0790e3aef0aefaba102e",
-  "usem.vamp.fields.sn_vul_pen_test_assessment_request": "f789051f931f0790e3aef0aefaba10ac"
+  "usem.vamp.fields.sn_vul_app_vulnerable_item": "0e89811f931f0790e3aef0aefaba102e"
  },
  "topic": "4edb78d7939b0790e3aef0aefaba10df",
  "br": "0f0cf41b939b0790e3aef0aefaba106f",
- "rows": 8
+ "rows": 5
 }

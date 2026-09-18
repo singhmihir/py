@@ -1,8 +1,9 @@
 """Deploys the VAMP outbound build into the stand-in scope on the PDI under a pinned update set:
-the two script includes, the five properties (topic plus one field property per sheet table) and the
-after insert/update rule on the application vulnerable item table. The repository files carry the
+the two script includes, the two properties (topic and the one field property of the application
+vulnerable item table) and the after insert/update rule on that table. The repository files carry the
 client application prefix; the deployment swaps it for the stand-in prefix. Each version is a fresh
-set: the properties of the earlier versions are removed under the scope's Default set first. Re-runnable: reopens the set recorded in state.json
+set: properties of earlier versions that are not deployed any more are removed under the scope's
+Default set first. Re-runnable: reopens the set recorded in state.json
 when its name matches."""
 import os, sys, json
 HERE = os.path.dirname(os.path.abspath(__file__)); BASE = os.path.dirname(os.path.dirname(HERE))
@@ -10,7 +11,7 @@ sys.path.insert(0, os.path.join(BASE, 'tools'))
 from snui import SNUI
 SCOPE = '9d1e03de930b8310e3aef0aefaba10d5'          # stand-in scoped app on the PDI
 CLIENT_PREFIX, PDI_PREFIX = 'x_boar_bofa_usem_1', 'x_196061_bofasim'
-NAME = 'SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.2'
+NAME = 'SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.3'
 DEFAULT_SET = 'a91e03de930b8310e3aef0aefaba10de'      # Default update set of the stand-in scope
 BR_NAME = 'BOFA_BR_AVIT_VampOutbound'
 SI_NAMES = ['BOFASIVampOutboundProcessor', 'BOFASIKafkaProducerVamp']
@@ -28,9 +29,9 @@ reuse = ST.get('set_name') == NAME
 c = ui.js('''
 var o = {removed: []};
 new GlideUpdateSet().set(%s);
-var p = new GlideRecord('sys_properties'); p.addQuery('name', 'STARTSWITH', %s).addOrCondition('name', 'STARTSWITH', %s); p.query();
+var p = new GlideRecord('sys_properties'); p.addQuery('name', 'STARTSWITH', %s); p.addQuery('name', 'NOT IN', %s); p.query();
 while (p.next()) { o.removed.push('' + p.getValue('name')); p.deleteRecord(); }
-gs.print('X::' + JSON.stringify(o));''' % (json.dumps(DEFAULT_SET), json.dumps(PDI_PREFIX + '.usem.vamp.avit.'), json.dumps(PDI_PREFIX + '.usem.vamp.finding.')), scope=SCOPE)
+gs.print('X::' + JSON.stringify(o));''' % (json.dumps(DEFAULT_SET), json.dumps(PDI_PREFIX + '.usem.vamp.'), json.dumps(','.join(PDI_PREFIX + '.' + s for s in props))), scope=SCOPE)
 print('properties of earlier versions removed under the Default set:', c['removed'])
 d = ui.js('''
 var o = {rows: [], si: {}, props: {}};
