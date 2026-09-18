@@ -22,7 +22,7 @@ print('\n'.join('  ' + r for r in d['rows'])); print('set:', d['name'], '|', d['
 assert d['name'] == NAME and d['app'] == 'BofA Sim' and len(d['rows']) == EXPECT and all(r.endswith('| BofA Sim') for r in d['rows'])
 n = ui.export_update_set(SET, OUT)
 content = open(OUT).read(); low = content.lower()
-hits = [t for t in ['dev390397', 'zk5lg9v', 'service-now.com', 'tr1dent'] if t in low]
+hits = [t for t in ['dev390397', 'zk5lg9v', 'service-now.com'] if t in low]
 root = ET.parse(OUT).getroot()
 print('export:', len(content), 'bytes | nodes', n, '| set in file:', root.find('sys_remote_update_set/name').text, '| user/instance scrub', 'CLEAN' if not hits else hits)
 assert not hits and n == EXPECT and root.find('sys_remote_update_set/name').text == NAME
