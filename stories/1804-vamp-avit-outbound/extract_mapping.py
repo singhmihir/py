@@ -1,6 +1,8 @@
 """Reads the sheet "SN to VAMP" of the client workbook and generates, without hand transcription:
-vamp_mapping.json (the rows in sheet order), properties.json (the topic property and one field
-property per table, one servicenow_field=json_field pair per line, names exactly as the sheet) and
+vamp_mapping.json (the rows in sheet order), properties.json (the topic property and the one field
+property of the application vulnerable item table: its own fields first, then the fields of the other
+sheet tables as <table>.<field>, one servicenow_field=json_field pair per line, names exactly as the
+sheet) and
 the read-only background script that checks every sheet field against the dictionary of the
 instance it runs on."""
 import os, json
@@ -26,11 +28,13 @@ json.dump(rows, open(os.path.join(HERE, 'vamp_mapping.json'), 'w'), indent=1)
 props = {'usem.vamp.kafka.topic_sys_id': {
     'value': '',
     'description': 'sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_verification_outbound, read by BOFASIKafkaProducerVamp.'}}
-for t in tables:
-    fields = [r for r in rows if r['table'] == t and r['required'].lower() == 'yes']
-    props['usem.vamp.fields.' + t] = {
-        'value': '\n'.join('%s=%s,' % (r['field'], r['field']) for r in fields),
-        'description': 'VAMP payload fields of %s, one servicenow_field=json_field pair per line in payload order, exactly the rows of the sheet "SN to VAMP"; a field missing on the table or empty is sent as "".' % t}
+AVIT = 'sn_vul_app_vulnerable_item'
+required = [r for r in rows if r['required'].lower() == 'yes']
+lines = ['%s=%s,' % (r['field'], r['field']) for r in required if r['table'] == AVIT]
+lines += ['%s.%s=%s,' % (r['table'], r['field'], r['field']) for r in required if r['table'] != AVIT]
+props['usem.vamp.fields.' + AVIT] = {
+    'value': '\n'.join(lines),
+    'description': 'VAMP payload fields, one servicenow_field=json_field pair per line in payload order, exactly the rows of the sheet "SN to VAMP": the fields of the application vulnerable item, then the fields of the related tables as <table>.<field> (sn_vul_app_vul_entry, sn_vul_app_vulnerability, sn_vul_pen_test_assessment_request); a field missing on the table or empty is sent as "".'}
 json.dump(props, open(os.path.join(HERE, 'properties.json'), 'w'), indent=1)
 check = '''// Checks every field of the sheet "SN to VAMP" against the dictionary of this instance.
 // Read only. Run as a background script in global scope; the output lists one line per sheet
@@ -65,6 +69,5 @@ gs.print(issues.length ? 'To raise (' + issues.length + '):\\n- ' + issues.join(
 ''' % json.dumps([{'table': r['table'], 'field': r['field'], 'label': r['label'], 'type': r['type']} for r in rows], indent=4)
 open(os.path.join(HERE, 'VAMP Field Check - Background Script.js'), 'w').write(check)
 print('sheet rows:', len(rows), '| tables:', tables)
-for t in tables:
-    print(' ', 'usem.vamp.fields.' + t, '=', props['usem.vamp.fields.' + t]['value'].replace('\n', ' '))
+print('  usem.vamp.fields.' + AVIT + ' =\n    ' + props['usem.vamp.fields.' + AVIT]['value'].replace('\n', '\n    '))
 print('required flags:', sorted(set(r['required'] for r in rows)), '| types:', sorted(set(r['type'] for r in rows)))

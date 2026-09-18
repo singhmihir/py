@@ -24,12 +24,12 @@ BOFASIVampOutboundProcessor.prototype = {
         this.GROUP_ITEM_TABLE = 'sn_vul_app_m2m_vul_group_item';
         this.GROUP_ITEM_FIELD = 'sn_vul_app_vulnerable_item';
         this.GROUP_FIELD = 'sn_vul_app_vulnerability';
-        this.SECTIONS = [
-            { key: 'finding',          table: 'sn_vul_app_vulnerable_item' },
-            { key: 'tpe',              table: 'sn_vul_app_vul_entry',               field: 'vulnerability' },
-            { key: 'remediation_task', table: 'sn_vul_app_vulnerability' },
-            { key: 'ptreq',            table: 'sn_vul_pen_test_assessment_request', field: 'assessment_request' }
-        ];
+        this.SECTIONS = {
+            sn_vul_app_vulnerable_item:         { key: 'finding' },
+            sn_vul_app_vul_entry:               { key: 'tpe', field: 'vulnerability' },
+            sn_vul_app_vulnerability:           { key: 'remediation_task' },
+            sn_vul_pen_test_assessment_request: { key: 'ptreq', field: 'assessment_request' }
+        };
     },
 
     buildPayload: function(record) {
@@ -69,20 +69,31 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     _buildFinding: function(record) {
+        var mapping = this._fieldMapping(record.getTableName());
         var finding = {};
-        for (var i = 0; i < this.SECTIONS.length; i++) {
-            var section = this.SECTIONS[i];
-            finding[section.key] = this._renderFields(this._sectionRecord(record, section), this._fieldMapping(section.table));
+        var records = {};
+        for (var i = 0; i < mapping.length; i++) {
+            var at = mapping[i].field.indexOf('.');
+            var table = at < 0 ? record.getTableName() : mapping[i].field.substring(0, at);
+            var field = at < 0 ? mapping[i].field : mapping[i].field.substring(at + 1);
+            var section = this.SECTIONS[table];
+            if (!section)
+                throw new Error('table ' + table + ' in property ' + this.FIELDS_PROPERTY_PREFIX + record.getTableName() + ' is not a source of the payload');
+            if (!records.hasOwnProperty(table))
+                records[table] = this._sectionRecord(record, table, section);
+            if (!finding[section.key])
+                finding[section.key] = {};
+            finding[section.key][mapping[i].json] = this._fieldValue(records[table], field);
         }
         return finding;
     },
 
-    _sectionRecord: function(record, section) {
-        if (section.table == record.getTableName())
+    _sectionRecord: function(record, table, section) {
+        if (table == record.getTableName())
             return record;
-        if (section.table == this.GROUP_FIELD)
-            return this._remediationTask(record);
-        return record.getElement(section.field).getRefRecord();
+        if (section.field)
+            return record.getElement(section.field).getRefRecord();
+        return this._remediationTask(record);
     },
 
     _remediationTask: function(record) {
@@ -108,13 +119,6 @@ BOFASIVampOutboundProcessor.prototype = {
             mapping.push({ field: field, json: pair.length > 1 && pair[1].trim() ? pair[1].trim() : field });
         }
         return mapping;
-    },
-
-    _renderFields: function(record, mapping) {
-        var values = {};
-        for (var i = 0; i < mapping.length; i++)
-            values[mapping[i].json] = this._fieldValue(record, mapping[i].field);
-        return values;
     },
 
     _fieldValue: function(record, field) {
@@ -233,46 +237,7 @@ BOFASIKafkaProducerVamp.prototype = {
 </sys_properties>
 <sys_properties action="INSERT_OR_UPDATE">
 <choices/>
-<description>VAMP payload fields of sn_vul_app_vul_entry, one servicenow_field=json_field pair per line in payload order, exactly the rows of the sheet "SN to VAMP"; a field missing on the table or empty is sent as "".</description>
-<ignore_cache>false</ignore_cache>
-<is_private>false</is_private>
-<name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vul_entry</name>
-<read_roles/>
-<suffix>usem.vamp.fields.sn_vul_app_vul_entry</suffix>
-<sys_class_name>sys_properties</sys_class_name>
-<sys_id>ff79cddb931f0790e3aef0aefaba1084</sys_id>
-<sys_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vul_entry</sys_name>
-<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
-<sys_policy/>
-<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
-<sys_update_name>sys_properties_ff79cddb931f0790e3aef0aefaba1084</sys_update_name>
-<type>string</type>
-<value>number=number,</value>
-<write_roles/>
-</sys_properties>
-<sys_properties action="INSERT_OR_UPDATE">
-<choices/>
-<description>VAMP payload fields of sn_vul_app_vulnerability, one servicenow_field=json_field pair per line in payload order, exactly the rows of the sheet "SN to VAMP"; a field missing on the table or empty is sent as "".</description>
-<ignore_cache>false</ignore_cache>
-<is_private>false</is_private>
-<name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerability</name>
-<read_roles/>
-<suffix>usem.vamp.fields.sn_vul_app_vulnerability</suffix>
-<sys_class_name>sys_properties</sys_class_name>
-<sys_id>4c89011f931f0790e3aef0aefaba1074</sys_id>
-<sys_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerability</sys_name>
-<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
-<sys_policy/>
-<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
-<sys_update_name>sys_properties_4c89011f931f0790e3aef0aefaba1074</sys_update_name>
-<type>string</type>
-<value>number=number,
-primary_ait=primary_ait,</value>
-<write_roles/>
-</sys_properties>
-<sys_properties action="INSERT_OR_UPDATE">
-<choices/>
-<description>VAMP payload fields of sn_vul_app_vulnerable_item, one servicenow_field=json_field pair per line in payload order, exactly the rows of the sheet "SN to VAMP"; a field missing on the table or empty is sent as "".</description>
+<description>VAMP payload fields, one servicenow_field=json_field pair per line in payload order, exactly the rows of the sheet "SN to VAMP": the fields of the application vulnerable item, then the fields of the related tables as &lt;table&gt;.&lt;field&gt; (sn_vul_app_vul_entry, sn_vul_app_vulnerability, sn_vul_pen_test_assessment_request); a field missing on the table or empty is sent as "".</description>
 <ignore_cache>false</ignore_cache>
 <is_private>false</is_private>
 <name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</name>
@@ -292,28 +257,13 @@ sys_updated_on=sys_updated_on,
 state=state,
 configuration_item=configuration_item,
 u_verification_status=u_verification_status,
-source_avit_id=source_avit_id,</value>
-<write_roles/>
-</sys_properties>
-<sys_properties action="INSERT_OR_UPDATE">
-<choices/>
-<description>VAMP payload fields of sn_vul_pen_test_assessment_request, one servicenow_field=json_field pair per line in payload order, exactly the rows of the sheet "SN to VAMP"; a field missing on the table or empty is sent as "".</description>
-<ignore_cache>false</ignore_cache>
-<is_private>false</is_private>
-<name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_pen_test_assessment_request</name>
-<read_roles/>
-<suffix>usem.vamp.fields.sn_vul_pen_test_assessment_request</suffix>
-<sys_class_name>sys_properties</sys_class_name>
-<sys_id>f789051f931f0790e3aef0aefaba10ac</sys_id>
-<sys_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_pen_test_assessment_request</sys_name>
-<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
-<sys_policy/>
-<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
-<sys_update_name>sys_properties_f789051f931f0790e3aef0aefaba10ac</sys_update_name>
-<type>string</type>
-<value>number=number,
-sys_created_on=sys_created_on,
-u_assessment_id=u_assessment_id,</value>
+source_avit_id=source_avit_id,
+sn_vul_app_vul_entry.number=number,
+sn_vul_app_vulnerability.number=number,
+sn_vul_app_vulnerability.primary_ait=primary_ait,
+sn_vul_pen_test_assessment_request.number=number,
+sn_vul_pen_test_assessment_request.sys_created_on=sys_created_on,
+sn_vul_pen_test_assessment_request.u_assessment_id=u_assessment_id,</value>
 <write_roles/>
 </sys_properties>
 <sys_script action="INSERT_OR_UPDATE">

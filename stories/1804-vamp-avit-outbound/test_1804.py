@@ -1,6 +1,6 @@
 """Checks the VAMP outbound build on the PDI against the sheet "SN to VAMP" and the two fixture items:
-the five properties hold exactly the sheet rows, the payload carries exactly the sheet fields per
-table and every value (A), an item with nothing linked (B), the rule on a real update and a real
+the field property holds exactly the sheet rows and the topic property is the only other one, the
+payload carries exactly the sheet fields per table and every value (A), an item with nothing linked (B), the rule on a real update and a real
 insert with the processor and producer messages (C), and rendering by type: references as sys_id,
 integers raw, dates formatted, missing or empty as "" (D). Run twice."""
 import os, sys, json, re, html
@@ -58,7 +58,7 @@ gs.print('X::' + JSON.stringify(o));''' % json.dumps(sys_id))
 def shape(tag, r):
     p = json.loads(r['text']); e = p['envelope']
     expected_props = {P + '.' + k: v['value'] for k, v in PROPS.items() if k != 'usem.vamp.kafka.topic_sys_id'}
-    check(tag + ' the four field properties hold exactly the sheet rows, and the topic property is the only other one', {k: v for k, v in r['props'].items() if not k.endswith('topic_sys_id')} == expected_props and len(r['props']) == 5, r['props'])
+    check(tag + ' one field property holding exactly the sheet rows, the topic property the only other one', {k: v for k, v in r['props'].items() if not k.endswith('topic_sys_id')} == expected_props and len(r['props']) == 2 and list(expected_props) == [P + '.usem.vamp.fields.sn_vul_app_vulnerable_item'], r['props'])
     check(tag + ' payload is JSON with envelope and findings only', sorted(p.keys()) == ['envelope', 'findings'], list(p.keys()))
     check(tag + ' envelope keys in order', list(e.keys()) == ENVELOPE, list(e.keys()))
     check(tag + ' envelope constants', (e['type'], e['topic_name'], e['namespace'], e['core_version'], e['outbound_version'], e['element_count']) == ('record', 'sn_usem_verification_outbound', 'com.bofa.usem', '1.0.0', '1.0.0', 1), e)
@@ -98,7 +98,7 @@ var o = {};
 function count(text) { var c = new GlideAggregate('syslog_app_scope'); c.addAggregate('COUNT'); c.addQuery('message', 'CONTAINS', text); c.query(); c.next(); return parseInt(c.getAggregate('COUNT')); }
 var linked = %(linked)s;
 o.before = {producer: count('BOFASIKafkaProducerVamp: message not sent for sn_vul_app_vulnerable_item.' + linked), processor: count('BOFASIVampOutboundProcessor: payload not built'), rule: count('BOFA_BR_AVIT_VampOutbound')};
-var a = new GlideRecord('sn_vul_app_vulnerable_item'); a.get(linked); a.setValue('short_description', 'VAMP outbound fixture (linked) run %(run)s'); a.update();
+var a = new GlideRecord('sn_vul_app_vulnerable_item'); a.get(linked); a.setValue('short_description', 'VAMP outbound fixture (linked) run %(run)s at ' + new GlideDateTime().getNumericValue()); a.update();
 o.after_update = {producer: count('BOFASIKafkaProducerVamp: message not sent for sn_vul_app_vulnerable_item.' + linked), processor: count('BOFASIVampOutboundProcessor: payload not built'), rule: count('BOFA_BR_AVIT_VampOutbound')};
 var log = new GlideRecord('syslog_app_scope'); log.addQuery('message', 'CONTAINS', 'BOFASIKafkaProducerVamp: message not sent for sn_vul_app_vulnerable_item.' + linked); log.orderByDesc('sys_created_on'); log.setLimit(1); log.query(); log.next();
 o.producer_log = {level: '' + log.getValue('level'), message: '' + log.getValue('message'), age_s: (new GlideDateTime().getNumericValue() - new GlideDateTime(log.getValue('sys_created_on')).getNumericValue()) / 1000};
@@ -126,8 +126,9 @@ gs.print('X::' + JSON.stringify(o));''' % dict(linked=json.dumps(FX['linked']), 
     r, _ = js('''
 var o = {};
 var a = new GlideRecord('sn_vul_app_vulnerable_item'); a.get(%s);
-var mapping = [{field: 'cmdb_ci', json: 'cmdb_ci'}, {field: 'assessment_request', json: 'assessment_request'}, {field: 'state', json: 'state'}, {field: 'sys_created_on', json: 'sys_created_on'}, {field: 'first_found', json: 'first_found'}, {field: 'short_description', json: 'short_description'}, {field: 'closed_at', json: 'closed_at'}, {field: 'no_such_field', json: 'no_such_field'}];
-o.rendered = new x_196061_bofasim.BOFASIVampOutboundProcessor()._renderFields(a, mapping);
+var fields = ['cmdb_ci', 'assessment_request', 'state', 'sys_created_on', 'first_found', 'short_description', 'closed_at', 'no_such_field'];
+var processor = new x_196061_bofasim.BOFASIVampOutboundProcessor(); o.rendered = {};
+for (var i = 0; i < fields.length; i++) o.rendered[fields[i]] = processor._fieldValue(a, fields[i]);
 function stamp(v) { var g = new GlideDateTime(v); return g.getDate().getByFormat('MM-dd-yyyy') + ' ' + g.getTime().getByFormat('HH:mm:ss'); }
 var fd = new GlideDate(); fd.setValue(a.getValue('first_found'));
 o.expect = {ci: '' + a.getValue('cmdb_ci'), ci_display: '' + a.getDisplayValue('cmdb_ci'), ptreq: '' + a.getValue('assessment_request'), state: '' + a.getValue('state'), state_display: '' + a.getDisplayValue('state'), created: stamp(a.getValue('sys_created_on')), first_found: a.getValue('first_found') ? fd.getByFormat('MM-dd-yyyy') : '', sd: '' + a.getValue('short_description'), closed_empty: a.closed_at.nil()};

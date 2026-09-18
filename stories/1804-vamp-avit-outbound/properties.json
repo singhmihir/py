@@ -3,20 +3,8 @@
   "value": "",
   "description": "sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_verification_outbound, read by BOFASIKafkaProducerVamp."
  },
- "usem.vamp.fields.sn_vul_app_vul_entry": {
-  "value": "number=number,",
-  "description": "VAMP payload fields of sn_vul_app_vul_entry, one servicenow_field=json_field pair per line in payload order, exactly the rows of the sheet \"SN to VAMP\"; a field missing on the table or empty is sent as \"\"."
- },
- "usem.vamp.fields.sn_vul_app_vulnerability": {
-  "value": "number=number,\nprimary_ait=primary_ait,",
-  "description": "VAMP payload fields of sn_vul_app_vulnerability, one servicenow_field=json_field pair per line in payload order, exactly the rows of the sheet \"SN to VAMP\"; a field missing on the table or empty is sent as \"\"."
- },
  "usem.vamp.fields.sn_vul_app_vulnerable_item": {
-  "value": "number=number,\nsys_created_on=sys_created_on,\nsys_updated_on=sys_updated_on,\nstate=state,\nconfiguration_item=configuration_item,\nu_verification_status=u_verification_status,\nsource_avit_id=source_avit_id,",
-  "description": "VAMP payload fields of sn_vul_app_vulnerable_item, one servicenow_field=json_field pair per line in payload order, exactly the rows of the sheet \"SN to VAMP\"; a field missing on the table or empty is sent as \"\"."
- },
- "usem.vamp.fields.sn_vul_pen_test_assessment_request": {
-  "value": "number=number,\nsys_created_on=sys_created_on,\nu_assessment_id=u_assessment_id,",
-  "description": "VAMP payload fields of sn_vul_pen_test_assessment_request, one servicenow_field=json_field pair per line in payload order, exactly the rows of the sheet \"SN to VAMP\"; a field missing on the table or empty is sent as \"\"."
+  "value": "number=number,\nsys_created_on=sys_created_on,\nsys_updated_on=sys_updated_on,\nstate=state,\nconfiguration_item=configuration_item,\nu_verification_status=u_verification_status,\nsource_avit_id=source_avit_id,\nsn_vul_app_vul_entry.number=number,\nsn_vul_app_vulnerability.number=number,\nsn_vul_app_vulnerability.primary_ait=primary_ait,\nsn_vul_pen_test_assessment_request.number=number,\nsn_vul_pen_test_assessment_request.sys_created_on=sys_created_on,\nsn_vul_pen_test_assessment_request.u_assessment_id=u_assessment_id,",
+  "description": "VAMP payload fields, one servicenow_field=json_field pair per line in payload order, exactly the rows of the sheet \"SN to VAMP\": the fields of the application vulnerable item, then the fields of the related tables as <table>.<field> (sn_vul_app_vul_entry, sn_vul_app_vulnerability, sn_vul_pen_test_assessment_request); a field missing on the table or empty is sent as \"\"."
  }
 }
