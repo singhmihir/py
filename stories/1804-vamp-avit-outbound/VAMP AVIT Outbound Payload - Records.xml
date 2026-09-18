@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unload>
+<sys_script_include action="INSERT_OR_UPDATE">
+<access>public</access>
+<active>true</active>
+<api_name>x_boar_bofa_usem_1.BOFASIVampOutboundProcessor</api_name>
+<caller_access/>
+<client_callable>false</client_callable>
+<description>Builds the outbound VAMP payload (envelope plus one finding element) for an application vulnerable item. Sections and their fields come from the properties usem.vamp.avit.sections and usem.vamp.avit.fields.&lt;section&gt;.</description>
+<mobile_callable>false</mobile_callable>
+<name>BOFASIVampOutboundProcessor</name>
+<sandbox_callable>false</sandbox_callable>
+<script><![CDATA[var BOFASIVampOutboundProcessor = Class.create();
+BOFASIVampOutboundProcessor.prototype = {
+
+    initialize: function() {
+        this.TOPIC_NAME = 'sn_usem_verification_outbound';
+        this.NAMESPACE = 'com.bofa.usem';
+        this.CORE_VERSION = '1.0.0';
+        this.OUTBOUND_VERSION = '1.0.0';
+        this.ELEMENTS_KEY = 'findings';
+        this.DATE_FORMAT = 'MM-dd-yyyy';
+        this.TIME_FORMAT = 'HH:mm:ss';
+        this.SECTIONS_PROPERTY = 'x_boar_bofa_usem_1.usem.vamp.avit.sections';
+        this.FIELDS_PROPERTY_PREFIX = 'x_boar_bofa_usem_1.usem.vamp.avit.fields.';
+        this.TASK_KEY = 'remediation_task';
+        this.GROUP_ITEM_TABLE = 'sn_vul_app_m2m_vul_group_item';
+        this.GROUP_ITEM_FIELD = 'sn_vul_app_vulnerable_item';
+        this.GROUP_FIELD = 'sn_vul_app_vulnerability';
+    },
+
+    buildPayload: function(record) {
+        try {
+            var payload = {
+                envelope: this._buildEnvelope(this._activity(record))
+            };
+            payload[this.ELEMENTS_KEY] = [this._buildElement(record)];
+            var message = JSON.stringify(payload);
+            gs.addInfoMessage('VAMP payload for ' + record.getValue('number') + ': ' + message)
+            return message;
+        } catch (e) {
+            gs.error(this.type + ': payload not built for ' + record.getTableName() + ' ' + record.getUniqueValue() + ' - ' + (e.message || e));
+            return '';
+        }
+    },
+
+    _activity: function(record) {
+        var operation = String(record.operation() || '').toUpperCase();
+        if (operation)
+            return operation;
+        return parseInt(record.getValue('sys_mod_count')) > 0 ? 'UPDATE' : 'INSERT';
+    },
+
+    _buildEnvelope: function(activity) {
+        return {
+            type: 'record',
+            topic_name: this.TOPIC_NAME,
+            namespace: this.NAMESPACE,
+            core_version: this.CORE_VERSION,
+            outbound_version: this.OUTBOUND_VERSION,
+            event_id: this._newEventId(),
+            event_timestamp: this._utcTimestamp(),
+            element_count: 1,
+            element_activity: activity
+        };
+    },
+
+    _buildElement: function(record) {
+        var element = {};
+        var task = this._remediationTask(record);
+        var sections = this._pairs(gs.getProperty(this.SECTIONS_PROPERTY, ''));
+        for (var i = 0; i < sections.length; i++)
+            element[sections[i].name] = this._buildSection(this._sectionRecord(record, task, sections[i].value), sections[i].name);
+        return element;
+    },
+
+    _buildSection: function(target, section) {
+        var fields = this._pairs(gs.getProperty(this.FIELDS_PROPERTY_PREFIX + section, ''));
+        var values = {};
+        for (var i = 0; i < fields.length; i++)
+            values[fields[i].value || fields[i].name] = this._fieldValue(target, fields[i].name);
+        return values;
+    },
+
+    _sectionRecord: function(record, task, path) {
+        if (!path)
+            return record;
+        if (path == this.TASK_KEY)
+            return task;
+        var root = record;
+        if (path.indexOf(this.TASK_KEY + '.') == 0) {
+            root = task;
+            path = path.substring(this.TASK_KEY.length + 1);
+        }
+        return root ? root.getElement(path).getRefRecord() : null;
+    },
+
+    _remediationTask: function(record) {
+        var item = new GlideRecord(this.GROUP_ITEM_TABLE);
+        item.addQuery(this.GROUP_ITEM_FIELD, record.getUniqueValue());
+        item.orderByDesc('sys_created_on');
+        item.query();
+        return item.next() ? item.getElement(this.GROUP_FIELD).getRefRecord() : null;
+    },
+
+    _pairs: function(value) {
+        var pairs = [];
+        var entries = String(value).split(/\r?\n|,/);
+        for (var i = 0; i < entries.length; i++) {
+            var pair = entries[i].split('=');
+            var name = pair[0].trim();
+            if (name)
+                pairs.push({ name: name, value: pair.length > 1 ? pair[1].trim() : '' });
+        }
+        return pairs;
+    },
+
+    _fieldValue: function(record, field) {
+        if (!record || !record.isValidRecord() || !record.isValidField(field))
+            return '';
+        var element = record.getElement(field);
+        if (element === null || element.nil())
+            return '';
+        return this._renderElement(element);
+    },
+
+    _renderElement: function(element) {
+        switch (String(element.getED().getInternalType())) {
+            case 'glide_date_time':
+                return this._formatDateTime(element.getValue());
+            case 'glide_date':
+                return this._formatDate(element.getValue());
+            case 'journal_input':
+                return String(element.getJournalEntry(1)).trim();
+            case 'reference':
+            case 'glide_list':
+            case 'boolean':
+            case 'glide_duration':
+            case 'timer':
+            case 'domain_id':
+            case 'sys_class_name':
+            case 'integer':
+            case 'string':
+                return String(element.getDisplayValue());
+            default:
+                return String(element.getValue());
+        }
+    },
+
+    _formatDateTime: function(value) {
+        var gdt = new GlideDateTime(value);
+        return gdt.getDate().getByFormat(this.DATE_FORMAT) + ' ' + gdt.getTime().getByFormat(this.TIME_FORMAT);
+    },
+
+    _formatDate: function(value) {
+        var gd = new GlideDate();
+        gd.setValue(value);
+        return gd.getByFormat(this.DATE_FORMAT);
+    },
+
+    _newEventId: function() {
+        var guid = gs.generateGUID();
+        return guid.substring(0, 8) + '-' + guid.substring(8, 12) + '-' + guid.substring(12, 16) + '-' +
+            guid.substring(16, 20) + '-' + guid.substring(20, 32);
+    },
+
+    _utcTimestamp: function() {
+        return new GlideDateTime().getValue().replace(' ', 'T') + 'Z';
+    },
+
+    type: 'BOFASIVampOutboundProcessor'
+};
+]]></script>
+<sys_class_name>sys_script_include</sys_class_name>
+<sys_id>79db78d7939b0790e3aef0aefaba10a3</sys_id>
+<sys_name>BOFASIVampOutboundProcessor</sys_name>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_script_include_79db78d7939b0790e3aef0aefaba10a3</sys_update_name>
+</sys_script_include>
+<sys_script_include action="INSERT_OR_UPDATE">
+<access>public</access>
+<active>true</active>
+<api_name>x_boar_bofa_usem_1.BOFASIKafkaProducerVamp</api_name>
+<caller_access/>
+<client_callable>false</client_callable>
+<description>Sends a VAMP payload to the Kafka topic held in usem.vamp.kafka.topic_sys_id with sn_ih_kafka.ProducerV2 (key &lt;table&gt;.&lt;sys_id&gt;).
+Documentation of API used - https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html</description>
+<mobile_callable>false</mobile_callable>
+<name>BOFASIKafkaProducerVamp</name>
+<sandbox_callable>false</sandbox_callable>
+<script><![CDATA[var BOFASIKafkaProducerVamp = Class.create();
+BOFASIKafkaProducerVamp.prototype = {
+
+    initialize: function() {
+        this.TOPIC_PROPERTY = 'x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id';
+        this.IS_SYNC = false;
+        this.HEADERS = null;
+        this.SCHEMA_ID = null;
+    },
+
+    sendPayload: function(payload, record) {
+        var key = record.getTableName() + '.' + record.getUniqueValue();
+        try {
+            var topicSysId = gs.getProperty(this.TOPIC_PROPERTY, '');
+            var response = new sn_ih_kafka.ProducerV2().send(topicSysId, key, payload, this.IS_SYNC, this.HEADERS, this.SCHEMA_ID);
+            gs.addInfoMessage('VAMP Kafka response for ' + key + ': ' + JSON.stringify(response))
+        } catch (e) {
+            gs.error(this.type + ': message not sent for ' + key + ' - ' + (e.message || e));
+        }
+    },
+
+    type: 'BOFASIKafkaProducerVamp'
+};
+]]></script>
+<sys_class_name>sys_script_include</sys_class_name>
+<sys_id>06db78d7939b0790e3aef0aefaba10aa</sys_id>
+<sys_name>BOFASIKafkaProducerVamp</sys_name>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_script_include_06db78d7939b0790e3aef0aefaba10aa</sys_update_name>
+</sys_script_include>
+<sys_properties action="INSERT_OR_UPDATE">
+<choices/>
+<description>sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_verification_outbound, read by BOFASIKafkaProducerVamp.</description>
+<ignore_cache>false</ignore_cache>
+<is_private>false</is_private>
+<name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</name>
+<read_roles/>
+<suffix>usem.vamp.kafka.topic_sys_id</suffix>
+<sys_class_name>sys_properties</sys_class_name>
+<sys_id>8edb78d7939b0790e3aef0aefaba10df</sys_id>
+<sys_name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</sys_name>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_properties_8edb78d7939b0790e3aef0aefaba10df</sys_update_name>
+<type>string</type>
+<value/>
+<write_roles/>
+</sys_properties>
+<sys_properties action="INSERT_OR_UPDATE">
+<choices/>
+<description>Sections of the VAMP finding payload in order, one json_key=path per line: the path is dot-walked from the application vulnerable item (empty path = the item itself, remediation_task = the item's remediation task). The fields of each section come from usem.vamp.avit.fields.&lt;json_key&gt;.</description>
+<ignore_cache>false</ignore_cache>
+<is_private>false</is_private>
+<name>x_boar_bofa_usem_1.usem.vamp.avit.sections</name>
+<read_roles/>
+<suffix>usem.vamp.avit.sections</suffix>
+<sys_class_name>sys_properties</sys_class_name>
+<sys_id>66eb7cd7939b0790e3aef0aefaba1058</sys_id>
+<sys_name>x_boar_bofa_usem_1.usem.vamp.avit.sections</sys_name>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_properties_66eb7cd7939b0790e3aef0aefaba1058</sys_update_name>
+<type>string</type>
+<value>finding=,
+tpe=vulnerability,
+remediation_task=remediation_task,
+ait=application_release.u_primary_ait,
+ci=cmdb_ci,
+exception=change_approval,
+consequence=u_consequence,
+ptreq=assessment_request,</value>
+<write_roles/>
+</sys_properties>
+<sys_properties action="INSERT_OR_UPDATE">
+<choices/>
+<description>Fields of the finding section (sn_vul_app_vulnerable_item), one servicenow_field=json_field per line in payload order; a field missing on the table or empty is sent as "".</description>
+<ignore_cache>false</ignore_cache>
+<is_private>false</is_private>
+<name>x_boar_bofa_usem_1.usem.vamp.avit.fields.finding</name>
+<read_roles/>
+<suffix>usem.vamp.avit.fields.finding</suffix>
+<sys_class_name>sys_properties</sys_class_name>
+<sys_id>24fbbcd7939b0790e3aef0aefaba10ad</sys_id>
+<sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.finding</sys_name>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_properties_24fbbcd7939b0790e3aef0aefaba10ad</sys_update_name>
+<type>string</type>
+<value>number=number,
+sys_created_on=sys_created_on,
+sys_updated_on=sys_updated_on,
+state=state,
+cmdb_ci=configuration_item,
+u_verification_status=u_verification_status,
+source_avit_id=source_avit_id,</value>
+<write_roles/>
+</sys_properties>
+<sys_properties action="INSERT_OR_UPDATE">
+<choices/>
+<description>Fields of the tpe section (third party entry, sn_vul_app_vul_entry), one servicenow_field=json_field per line.</description>
+<ignore_cache>false</ignore_cache>
+<is_private>false</is_private>
+<name>x_boar_bofa_usem_1.usem.vamp.avit.fields.tpe</name>
+<read_roles/>
+<suffix>usem.vamp.avit.fields.tpe</suffix>
+<sys_class_name>sys_properties</sys_class_name>
+<sys_id>1efb301b939b0790e3aef0aefaba1093</sys_id>
+<sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.tpe</sys_name>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_properties_1efb301b939b0790e3aef0aefaba1093</sys_update_name>
+<type>string</type>
+<value>number=number,</value>
+<write_roles/>
+</sys_properties>
+<sys_properties action="INSERT_OR_UPDATE">
+<choices/>
+<description>Fields of the remediation_task section (sn_vul_app_vulnerability), one servicenow_field=json_field per line.</description>
+<ignore_cache>false</ignore_cache>
+<is_private>false</is_private>
+<name>x_boar_bofa_usem_1.usem.vamp.avit.fields.remediation_task</name>
+<read_roles/>
+<suffix>usem.vamp.avit.fields.remediation_task</suffix>
+<sys_class_name>sys_properties</sys_class_name>
+<sys_id>400cb01b939b0790e3aef0aefaba1015</sys_id>
+<sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.remediation_task</sys_name>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_properties_400cb01b939b0790e3aef0aefaba1015</sys_update_name>
+<type>string</type>
+<value>number=number,
+primary_ait=primary_ait,</value>
+<write_roles/>
+</sys_properties>
+<sys_properties action="INSERT_OR_UPDATE">
+<choices/>
+<description>Fields of the ait section (Primary AIT of the finding), one servicenow_field=json_field per line.</description>
+<ignore_cache>false</ignore_cache>
+<is_private>false</is_private>
+<name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ait</name>
+<read_roles/>
+<suffix>usem.vamp.avit.fields.ait</suffix>
+<sys_class_name>sys_properties</sys_class_name>
+<sys_id>1c0cf01b939b0790e3aef0aefaba1009</sys_id>
+<sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ait</sys_name>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_properties_1c0cf01b939b0790e3aef0aefaba1009</sys_update_name>
+<type>string</type>
+<value>number=number,</value>
+<write_roles/>
+</sys_properties>
+<sys_properties action="INSERT_OR_UPDATE">
+<choices/>
+<description>Fields of the ci section (configuration item of the finding), one servicenow_field=json_field per line.</description>
+<ignore_cache>false</ignore_cache>
+<is_private>false</is_private>
+<name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ci</name>
+<read_roles/>
+<suffix>usem.vamp.avit.fields.ci</suffix>
+<sys_class_name>sys_properties</sys_class_name>
+<sys_id>fd0c341b939b0790e3aef0aefaba1076</sys_id>
+<sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ci</sys_name>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_properties_fd0c341b939b0790e3aef0aefaba1076</sys_update_name>
+<type>string</type>
+<value>name=name,
+sys_class_name=class_name,</value>
+<write_roles/>
+</sys_properties>
+<sys_properties action="INSERT_OR_UPDATE">
+<choices/>
+<description>Fields of the exception section (sn_sec_exception_change_approval), one servicenow_field=json_field per line.</description>
+<ignore_cache>false</ignore_cache>
+<is_private>false</is_private>
+<name>x_boar_bofa_usem_1.usem.vamp.avit.fields.exception</name>
+<read_roles/>
+<suffix>usem.vamp.avit.fields.exception</suffix>
+<sys_class_name>sys_properties</sys_class_name>
+<sys_id>960c341b939b0790e3aef0aefaba10e7</sys_id>
+<sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.exception</sys_name>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_properties_960c341b939b0790e3aef0aefaba10e7</sys_update_name>
+<type>string</type>
+<value>number=number,
+approval_state=approval_state,
+desired_validity_date=desired_validity_date,</value>
+<write_roles/>
+</sys_properties>
+<sys_properties action="INSERT_OR_UPDATE">
+<choices/>
+<description>Fields of the consequence section, one servicenow_field=json_field per line.</description>
+<ignore_cache>false</ignore_cache>
+<is_private>false</is_private>
+<name>x_boar_bofa_usem_1.usem.vamp.avit.fields.consequence</name>
+<read_roles/>
+<suffix>usem.vamp.avit.fields.consequence</suffix>
+<sys_class_name>sys_properties</sys_class_name>
+<sys_id>620c741b939b0790e3aef0aefaba109f</sys_id>
+<sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.consequence</sys_name>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_properties_620c741b939b0790e3aef0aefaba109f</sys_update_name>
+<type>string</type>
+<value>number=number,
+state=state,
+u_consequence_level=u_consequence_level,</value>
+<write_roles/>
+</sys_properties>
+<sys_properties action="INSERT_OR_UPDATE">
+<choices/>
+<description>Fields of the ptreq section (sn_vul_pen_test_assessment_request), one servicenow_field=json_field per line.</description>
+<ignore_cache>false</ignore_cache>
+<is_private>false</is_private>
+<name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ptreq</name>
+<read_roles/>
+<suffix>usem.vamp.avit.fields.ptreq</suffix>
+<sys_class_name>sys_properties</sys_class_name>
+<sys_id>be0cb41b939b0790e3aef0aefaba109c</sys_id>
+<sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ptreq</sys_name>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_properties_be0cb41b939b0790e3aef0aefaba109c</sys_update_name>
+<type>string</type>
+<value>number=number,
+sys_created_on=sys_created_on,
+u_assessment_id=u_assessment_id,</value>
+<write_roles/>
+</sys_properties>
+<sys_script action="INSERT_OR_UPDATE">
+<abort_action>false</abort_action>
+<access>package_private</access>
+<action_delete>false</action_delete>
+<action_insert>true</action_insert>
+<action_query>false</action_query>
+<action_update>true</action_update>
+<active>true</active>
+<add_message>false</add_message>
+<advanced>true</advanced>
+<change_fields>false</change_fields>
+<client_callable>false</client_callable>
+<collection>sn_vul_app_vulnerable_item</collection>
+<condition/>
+<description>Builds the VAMP payload for the application vulnerable item with BOFASIVampOutboundProcessor and sends it with BOFASIKafkaProducerVamp on every insert and update.</description>
+<execute_function>false</execute_function>
+<filter_condition table="sn_vul_app_vulnerable_item"/>
+<is_rest>false</is_rest>
+<message/>
+<name>BOFA_BR_AVIT_VampOutbound</name>
+<order>100</order>
+<priority>100</priority>
+<rest_method/>
+<rest_method_text/>
+<rest_service/>
+<rest_service_text/>
+<rest_variables/>
+<role_conditions/>
+<script><![CDATA[(function executeRule(current, previous /*null when async*/ ) {
+    try {
+        var payload = new x_boar_bofa_usem_1.BOFASIVampOutboundProcessor().buildPayload(current);
+        if (payload)
+            new x_boar_bofa_usem_1.BOFASIKafkaProducerVamp().sendPayload(payload, current);
+    } catch (e) {
+        gs.error('BOFA_BR_AVIT_VampOutbound: outbound message failed for ' + current.getTableName() + ' ' + current.getUniqueValue() + ' - ' + (e.message || e));
+    }
+})(current, previous);
+]]></script>
+<sys_class_name>sys_script</sys_class_name>
+<sys_domain>global</sys_domain>
+<sys_domain_path>/</sys_domain_path>
+<sys_id>0f0cf41b939b0790e3aef0aefaba106f</sys_id>
+<sys_name>BOFA_BR_AVIT_VampOutbound</sys_name>
+<sys_overrides/>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_script_0f0cf41b939b0790e3aef0aefaba106f</sys_update_name>
+<template/>
+<when>after</when>
+</sys_script>
+</unload>
