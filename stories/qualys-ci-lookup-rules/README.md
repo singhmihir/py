@@ -478,3 +478,16 @@ Next step when Mihir resumes: he runs version 3 with `MATCHED_LIMIT = 200`, `UNM
 `LIST_CAP = 200`, attaches the output to INC0010003; read the class pairs and the retired / duplicate lists, put
 numbers on the two proposals, then ask before changing anything. The 430 source-field correction is a one-line
 configuration note for the instance administrator, also to be confirmed by Mihir.
+
+
+## CMDB team demo deck (22 Sep)
+`Qualys CI Lookup Rules - CMDB Team Demo.pptx`, built by `deck_demo/build_demo_deck.js` from `deck_demo/demo_data.json`
+(`deck_demo/build_demo_data.py`): title, two concept slides (what a lookup rule does, the principles the USEM rules
+share), the chain at a glance, then for each of the 21 custom rules one explanation slide (purpose, how it matches,
+reads, returns, place in the chain, items matched) and three example slides, one matched discovered item per slide with
+the scanned values, the numbered steps the rule took and the CI it returned, both with record links to the client
+development instance. `Lookup Rules - Demo Examples Script.js` (read-only, on INC0010003) prints, per active Qualys rule,
+the matched count and three matched items with the scanned values and the CI (one EX line each); its output pasted into
+`deck_demo/demo_examples_output.txt` fills every rule. Until then the two load balancer rules take their examples from
+the 17 Sep client exports and the other rules show a placeholder slide. Rebuild with
+`python3 deck_demo/build_demo_data.py && NODE_PATH=<node_modules with pptxgenjs> node deck_demo/build_demo_deck.js`.

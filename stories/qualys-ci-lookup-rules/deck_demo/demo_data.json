@@ -1,0 +1,738 @@
+{
+ "title": "Qualys CI Lookup Rules",
+ "subtitle": "How a scanned host finds its CI",
+ "concepts": [
+  {
+   "title": "What a CI lookup rule does",
+   "kicker": "Key concepts",
+   "bullets": [
+    "Qualys sends one record per scanned host: DNS name, IP address, operating system, serial number, NetBIOS name. Each record lands as a Discovered Item.",
+    "The platform runs the CI lookup rules in order. Each rule reads one source field (serial, DNS or IP) plus the rest of the record, searches the CMDB and returns one CI or nothing.",
+    "The first rule that returns a CI wins: the item is matched to it and every vulnerable item of that host attaches to that CI.",
+    "When no rule answers, the item stays unmatched and receives a placeholder record (Unclassed Hardware) until it is evaluated again.",
+    "Items are evaluated again on the next import, when a rule changes, or on demand with the list action \"Reapply CI lookup rules\"."
+   ]
+  },
+  {
+   "title": "Principles the USEM rules share",
+   "kicker": "Key concepts",
+   "bullets": [
+    "Exactly one record or decline. A rule never picks between two candidates; ambiguity stays unmatched for the CMDB to resolve.",
+    "The scanned OS sets the class: Red Hat means Linux Server, Windows Server means Windows Server, NetApp means Storage Server. The search stays inside that class first, then goes hardware-wide.",
+    "Class agreement: a CI reached through DNS or IP records must be of a class the OS implies (same, parent or child), so a Cisco IOS router never lands on a Computer.",
+    "Ignored classes never answer: adapters, IP address records, storage volumes, certificates and the other classes on sn_sec_cmn.ignoreCIClass.",
+    "Strongest identifier first: serial, then FQDN, host name with domain, DNS layers, host name, controllers and interfaces, virtual servers, IP address, and a broad name search last.",
+    "No fitness heuristics: no \"best\" record by class depth or last update. A retired duplicate is set aside for the live record; two live records decline."
+   ]
+  }
+ ],
+ "chain": [
+  [
+   "175",
+   "Serial Number Class Match",
+   "SERIAL_NUMBER, plus the OS",
+   "the one CI of that class carrying the serial, else null"
+  ],
+  [
+   "180",
+   "Serial Number Hardware Match",
+   "SERIAL_NUMBER",
+   "the one hardware CI carrying the serial, else null"
+  ],
+  [
+   "200",
+   "Cisco IP Phone MAC",
+   "DNS",
+   "the one IP Phone CI carrying that MAC, else null"
+  ],
+  [
+   "250",
+   "FQDN Class Match",
+   "DNS, plus the OS and the IP",
+   "the one CI of that class whose fqdn equals the scanned name"
+  ],
+  [
+   "260",
+   "FQDN Hardware Match",
+   "DNS, plus the IP",
+   "the one hardware CI whose fqdn equals the scanned name"
+  ],
+  [
+   "300",
+   "Hostname Domain Class Match",
+   "DNS, plus the OS and the IP",
+   "the one CI of that class whose domain evidence agrees"
+  ],
+  [
+   "310",
+   "Hostname Domain Hardware Match",
+   "DNS, plus the IP",
+   "the one hardware CI whose domain evidence agrees"
+  ],
+  [
+   "350",
+   "Layered DNS Match",
+   "DNS, plus the IP",
+   "the CI at the end of DNS Name to IP Address to adapter to CI"
+  ],
+  [
+   "400",
+   "Hostname Class Match",
+   "DNS, plus the OS",
+   "the one CI of that class named with the short hostname"
+  ],
+  [
+   "410",
+   "Hostname Hardware Match",
+   "DNS, plus the OS",
+   "the one hardware CI named with the hostname, class permitting"
+  ],
+  [
+   "415",
+   "Device Name Match",
+   "DNS, plus the OS and the IP",
+   "the one IP Phone or Imaging Hardware CI named with the host name; the scanned address breaks a tie"
+  ],
+  [
+   "420",
+   "Management Interface Match",
+   "DNS, plus the OS",
+   "the one hardware CI named like the label without its suffix"
+  ],
+  [
+   "430",
+   "Network Interface Name Match",
+   "DNS, plus the OS",
+   "the one Network Gear or Load Balancer device named by a prefix"
+  ],
+  [
+   "450",
+   "FQDN Name Hardware Match",
+   "DNS",
+   "the one hardware CI whose name is exactly the scanned FQDN"
+  ],
+  [
+   "455",
+   "Load Balancer Member Match",
+   "IP, plus the OS and the DNS name",
+   "the one real server behind the virtual server; null with several machines, a member the CMDB cannot place, or no pool data"
+  ],
+  [
+   "460",
+   "Load Balancer Service Match",
+   "IP, plus the OS and the DNS name",
+   "the one Load Balancer Service CI for that VIP"
+  ],
+  [
+   "700",
+   "IP Class Match",
+   "IP, plus the OS",
+   "the one CI of that class whose ip_address equals the scanned address"
+  ],
+  [
+   "705",
+   "IP Hardware Match",
+   "IP, plus the OS",
+   "the one hardware CI on that address, balancer and class permitting"
+  ],
+  [
+   "730",
+   "IP Adapter Match",
+   "IP",
+   "the CI that owns the adapter carrying the scanned address"
+  ],
+  [
+   "740",
+   "IP Layered Match",
+   "IP",
+   "the CI at the end of IP Address to adapter to CI"
+  ],
+  [
+   "850",
+   "FQDN Name Broad Match",
+   "DNS",
+   "the one CI in any class named exactly with the scanned FQDN"
+  ]
+ ],
+ "rules": [
+  {
+   "order": "175",
+   "name": "USEM Serial Number Class Match",
+   "group": "Serial number",
+   "purpose": "A serial number stays with a machine for its whole life, while names and addresses get reused. It is the strongest identifier Qualys gives us, so it is tried first, inside the class the scanned OS points at.",
+   "reads": "SERIAL_NUMBER, plus the OS",
+   "returns": "the one CI of that class carrying the serial, else null",
+   "before": "nothing custom runs before this rule.",
+   "after": "the hardware-wide serial rule, for hosts whose OS gives no class.",
+   "stages": [
+    "Refuse placeholder serials",
+    "Class from the scanned OS",
+    "Serial search, exactly one CI"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "180",
+   "name": "USEM Serial Number Hardware Match",
+   "group": "Serial number",
+   "purpose": "The same serial search across the whole hardware tree. It exists for hosts whose OS gives no usable class, and for CIs that sit in a different class than the OS suggests.",
+   "reads": "SERIAL_NUMBER",
+   "returns": "the one hardware CI carrying the serial, else null",
+   "before": "the class-scoped serial rule already tried the serial inside the OS class.",
+   "after": "the phone rule and then the name rules.",
+   "stages": [
+    "Same guard on the value",
+    "Search the whole hardware tree"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "200",
+   "name": "USEM Cisco IP Phone MAC",
+   "group": "Phone",
+   "purpose": "Unified Communications Manager names every phone \"SEP\" followed by its MAC address, and Qualys reports that name as the DNS label. The rule turns the label back into a MAC and finds the one IP Phone CI that carries it.",
+   "reads": "DNS",
+   "returns": "the one IP Phone CI carrying that MAC, else null",
+   "before": "the serial rules; phones report no serial.",
+   "after": "the FQDN and hostname rules, which never see a phone label.",
+   "stages": [
+    "Strict label, four MAC spellings",
+    "Adapter first, then the phone record",
+    "Last resort: the device name"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "250",
+   "name": "USEM FQDN Class Match",
+   "group": "Name",
+   "purpose": "The first name rule. An exact FQDN on the CI record is the most precise name evidence there is, so it is matched before any hostname handling, inside the class the OS points at.",
+   "reads": "DNS, plus the OS and the IP",
+   "returns": "the one CI of that class whose fqdn equals the scanned name",
+   "before": "the serial rules and the phone rule found nothing.",
+   "after": "the hardware-wide FQDN rule, then hostname plus domain.",
+   "stages": [
+    "Class from the scanned OS",
+    "Exact fqdn match",
+    "One hit, or the IP breaks the tie"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "260",
+   "name": "USEM FQDN Hardware Match",
+   "group": "Name",
+   "purpose": "The exact FQDN search again, across the whole hardware tree. It picks up the hosts whose OS gives no class and the CIs kept in a generic or different class than the OS suggests.",
+   "reads": "DNS, plus the IP",
+   "returns": "the one hardware CI whose fqdn equals the scanned name",
+   "before": "the class-scoped FQDN rule tried the same value inside the OS class.",
+   "after": "the hostname plus domain rules, for CIs with no fqdn value at all.",
+   "stages": [
+    "Same helper, wider scope",
+    "Collect and decide"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "300",
+   "name": "USEM Hostname Domain Class Match",
+   "group": "Name",
+   "purpose": "For CIs named with the short hostname that carry the domain somewhere else, in dns_domain or in an fqdn that was never copied into the name. Short name and domain are matched together, inside the class the OS points at.",
+   "reads": "DNS, plus the OS and the IP",
+   "returns": "the one CI of that class whose domain evidence agrees",
+   "before": "the FQDN rules looked in the fqdn field and found nothing.",
+   "after": "the hardware-wide variant, the layered DNS rule, then the plain hostname rules.",
+   "stages": [
+    "Class from the scanned OS",
+    "Name matched, domain confirmed",
+    "One confirmed CI, IP as tie-break"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "310",
+   "name": "USEM Hostname Domain Hardware Match",
+   "group": "Name",
+   "purpose": "Short hostname plus domain evidence again, across the whole hardware tree, for CIs classed generically (Server, Computer) or differently from the scanned OS.",
+   "reads": "DNS, plus the IP",
+   "returns": "the one hardware CI whose domain evidence agrees",
+   "before": "the class-scoped variant tried the same evidence inside the OS class.",
+   "after": "the layered DNS rule and then the plain hostname rules.",
+   "stages": [
+    "Same helper, wider scope",
+    "Domain evidence still required"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "350",
+   "name": "USEM Layered DNS Match",
+   "group": "Name",
+   "purpose": "Discovery keeps names and addresses as their own records linked to the device. This rule follows that chain, the only way to find a host whose name is not written on the CI record at all, and it resolves aliases to the real machine.",
+   "reads": "DNS, plus the IP",
+   "returns": "the CI at the end of DNS Name to IP Address to adapter to CI",
+   "before": "the FQDN and hostname-plus-domain rules read fields on the CI record.",
+   "after": "the plain hostname rules and the full-FQDN name rule.",
+   "stages": [
+    "Follow the chain in one query",
+    "Count owners, note the IP path",
+    "One CI, or the IP decides"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "400",
+   "name": "USEM Hostname Class Match",
+   "group": "Name",
+   "purpose": "The short hostname alone, inside the class the scanned OS points at. For CIs that carry only a short name and no domain information; the agreement between CI class and scanned OS stands in for the missing domain evidence.",
+   "reads": "DNS, plus the OS",
+   "returns": "the one CI of that class named with the short hostname",
+   "before": "every rule so far needed domain evidence on the CI.",
+   "after": "the hardware-wide short name rule with a class sanity check.",
+   "stages": [
+    "Short label only",
+    "Class from the scanned OS",
+    "Name search, exactly one CI"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "410",
+   "name": "USEM Hostname Hardware Match",
+   "group": "Name",
+   "purpose": "The short hostname across the whole hardware tree, with a check that the CI found does not contradict the scanned OS. For CIs classed generically (Server, Computer, UNIX Server) or differently from the OS.",
+   "reads": "DNS, plus the OS",
+   "returns": "the one hardware CI named with the hostname, class permitting",
+   "before": "the class-scoped rule required the name to be unique inside the OS class.",
+   "after": "the full-FQDN name rule, then the address rules.",
+   "stages": [
+    "Class becomes a preference",
+    "One CI carries the name",
+    "Veto a contradicting class"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "415",
+   "name": "USEM Device Name Match",
+   "group": "Name",
+   "purpose": "IP Phones and Scanners sit outside the Hardware tree, so the hardware-wide name rules never see them, and they report no OS. This rule looks for the scanned host name in exactly those two classes.",
+   "reads": "DNS, plus the OS and the IP",
+   "returns": "the one IP Phone or Imaging Hardware CI named with the host name; the scanned address breaks a tie",
+   "before": "USEM Hostname Hardware Match, which searches the Hardware tree only.",
+   "after": "USEM Management Interface Match.",
+   "stages": [
+    "Refuse when the OS names a server or desktop",
+    "Host name searched in IP Phone and Imaging Hardware",
+    "One device, else the scanned address breaks the tie"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "420",
+   "name": "USEM Management Interface Match",
+   "group": "Controllers, interfaces, virtual servers",
+   "purpose": "Server management controllers (HP iLO, Oracle ILOM, Dell iDRAC, IBM IMM, Cisco CIMC, BMC, IPMI) are scanned under their own label, the server name plus a suffix. The findings belong to the server, so the rule strips the suffix and matches the server.",
+   "reads": "DNS, plus the OS",
+   "returns": "the one hardware CI named like the label without its suffix",
+   "before": "the hostname rules tried the whole label and found nothing.",
+   "after": "the network interface rule and the full-FQDN name rule.",
+   "stages": [
+    "Two ways to recognise a controller",
+    "The server, uniquely named",
+    "Never a load balancer"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "430",
+   "name": "USEM Network Interface Name Match",
+   "group": "Controllers, interfaces, virtual servers",
+   "purpose": "Network devices are scanned through their interface and VLAN addresses, each carrying a label of the device name plus an interface tail. The device CI is named with the leading part only, so the rule walks the label prefix by prefix.",
+   "reads": "DNS, plus the OS",
+   "returns": "the one Network Gear or Load Balancer device named by a prefix",
+   "before": "the hostname rules tried the whole label; the controller rule found no suffix.",
+   "after": "the full-FQDN name rule and the load balancer service rule.",
+   "stages": [
+    "Interface evidence first",
+    "Longest prefix first",
+    "First prefix that hits decides"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "450",
+   "name": "USEM FQDN Name Hardware Match",
+   "group": "Name",
+   "purpose": "Some loads name the CI with the whole FQDN string instead of the short hostname, typically the appliance domains ending in .rpg, so a short name search can never find them.",
+   "reads": "DNS",
+   "returns": "the one hardware CI whose name is exactly the scanned FQDN",
+   "before": "every rule so far compared the short hostname or the fqdn field.",
+   "after": "the address rules, and finally the broad name rule.",
+   "stages": [
+    "Compare the whole string",
+    "Hardware tree, exactly one CI"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "455",
+   "name": "USEM Load Balancer Member Match",
+   "group": "Controllers, interfaces, virtual servers",
+   "purpose": "Many virtual servers front exactly one real server. When the CMDB holds the pool behind the virtual server and every member leads to one and the same machine, the findings belong to that machine.",
+   "reads": "IP, plus the OS and the DNS name",
+   "returns": "the one real server behind the virtual server; null with several machines, a member the CMDB cannot place, or no pool data",
+   "before": "the hardware rules, which decline a virtual address.",
+   "after": "USEM Load Balancer Service Match, which attaches the virtual server record when the CMDB does not show several servers behind it.",
+   "stages": [
+    "VIP sign: load balancer OS or a VIP marker in the name",
+    "Virtual server found on fqdn, then name, then address",
+    "Service to Pool to Pool Member to server",
+    "One machine behind the whole pool, else decline"
+   ],
+   "examples": [
+    {
+     "number": "SDI000002418623",
+     "host": "ccgw-l7-vip2.sit1.gwimnp.rpg",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002418623",
+     "item_facts": [
+      [
+       "DNS name",
+       "ccgw-l7-vip2.sit1.gwimnp.rpg"
+      ],
+      [
+       "IP address",
+       "10.143.52.217"
+      ],
+      [
+       "Operating system",
+       "F5 Networks Big-IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-17 02:11:52"
+      ]
+     ],
+     "walk": [
+      "VIP sign: OS \"F5 Networks Big-IP\" or a VIP marker in \"ccgw-l7-vip2.sit1.gwimnp.rpg\"",
+      "Virtual server /Common/ihscore-sit1-ccgw-6011-vip on 10.143.52.217, pool /Common/ihscore-sit1-ccgw-443-pool, 1 member",
+      "Every member (10.143.72.200) leads to the same machine",
+      "Server returned: lva71pwbolcc01v [Linux Server]"
+     ],
+     "ci_name": "lva71pwbolcc01v",
+     "ci_class": "Linux Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=ddcdddf02b462294d50dffbdbe91bf9b",
+     "ci_facts": []
+    },
+    {
+     "number": "SDI000002411394",
+     "host": "ccgw-l7-vip2.dev.gwimnp.rpg",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002411394",
+     "item_facts": [
+      [
+       "DNS name",
+       "ccgw-l7-vip2.dev.gwimnp.rpg"
+      ],
+      [
+       "IP address",
+       "10.143.52.163"
+      ],
+      [
+       "Operating system",
+       "F5 Networks Big-IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-17 02:08:45"
+      ]
+     ],
+     "walk": [
+      "VIP sign: OS \"F5 Networks Big-IP\" or a VIP marker in \"ccgw-l7-vip2.dev.gwimnp.rpg\"",
+      "Virtual server /Common/ihscore-dev-ccgw-6011-vip on 10.143.52.163, pool /Common/ihscore-dev-ccgw-443-pool, 1 member",
+      "Every member (10.143.72.198) leads to the same machine",
+      "Server returned: lva68pwbolcc01v [Linux Server]"
+     ],
+     "ci_name": "lva68pwbolcc01v",
+     "ci_class": "Linux Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=d78e25b82b8e2294d50dffbdbe91bf32",
+     "ci_facts": []
+    },
+    {
+     "number": "SDI000002375027",
+     "host": "multi-benefits-l7-vip2.dev.gwimnp.rpg",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002375027",
+     "item_facts": [
+      [
+       "DNS name",
+       "multi-benefits-l7-vip2.dev.gwimnp.rpg"
+      ],
+      [
+       "IP address",
+       "10.143.52.154"
+      ],
+      [
+       "Operating system",
+       "F5 Networks Big-IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-17 01:55:40"
+      ]
+     ],
+     "walk": [
+      "VIP sign: OS \"F5 Networks Big-IP\" or a VIP marker in \"multi-benefits-l7-vip2.dev.gwimnp.rpg\"",
+      "Virtual server /Common/ihscore-dev-multilang_benefits-6011-vip on 10.143.52.154, pool /Common/ihscore-dev-de_benefits-444-pool, 1 member",
+      "Every member (10.143.72.171) leads to the same machine",
+      "Server returned: wva68pwbolts51v [Windows Server]"
+     ],
+     "ci_name": "wva68pwbolts51v",
+     "ci_class": "Windows Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=813bd5383b0e6254a052e71864e45a35",
+     "ci_facts": []
+    }
+   ],
+   "matched": null
+  },
+  {
+   "order": "460",
+   "name": "USEM Load Balancer Service Match",
+   "group": "Controllers, interfaces, virtual servers",
+   "purpose": "A virtual IP answered by a load balancer is not the balancer, and the hardware rules refuse the balancer device on purpose. Such hosts belong to the Load Balancer Service CI that models the VIP.",
+   "reads": "IP, plus the OS and the DNS name",
+   "returns": "the one Load Balancer Service CI for that VIP",
+   "before": "the hardware rules declined: no serial, no server name, address on a balancer.",
+   "after": "the ordinary address rules, for hosts that are not VIPs.",
+   "stages": [
+    "VIP evidence first",
+    "Strongest evidence first",
+    "Ambiguity stops the rule"
+   ],
+   "examples": [
+    {
+     "number": "SDI000003028240",
+     "host": "171.159.246.128",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003028240",
+     "item_facts": [
+      [
+       "DNS name",
+       "(none)"
+      ],
+      [
+       "IP address",
+       "171.159.246.128"
+      ],
+      [
+       "Operating system",
+       "F5 Networks Big-IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-15 22:22:39"
+      ]
+     ],
+     "walk": [
+      "VIP sign: OS \"F5 Networks Big-IP\" or a VIP marker in \"\"",
+      "Load Balancer Service record looked up on fqdn, then name, then the address 171.159.246.128; the pool is not read",
+      "One live record for that virtual server: /Common/ait71454-pt1-mlonefeeui-443-vip",
+      "The virtual server record stands for the host"
+     ],
+     "ci_name": "/Common/ait71454-pt1-mlonefeeui-443-vip",
+     "ci_class": "Load Balancer Service",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=a029dc43931183d03854f05ea903d6b7",
+     "ci_facts": [
+      [
+       "IP address",
+       "171.159.246.128"
+      ],
+      [
+       "Load balancer",
+       "sveqbt1rp1lb02b"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000003069763",
+     "host": "prsapp-va-vip.pt1.gwimnp.rpg",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003069763",
+     "item_facts": [
+      [
+       "DNS name",
+       "prsapp-va-vip.pt1.gwimnp.rpg"
+      ],
+      [
+       "IP address",
+       "171.159.246.4"
+      ],
+      [
+       "Operating system",
+       "F5 Networks Big-IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-15 21:48:23"
+      ]
+     ],
+     "walk": [
+      "VIP sign: OS \"F5 Networks Big-IP\" or a VIP marker in \"prsapp-va-vip.pt1.gwimnp.rpg\"",
+      "Load Balancer Service record looked up on fqdn, then name, then the address 171.159.246.4; the pool is not read",
+      "One live record for that virtual server: /Common/ait71551-pt1-prsapp-443-vip",
+      "The virtual server record stands for the host"
+     ],
+     "ci_name": "/Common/ait71551-pt1-prsapp-443-vip",
+     "ci_class": "Load Balancer Service",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=917ce0282f9e87103819983fafa4e37e",
+     "ci_facts": [
+      [
+       "IP address",
+       "171.159.246.4"
+      ],
+      [
+       "Load balancer",
+       "sveqbt1rp1lb02b"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000003069406",
+     "host": "lki-nao-flash-svc-tt-mw.ecnp.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003069406",
+     "item_facts": [
+      [
+       "DNS name",
+       "lki-nao-flash-svc-tt-mw.ecnp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "171.176.215.217"
+      ],
+      [
+       "Operating system",
+       "F5 Networks Big-IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-15 21:48:46"
+      ]
+     ],
+     "walk": [
+      "VIP sign: OS \"F5 Networks Big-IP\" or a VIP marker in \"lki-nao-flash-svc-tt-mw.ecnp.bankofamerica.com\"",
+      "Load Balancer Service record looked up on fqdn, then name, then the address 171.176.215.217; the pool is not read",
+      "One live record for that virtual server: /Common/LKI-NAO-FLASH-SVC-TT-443",
+      "The virtual server record stands for the host"
+     ],
+     "ci_name": "/Common/LKI-NAO-FLASH-SVC-TT-443",
+     "ci_class": "Load Balancer Service",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=31ccec6c2f56871006a8a93fafa4e397",
+     "ci_facts": [
+      [
+       "IP address",
+       "171.176.215.217"
+      ],
+      [
+       "Load balancer",
+       "rtxqbt1conlb03a"
+      ]
+     ]
+    }
+   ],
+   "matched": null
+  },
+  {
+   "order": "700",
+   "name": "USEM IP Class Match",
+   "group": "IP address",
+   "purpose": "The first address rule. An address is the least trustworthy identifier: addresses move between machines and are shared by load balancers. It is used only for hosts with no serial and no usable name, inside the class the OS points at.",
+   "reads": "IP, plus the OS",
+   "returns": "the one CI of that class whose ip_address equals the scanned address",
+   "before": "every serial and name rule; a host with no DNS name makes them all decline.",
+   "after": "the hardware-wide address rule, then the adapter and layered rules.",
+   "stages": [
+    "Addresses that identify nothing",
+    "Class from the scanned OS",
+    "Address search, exactly one CI"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "705",
+   "name": "USEM IP Hardware Match",
+   "group": "IP address",
+   "purpose": "The address across the whole hardware tree, with two extra safety checks: the CI must not be a load balancer, and its class must not contradict the scanned OS.",
+   "reads": "IP, plus the OS",
+   "returns": "the one hardware CI on that address, balancer and class permitting",
+   "before": "the class-scoped address rule required a CI of the OS class.",
+   "after": "the adapter rule and the layered address rule.",
+   "stages": [
+    "One CI on the address",
+    "Reject a load balancer",
+    "Veto a contradicting class"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "730",
+   "name": "USEM IP Adapter Match",
+   "group": "IP address",
+   "purpose": "Discovery stores one Network Adapter record per network card, and a multi-homed server keeps its addresses there rather than on the CI record. This rule finds the adapter carrying the address and takes its owning CI.",
+   "reads": "IP",
+   "returns": "the CI that owns the adapter carrying the scanned address",
+   "before": "the address rules so far read the ip_address field of the CI record.",
+   "after": "the layered address rule and then the broad name rule.",
+   "stages": [
+    "Adapters, not CIs",
+    "Count owners, not rows"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "740",
+   "name": "USEM IP Layered Match",
+   "group": "IP address",
+   "purpose": "Newer discovery writes each address as its own IP Address record linked to the adapter, and the adapter record itself may carry no address. This rule reads those records, two links from the CI.",
+   "reads": "IP",
+   "returns": "the CI at the end of IP Address to adapter to CI",
+   "before": "the adapter rule looked for the address on the adapter records.",
+   "after": "the broad name rule, and after that the out-of-box Qualys rules.",
+   "stages": [
+    "Two links away",
+    "One owner, and not a balancer"
+   ],
+   "examples": [],
+   "matched": null
+  },
+  {
+   "order": "850",
+   "name": "USEM FQDN Name Broad Match",
+   "group": "Broad name",
+   "purpose": "The one deliberately late, broad fallback: a CI named with the full FQDN anywhere in the CI table, classes outside the hardware tree included, such as a virtual machine instance.",
+   "reads": "DNS",
+   "returns": "the one CI in any class named exactly with the scanned FQDN",
+   "before": "every hardware-scoped rule has declined for this host.",
+   "after": "the out-of-box Qualys rules: host id, cloud resource id, FQDN, NetBIOS, DNS.",
+   "stages": [
+    "Why it runs last",
+    "Root CI table, exactly one CI"
+   ],
+   "examples": [],
+   "matched": null
+  }
+ ],
+ "example_source": "client exports of 17 Sep (load balancer rules only)"
+}
