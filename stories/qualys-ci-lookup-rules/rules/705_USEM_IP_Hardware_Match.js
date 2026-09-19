@@ -1,0 +1,177 @@
+/* USEM IP Hardware Match
+   -------------------------------------------------------------------------------------------------
+   The address across the whole hardware tree, with two extra safety checks: the CI must not be a
+   load balancer, and its class must not contradict the scanned OS.
+
+   Sample payload (one Qualys host record, used in every note below)
+   {
+     "ID": "83047624",
+     "IP": "30.162.178.24",
+     "TRACKING_METHOD": "IP",
+     "OS": "Ubuntu / Tiny Core Linux / Linux 2.6.x / IBM ASM / HP StoreOnce / F5 Networks Big-IP / Cisco IOS Software"
+   }
+   Input  : sourceValue is the IP field, "30.162.178.24"; the rule also reads the OS from
+            sourcePayload.
+   Returns: the sys_id of the one hardware CI whose ip_address equals the scanned address, when it
+            is not a load balancer, its name agrees with the scanned host name and its class is the
+            one the OS implies, a sub-class of it or a parent of it; null otherwise.
+   Sample : the CI in the generic Server class whose ip_address is "30.162.178.24"; a Load Balancer
+            on that address would be refused, and with a known OS a CI of a contradicting class
+            would be too.
+
+   Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
+   Before : USEM IP Class Match required the address to belong to one CI of the class the OS
+            implies; the sample OS is a list of guesses, so that rule declined without searching.
+   Reaches: DNS-less hosts whose CI is kept in a parent class or whose OS gave no class.
+   After  : USEM IP Adapter Match and USEM IP Layered Match.
+   ------------------------------------------------------------------------------------------------- */
+(function process(rule, sourceValue, sourcePayload) {
+    if (!sourceValue)                             // nothing to look up
+        return null;
+    var ip = ('' + sourceValue).trim();           // "30.162.178.24"
+    // loopback and link-local identify nothing
+    if (!ip || ip.indexOf('127.') == 0 || ip.indexOf('169.254.') == 0)
+        return null;
+
+    // Classes that must never be matched (placeholder and technical CIs); the list lives in the
+    // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
+    var ignore = (typeof _ignoreClass != 'undefined' && _ignoreClass) ?
+        ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
+
+    // -- Class the scanned OS implies, kept as a preference ---------------------------------------
+    // This rule searches the whole hardware tree, so the class is not a filter here; it is checked
+    // at the end to reject a CI whose class contradicts the scan. An unknown OS gives no class and
+    // then no check is made.
+    // Sample: classFor("Ubuntu / Tiny Core Linux / Linux 2.6.x / IBM ASM / HP StoreOnce / F5
+    //         Networks Big-IP / Cisco IOS Software") gives no class, so pref is ""; it is only used
+    //         in the last stage.
+    //
+    // classFor() maps the OS text Qualys reports to the CMDB class the CI should be in, e.g. "Red
+    // Hat Enterprise Linux 9.8" is a Linux Server, "Windows Server 2016 Standard" a Windows Server
+    // and "VMware ESXi 7.0.3" an ESX Server. A string of guesses separated by "/" comes from an
+    // unauthenticated scan that could not identify the OS; three or more guesses give no class at
+    // all.
+    function classFor(os) {
+        if (!os) return '';
+        var s = ('' + os).toLowerCase();
+        if (s.split('/').length > 2) return '';   // multi-guess fingerprint
+        if (s.indexOf('esx') != -1) return 'cmdb_ci_esx_server';
+        if (s.indexOf('windows') != -1)
+            return s.indexOf('server') != -1 ? 'cmdb_ci_win_server' : 'cmdb_ci_computer';
+        if (s.indexOf('aix') != -1) return 'cmdb_ci_aix_server';
+        if (s.indexOf('solaris') != -1 || s.indexOf('sunos') != -1) return 'cmdb_ci_solaris_server';
+        if (s.indexOf('hp-ux') != -1) return 'cmdb_ci_hpux_server';
+        if (s.indexOf('netapp') != -1 || s.indexOf('ontap') != -1) return 'cmdb_ci_storage_server';
+        if (s.indexOf('printer') != -1 || s.indexOf('laserjet') != -1 || s.indexOf('jetdirect') != -1) return 'cmdb_ci_printer';
+        if (s.indexOf('red hat') != -1 || s.indexOf('linux') != -1 || s.indexOf('centos') != -1 ||
+            s.indexOf('ubuntu') != -1 || s.indexOf('suse') != -1 || s.indexOf('debian') != -1 ||
+            s.indexOf('fedora') != -1 || s.indexOf('euleros') != -1 ||
+            s.indexOf('oracle enterprise') != -1 || s.indexOf('amazon') != -1) return 'cmdb_ci_linux_server';
+        if (s.indexOf('nx-os') != -1 || s.indexOf('catos') != -1 || s.indexOf('cisco') != -1) return 'cmdb_ci_netgear';
+        return '';
+    }
+    var pref = classFor(sourcePayload.OS);
+
+    // agrees() decides whether a CI of class cls can be the scanned host once the OS gave a class:
+    // the same class, one of its sub-classes, or one of its parents (a Cisco IOS host may be kept
+    // as a plain Network Gear or Hardware record). Any other class is a different kind of machine:
+    // a Computer named or addressed like a router is a namesake or a reused address, never the
+    // router. With no class from the OS nothing is refused.
+    function parentsOf(table) {                   // the class and every class above it
+        var out = [table];
+        var db = new GlideRecord('sys_db_object');
+        db.addQuery('name', table);
+        db.query();
+        while (db.next() && db.getValue('super_class')) {
+            var parent = '' + db.super_class.name;
+            out.push(parent);
+            db = new GlideRecord('sys_db_object');
+            db.addQuery('name', parent);
+            db.query();
+        }
+        return out;
+    }
+    function agrees(cls) {
+        if (!pref || cls == pref)
+            return true;
+        if (parentsOf(cls).indexOf(pref) != -1)   // cls is a sub-class of pref
+            return true;
+        return parentsOf(pref).indexOf(cls) != -1;  // cls is a parent of pref
+    }
+
+    // A load balancer answers on virtual addresses for the servers behind it, so it is never the
+    // host that was scanned.
+    function isLoadBalancer(id) {
+        var lb = new GlideRecord('cmdb_ci_lb');
+        return lb.isValid() && lb.get(id);
+    }
+
+    // nameAgrees() checks the CI found against the host name the scan carries. Nothing is checked
+    // when the payload has no DNS or the CI has no name. Otherwise the first label of the CI name
+    // must equal the scanned label, or one must be the other plus a hyphenated tail ("<name>-mgmt"
+    // for a management interface, "<name>-a" for a node). A CI named after another machine sits on
+    // a reused address (a lease that moved, a decommissioned host whose address was handed on) and
+    // is not the scanned host, whatever its class.
+    function nameAgrees(ciId) {
+        var label = ('' + (sourcePayload.DNS || '')).trim().toLowerCase().split('.')[0];
+        if (!label)
+            return true;
+        var ci = new GlideRecord('cmdb_ci');
+        ci.get(ciId);
+        var name = ('' + ci.getValue('name')).trim().toLowerCase().split('.')[0];
+        if (!name)
+            return true;
+        return name == label || label.indexOf(name + '-') == 0 || name.indexOf(label + '-') == 0;
+    }
+
+    // -- Address search across the hardware tree --------------------------------------------------
+    // Nothing is filtered by class here; the four checks that follow provide the safety.
+    // Sample: the search on cmdb_ci_hardware for ip_address "30.162.178.24" finds one CI in the
+    //         generic Server class.
+    var gr = new GlideRecord('cmdb_ci_hardware');  // Hardware and every class beneath it
+    gr.addQuery('ip_address', ip);
+    if (ignore)
+        gr.addQuery('sys_class_name', 'NOT IN', ignore);
+
+    // -- Exactly one CI carries the value ---------------------------------------------------------
+    // The first row is remembered with its class; a second row means an address answered by several
+    // CIs (a shared virtual IP, an address reused after a rebuild), which is never a safe match and
+    // the rule declines.
+    // Sample: one row, so id is the sys_id of that Server and cls is "cmdb_ci_server".
+    gr.query();
+    if (!gr.next())
+        return null;
+    var id = gr.getUniqueValue();
+    var cls = '' + gr.getValue('sys_class_name');
+    if (gr.hasNext())
+        return null;
+
+    // -- Reject a load balancer -------------------------------------------------------------------
+    // A scanned address that belongs to a load balancer is a virtual IP; the findings describe a
+    // pool member behind it, not the balancer.
+    // Sample: the Server is not a Load Balancer, so the rule carries on. A Load Balancer on
+    //         "30.162.178.24" would end it here.
+    if (isLoadBalancer(id))
+        return null;
+
+    // -- The CI must carry the scanned name -------------------------------------------------------
+    // An address alone is not enough when the scan also carries a host name: the CI found must be
+    // named with it, allowing a hyphenated tail on either side. This keeps a finding scanned as one
+    // host off a record named after another, which is what a reused address produces.
+    // Sample: the sample carries no DNS, so nothing is checked. A host scanned as "vk1660790" whose
+    //         address sits on a Server named "vk1448212" would be declined here.
+    if (!nameAgrees(id))
+        return null;
+
+    // -- Reject a CI whose class contradicts the scanned OS ---------------------------------------
+    // When the OS gave a class, the CI found must be of that class, of a sub-class of it, or of a
+    // parent of it. A host that lands on a Windows Server by name or address is a namesake or a
+    // reused address, not the same machine, and its findings would go to the wrong owner.
+    // Sample: pref is empty for the sample, so agrees() is true and the sys_id is returned. With OS
+    //         "VMware ESXi 7.0.3", pref would be cmdb_ci_esx_server; the plain Server, a parent of
+    //         ESX Server, would still pass, a Windows Server or a Computer named like a router
+    //         would be rejected.
+    if (!agrees(cls))
+        return null;
+    return id;
+})(rule, sourceValue, sourcePayload);

@@ -1,0 +1,1265 @@
+{
+ "rules": [
+  {
+   "rule": "460",
+   "stages": [
+    {
+     "title": "Preparation",
+     "summary": "The header comment (lines 1-30) sets the scene: a virtual IP (VIP) answered by a load balancer is not the balancer device, and the hardware rules refuse the balancer device on purpose. Such hosts belong to the Load Balancer Service CI that models the VIP, and this rule finds it. It runs on the IP field so that VIPs without a DNS name are covered too. The header lists the sample payload, the input (sourceValue is the IP field, and the rule also reads OS and DNS from the payload), what the rule returns (the sys_id of the one Load Balancer Service found by fqdn, then by name, then by address; null when the host shows no VIP evidence, when no service matches, or when two services carry the value) and its place in the chain (after the hardware rules declined, before the IP address rules). A further comment (lines 40-41) explains the ignore list: classes that must never be matched (placeholder and technical CIs), taken from the property sn_sec_cmn.ignoreCIClass, which the framework may also pass in as _ignoreClass. The code lines here take the inputs and prepare five working values: ip, dns, label, os and ignore.",
+     "lines": [
+      {
+       "code": "(function process(rule, sourceValue, sourcePayload) {",
+       "explanation": "A \"function\" is a named block of instructions that takes inputs and hands back one answer. This line opens a function named process with three inputs: rule (the lookup rule record), sourceValue (the value of the rule's Source field, here the IP) and sourcePayload (the whole Qualys host record). The bracket before the word function means the function is written and run in one go; the last line of the script supplies the inputs.",
+       "state": "rule = the lookup rule record (never read by the script); sourceValue = \"171.203.142.26\"; sourcePayload = {\"ID\": \"1202267231\", \"IP\": \"171.203.142.26\", \"TRACKING_METHOD\": \"IP\", \"OS\": \"F5 Big IP\", \"DNS\": \"crisp-tx.bankofamerica.com\"}",
+       "note": "Whatever the function hands back with \"return\" becomes the rule's answer: the sys_id of a CI, or null, which means no answer and the next rule in the chain tries."
+      },
+      {
+       "code": "    if (!sourceValue)                             // nothing to look up",
+       "explanation": "\"if\" runs the next line only when the condition in brackets is true. \"!\" means \"not\". So this asks: is sourceValue empty or missing?",
+       "state": "sourceValue is \"171.203.142.26\", so \"not sourceValue\" is false and the next line is skipped. No variable changes.",
+       "note": "This case arises when the Qualys record carries no IP field at all, or when the IP field is present but empty."
+      },
+      {
+       "code": "        return null;",
+       "explanation": "\"return\" ends the function at once and hands back the value written after it. \"null\" is the special value meaning \"nothing\" or \"no answer\". Here it tells the platform this rule has no CI to offer and the next rule should try.",
+       "state": "The rule returns null here only when the IP value is empty. Not reached for the sample."
+      },
+      {
+       "code": "    var ip = ('' + sourceValue).trim();           // \"171.203.142.26\"",
+       "explanation": "\"var\" creates a named holder (a variable) for a value. '' + sourceValue glues the value onto an empty text, which turns it into plain text. trim() removes any spaces at the start and end. The result is stored as ip.",
+       "state": "ip = \"171.203.142.26\"",
+       "note": "The platform may hand the value over as a special text object; turning it into plain text keeps the later comparisons safe."
+      },
+      {
+       "code": "    if (!ip || ip.indexOf('127.') == 0 || ip.indexOf('169.254.') == 0)   // loopback and link-local identify nothing",
+       "explanation": "\"||\" means \"or\": the condition is true when any part is true. indexOf(text) gives the position where that text first appears (counting from 0), or -1 when it is absent. \"==\" means \"is equal to\". So this asks: is ip empty, or does it start with \"127.\" (found at position 0), or does it start with \"169.254.\"?",
+       "state": "ip is not empty; \"171.203.142.26\".indexOf(\"127.\") is -1; \"171.203.142.26\".indexOf(\"169.254.\") is -1. All three parts are false, so the next line is skipped. No variable changes.",
+       "note": "127.x addresses are a machine's own loopback address and 169.254.x.x addresses are self-assigned when no network address was given; neither identifies a real host, so such scans are declined."
+      },
+      {
+       "code": "        return null;",
+       "explanation": "Ends the rule with no answer.",
+       "state": "The rule returns null here only when ip is empty after trimming, or starts with \"127.\" or \"169.254.\". Not reached for the sample."
+      },
+      {
+       "code": "    var dns = ('' + (sourcePayload.DNS || '')).trim().toLowerCase();   // \"crisp-tx.bankofamerica.com\", may be empty",
+       "explanation": "Reads the DNS field of the payload. sourcePayload.DNS || '' means: use the DNS value, or an empty text when the field is missing or empty. The value is turned into plain text, trimmed, and toLowerCase() changes every letter to lower case so that later comparisons do not depend on capitalisation.",
+       "state": "Reads payload field DNS = \"crisp-tx.bankofamerica.com\"; dns = \"crisp-tx.bankofamerica.com\"",
+       "note": "Without the || '' fallback a DNS field absent from the payload would become the text \"undefined\" (and one present but holding no value the text \"null\") rather than an empty text, and that word would then be searched for as a name."
+      },
+      {
+       "code": "    var label = dns.split('.')[0];                // \"crisp-tx\"",
+       "explanation": "split('.') cuts the text at every dot into a list of pieces; [0] takes the first piece. That first piece is the host label, the part before the domain.",
+       "state": "dns splits into [\"crisp-tx\", \"bankofamerica\", \"com\"]; label = \"crisp-tx\"",
+       "note": "When dns is empty the list is [\"\"] and label is the empty text \"\"."
+      },
+      {
+       "code": "    var os = ('' + (sourcePayload.OS || '')).toLowerCase();   // \"f5 big ip\"",
+       "explanation": "Reads the OS field of the payload in the same way as the DNS field, except that it is not trimmed: plain text, empty when the field is missing or empty, all in lower case. Spaces at the ends do no harm here because the OS text is only searched for product words, never compared whole.",
+       "state": "Reads payload field OS = \"F5 Big IP\"; os = \"f5 big ip\""
+      },
+      {
+       "code": "    var ignore = (typeof _ignoreClass != 'undefined' && _ignoreClass) ?",
+       "explanation": "Starts building the ignore list. typeof tells what kind of thing a name holds; when a name was never given a value, typeof answers the text 'undefined'. \"!=\" means \"is not equal to\". \"&&\" means \"and\": both parts must be true. So the question is: does a variable named _ignoreClass exist and hold a non-empty value? The \"?\" starts a choice: the value after \"?\" is used when the question is true, the value after \":\" (on the next line) otherwise.",
+       "state": "typeof _ignoreClass gives 'undefined', so the question is false and the choice falls to the part after \":\" on the next line.",
+       "note": "The platform's CI lookup framework may hand the ignore list in as _ignoreClass. Asking typeof first is the safe way to check, because reading an unknown name directly would stop the script with an error."
+      },
+      {
+       "code": "        ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');",
+       "explanation": "The two possible values of the choice. Before \":\" is the text of _ignoreClass (used when it exists); after \":\" is the value of the system property sn_sec_cmn.ignoreCIClass, with an empty text as fallback when the property does not exist. The chosen value is stored as ignore.",
+       "state": "ignore = \"sn_sec_cmn_unmatched_ci,sn_vul_qualys_ci,cmdb_ci_unclassed_hardware,cmdb_ci_incomplete_ip,cmdb_ci_dns_name\"",
+       "note": "These are placeholder and technical CI classes that must never be returned as a match."
+      }
+     ]
+    },
+    {
+     "title": "isMarker",
+     "summary": "The comment above the function (lines 44-46) describes it: isMarker says whether one hyphen segment of the label is a listed marker, in one of three forms: the word itself (\"vlan\"), the word followed by digits only (\"vlan705\", \"v201\"), or, for words of three letters or more, a segment ending in the word (\"multihostvip\"). For the sample the VIP evidence stage calls it twice, with segment \"crisp\" and then \"tx\", both times with the words [\"vip\", \"vs\"]; both calls answer false.",
+     "lines": [
+      {
+       "code": "    function isMarker(segment, words) {",
+       "explanation": "Declares a helper function named isMarker with two inputs: segment (one piece of the host label between hyphens) and words (the list of marker words). It answers true or false. A function declared this way can be used anywhere inside the outer function.",
+       "state": "For the sample it is called twice from the VIP evidence stage: first with segment = \"crisp\", then with segment = \"tx\"; both times words = [\"vip\", \"vs\"]."
+      },
+      {
+       "code": "        for (var i = 0; i < words.length; i++) {",
+       "explanation": "\"for\" repeats the block that follows. It creates a counter i starting at 0, keeps going while i is less than the number of words (words.length, here 2) and adds 1 to i after each pass (i++). So the block runs once per marker word.",
+       "state": "In each call i takes the values 0 and then 1."
+      },
+      {
+       "code": "            var w = words[i];",
+       "explanation": "Picks the word at position i in the list and stores it as w.",
+       "state": "First pass w = \"vip\"; second pass w = \"vs\" (the same in both calls)."
+      },
+      {
+       "code": "            if (segment == w)",
+       "explanation": "Test one: is the segment exactly the marker word?",
+       "state": "\"crisp\" == \"vip\" false; \"crisp\" == \"vs\" false; \"tx\" == \"vip\" false; \"tx\" == \"vs\" false. The next line is skipped every time."
+      },
+      {
+       "code": "                return true;",
+       "explanation": "Ends isMarker with the answer true: the segment is a marker.",
+       "state": "Not reached for the sample. It would be reached for a label such as \"rbps-dev3-sve-vip\", whose segment \"vip\" equals the word."
+      },
+      {
+       "code": "            if (segment.indexOf(w) == 0 && /^[0-9]+$/.test(segment.substring(w.length)))",
+       "explanation": "Test two: does the segment start with the word (found at position 0) and is the rest of the segment digits only? substring(w.length) takes the part of the segment after the word. /^[0-9]+$/ is a pattern meaning \"from start to end, one or more digits\", and .test() answers whether the text fits the pattern. Because of \"&&\", the digit check runs only when the first part is true.",
+       "state": "\"crisp\".indexOf(\"vip\") is -1, \"crisp\".indexOf(\"vs\") is -1, \"tx\".indexOf(\"vip\") is -1, \"tx\".indexOf(\"vs\") is -1; the first part is false each time, so the digit check never runs and the next line is skipped.",
+       "note": "A segment such as \"vs1\" passes: it starts with \"vs\" and the rest, \"1\", is digits only."
+      },
+      {
+       "code": "                return true;",
+       "explanation": "Ends isMarker with true for the \"word plus digits\" form.",
+       "state": "Not reached for the sample."
+      },
+      {
+       "code": "            if (w.length >= 3 && segment.length > w.length && segment.substring(segment.length - w.length) == w)",
+       "explanation": "Test three: is the word at least three letters long, is the segment longer than the word, and does the segment end with the word? substring(segment.length - w.length) takes the last characters of the segment, as many as the word has. \">=\" means \"greater than or equal to\" and \">\" means \"greater than\".",
+       "state": "\"crisp\" with \"vip\": 3 >= 3 true, 5 > 3 true, \"crisp\".substring(2) is \"isp\", not \"vip\", so false. \"crisp\" with \"vs\": 2 >= 3 false, stop. \"tx\" with \"vip\": 3 >= 3 true, 2 > 3 false, stop. \"tx\" with \"vs\": 2 >= 3 false, stop. The next line is skipped every time.",
+       "note": "The three-letter minimum keeps the short word \"vs\" from matching the end of ordinary words such as \"devs\"; \"multihostvip\" ends in \"vip\" and passes."
+      },
+      {
+       "code": "                return true;",
+       "explanation": "Ends isMarker with true for the \"ends with the word\" form.",
+       "state": "Not reached for the sample."
+      },
+      {
+       "code": "        }",
+       "explanation": "Closes the \"for\" block; control goes back to the for line to move to the next word, or leaves the loop when all words are done.",
+       "state": "No variable changes; after the first pass i becomes 1 (1 < 2, so a second pass runs), after the second pass i becomes 2 (2 < 2 is false) and the loop ends. In both sample calls the loop runs its two passes without a hit."
+      },
+      {
+       "code": "        return false;",
+       "explanation": "Reached only after every word was tried without a hit; the answer is false: this segment is not a marker.",
+       "state": "Both sample calls end here: isMarker(\"crisp\") = false; isMarker(\"tx\") = false."
+      },
+      {
+       "code": "    }",
+       "explanation": "Closes the isMarker function.",
+       "state": "no variable changes"
+      }
+     ]
+    },
+    {
+     "title": "VIP evidence first",
+     "summary": "The banner comment (lines 59-68) says the rule goes on only when the OS text contains a listed load balancer word or one of the label segments is a listed VIP marker. A Load Balancer Service must never be returned for an ordinary server that happens to share an address with a VIP; this check keeps the rule to the hosts that really are VIPs. The comment walks the sample: \"f5 big ip\" contains \"f5\", so evidence is true; \"rbps-dev3-sve-vip.ecommnp.rpg\" with OS \"Linux 2.6\" would qualify through the segment \"vip\"; \"ah-1047132-001\" with OS \"Red Hat Enterprise Linux 9.8\" has neither and the rule would decline. The two lists (load balancer products in the OS text, label segments that mark a virtual IP) live at the top of this stage and can be extended when a site uses another naming habit.",
+     "lines": [
+      {
+       "code": "    var osMarkers = ['f5', 'big-ip', 'big ip', 'netscaler'];",
+       "explanation": "A list (the square brackets) of load balancer product words looked for in the OS text, all in lower case.",
+       "state": "osMarkers = [\"f5\", \"big-ip\", \"big ip\", \"netscaler\"]"
+      },
+      {
+       "code": "    var labelMarkers = ['vip', 'vs'];",
+       "explanation": "The list of label segments that mark a virtual IP.",
+       "state": "labelMarkers = [\"vip\", \"vs\"]"
+      },
+      {
+       "code": "    var evidence = false;",
+       "explanation": "A yes/no holder that starts as \"no\". It becomes true as soon as any VIP evidence is found.",
+       "state": "evidence = false"
+      },
+      {
+       "code": "    for (var m = 0; m < osMarkers.length; m++)",
+       "explanation": "Repeats the next two lines once for each product word; m counts 0, 1, 2, 3.",
+       "state": "m runs 0, 1, 2, 3."
+      },
+      {
+       "code": "        if (os.indexOf(osMarkers[m]) != -1)",
+       "explanation": "Is the product word found anywhere in the OS text? indexOf gives -1 when absent, so \"!= -1\" means \"present\".",
+       "state": "m = 0: \"f5 big ip\".indexOf(\"f5\") is 0, present. m = 1: \"big-ip\" absent (-1). m = 2: \"big ip\" found at position 3, present. m = 3: \"netscaler\" absent (-1)."
+      },
+      {
+       "code": "            evidence = true;",
+       "explanation": "Records that VIP evidence was found.",
+       "state": "evidence = true (set when m = 0, and set again when m = 2)."
+      },
+      {
+       "code": "    var segments = label ? label.split('-') : [];",
+       "explanation": "Cuts the label at every hyphen into a list of segments. The choice \"? :\" gives an empty list [] when the label is empty, so nothing is searched.",
+       "state": "label is \"crisp-tx\", so segments = [\"crisp\", \"tx\"]"
+      },
+      {
+       "code": "    for (var s = 0; s < segments.length; s++)",
+       "explanation": "Repeats the next two lines once per segment; s counts 0 and 1.",
+       "state": "s runs 0, 1."
+      },
+      {
+       "code": "        if (isMarker(segments[s], labelMarkers))",
+       "explanation": "Asks the isMarker helper whether this segment is a VIP marker in any of its three forms.",
+       "state": "s = 0: isMarker(\"crisp\", [\"vip\", \"vs\"]) = false. s = 1: isMarker(\"tx\", [\"vip\", \"vs\"]) = false. The next line is skipped both times."
+      },
+      {
+       "code": "            evidence = true;",
+       "explanation": "Records VIP evidence found in the host name.",
+       "state": "Not reached for the sample; evidence stays true from the OS check."
+      },
+      {
+       "code": "    if (!evidence)",
+       "explanation": "If no evidence was found at all, stop.",
+       "state": "evidence is true, so \"not evidence\" is false and the next line is skipped. No variable changes."
+      },
+      {
+       "code": "        return null;",
+       "explanation": "Ends the rule with no answer, handing the host to the next rule.",
+       "state": "The rule returns null here only when neither the OS text names a load balancer product nor any label segment is a VIP marker. Not reached for the sample.",
+       "note": "This is the line that protects ordinary servers: for \"ah-1047132-001\" with OS \"Red Hat Enterprise Linux 9.8\" the rule stops here."
+      }
+     ]
+    },
+    {
+     "title": "one",
+     "summary": "This helper, declared just under the banner comment of the last stage, performs a single lookup step on the Load Balancer Service table (cmdb_ci_lb_service). It gives back three kinds of answer: the sys_id when exactly one service carries the value; undefined (\"nothing here, try the next step\") when there is no value to search or no row is found; and null (\"decline, stop the rule\") when the table does not exist or two services share the value. For the sample it runs once, with field \"fqdn\" and value \"crisp-tx.bankofamerica.com\", and gives back <crisp-tx>.",
+     "lines": [
+      {
+       "code": "    function one(field, value) {",
+       "explanation": "Declares the helper named one with two inputs: field (the column to search on the Load Balancer Service table) and value (the text to look for).",
+       "state": "For the sample it is called once from the steps loop with field = \"fqdn\", value = \"crisp-tx.bankofamerica.com\"."
+      },
+      {
+       "code": "        if (!value)",
+       "explanation": "Is there nothing to search for?",
+       "state": "value is \"crisp-tx.bankofamerica.com\", so the condition is false and the next line is skipped. No variable changes."
+      },
+      {
+       "code": "            return undefined;                     // nothing to search, next step",
+       "explanation": "\"undefined\" is the value of something that was never set. Giving it back here means \"no result, but no decision either\": the caller moves on to the next step.",
+       "state": "Not reached for the sample. It is reached when a host has no DNS name: dns and label are then both the empty text \"\", so the fqdn step and both name steps (name with dns, name with label) give back undefined here and only the address step, ip_address = \"171.203.142.26\", searches."
+      },
+      {
+       "code": "        var gr = new GlideRecord('cmdb_ci_lb_service');",
+       "explanation": "Opens a new database query object on the Load Balancer Service table, the table that models virtual IPs. No conditions yet.",
+       "state": "gr = an empty query on cmdb_ci_lb_service",
+       "note": "The balancer device \"rvcpcz1atmlb01s\" lives in another table (cmdb_ci_lb_bigip, under Server), so it can never appear in this query, not even at the address step."
+      },
+      {
+       "code": "        if (!gr.isValid())",
+       "explanation": "isValid() answers whether the table exists on this instance. \"!\" turns the question into \"the table is missing\".",
+       "state": "cmdb_ci_lb_service exists, so the condition is false and the next line is skipped. No variable changes."
+      },
+      {
+       "code": "            return null;                          // class not installed here, decline",
+       "explanation": "Gives back null, which the caller turns into the rule's final null.",
+       "state": "Not reached for the sample."
+      },
+      {
+       "code": "        gr.addQuery(field, value);",
+       "explanation": "Adds the condition \"field equals value\" to the query. Text comparisons in the platform ignore capitalisation.",
+       "state": "gr now carries the condition fqdn = \"crisp-tx.bankofamerica.com\""
+      },
+      {
+       "code": "        if (ignore)",
+       "explanation": "Only when the ignore list is not empty.",
+       "state": "ignore is a non-empty text, so the condition is true. No variable changes."
+      },
+      {
+       "code": "            gr.addQuery('sys_class_name', 'NOT IN', ignore);",
+       "explanation": "Adds a second condition: the record's class (sys_class_name) must not be one of the classes in the ignore list.",
+       "state": "gr now also carries sys_class_name NOT IN \"sn_sec_cmn_unmatched_ci,sn_vul_qualys_ci,cmdb_ci_unclassed_hardware,cmdb_ci_incomplete_ip,cmdb_ci_dns_name\"",
+       "note": "\"crisp-tx\" is of class cmdb_ci_lb_service, which is not in the list, so it stays a candidate."
+      },
+      {
+       "code": "        gr.query();",
+       "explanation": "Runs the query against the CMDB.",
+       "state": "The result holds one row: the Load Balancer Service \"crisp-tx\" <crisp-tx>, whose fqdn is crisp-tx.bankofamerica.com."
+      },
+      {
+       "code": "        if (!gr.next())",
+       "explanation": "next() moves to the first row and answers true when there is one, false when the result is empty. So \"!gr.next()\" means \"nothing was found\".",
+       "state": "next() is true and gr now sits on \"crisp-tx\"; the condition is false and the next line is skipped."
+      },
+      {
+       "code": "            return undefined;                     // nothing found, next step",
+       "explanation": "Nothing matched this step; the caller tries the next step.",
+       "state": "Not reached for the sample: the fqdn step finds \"crisp-tx\" and ends the rule, so no later step runs. Had the fqdn step found nothing, the next step, name = \"crisp-tx.bankofamerica.com\", would return undefined here, because the service's name is \"crisp-tx\", not the full DNS name."
+      },
+      {
+       "code": "        var id = gr.getUniqueValue();",
+       "explanation": "Reads the sys_id of the row the query sits on and keeps it as id.",
+       "state": "id = <crisp-tx>"
+      },
+      {
+       "code": "        if (gr.hasNext())",
+       "explanation": "hasNext() says whether another row follows, without moving. If so, two services carry the same value.",
+       "state": "No second row, so hasNext() is false and the next line is skipped. No variable changes."
+      },
+      {
+       "code": "            return null;                          // two services, never guess",
+       "explanation": "Two candidates means the rule refuses to guess and declines.",
+       "state": "Not reached for the sample. It would be reached if two services shared the fqdn crisp-tx.bankofamerica.com."
+      },
+      {
+       "code": "        return id;",
+       "explanation": "Gives back the sys_id of the single service found.",
+       "state": "one(\"fqdn\", \"crisp-tx.bankofamerica.com\") = <crisp-tx>"
+      },
+      {
+       "code": "    }",
+       "explanation": "Closes the one function.",
+       "state": "no variable changes"
+      }
+     ]
+    },
+    {
+     "title": "The one service, by fqdn, then name, then address",
+     "summary": "The banner comment (lines 81-88) says the scanned DNS name is tried in the fqdn field, then in the name field, then the label in the name field, then the scanned address in ip_address. Each step accepts exactly one service; a step that finds two ends the rule with null, because a weaker piece of evidence could otherwise pick a different service; a step that finds nothing hands over to the next. The comment walks the sample: the first step, fqdn \"crisp-tx.bankofamerica.com\", finds the Load Balancer Service \"crisp-tx\" and no second row, so its sys_id is returned; a VIP without a DNS name and two services on \"171.203.142.26\" would reach the last step and decline there.",
+     "lines": [
+      {
+       "code": "    var steps = [['fqdn', dns], ['name', dns], ['name', label], ['ip_address', ip]];",
+       "explanation": "A list of four steps, each a pair of field and value, in the order they are tried.",
+       "state": "steps = [[\"fqdn\", \"crisp-tx.bankofamerica.com\"], [\"name\", \"crisp-tx.bankofamerica.com\"], [\"name\", \"crisp-tx\"], [\"ip_address\", \"171.203.142.26\"]]"
+      },
+      {
+       "code": "    for (var t = 0; t < steps.length; t++) {",
+       "explanation": "Repeats the block once per step; t counts 0 to 3, unless a return ends the rule earlier.",
+       "state": "t = 0 for the sample; the loop never reaches t = 1 because the first step answers."
+      },
+      {
+       "code": "        var found = one(steps[t][0], steps[t][1]);",
+       "explanation": "Runs the one helper with the field (steps[t][0]) and the value (steps[t][1]) of this step and stores its answer as found.",
+       "state": "found = one(\"fqdn\", \"crisp-tx.bankofamerica.com\") = <crisp-tx>"
+      },
+      {
+       "code": "        if (found === null)",
+       "explanation": "\"===\" is strict equality: true only when found is exactly null, not undefined and not a sys_id. Null from the helper means \"decline\".",
+       "state": "found is <crisp-tx>, so the condition is false and the next line is skipped. No variable changes.",
+       "note": "The strict form matters: with the looser \"==\", undefined (a step that found nothing) would also count as equal to null, and the rule would stop after the first empty step instead of trying the next one."
+      },
+      {
+       "code": "            return null;",
+       "explanation": "Ends the rule with no answer.",
+       "state": "The rule returns null here only when a step found two services or the Load Balancer Service table is missing. Not reached for the sample."
+      },
+      {
+       "code": "        if (found)",
+       "explanation": "True when found holds a sys_id (a non-empty text); false when it is undefined.",
+       "state": "found is <crisp-tx>, so the condition is true."
+      },
+      {
+       "code": "            return found;",
+       "explanation": "Ends the rule with the sys_id as its answer: this CI is matched to the scanned host.",
+       "state": "The rule returns <crisp-tx>, the Load Balancer Service \"crisp-tx\"."
+      },
+      {
+       "code": "    }",
+       "explanation": "Closes the \"for\" block. When a step gave undefined, control comes back here and the next step is tried.",
+       "state": "Not reached for the sample, because the previous line already ended the rule."
+      },
+      {
+       "code": "    return null;",
+       "explanation": "Reached only when all four steps found nothing; the rule declines.",
+       "state": "The rule returns null here only when no service carries the DNS name, the label or the address. Not reached for the sample."
+      },
+      {
+       "code": "})(rule, sourceValue, sourcePayload);",
+       "explanation": "\"}\" closes the process function, \")\" closes the bracket opened on the first line, and \"(rule, sourceValue, sourcePayload)\" runs the function at once with the three inputs the platform provides. The value the function returned is the rule's result.",
+       "state": "The rule's result for the sample is <crisp-tx>."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "rule": "455",
+   "stages": [
+    {
+     "title": "Preparation",
+     "summary": "The header comment (lines 1-32) states the purpose: a virtual server usually fronts several real servers, but many front exactly one; when the CMDB holds the pool behind the virtual server and exactly one real server sits in it, findings scanned on the virtual address belong to that server. The rule finds the virtual server the way the service rule does, walks Load Balancer Service to Pool to Pool Member to server, and returns the server only when it is the single one; otherwise it declines and USEM Load Balancer Service Match attaches the virtual server record. The header also shows the sample payload, the input (sourceValue is the IP, plus OS and DNS from the payload), the return (one server sys_id or null) and the place in the chain (after the hardware rules, before the service rule). The code lines below open the rule, read the address, the DNS name and the OS text, and load the list of CI classes that must never be matched (comments at lines 37, 40 and 45-46 label those steps).",
+     "lines": [
+      {
+       "code": "(function process(rule, sourceValue, sourcePayload) {",
+       "explanation": "Opens the whole rule as one block of steps called a function. A function is a named recipe that takes inputs and hands back one answer. It takes three inputs: rule (the lookup rule record, which the script never reads), sourceValue (the value of the rule's Source field, the IP) and sourcePayload (the whole Qualys host record). The round bracket before the word function wraps the recipe so that it can be run straight away at the very last line; the curly brace at the end opens the list of steps, which runs to the matching closing brace on that last line.",
+       "state": "rule = the lookup rule record (not used); sourceValue = \"171.203.142.26\"; sourcePayload = {\"ID\": \"1202267231\", \"IP\": \"171.203.142.26\", \"TRACKING_METHOD\": \"IP\", \"OS\": \"F5 Big IP\", \"DNS\": \"crisp-tx.bankofamerica.com\"}"
+      },
+      {
+       "code": "    if (!sourceValue)                             // nothing to look up",
+       "explanation": "\"if\" asks a yes/no question and runs the indented line below only when the answer is yes. The exclamation mark means \"not\", so the question is: is sourceValue empty or missing? The text after // is a note for the reader and does nothing.",
+       "state": "sourceValue is \"171.203.142.26\", so the answer is no and the next line is skipped; no variable changes",
+       "note": "A host whose Source field (IP) is empty would take the next line."
+      },
+      {
+       "code": "        return null;",
+       "explanation": "\"return\" ends the rule at once and hands back the value written after it. \"null\" is the value that means \"nothing\": the rule declines and the platform passes the host to the next lookup rule.",
+       "state": "the rule returns null here only when the Source field (IP) is empty; not reached in the sample"
+      },
+      {
+       "code": "    var ip = ('' + sourceValue).trim();           // \"171.203.142.26\"",
+       "explanation": "\"var\" creates a named holder (a variable) called ip. Adding the empty text '' in front turns the value into plain text. \".trim()\" removes any spaces at the start and end of the text.",
+       "state": "ip = \"171.203.142.26\""
+      },
+      {
+       "code": "    if (!ip || ip.indexOf('127.') == 0 || ip.indexOf('169.254.') == 0)",
+       "explanation": "Three questions joined by \"||\", which means \"or\": the answer is yes if any one of them is yes. \"indexOf\" gives the position where a piece of text starts inside a longer text (0 means at the very beginning, -1 means not present). \"==\" means \"is equal to\". So this asks: is ip empty, or does it start with \"127.\" (the loopback address), or does it start with \"169.254.\" (a link-local address)?",
+       "state": "ip is not empty; \"127.\" is not in \"171.203.142.26\" (position -1); \"169.254.\" is not in it either (position -1); the answer is no and the next line is skipped; no variable changes",
+       "note": "Loopback and link-local addresses point at no particular machine, so they are never looked up."
+      },
+      {
+       "code": "        return null;",
+       "explanation": "Ends the rule with \"nothing\" when the address is unusable.",
+       "state": "the rule returns null here only when ip is empty or starts with \"127.\" or \"169.254.\"; not reached in the sample"
+      },
+      {
+       "code": "    var dns = ('' + (sourcePayload.DNS || '')).trim().toLowerCase();",
+       "explanation": "Reads the DNS field of the payload. \"sourcePayload.DNS || ''\" means: take the DNS value, or the empty text '' when the field is missing. The result is turned into text, trimmed of outer spaces, and \".toLowerCase()\" makes every letter small so later comparisons ignore capital letters.",
+       "state": "reads payload field DNS = \"crisp-tx.bankofamerica.com\"; dns = \"crisp-tx.bankofamerica.com\"",
+       "note": "Without the || '' guard a missing DNS field would become the text \"undefined\" instead of an empty text."
+      },
+      {
+       "code": "    var label = dns.split('.')[0];                // \"crisp-tx\"",
+       "explanation": "\".split('.')\" cuts the DNS name at every dot into a list of pieces. \"[0]\" takes the first piece, the host's short name.",
+       "state": "label = \"crisp-tx\" (the pieces were \"crisp-tx\", \"bankofamerica\", \"com\")",
+       "note": "With an empty dns the label is the empty text \"\"."
+      },
+      {
+       "code": "    var os = ('' + (sourcePayload.OS || '')).toLowerCase();  // \"f5 big ip\"",
+       "explanation": "Reads the OS field of the payload much as the DNS field was read: the empty text is used when the field is missing, the value is turned into text and \".toLowerCase()\" makes every letter small. Unlike dns it is not trimmed, which does not matter because the OS text is only searched for words later.",
+       "state": "reads payload field OS = \"F5 Big IP\"; os = \"f5 big ip\""
+      },
+      {
+       "code": "    var ignore = (typeof _ignoreClass != 'undefined' && _ignoreClass) ?",
+       "explanation": "Starts building ignore, the comma-separated list of CI classes that must never be matched. \"typeof\" tells what kind of thing a name holds; \"undefined\" is the kind reported when the name does not exist at all. \"!=\" means \"is not equal to\" and \"&&\" means \"and\". So the question is: did the framework hand in a variable called _ignoreClass, and does it hold a value? The question mark starts a choice: the value before the colon on the next line is used when the answer is yes, the value after it when the answer is no.",
+       "state": "typeof _ignoreClass gives 'undefined', so the answer is no and the value comes from the second choice on the next line"
+      },
+      {
+       "code": "        ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');",
+       "explanation": "The two choices. Before the colon: the handed-in _ignoreClass as text. After the colon: \"gs.getProperty\" reads a system property by name; the second argument '' is what to use when the property is not set.",
+       "state": "ignore = \"sn_sec_cmn_unmatched_ci,sn_vul_qualys_ci,cmdb_ci_unclassed_hardware,cmdb_ci_incomplete_ip,cmdb_ci_dns_name\"",
+       "note": "Placeholder classes such as the unclassed hardware records created for unmatched hosts are in this list, so they can never be returned as a match."
+      }
+     ]
+    },
+    {
+     "title": "isMarker()",
+     "summary": "Helper described by the comment at lines 50-52: it says whether one hyphen segment of the label is a listed marker, in three ways: the word itself (\"vlan\"), the word followed by digits only (\"vlan705\", \"v201\"), or, for words of three letters or more, a segment ending in the word (\"multihostvip\"). It is written here but only called in the VIP sign stage; a function written this way can be called from anywhere inside the rule. In the sample it is called twice, for \"crisp\" and for \"tx\", each time with the words [\"vip\", \"vs\"], and answers false both times.",
+     "lines": [
+      {
+       "code": "    function isMarker(segment, words) {",
+       "explanation": "Defines a helper function named isMarker with two inputs: segment, one piece of the label between hyphens, and words, the list of marker words to look for. It answers true or false.",
+       "state": "no variable changes when defined; in the sample it is later called with segment = \"crisp\" and then segment = \"tx\", both with words = [\"vip\", \"vs\"]"
+      },
+      {
+       "code": "        for (var i = 0; i < words.length; i++) {",
+       "explanation": "\"for\" repeats the block below once per item. A counter i starts at 0, the block runs while i is less than the number of words (words.length), and i++ adds 1 to the counter after every round.",
+       "state": "in each sample call i is 0 in the first round (word \"vip\") and 1 in the second (word \"vs\"); the loop ends when i reaches 2"
+      },
+      {
+       "code": "            var w = words[i];",
+       "explanation": "Takes the word at position i of the list and holds it in w.",
+       "state": "w = \"vip\" in the first round, w = \"vs\" in the second round"
+      },
+      {
+       "code": "            if (segment == w)",
+       "explanation": "Asks whether the segment is exactly the marker word.",
+       "state": "\"crisp\" is not \"vip\" and not \"vs\"; \"tx\" is not \"vip\" and not \"vs\"; the answer is no every time and the next line is skipped"
+      },
+      {
+       "code": "                return true;",
+       "explanation": "Ends the helper with the answer true: the segment is a marker.",
+       "state": "returns true only when a segment equals a word, for example the segment \"vip\"; not reached in the sample"
+      },
+      {
+       "code": "            if (segment.indexOf(w) == 0 && /^[0-9]+$/.test(segment.substring(w.length)))",
+       "explanation": "Two conditions joined by \"and\": the segment starts with the word (indexOf gives position 0), and what remains after the word is digits only. \"substring(w.length)\" cuts off the first letters, as many as the word has, and keeps the rest. The part between the slashes is a pattern: ^ start of text, [0-9]+ one or more digits, $ end of text; \".test\" checks the rest against that pattern.",
+       "state": "\"crisp\".indexOf(\"vip\") is -1 and \"crisp\".indexOf(\"vs\") is -1; \"tx\".indexOf(\"vip\") is -1 and \"tx\".indexOf(\"vs\") is -1; the first condition is no each time, the second is not looked at, and the next line is skipped",
+       "note": "A segment such as \"vs01\" passes: it starts with \"vs\" and the rest, \"01\", is digits only."
+      },
+      {
+       "code": "                return true;",
+       "explanation": "Answers true: the segment is the marker word followed by a number.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "            if (w.length >= 3 && segment.length > w.length && segment.substring(segment.length - w.length) == w)",
+       "explanation": "For marker words of at least three letters (\">=\" means \"greater than or equal to\"): the segment must be longer than the word, and its last letters, as many as the word has, must equal the word. \"substring(segment.length - w.length)\" takes just that tail of the segment.",
+       "state": "for w = \"vip\" (3 letters): \"crisp\" is 5 letters and its tail \"isp\" is not \"vip\"; \"tx\" is 2 letters, not longer than 3. For w = \"vs\" (2 letters) the first condition is no. The answer is no every time and the next line is skipped",
+       "note": "\"multihostvip\" ends in \"vip\" and passes. Two-letter words such as \"vs\" are kept out of this test on purpose, so a name that merely ends in \"vs\" does not count as a virtual server."
+      },
+      {
+       "code": "                return true;",
+       "explanation": "Answers true: the segment ends in the marker word.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "        }",
+       "explanation": "Closes the \"for\" block. Control goes back to the loop line for the next word, or leaves the loop when all words have been tried.",
+       "state": "in each sample call: after the round for \"vip\" the counter i becomes 1 and the loop goes on to \"vs\"; after the round for \"vs\" it becomes 2, which is not less than 2, and the loop ends; no other variable changes"
+      },
+      {
+       "code": "        return false;",
+       "explanation": "No word matched in any of the three ways, so the helper answers false.",
+       "state": "returns false for \"crisp\" and returns false for \"tx\""
+      },
+      {
+       "code": "    }",
+       "explanation": "Closes the isMarker helper.",
+       "state": "no variable changes"
+      }
+     ]
+    },
+    {
+     "title": "VIP sign first",
+     "summary": "Comments at lines 66-75: the rule goes on only when the OS text contains a listed load balancer word or one of the label segments is a listed VIP marker, exactly as the service rule does, so an ordinary server that shares an address with a virtual IP is never walked through a pool. Sample: \"f5 big ip\" contains \"f5\", so sign is true; \"rbps-dev3-sve-vip.ecommnp.rpg\" with OS \"Linux 2.6\" would qualify through the segment \"vip\"; \"ah-1047132-001\" with \"Red Hat Enterprise Linux 9.8\" has neither and the rule would decline. The two lists must be kept the same as in the service rule.",
+     "lines": [
+      {
+       "code": "    var osMarkers = ['f5', 'big-ip', 'big ip', 'netscaler'];",
+       "explanation": "Creates the list of load balancer product words looked for in the OS text. Square brackets hold a list.",
+       "state": "osMarkers = [\"f5\", \"big-ip\", \"big ip\", \"netscaler\"]"
+      },
+      {
+       "code": "    var labelMarkers = ['vip', 'vs'];",
+       "explanation": "Creates the list of label words that mark a virtual IP.",
+       "state": "labelMarkers = [\"vip\", \"vs\"]"
+      },
+      {
+       "code": "    var sign = false;",
+       "explanation": "Creates sign, a yes/no flag that records whether the host shows any virtual-IP sign. It starts as false (no).",
+       "state": "sign = false"
+      },
+      {
+       "code": "    for (var m = 0; m < osMarkers.length; m++)",
+       "explanation": "\"for\" repeats one statement once per OS marker word; here that statement is the \"if\" question on the next line together with the \"sign = true;\" line it controls. The counter m starts at 0, the block runs while m is less than the number of marker words (osMarkers.length, 4), and m++ adds 1 after every round, so m goes 0, 1, 2, 3.",
+       "state": "m = 0, 1, 2, 3 in turn; the loop ends when m reaches 4"
+      },
+      {
+       "code": "        if (os.indexOf(osMarkers[m]) != -1)",
+       "explanation": "Asks whether the marker word appears anywhere in the OS text: \"!= -1\" means \"is found at some position\".",
+       "state": "\"f5\" is found in \"f5 big ip\" at position 0 (yes); \"big-ip\" is not found (-1, no); \"big ip\" is found at position 3 (yes); \"netscaler\" is not found (-1, no)"
+      },
+      {
+       "code": "            sign = true;",
+       "explanation": "Records that a load balancer word was found.",
+       "state": "sign = true (set in the round for \"f5\" and set again in the round for \"big ip\")"
+      },
+      {
+       "code": "    var segments = label ? label.split('-') : [];",
+       "explanation": "Creates segments. The question mark is the same kind of choice as before: when label is not empty, cut it at every hyphen into a list of pieces; otherwise use an empty list [] so nothing is checked.",
+       "state": "segments = [\"crisp\", \"tx\"]"
+      },
+      {
+       "code": "    for (var s = 0; s < segments.length; s++)",
+       "explanation": "Repeats the \"if\" question on the next line, together with the \"sign = true;\" line it controls, once per segment; the counter s starts at 0 and goes up to 1 for the two segments of the sample, and the loop ends when s reaches the number of segments (segments.length).",
+       "state": "s = 0 (\"crisp\"), then s = 1 (\"tx\"); the loop ends when s reaches 2"
+      },
+      {
+       "code": "        if (isMarker(segments[s], labelMarkers))",
+       "explanation": "Calls the isMarker helper with the segment and the marker list and asks whether it answered true.",
+       "state": "isMarker(\"crisp\", [\"vip\", \"vs\"]) answers false; isMarker(\"tx\", [\"vip\", \"vs\"]) answers false; the next line is skipped both times"
+      },
+      {
+       "code": "            sign = true;",
+       "explanation": "Records that a label segment is a VIP marker.",
+       "state": "not reached in the sample; sign stays true from the OS test"
+      },
+      {
+       "code": "    if (!sign)",
+       "explanation": "Asks whether no sign was found at all.",
+       "state": "sign is true, so the answer is no and the next line is skipped; no variable changes"
+      },
+      {
+       "code": "        return null;",
+       "explanation": "Declines: a host with no virtual-IP sign is never walked through a pool, and the next rule gets it.",
+       "state": "the rule returns null here only when neither the OS text nor a label segment shows a virtual-IP sign, for example \"ah-1047132-001\" with OS \"Red Hat Enterprise Linux 9.8\"; not reached in the sample"
+      }
+     ]
+    },
+    {
+     "title": "one()",
+     "summary": "Helper described by the comment at lines 89-95, which also frames the next stage: the same search as the service rule, each step accepting exactly one Load Balancer Service. The helper looks for one value in one field of the Load Balancer Service table and answers in three ways: undefined (nothing to search or nothing found, go to the next step), null (two services found, or the class is not installed, so the whole rule must stop) or the sys_id of the single service found. In the sample it is called once, with field \"fqdn\" and value \"crisp-tx.bankofamerica.com\", and returns <crisp-tx>.",
+     "lines": [
+      {
+       "code": "    function one(field, value) {",
+       "explanation": "Defines the helper named one with two inputs: field, the column to search, and value, the text to look for.",
+       "state": "no variable changes when defined; in the sample it is called with field = \"fqdn\" and value = \"crisp-tx.bankofamerica.com\""
+      },
+      {
+       "code": "        if (!value)",
+       "explanation": "Asks whether there is nothing to search for.",
+       "state": "value is \"crisp-tx.bankofamerica.com\", so the answer is no and the next line is skipped"
+      },
+      {
+       "code": "            return undefined;                     // nothing to search, next step",
+       "explanation": "Answers \"undefined\", the value that means \"no answer given\". The caller treats it as \"try the next step\".",
+       "state": "not reached in the sample; reached when the value for a step is empty, for example the fqdn and name steps for a host with no DNS name"
+      },
+      {
+       "code": "        var gr = new GlideRecord('cmdb_ci_lb_service');",
+       "explanation": "\"new GlideRecord(table)\" prepares a query on a table, here the Load Balancer Service table, and holds it in gr. Nothing is fetched yet.",
+       "state": "gr = an empty query on cmdb_ci_lb_service"
+      },
+      {
+       "code": "        if (!gr.isValid())",
+       "explanation": "Asks whether the table does not exist on this instance.",
+       "state": "the Load Balancer Service table exists, so the answer is no and the next line is skipped"
+      },
+      {
+       "code": "            return null;                          // class not installed here, decline",
+       "explanation": "Answers null so that the rule declines when the load balancer model is not installed.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "        gr.addQuery(field, value);",
+       "explanation": "Adds the condition \"field equals value\" to the query. Text comparisons ignore capital letters.",
+       "state": "the query now reads: fqdn = \"crisp-tx.bankofamerica.com\""
+      },
+      {
+       "code": "        if (ignore)",
+       "explanation": "Asks whether the ignore list holds anything.",
+       "state": "ignore is not empty, so the answer is yes and the next line runs"
+      },
+      {
+       "code": "            gr.addQuery('sys_class_name', 'NOT IN', ignore);",
+       "explanation": "Adds a second condition, joined with \"and\": the record's class must not be one of the ignored classes.",
+       "state": "the query now reads: fqdn = \"crisp-tx.bankofamerica.com\" AND sys_class_name NOT IN \"sn_sec_cmn_unmatched_ci,sn_vul_qualys_ci,cmdb_ci_unclassed_hardware,cmdb_ci_incomplete_ip,cmdb_ci_dns_name\""
+      },
+      {
+       "code": "        gr.query();",
+       "explanation": "Runs the query against the database.",
+       "state": "the result holds one row: the Load Balancer Service \"crisp-tx\""
+      },
+      {
+       "code": "        if (!gr.next())",
+       "explanation": "\"next()\" moves to the first row of the result and says true when there is one, false when the result is empty. The question is: was nothing found?",
+       "state": "next() is true and gr now stands on \"crisp-tx\" (fqdn crisp-tx.bankofamerica.com, ip_address 171.203.142.26, port 443, pool crisp-tx-pool); the answer is no and the next line is skipped"
+      },
+      {
+       "code": "            return undefined;                     // nothing found, next step",
+       "explanation": "Answers \"undefined\" so that the caller moves on to the next search step.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "        var id = gr.getUniqueValue();",
+       "explanation": "\"getUniqueValue()\" gives the sys_id of the row the query stands on, held in id.",
+       "state": "id = <crisp-tx>"
+      },
+      {
+       "code": "        if (gr.hasNext())",
+       "explanation": "\"hasNext()\" says whether another row follows, without moving. The question is: is there a second service?",
+       "state": "there is no second row, so the answer is no and the next line is skipped"
+      },
+      {
+       "code": "            return null;                          // two services, never guess",
+       "explanation": "Answers null: with two candidate services the rule never guesses, and the whole rule will stop.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "        return id;",
+       "explanation": "Answers with the sys_id of the single service found.",
+       "state": "returns <crisp-tx>"
+      },
+      {
+       "code": "    }",
+       "explanation": "Closes the one helper.",
+       "state": "no variable changes"
+      }
+     ]
+    },
+    {
+     "title": "The one virtual server, by fqdn, then name, then address",
+     "summary": "The comment at lines 89-95 describes this search: the scanned DNS name in the fqdn field, then in the name field, then the label in the name field, then the scanned address in ip_address. Each step accepts exactly one service; a step that finds two ends the rule; a step that finds nothing hands over to the next. Sample: the first step, fqdn \"crisp-tx.bankofamerica.com\", finds the Load Balancer Service \"crisp-tx\" and no second row, so service holds its sys_id and the other three steps never run.",
+     "lines": [
+      {
+       "code": "    var steps = [['fqdn', dns], ['name', dns], ['name', label], ['ip_address', ip]];",
+       "explanation": "Creates the ordered list of search steps. Each step is a small list of two items: the field to search and the value to look for.",
+       "state": "steps = [[\"fqdn\", \"crisp-tx.bankofamerica.com\"], [\"name\", \"crisp-tx.bankofamerica.com\"], [\"name\", \"crisp-tx\"], [\"ip_address\", \"171.203.142.26\"]]"
+      },
+      {
+       "code": "    var service = null;",
+       "explanation": "Creates service, the holder for the virtual server's sys_id, starting as \"nothing\".",
+       "state": "service = null"
+      },
+      {
+       "code": "    for (var t = 0; t < steps.length && !service; t++) {",
+       "explanation": "Repeats the block once per step, with counter t, but only while there are steps left and service is still empty (\"!service\"). As soon as a service is found the loop stops.",
+       "state": "t = 0 in the first round; after that round service is set, so the check fails and the loop ends with t = 1"
+      },
+      {
+       "code": "        var found = one(steps[t][0], steps[t][1]);",
+       "explanation": "Calls the one helper with the field (steps[t][0]) and the value (steps[t][1]) of the current step and holds its answer in found.",
+       "state": "found = one(\"fqdn\", \"crisp-tx.bankofamerica.com\") = <crisp-tx>"
+      },
+      {
+       "code": "        if (found === null)",
+       "explanation": "\"===\" is the strict \"is exactly equal to\": it is yes only for null itself, not for undefined. The question: did the helper say \"stop, two services\" (or \"class not installed\")?",
+       "state": "found is <crisp-tx>, not null, so the answer is no and the next line is skipped"
+      },
+      {
+       "code": "            return null;",
+       "explanation": "Ends the rule with \"nothing\" because a step found two services or the class is missing.",
+       "state": "the rule returns null here only when a step finds two or more Load Balancer Services, or the Load Balancer Service table is not installed; not reached in the sample"
+      },
+      {
+       "code": "        if (found)",
+       "explanation": "Asks whether the helper gave a sys_id (a non-empty text counts as yes; undefined counts as no).",
+       "state": "found is <crisp-tx>, so the answer is yes and the next line runs"
+      },
+      {
+       "code": "            service = found;",
+       "explanation": "Keeps the sys_id of the single virtual server.",
+       "state": "service = <crisp-tx>"
+      },
+      {
+       "code": "    }",
+       "explanation": "Closes the step loop. The loop condition is checked again; because service is set, the loop ends.",
+       "state": "t = 1; service = <crisp-tx>"
+      },
+      {
+       "code": "    if (!service)",
+       "explanation": "Asks whether no step found a service.",
+       "state": "service is <crisp-tx>, so the answer is no and the next line is skipped"
+      },
+      {
+       "code": "        return null;",
+       "explanation": "Declines when no virtual server was found by any of the four steps.",
+       "state": "the rule returns null here only when the fqdn, name (twice) and ip_address searches all find nothing; not reached in the sample"
+      }
+     ]
+    },
+    {
+     "title": "isRealServer()",
+     "summary": "Helper described by the comment at lines 125-129: it says whether a CI can be the machine behind the virtual server, that is a record in the Hardware tree that is neither a load balancer nor of an ignored class. It is written here and used later through keep(). In the sample it is called once, with <usvacrispweb01>, and answers true.",
+     "lines": [
+      {
+       "code": "    function isRealServer(id) {",
+       "explanation": "Defines the helper named isRealServer with one input, the sys_id of a CI. It answers true or false.",
+       "state": "no variable changes when defined; in the sample it is called with id = <usvacrispweb01>"
+      },
+      {
+       "code": "        var hw = new GlideRecord('cmdb_ci_hardware');",
+       "explanation": "Prepares a query on the Hardware table. This hw belongs to the helper only and is separate from the hw used later in the main flow.",
+       "state": "hw = an empty query on cmdb_ci_hardware"
+      },
+      {
+       "code": "        if (!hw.get(id))",
+       "explanation": "\"get(sys_id)\" fetches the record with that sys_id from the table or any of its sub-classes and says true when it exists. The question: is the CI not hardware at all?",
+       "state": "hw.get(<usvacrispweb01>) is true because a Linux Server is in the Hardware tree; hw now stands on \"usvacrispweb01\"; the answer is no and the next line is skipped",
+       "note": "A Pool Member or a Load Balancer Service record is not hardware, would not be found here, and would give false."
+      },
+      {
+       "code": "            return false;",
+       "explanation": "Answers false: something outside the Hardware tree is never the real server.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "        var cls = ',' + hw.getValue('sys_class_name') + ',';",
+       "explanation": "Reads the record's class name and wraps it in commas, so the next line can look for the whole name only and not a part of a longer name.",
+       "state": "cls = \",cmdb_ci_linux_server,\""
+      },
+      {
+       "code": "        if (ignore && (',' + ignore + ',').indexOf(cls) != -1)",
+       "explanation": "Asks whether there is an ignore list and the wrapped class name appears in the comma-wrapped ignore list.",
+       "state": "\",sn_sec_cmn_unmatched_ci,sn_vul_qualys_ci,cmdb_ci_unclassed_hardware,cmdb_ci_incomplete_ip,cmdb_ci_dns_name,\" does not contain \",cmdb_ci_linux_server,\" (position -1), so the answer is no and the next line is skipped"
+      },
+      {
+       "code": "            return false;",
+       "explanation": "Answers false for an ignored class, such as the unclassed hardware placeholders.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "        var lb = new GlideRecord('cmdb_ci_lb');",
+       "explanation": "Prepares a query on the Load Balancer table, the class of balancer devices.",
+       "state": "lb = an empty query on cmdb_ci_lb"
+      },
+      {
+       "code": "        return !(lb.isValid() && lb.get(id));",
+       "explanation": "Answers the opposite of \"the Load Balancer table exists and this sys_id is found in it\". A record found there is a balancer device, so the answer is false; anything else gives true.",
+       "state": "lb.isValid() is true and lb.get(<usvacrispweb01>) is false (a Linux Server is not under cmdb_ci_lb), so the inner part is false and the helper returns true",
+       "note": "The balancer device \"rvcpcz1atmlb01s\" (class cmdb_ci_lb_bigip, under cmdb_ci_lb) would be found here and the helper would answer false."
+      },
+      {
+       "code": "    }",
+       "explanation": "Closes the isRealServer helper.",
+       "state": "no variable changes"
+      }
+     ]
+    },
+    {
+     "title": "related()",
+     "summary": "Helper described by the comment at lines 125-129: it collects the CIs tied to a record by a relationship in either direction, kept to one class and its sub-classes, so a load balancer model loaded as relationships instead of reference fields is read the same way. In the sample it is called three times: related(<crisp-tx>, 'cmdb_ci_lb_pool'), related(<crisp-tx-pool>, 'cmdb_ci_lb_pool_member') and related(<member-31>, 'cmdb_ci_hardware'). No relationship rows involve these records, so each call returns an empty list and the loop body never runs.",
+     "lines": [
+      {
+       "code": "    function related(id, table) {",
+       "explanation": "Defines the helper named related with two inputs: id, the sys_id of the record to start from, and table, the class the related records must belong to. It answers with a list of sys_ids.",
+       "state": "no variable changes when defined; in the sample it is called with (<crisp-tx>, \"cmdb_ci_lb_pool\"), then (<crisp-tx-pool>, \"cmdb_ci_lb_pool_member\"), then (<member-31>, \"cmdb_ci_hardware\")"
+      },
+      {
+       "code": "        var out = [];",
+       "explanation": "Creates out, an empty list that will collect the related sys_ids.",
+       "state": "out = [] in each call"
+      },
+      {
+       "code": "        var rel = new GlideRecord('cmdb_rel_ci');",
+       "explanation": "Prepares a query on the CI Relationship table, where each row links a parent CI to a child CI.",
+       "state": "rel = an empty query on cmdb_rel_ci"
+      },
+      {
+       "code": "        rel.addQuery('parent', id).addOrCondition('child', id);",
+       "explanation": "Adds the condition \"parent equals id\" and, with \"addOrCondition\", widens that same condition with \"or child equals id\", so rows where the record sits at either end are selected.",
+       "state": "the query reads: parent = <crisp-tx> OR child = <crisp-tx> in the first call; parent = <crisp-tx-pool> OR child = <crisp-tx-pool> in the second; parent = <member-31> OR child = <member-31> in the third"
+      },
+      {
+       "code": "        rel.query();",
+       "explanation": "Runs the query.",
+       "state": "the result holds zero rows in each sample call"
+      },
+      {
+       "code": "        while (rel.next()) {",
+       "explanation": "\"while\" repeats the block as long as its question is yes. next() moves to the next relationship row and says false when there are no more.",
+       "state": "next() is false at once in each sample call, so the block never runs"
+      },
+      {
+       "code": "            var other = rel.getValue('parent') == id ?",
+       "explanation": "Starts working out the other end of the relationship: if the parent is our record, the other end is the child, otherwise it is the parent. The choice continues on the next line.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "                rel.getValue('child') : rel.getValue('parent');",
+       "explanation": "The two choices: the child sys_id when our record is the parent, the parent sys_id otherwise. The result is held in other.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "            var g = new GlideRecord(table);",
+       "explanation": "Prepares a query on the wanted class.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "            if (g.isValid() && g.get(other))",
+       "explanation": "Asks whether the wanted class exists and the other record is found in that class or one of its sub-classes.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "                out.push(other);",
+       "explanation": "\"push\" adds the sys_id to the end of the list.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "        }",
+       "explanation": "Closes the while block; control returns to the while line for the next relationship row.",
+       "state": "no variable changes"
+      },
+      {
+       "code": "        return out;",
+       "explanation": "Answers with the collected list.",
+       "state": "returns [] in each of the three sample calls"
+      },
+      {
+       "code": "    }",
+       "explanation": "Closes the related helper.",
+       "state": "no variable changes"
+      }
+     ]
+    },
+    {
+     "title": "The pool behind the virtual server",
+     "summary": "Comments at lines 155-161: a pool is reached three ways, because the load balancer model can be loaded either through reference fields or through relationships: the pool field on the service, pools whose service field points at the service, and pools related to the service. Without a pool the rule declines and the service rule attaches the virtual server. Sample: the service \"crisp-tx\" carries the pool \"crisp-tx-pool\" in its pool field, the pool's own service field also points back at \"crisp-tx\", and there are no relationships; poolIds holds that one sys_id.",
+     "lines": [
+      {
+       "code": "    var pools = {};",
+       "explanation": "Creates pools, an empty set. Curly braces make a collection keyed by name; here each pool sys_id is a key, so the same pool counted twice stays one entry.",
+       "state": "pools = {}"
+      },
+      {
+       "code": "    var svc = new GlideRecord('cmdb_ci_lb_service');",
+       "explanation": "Prepares a query on the Load Balancer Service table.",
+       "state": "svc = an empty query on cmdb_ci_lb_service"
+      },
+      {
+       "code": "    svc.get(service);",
+       "explanation": "Fetches the virtual server record found earlier.",
+       "state": "svc stands on \"crisp-tx\""
+      },
+      {
+       "code": "    if (svc.getValue('pool'))",
+       "explanation": "Asks whether the service's pool field points at a pool.",
+       "state": "the pool field holds <crisp-tx-pool>, so the answer is yes and the next line runs"
+      },
+      {
+       "code": "        pools[svc.getValue('pool')] = true;",
+       "explanation": "Adds that pool sys_id to the set.",
+       "state": "pools = { <crisp-tx-pool>: true }"
+      },
+      {
+       "code": "    var byService = new GlideRecord('cmdb_ci_lb_pool');",
+       "explanation": "Prepares a query on the Load Balancer Pool table for the second way of finding pools.",
+       "state": "byService = an empty query on cmdb_ci_lb_pool"
+      },
+      {
+       "code": "    if (byService.isValid()) {",
+       "explanation": "Asks whether the Pool table exists.",
+       "state": "it exists, so the answer is yes and the block runs"
+      },
+      {
+       "code": "        byService.addQuery('service', service);",
+       "explanation": "Adds the condition: the pool's service field must point at our virtual server.",
+       "state": "the query reads: service = <crisp-tx>"
+      },
+      {
+       "code": "        byService.query();",
+       "explanation": "Runs the query.",
+       "state": "the result holds one row: \"crisp-tx-pool\""
+      },
+      {
+       "code": "        while (byService.next())",
+       "explanation": "Repeats the next line for each pool found.",
+       "state": "first round: next() is true and byService stands on \"crisp-tx-pool\"; second round: next() is false and the loop ends"
+      },
+      {
+       "code": "            pools[byService.getUniqueValue()] = true;",
+       "explanation": "Adds the pool's sys_id to the set.",
+       "state": "pools = { <crisp-tx-pool>: true } (the same key as before, so still one entry)"
+      },
+      {
+       "code": "    }",
+       "explanation": "Closes the \"if\" block for the Pool table.",
+       "state": "no variable changes"
+      },
+      {
+       "code": "    var relPools = related(service, 'cmdb_ci_lb_pool');",
+       "explanation": "Third way: asks the related helper for pools tied to the service by a relationship.",
+       "state": "relPools = []"
+      },
+      {
+       "code": "    for (var r1 = 0; r1 < relPools.length; r1++)",
+       "explanation": "Repeats the next line once per related pool.",
+       "state": "relPools is empty, so the loop runs no rounds"
+      },
+      {
+       "code": "        pools[relPools[r1]] = true;",
+       "explanation": "Adds a related pool to the set.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "    var poolIds = Object.keys(pools);",
+       "explanation": "\"Object.keys\" turns the keys of the set into a plain list, giving each pool sys_id once.",
+       "state": "poolIds = [<crisp-tx-pool>]"
+      },
+      {
+       "code": "    if (!poolIds.length)",
+       "explanation": "Asks whether the list is empty (a length of 0 counts as \"not\").",
+       "state": "the list has 1 entry, so the answer is no and the next line is skipped"
+      },
+      {
+       "code": "        return null;",
+       "explanation": "Declines when the virtual server has no pool; the service rule will attach the virtual server record itself.",
+       "state": "the rule returns null here only when no pool is found by any of the three ways; not reached in the sample"
+      }
+     ]
+    },
+    {
+     "title": "The pool members and their addresses",
+     "summary": "Comments at lines 181-187: members are the records whose pool field points at one of the pools, plus the members related to a pool. Each member is kept with its address; an empty address is kept as an empty text so that no address search runs for it, yet a member without an address can still lead to a server through a relationship. Sample: the pool \"crisp-tx-pool\" has one member, \"crisp-tx-pool_10.10.20.31_443\", with ip_address \"10.10.20.31\"; members holds that one entry.",
+     "lines": [
+      {
+       "code": "    var members = {};",
+       "explanation": "Creates members, an empty collection keyed by member sys_id, where each entry will hold the member's address.",
+       "state": "members = {}"
+      },
+      {
+       "code": "    var mem = new GlideRecord('cmdb_ci_lb_pool_member');",
+       "explanation": "Prepares a query on the Load Balancer Pool Member table.",
+       "state": "mem = an empty query on cmdb_ci_lb_pool_member"
+      },
+      {
+       "code": "    if (mem.isValid()) {",
+       "explanation": "Asks whether the Pool Member table exists.",
+       "state": "it exists, so the block runs"
+      },
+      {
+       "code": "        mem.addQuery('pool', 'IN', poolIds.join(','));",
+       "explanation": "\"join(',')\" glues the list of pool sys_ids into one comma-separated text; \"IN\" means the member's pool field must be any one of them.",
+       "state": "the query reads: pool IN \"<crisp-tx-pool>\""
+      },
+      {
+       "code": "        mem.query();",
+       "explanation": "Runs the query.",
+       "state": "the result holds one row: \"crisp-tx-pool_10.10.20.31_443\""
+      },
+      {
+       "code": "        while (mem.next())",
+       "explanation": "Repeats the next line for each member found.",
+       "state": "first round: mem stands on \"crisp-tx-pool_10.10.20.31_443\"; second round: next() is false and the loop ends"
+      },
+      {
+       "code": "            members[mem.getUniqueValue()] = '' + (mem.getValue('ip_address') || '');",
+       "explanation": "Stores the member under its sys_id with its address as text. \"|| ''\" turns an empty address into the empty text instead of the word \"null\".",
+       "state": "members = { <member-31>: \"10.10.20.31\" }"
+      },
+      {
+       "code": "    }",
+       "explanation": "Closes the \"if\" block for the Pool Member table.",
+       "state": "no variable changes"
+      },
+      {
+       "code": "    for (var p1 = 0; p1 < poolIds.length; p1++) {",
+       "explanation": "Repeats the block once per pool, with counter p1, to look for members tied to the pool by relationships.",
+       "state": "one round with p1 = 0 (pool <crisp-tx-pool>); the loop ends when p1 reaches 1"
+      },
+      {
+       "code": "        var relMembers = related(poolIds[p1], 'cmdb_ci_lb_pool_member');",
+       "explanation": "Asks the related helper for Pool Members tied to this pool by a relationship.",
+       "state": "relMembers = []"
+      },
+      {
+       "code": "        for (var r2 = 0; r2 < relMembers.length; r2++) {",
+       "explanation": "Repeats the block once per related member.",
+       "state": "relMembers is empty, so the loop runs no rounds"
+      },
+      {
+       "code": "            if (members[relMembers[r2]] !== undefined)",
+       "explanation": "Looks up the related member's sys_id in the members collection. A key that is not in the collection reads as \"undefined\" (the value that means \"nothing stored here\"), so this asks whether an entry for this member already exists. \"!==\" is the strict \"is not exactly equal to\": the answer is yes only when something, even the empty text, is already stored under that sys_id.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "                continue;",
+       "explanation": "\"continue\" skips the rest of this round and moves to the next related member.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "            var mg = new GlideRecord('cmdb_ci_lb_pool_member');",
+       "explanation": "Prepares a query on the Pool Member table to read the related member.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "            mg.get(relMembers[r2]);",
+       "explanation": "Fetches that member record.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "            members[relMembers[r2]] = '' + (mg.getValue('ip_address') || '');",
+       "explanation": "Stores the related member with its address as text, an empty address as the empty text.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "        }",
+       "explanation": "Closes the loop over related members.",
+       "state": "no variable changes"
+      },
+      {
+       "code": "    }",
+       "explanation": "Closes the loop over pools.",
+       "state": "p1 = 1; members = { <member-31>: \"10.10.20.31\" }"
+      },
+      {
+       "code": "    var memberIds = Object.keys(members);",
+       "explanation": "Turns the member sys_ids into a plain list.",
+       "state": "memberIds = [<member-31>]"
+      },
+      {
+       "code": "    if (!memberIds.length)",
+       "explanation": "Asks whether no member was found.",
+       "state": "the list has 1 entry, so the answer is no and the next line is skipped"
+      },
+      {
+       "code": "        return null;",
+       "explanation": "Declines when the pool has no members.",
+       "state": "the rule returns null here only when no Pool Member points at or is related to any of the pools; not reached in the sample"
+      }
+     ]
+    },
+    {
+     "title": "The real servers, exactly one (the servers set)",
+     "summary": "Comments at lines 210-220: each member address is looked for on device records, on network adapters and on IP Address records, and each member is followed through its relationships to hardware; load balancer devices and ignored classes are left out. The distinct servers found are counted: one server is the match; none, or two or more, and the rule declines, leaving the virtual server record to the service rule. A member address carried by two device records is two servers and declines as well. Sample: the Linux Server \"usvacrispweb01\" carries \"10.10.20.31\" in its ip_address field, so servers ends with one entry and its sys_id is returned; a second member on \"10.10.20.32\" owned by another server would make the rule decline and the service rule attach \"crisp-tx\". This first part creates the set the search fills.",
+     "lines": [
+      {
+       "code": "    var servers = {};",
+       "explanation": "Creates servers, an empty set keyed by server sys_id, so a server found more than once still counts as one.",
+       "state": "servers = {}"
+      }
+     ]
+    },
+    {
+     "title": "keep()",
+     "summary": "A small helper written inside the last stage: it adds a sys_id to the servers set, but only when the sys_id is present and isRealServer says the record is hardware that is neither a load balancer nor of an ignored class. In the sample it is called once, with <usvacrispweb01>, from the hardware address search, and adds that server.",
+     "lines": [
+      {
+       "code": "    function keep(id) {",
+       "explanation": "Defines the helper named keep with one input, a sys_id.",
+       "state": "no variable changes when defined; in the sample it is called once with id = <usvacrispweb01>"
+      },
+      {
+       "code": "        if (id && isRealServer(id))",
+       "explanation": "Asks whether a sys_id was given and the isRealServer helper answers true for it.",
+       "state": "id is <usvacrispweb01> and isRealServer(<usvacrispweb01>) is true, so the answer is yes and the next line runs"
+      },
+      {
+       "code": "            servers[id] = true;",
+       "explanation": "Adds the sys_id to the servers set.",
+       "state": "servers = { <usvacrispweb01>: true }"
+      },
+      {
+       "code": "    }",
+       "explanation": "Closes the keep helper.",
+       "state": "no variable changes"
+      }
+     ]
+    },
+    {
+     "title": "The real servers, exactly one (the search and the answer)",
+     "summary": "The second part of the last stage (comments at lines 210-220): for each member, the address is searched on Hardware records, on Network Adapters that belong to a CI, and on IP Address records whose adapter belongs to a CI; then the member's relationships to hardware are followed. Every hit goes through keep(). Finally the distinct servers are counted and the single one is returned. Sample: the address \"10.10.20.31\" finds only \"usvacrispweb01\" on the Hardware table; adapters, IP Address records and relationships give nothing; one server, so <usvacrispweb01> is the answer. The closing line runs the whole function.",
+     "lines": [
+      {
+       "code": "    for (var k = 0; k < memberIds.length; k++) {",
+       "explanation": "Repeats the block once per member, with counter k.",
+       "state": "one round with k = 0 (member <member-31>); the loop ends when k reaches 1"
+      },
+      {
+       "code": "        var addr = members[memberIds[k]];",
+       "explanation": "Reads the member's stored address.",
+       "state": "addr = \"10.10.20.31\""
+      },
+      {
+       "code": "        if (addr) {",
+       "explanation": "Asks whether the member has an address; the three address searches run only then.",
+       "state": "addr is \"10.10.20.31\", so the block runs"
+      },
+      {
+       "code": "            var hw = new GlideRecord('cmdb_ci_hardware');",
+       "explanation": "Prepares a query on the Hardware table (the main flow's own hw, separate from the helper's).",
+       "state": "hw = an empty query on cmdb_ci_hardware"
+      },
+      {
+       "code": "            hw.addQuery('ip_address', addr);",
+       "explanation": "Adds the condition: the device's ip_address field equals the member address.",
+       "state": "the query reads: ip_address = \"10.10.20.31\""
+      },
+      {
+       "code": "            hw.query();",
+       "explanation": "Runs the query.",
+       "state": "the result holds one row: \"usvacrispweb01\" (the balancer device \"rvcpcz1atmlb01s\" carries 171.203.142.26, not this address, and the Pool Member record is not hardware)"
+      },
+      {
+       "code": "            while (hw.next())",
+       "explanation": "Repeats the next line for each device found.",
+       "state": "first round: hw stands on \"usvacrispweb01\"; second round: next() is false and the loop ends"
+      },
+      {
+       "code": "                keep(hw.getUniqueValue());",
+       "explanation": "Hands the device's sys_id to keep(), which adds it when it is a real server.",
+       "state": "keep(<usvacrispweb01>) runs; servers = { <usvacrispweb01>: true }"
+      },
+      {
+       "code": "            var nic = new GlideRecord('cmdb_ci_network_adapter');",
+       "explanation": "Prepares a query on the Network Adapter table for the second search.",
+       "state": "nic = an empty query on cmdb_ci_network_adapter"
+      },
+      {
+       "code": "            nic.addQuery('ip_address', addr);",
+       "explanation": "Adds the condition: the adapter's ip_address equals the member address.",
+       "state": "the query reads: ip_address = \"10.10.20.31\""
+      },
+      {
+       "code": "            nic.addNotNullQuery('cmdb_ci');",
+       "explanation": "Adds the condition that the adapter must belong to a CI (its cmdb_ci field is not empty).",
+       "state": "the query reads: ip_address = \"10.10.20.31\" AND cmdb_ci is not empty"
+      },
+      {
+       "code": "            nic.query();",
+       "explanation": "Runs the query.",
+       "state": "the result holds zero rows (\"usvacrispweb01\" has no adapters)"
+      },
+      {
+       "code": "            while (nic.next())",
+       "explanation": "Repeats the next line for each adapter found.",
+       "state": "next() is false at once, so no rounds"
+      },
+      {
+       "code": "                keep(nic.getValue('cmdb_ci'));",
+       "explanation": "Hands the sys_id of the CI that owns the adapter to keep().",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "            var ipr = new GlideRecord('cmdb_ci_ip_address');",
+       "explanation": "Prepares a query on the IP Address table for the third search.",
+       "state": "ipr = an empty query on cmdb_ci_ip_address"
+      },
+      {
+       "code": "            if (ipr.isValid()) {",
+       "explanation": "Asks whether the IP Address table exists.",
+       "state": "it exists, so the block runs"
+      },
+      {
+       "code": "                ipr.addQuery('ip_address', addr);",
+       "explanation": "Adds the condition: the IP Address record's ip_address equals the member address.",
+       "state": "the query reads: ip_address = \"10.10.20.31\""
+      },
+      {
+       "code": "                ipr.addNotNullQuery('nic.cmdb_ci');",
+       "explanation": "Adds the condition that the record's adapter (nic) belongs to a CI. \"nic.cmdb_ci\" reads through the adapter to its CI, two links away.",
+       "state": "the query reads: ip_address = \"10.10.20.31\" AND nic.cmdb_ci is not empty"
+      },
+      {
+       "code": "                ipr.query();",
+       "explanation": "Runs the query.",
+       "state": "the result holds zero rows (no IP Address records exist for the sample)"
+      },
+      {
+       "code": "                while (ipr.next())",
+       "explanation": "Repeats the next line for each IP Address record found.",
+       "state": "next() is false at once, so no rounds"
+      },
+      {
+       "code": "                    keep('' + ipr.nic.cmdb_ci);",
+       "explanation": "Hands the CI behind the adapter to keep(). \"ipr.nic.cmdb_ci\" reads through the IP Address record's adapter (nic) to the CI that owns it, two links away; adding '' in front turns that reference into its sys_id as plain text, the form keep() and isRealServer() expect.",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "            }",
+       "explanation": "Closes the \"if\" block for the IP Address table.",
+       "state": "no variable changes"
+      },
+      {
+       "code": "        }",
+       "explanation": "Closes the \"if (addr)\" block.",
+       "state": "no variable changes"
+      },
+      {
+       "code": "        var relServers = related(memberIds[k], 'cmdb_ci_hardware');",
+       "explanation": "Asks the related helper for Hardware records tied to the member by a relationship.",
+       "state": "relServers = []"
+      },
+      {
+       "code": "        for (var r3 = 0; r3 < relServers.length; r3++)",
+       "explanation": "Repeats the next line once per related hardware record.",
+       "state": "relServers is empty, so no rounds"
+      },
+      {
+       "code": "            keep(relServers[r3]);",
+       "explanation": "Hands the related record's sys_id to keep().",
+       "state": "not reached in the sample"
+      },
+      {
+       "code": "    }",
+       "explanation": "Closes the loop over members.",
+       "state": "k = 1; servers = { <usvacrispweb01>: true }"
+      },
+      {
+       "code": "    var ids = Object.keys(servers);",
+       "explanation": "Turns the distinct server sys_ids into a plain list.",
+       "state": "ids = [<usvacrispweb01>]"
+      },
+      {
+       "code": "    if (ids.length == 1)",
+       "explanation": "Asks whether exactly one server was found.",
+       "state": "the list has 1 entry, so the answer is yes and the next line runs"
+      },
+      {
+       "code": "        return ids[0];",
+       "explanation": "Ends the rule and hands back the single server's sys_id as the match.",
+       "state": "returns <usvacrispweb01>, the Linux Server \"usvacrispweb01\""
+      },
+      {
+       "code": "    return null;",
+       "explanation": "Reached only when zero or two or more servers were found: the rule declines and the service rule attaches the virtual server record.",
+       "state": "the rule returns null here only when the servers set is empty or holds two or more entries; not reached in the sample",
+       "note": "A second member on \"10.10.20.32\" owned by another server, or one address carried by two device records, ends here and \"crisp-tx\" is attached by the service rule instead."
+      },
+      {
+       "code": "})(rule, sourceValue, sourcePayload);",
+       "explanation": "Closes the function and, with the bracket pair that follows, runs it at once with the three inputs. Whatever the function returned becomes the rule's answer to the platform.",
+       "state": "the rule's answer is <usvacrispweb01>; the platform links the scanned host to the Linux Server \"usvacrispweb01\""
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

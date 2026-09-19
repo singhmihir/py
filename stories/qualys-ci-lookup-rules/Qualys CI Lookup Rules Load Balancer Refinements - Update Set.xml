@@ -1,0 +1,786 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-17 12:12:15">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Global">global</application>
+<application_name>Global</application_name>
+<application_scope>global</application_scope>
+<application_version/>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>Three USEM Qualys CI lookup rules re-issued. 350 Layered DNS Match refuses a load balancer device at the end of the DNS Name -&gt; IP Address -&gt; adapter -&gt; CI chain, because the name then belongs to a virtual address the balancer answers on; the host goes on to the load balancer rules. 455 Load Balancer Member Match and 460 Load Balancer Service Match treat several Load Balancer Service records carrying one name (an HA pair keeps the same virtual server on both devices; a test leaves a copy) as the same virtual server recorded more than once: the records answering on the scanned address are kept, then the live ones; the member rule walks the pools of every record kept, the service rule returns the one record left and declines when two live records still compete; two different names on one value still decline. 455 also treats several server records of one name as one machine: a retired record is set aside for the live one, two live records decline, two differently named machines decline; a member that leads to no server in the CMDB makes 455 decline, because the pool is then partly unknown, and the service rule attaches the virtual server record as before. No guess is made anywhere: an ambiguity the CMDB cannot settle is left to the service rule or unmatched. No system property is read or shipped.</description>
+<inserted/>
+<name>SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Load Balancer Refinements_V1.2</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>d7ceb73293574390e3aef0aefaba105a</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-17 12:12:14</sys_created_on>
+<sys_id>271a5407939b4390e3aef0aefaba101a</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-17 12:12:14</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sn_sec_cmn_ci_lookup_rule_0a8c2ed29357cb50e3aef0aefaba102c</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sn_sec_cmn_ci_lookup_rule"&gt;&lt;sn_sec_cmn_ci_lookup_rule action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;applies_to/&gt;&lt;condition/&gt;&lt;description&gt;Virtual server found as the service rule does (records of one name on the scanned address are one virtual server, retired copies set aside), then Load Balancer Service -&amp;gt; Pool -&amp;gt; Pool Member -&amp;gt; server; the one machine every member leads to, its live record when a retired duplicate exists, or null (a member the CMDB cannot place, no machine, two machines, two live records of one machine) so that the service rule decides.&lt;/description&gt;&lt;lookup_script/&gt;&lt;lookup_target&gt;ci&lt;/lookup_target&gt;&lt;method&gt;script&lt;/method&gt;&lt;name&gt;USEM Load Balancer Member Match&lt;/name&gt;&lt;order&gt;455&lt;/order&gt;&lt;reapply&gt;true&lt;/reapply&gt;&lt;reapply_version&gt;5&lt;/reapply_version&gt;&lt;script&gt;&lt;![CDATA[/* USEM Load Balancer Member Match
+   -------------------------------------------------------------------------------------------------
+   A virtual server usually fronts several real servers, but many front exactly one. When the CMDB
+   holds the pool behind the virtual server and every member of it leads to one and the same
+   machine, the findings scanned on the virtual address belong to that machine. This rule finds the
+   virtual server the way the service rule does, walks Load Balancer Service to Pool to Pool Member
+   to server, and returns the machine only when the whole pool points at it. With several machines,
+   a member the CMDB cannot place, or no pool data, it declines; the service rule then decides
+   whether the virtual server record can stand for the host.
+
+   Sample payload (one Qualys host record, used in every note below)
+   {
+     "ID": "1202267231",
+     "IP": "171.203.142.26",
+     "TRACKING_METHOD": "IP",
+     "OS": "F5 Big IP",
+     "DNS": "crisp-tx.bankofamerica.com"
+   }
+   Input  : sourceValue is the IP field, "171.203.142.26"; the rule also reads the OS and the DNS
+            name from sourcePayload.
+   Returns: the sys_id of the one real server behind the virtual server (a machine recorded more
+            than once counts once, its live record standing for it); null when the host shows no VIP
+            sign, no virtual server matches or two differently named ones carry the value, the
+            virtual server has no pool or no members, a member leads to no server in the CMDB, two
+            or more machines sit behind it, or two live records of the one machine compete.
+   Sample : the Linux Server "usvacrispweb01", the only member of the pool "crisp-tx-pool" behind
+            the Load Balancer Service "crisp-tx", reached through the member address "10.10.20.31".
+
+   Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
+   Before : the hardware rules declined: a VIP has no serial, "crisp-tx" is not a server name, and
+            the address belongs to a load balancer device.
+   Reaches: virtual servers whose pool, fully known to the CMDB, holds exactly one real server.
+   After  : USEM Load Balancer Service Match, which attaches the virtual server record when the CMDB
+            does not show several servers behind it.
+   ------------------------------------------------------------------------------------------------- */
+(function process(rule, sourceValue, sourcePayload) {
+    if (!sourceValue)                             // nothing to look up
+        return null;
+    var ip = ('' + sourceValue).trim();           // "171.203.142.26"
+    // loopback and link-local identify nothing
+    if (!ip || ip.indexOf('127.') == 0 || ip.indexOf('169.254.') == 0)
+        return null;
+    // "crisp-tx.bankofamerica.com", may be empty
+    var dns = ('' + (sourcePayload.DNS || '')).trim().toLowerCase();
+    var label = dns.split('.')[0];                // "crisp-tx"
+    var os = ('' + (sourcePayload.OS || '')).toLowerCase();  // "f5 big ip"
+
+    // Classes that must never be matched (placeholder and technical CIs); the list lives in the
+    // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
+    var ignore = (typeof _ignoreClass != 'undefined' &amp;&amp; _ignoreClass) ?
+        ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
+
+    // isMarker() says whether one hyphen segment of the label is a listed marker: the word itself
+    // ("vlan"), the word followed by digits only ("vlan705", "v201"), or, for words of three
+    // letters or more, a segment ending in the word ("multihostvip").
+    function isMarker(segment, words) {
+        for (var i = 0; i &lt; words.length; i++) {
+            var w = words[i];
+            if (segment == w)
+                return true;
+            if (segment.indexOf(w) == 0 &amp;&amp; /^[0-9]+$/.test(segment.substring(w.length)))
+                return true;
+            if (w.length &gt;= 3 &amp;&amp; segment.length &gt; w.length &amp;&amp; segment.substring(segment.length - w.length) == w)
+                return true;
+        }
+        return false;
+    }
+
+    // -- VIP sign first ---------------------------------------------------------------------------
+    // The rule goes on only when the OS text contains a listed load balancer word or one of the
+    // label segments is a listed VIP marker. An ordinary server that shares an address with a
+    // virtual IP is never treated as a VIP.
+    // Sample: "f5 big ip" contains "f5", so sign is true. "rbps-dev3-sve-vip.ecommnp.rpg" with OS
+    //         "Linux 2.6" would qualify through the segment "vip"; "ah-1047132-001" with OS "Red
+    //         Hat Enterprise Linux 9.8" has neither and the rule would decline.
+    //
+    // The load balancer products looked for in the OS text, and the label segments that mark a
+    // virtual IP. Keep both lists the same in the member rule and the service rule.
+    var osMarkers = ['f5', 'big-ip', 'big ip', 'netscaler'];
+    var labelMarkers = ['vip', 'vs'];
+    var sign = false;
+    for (var m = 0; m &lt; osMarkers.length; m++)
+        if (os.indexOf(osMarkers[m]) != -1)
+            sign = true;
+    var segments = label ? label.split('-') : [];
+    for (var s = 0; s &lt; segments.length; s++)
+        if (isMarker(segments[s], labelMarkers))
+            sign = true;
+    if (!sign)
+        return null;
+
+    // retired() is the platform's own test for a decommissioned CI: install status Retired,
+    // operational status Retired, or a Retired life cycle stage.
+    function retired(ci) {
+        return ci.getValue('install_status') == '7' || ci.getValue('operational_status') == '6' ||
+            ci.life_cycle_stage_status.getDisplayValue() == 'Retired';
+    }
+
+    // narrow() keeps the records carrying a flag when any does, so a record answering on the
+    // scanned address, or a live record, is preferred to the others without dropping the only
+    // records there are.
+    function narrow(list, flag) {
+        var out = [];
+        for (var i = 0; i &lt; list.length; i++)
+            if (list[i][flag])
+                out.push(list[i]);
+        return out.length ? out : list;
+    }
+
+    // -- The one virtual server, by fqdn, then name, then address ---------------------------------
+    // The scanned DNS name in the fqdn field, then in the name field, then the label in the name
+    // field, then the scanned address in ip_address. Each step accepts one virtual server. Several
+    // records carrying one name are the same virtual server recorded more than once (an HA pair
+    // keeps the same object on both devices; a test leaves a copy): the records answering on the
+    // scanned address are kept, then the live ones. Two different names on the same value end the
+    // rule; a step that finds nothing hands over to the next.
+    // Sample: the first step, fqdn "crisp-tx.bankofamerica.com", finds the Load Balancer Service
+    //         "crisp-tx" and no second row, so twins holds that one record. Two live records named
+    //         "crisp-tx" on "171.203.142.26", one per balancer of the pair, would both be kept and
+    //         the pool of each walked below; a retired copy beside a live one would be set aside.
+    var twins = [];                               // every record kept of the virtual server found
+    function one(field, value) {
+        if (!value)
+            return undefined;                     // nothing to search, next step
+        var gr = new GlideRecord('cmdb_ci_lb_service');
+        if (!gr.isValid())
+            return null;                          // class not installed here, decline
+        gr.addQuery(field, value);
+        if (ignore)
+            gr.addQuery('sys_class_name', 'NOT IN', ignore);
+        gr.query();
+        var rows = [], names = {};
+        while (gr.next()) {
+            names[('' + (gr.getValue('name') || '')).trim().toLowerCase()] = true;
+            rows.push({id: gr.getUniqueValue(), here: gr.getValue('ip_address') == ip,
+                live: !retired(gr)});
+        }
+        if (!rows.length)
+            return undefined;                     // nothing found, next step
+        if (Object.keys(names).length &gt; 1)
+            return null;                          // two different services, never guess
+        rows = narrow(rows, 'here');              // the records answering on the scanned address
+        if (rows.length &gt; 1)
+            rows = narrow(rows, 'live');          // the live records, a retired copy set aside
+        twins = [];
+        for (var w = 0; w &lt; rows.length; w++)
+            twins.push(rows[w].id);
+        return twins[0];
+    }
+    var steps = [['fqdn', dns], ['name', dns], ['name', label], ['ip_address', ip]];
+    var service = null;
+    for (var t = 0; t &lt; steps.length &amp;&amp; !service; t++) {
+        var found = one(steps[t][0], steps[t][1]);
+        if (found === null)
+            return null;
+        if (found)
+            service = found;
+    }
+    if (!service)
+        return null;
+
+    // isRealServer() says whether a CI can be the machine behind the virtual server: a record in
+    // the Hardware tree that is neither a load balancer nor of an ignored class. related() collects
+    // the CIs tied to a record by a relationship in either direction, kept to one class and its
+    // sub-classes; a mapping loaded as relationships instead of reference fields is read the same
+    // way.
+    function isRealServer(id) {
+        var hw = new GlideRecord('cmdb_ci_hardware');
+        if (!hw.get(id))
+            return false;
+        var cls = ',' + hw.getValue('sys_class_name') + ',';
+        if (ignore &amp;&amp; (',' + ignore + ',').indexOf(cls) != -1)
+            return false;
+        var lb = new GlideRecord('cmdb_ci_lb');
+        return !(lb.isValid() &amp;&amp; lb.get(id));
+    }
+    function related(id, table) {
+        var out = [];
+        var rel = new GlideRecord('cmdb_rel_ci');
+        rel.addQuery('parent', id).addOrCondition('child', id);
+        rel.query();
+        while (rel.next()) {
+            var other = rel.getValue('parent') == id ?
+                rel.getValue('child') : rel.getValue('parent');
+            var g = new GlideRecord(table);
+            if (g.isValid() &amp;&amp; g.get(other))
+                out.push(other);
+        }
+        return out;
+    }
+
+    // -- The pool behind the virtual server -------------------------------------------------------
+    // A pool is reached three ways for each record kept, because the load balancer model can be
+    // loaded either through reference fields or through relationships: the pool field on the
+    // service, pools whose service field points at the service, and pools related to the service.
+    // Without a pool the rule declines and the service rule takes over.
+    // Sample: the service "crisp-tx" carries the pool "crisp-tx-pool" in its pool field; poolIds
+    //         holds that one sys_id.
+    var pools = {};
+    for (var w = 0; w &lt; twins.length; w++) {
+        var svc = new GlideRecord('cmdb_ci_lb_service');
+        svc.get(twins[w]);
+        if (svc.getValue('pool'))
+            pools[svc.getValue('pool')] = true;
+        var byService = new GlideRecord('cmdb_ci_lb_pool');
+        if (byService.isValid()) {
+            byService.addQuery('service', twins[w]);
+            byService.query();
+            while (byService.next())
+                pools[byService.getUniqueValue()] = true;
+        }
+        var relPools = related(twins[w], 'cmdb_ci_lb_pool');
+        for (var r1 = 0; r1 &lt; relPools.length; r1++)
+            pools[relPools[r1]] = true;
+    }
+    var poolIds = Object.keys(pools);
+    if (!poolIds.length)
+        return null;
+
+    // -- The pool members and their addresses -----------------------------------------------------
+    // Members are the records whose pool field points at one of the pools, plus the members related
+    // to a pool. Each member is kept with its address, an empty one as an empty string so that no
+    // address search runs for it; a member without an address can still lead to a server through a
+    // relationship.
+    // Sample: the pool "crisp-tx-pool" has one member, "crisp-tx-pool_10.10.20.31_443", with
+    //         ip_address "10.10.20.31"; members holds that one entry.
+    var members = {};
+    var mem = new GlideRecord('cmdb_ci_lb_pool_member');
+    if (mem.isValid()) {
+        mem.addQuery('pool', 'IN', poolIds.join(','));
+        mem.query();
+        while (mem.next())
+            members[mem.getUniqueValue()] = '' + (mem.getValue('ip_address') || '');
+    }
+    for (var p1 = 0; p1 &lt; poolIds.length; p1++) {
+        var relMembers = related(poolIds[p1], 'cmdb_ci_lb_pool_member');
+        for (var r2 = 0; r2 &lt; relMembers.length; r2++) {
+            if (members[relMembers[r2]] !== undefined)
+                continue;
+            var mg = new GlideRecord('cmdb_ci_lb_pool_member');
+            mg.get(relMembers[r2]);
+            members[relMembers[r2]] = '' + (mg.getValue('ip_address') || '');
+        }
+    }
+    var memberIds = Object.keys(members);
+    if (!memberIds.length)
+        return null;
+
+    // -- The real servers: every member placed, one machine, one live record ----------------------
+    // Each member address is looked for on device records, on network adapters and on IP Address
+    // records, and each member is followed through its relationships to hardware; load balancer
+    // devices and ignored classes are left out. Every server found is kept with the first label of
+    // its name, and a member that leads to no server is counted as unplaced. Several records of one
+    // name are one machine recorded more than once (a rebuilt server whose old record was retired,
+    // a copy left by a test): its live record stands for it when it is the only live one. The
+    // machine is the match only when every member leads to it. An unplaced member leaves the pool
+    // partly unknown and the rule declines: the one server found may not be the one that was
+    // scanned. No server, two differently named machines, or two live records of the one machine
+    // decline as well, leaving the host to the service rule.
+    // Sample: the Linux Server "usvacrispweb01" carries "10.10.20.31" in its ip_address field, so
+    //         the one member is placed, servers holds one entry and its sys_id is returned. A
+    //         retired Server record also named "usvacrispweb01" would be set aside for the live
+    //         Linux Server; two live records of that name, a second member on "10.10.20.32" that no
+    //         CI carries, or one owned by "usvacrispweb02", would make the rule decline.
+    var servers = {};                             // sys_id -&gt; first label of the name
+    // distinct member addresses; an address-less member by record
+    var identities = {};
+    var unresolved = 0;                           // members that lead to no server in the CMDB
+    function keep(id) {
+        if (!id)
+            return false;
+        if (servers[id] !== undefined)
+            return true;
+        if (!isRealServer(id))
+            return false;
+        var ci = new GlideRecord('cmdb_ci_hardware');
+        ci.get(id);
+        servers[id] = ('' + (ci.getValue('name') || '')).trim().toLowerCase().split('.')[0] || id;
+        return true;
+    }
+    for (var k = 0; k &lt; memberIds.length; k++) {
+        var addr = members[memberIds[k]];
+        var led = false;                          // whether this member led to a server
+        identities[addr || memberIds[k]] = true;
+        if (addr) {
+            var hw = new GlideRecord('cmdb_ci_hardware');
+            hw.addQuery('ip_address', addr);
+            hw.query();
+            while (hw.next())
+                led = keep(hw.getUniqueValue()) || led;
+            var nic = new GlideRecord('cmdb_ci_network_adapter');
+            nic.addQuery('ip_address', addr);
+            nic.addNotNullQuery('cmdb_ci');
+            nic.query();
+            while (nic.next())
+                led = keep(nic.getValue('cmdb_ci')) || led;
+            var ipr = new GlideRecord('cmdb_ci_ip_address');
+            if (ipr.isValid()) {
+                ipr.addQuery('ip_address', addr);
+                ipr.addNotNullQuery('nic.cmdb_ci');
+                ipr.query();
+                while (ipr.next())
+                    led = keep('' + ipr.nic.cmdb_ci) || led;
+            }
+        }
+        var relServers = related(memberIds[k], 'cmdb_ci_hardware');
+        for (var r3 = 0; r3 &lt; relServers.length; r3++)
+            led = keep(relServers[r3]) || led;
+        if (!led)
+            unresolved++;
+    }
+    var ids = Object.keys(servers);
+    var machines = {};                            // name label -&gt; its records
+    for (var n = 0; n &lt; ids.length; n++)
+        machines[servers[ids[n]]] = (machines[servers[ids[n]]] || []).concat(ids[n]);
+    var labels = Object.keys(machines);
+    if (unresolved || labels.length != 1)
+        return null;                              // an unplaced member, no server, or two machines
+    var records = machines[labels[0]];
+    if (records.length == 1)
+        return records[0];
+    var live = [];                                // one machine recorded more than once
+    for (var f = 0; f &lt; records.length; f++) {
+        var ci = new GlideRecord('cmdb_ci_hardware');
+        ci.get(records[f]);
+        if (!retired(ci))
+            live.push(records[f]);
+    }
+    return live.length == 1 ? live[0] : null;     // two live records compete, never guess
+})(rule, sourceValue, sourcePayload);
+]]&gt;&lt;/script&gt;&lt;source display_value="Qualys Cloud Platform"&gt;ed44bdc453220300e8f9f745911c0801&lt;/source&gt;&lt;source_field&gt;IP&lt;/source_field&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-15 14:56:29&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;0a8c2ed29357cb50e3aef0aefaba102c&lt;/sys_id&gt;&lt;sys_mod_count&gt;4&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-17 10:43:27&lt;/sys_updated_on&gt;&lt;table&gt;sn_vul_qualys_host_attrb&lt;/table&gt;&lt;target_field/&gt;&lt;target_field_product_model/&gt;&lt;target_table/&gt;&lt;target_table_product_model&gt;cmdb_application_product_model&lt;/target_table_product_model&gt;&lt;type&gt;custom&lt;/type&gt;&lt;/sn_sec_cmn_ci_lookup_rule&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-2138406365</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Load Balancer Refinements_V1.2">271a5407939b4390e3aef0aefaba101a</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-17 12:12:14</sys_created_on>
+<sys_id>671ad44f93db4390e3aef0aefaba102f</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0af3c512a0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-17 12:12:14</sys_updated_on>
+<table>sn_vul_qualys_host_attrb</table>
+<target_name>USEM Load Balancer Member Match</target_name>
+<type>Lookup Rule</type>
+<update_domain>global</update_domain>
+<update_guid>ae27d8cb1c9b43903081691f65fbf0de</update_guid>
+<update_guid_history>ae27d8cb1c9b43903081691f65fbf0de:-2138406365,47c5008794d74390bdda8d6b96e5c1f7:-2138406365,aa814443a0974390a0660cf5162afbee:-177196849,6bceb73230574390e6983279ca5ec87f:-408840443,f2fca6561857cb502c357f6cf3543b78:-1243757037,4e8c2ed29157cb50e1aa60d457c41130:-2139349477</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sn_sec_cmn_ci_lookup_rule_2c9e8d3393430310e3aef0aefaba10fb</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sn_sec_cmn_ci_lookup_rule"&gt;&lt;sn_sec_cmn_ci_lookup_rule action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;applies_to/&gt;&lt;condition/&gt;&lt;description&gt;Virtual IP matched to its Load Balancer Service CI: load balancer OS word or VIP label marker required, service found by fqdn, then name, then address; records of one name are one virtual server, the one on the scanned address and live is returned, two live records or two different names decline. The product and marker lists are declared in the script.&lt;/description&gt;&lt;lookup_script/&gt;&lt;lookup_target&gt;ci&lt;/lookup_target&gt;&lt;method&gt;script&lt;/method&gt;&lt;name&gt;USEM Load Balancer Service Match&lt;/name&gt;&lt;order&gt;460&lt;/order&gt;&lt;reapply&gt;true&lt;/reapply&gt;&lt;reapply_version&gt;8&lt;/reapply_version&gt;&lt;script&gt;&lt;![CDATA[/* USEM Load Balancer Service Match
+   -------------------------------------------------------------------------------------------------
+   A virtual IP answered by a load balancer is not the balancer, and the hardware rules refuse the
+   balancer device on purpose. Such hosts belong to the Load Balancer Service CI that models the
+   VIP, and this rule finds it. It runs on the IP field so that VIPs without a DNS name are covered
+   too.
+
+   Sample payload (one Qualys host record, used in every note below)
+   {
+     "ID": "1202267231",
+     "IP": "171.203.142.26",
+     "TRACKING_METHOD": "IP",
+     "OS": "F5 Big IP",
+     "DNS": "crisp-tx.bankofamerica.com"
+   }
+   Input  : sourceValue is the IP field, "171.203.142.26"; the rule also reads the OS and the DNS
+            name from sourcePayload.
+   Returns: the sys_id of the one Load Balancer Service CI found by fqdn, then by name, then by
+            address (a retired copy of the record found is set aside); null when the host shows no
+            VIP evidence, when no service matches, when two differently named services carry the
+            value, or when two live records of one virtual server compete.
+   Sample : the Load Balancer Service CI "crisp-tx", whose fqdn is "crisp-tx.bankofamerica.com".
+
+   Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
+   Before : the hardware rules declined: a VIP has no serial, "crisp-tx" is not a server name, and
+            the address belongs to a load balancer device.
+   Reaches: hosts with VIP evidence (an OS text naming a load balancer product, or a DNS label with
+            a VIP marker segment such as "-vip" or "vs1"; both lists are declared in the script, at
+            the top of the matching stage) that the member rule left: no pool known, several servers
+            behind the virtual server, or a member the CMDB cannot place.
+   After  : the IP address rules, for hosts that are not VIPs.
+   ------------------------------------------------------------------------------------------------- */
+(function process(rule, sourceValue, sourcePayload) {
+    if (!sourceValue)                             // nothing to look up
+        return null;
+    var ip = ('' + sourceValue).trim();           // "171.203.142.26"
+    // loopback and link-local identify nothing
+    if (!ip || ip.indexOf('127.') == 0 || ip.indexOf('169.254.') == 0)
+        return null;
+    // "crisp-tx.bankofamerica.com", may be empty
+    var dns = ('' + (sourcePayload.DNS || '')).trim().toLowerCase();
+    var label = dns.split('.')[0];                // "crisp-tx"
+    var os = ('' + (sourcePayload.OS || '')).toLowerCase();  // "f5 big ip"
+
+    // Classes that must never be matched (placeholder and technical CIs); the list lives in the
+    // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
+    var ignore = (typeof _ignoreClass != 'undefined' &amp;&amp; _ignoreClass) ?
+        ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
+
+    // isMarker() says whether one hyphen segment of the label is a listed marker: the word itself
+    // ("vlan"), the word followed by digits only ("vlan705", "v201"), or, for words of three
+    // letters or more, a segment ending in the word ("multihostvip").
+    function isMarker(segment, words) {
+        for (var i = 0; i &lt; words.length; i++) {
+            var w = words[i];
+            if (segment == w)
+                return true;
+            if (segment.indexOf(w) == 0 &amp;&amp; /^[0-9]+$/.test(segment.substring(w.length)))
+                return true;
+            if (w.length &gt;= 3 &amp;&amp; segment.length &gt; w.length &amp;&amp; segment.substring(segment.length - w.length) == w)
+                return true;
+        }
+        return false;
+    }
+
+    // -- VIP evidence first -----------------------------------------------------------------------
+    // The rule goes on only when the OS text contains a listed load balancer word or one of the
+    // label segments is a listed VIP marker. A Load Balancer Service must never be returned for an
+    // ordinary server that happens to share an address with a VIP; this check keeps the rule to the
+    // hosts that really are VIPs.
+    // Sample: "f5 big ip" contains "f5", so evidence is true. "rbps-dev3-sve-vip.ecommnp.rpg" with
+    //         OS "Linux 2.6" would qualify through the segment "vip"; "ah-1047132-001" with OS "Red
+    //         Hat Enterprise Linux 9.8" has neither and the rule would decline.
+    //
+    // The load balancer products looked for in the OS text, and the label segments that mark a
+    // virtual IP. Extend these two lists when a site uses another naming habit.
+    var osMarkers = ['f5', 'big-ip', 'big ip', 'netscaler'];
+    var labelMarkers = ['vip', 'vs'];
+    var evidence = false;
+    for (var m = 0; m &lt; osMarkers.length; m++)
+        if (os.indexOf(osMarkers[m]) != -1)
+            evidence = true;
+    var segments = label ? label.split('-') : [];
+    for (var s = 0; s &lt; segments.length; s++)
+        if (isMarker(segments[s], labelMarkers))
+            evidence = true;
+    if (!evidence)
+        return null;
+
+    // retired() is the platform's own test for a decommissioned CI: install status Retired,
+    // operational status Retired, or a Retired life cycle stage.
+    function retired(ci) {
+        return ci.getValue('install_status') == '7' || ci.getValue('operational_status') == '6' ||
+            ci.life_cycle_stage_status.getDisplayValue() == 'Retired';
+    }
+
+    // narrow() keeps the records carrying a flag when any does, so a record answering on the
+    // scanned address, or a live record, is preferred to the others without dropping the only
+    // records there are.
+    function narrow(list, flag) {
+        var out = [];
+        for (var i = 0; i &lt; list.length; i++)
+            if (list[i][flag])
+                out.push(list[i]);
+        return out.length ? out : list;
+    }
+
+    // -- The one service, by fqdn, then name, then address ----------------------------------------
+    // The scanned DNS name is tried in the fqdn field, then in the name field, then the label in
+    // the name field, then the scanned address in ip_address. Each step accepts one virtual server.
+    // Several records carrying one name are the same virtual server recorded more than once (an HA
+    // pair keeps the same object on both devices; a test leaves a copy): the records answering on
+    // the scanned address are kept, then the live ones, and the one record left is returned. Two
+    // records still standing, both devices of a pair live, are an ambiguity nothing here can
+    // settle, so the rule declines; two different names on the same value decline as well, because
+    // a weaker piece of evidence could otherwise pick a different service. A step that finds
+    // nothing hands over to the next.
+    // Sample: the first step, fqdn "crisp-tx.bankofamerica.com", finds the Load Balancer Service
+    //         "crisp-tx" and no second row, so its sys_id is returned. Two live records named
+    //         "crisp-tx" on "171.203.142.26", one per balancer of the pair, would make the rule
+    //         decline; were one of them retired, the live one would be returned. A VIP without a
+    //         DNS name and two differently named services on "171.203.142.26" would reach the last
+    //         step and decline there.
+    function one(field, value) {
+        if (!value)
+            return undefined;                     // nothing to search, next step
+        var gr = new GlideRecord('cmdb_ci_lb_service');
+        if (!gr.isValid())
+            return null;                          // class not installed here, decline
+        gr.addQuery(field, value);
+        if (ignore)
+            gr.addQuery('sys_class_name', 'NOT IN', ignore);
+        gr.query();
+        var rows = [], names = {};
+        while (gr.next()) {
+            names[('' + (gr.getValue('name') || '')).trim().toLowerCase()] = true;
+            rows.push({id: gr.getUniqueValue(), here: gr.getValue('ip_address') == ip,
+                live: !retired(gr)});
+        }
+        if (!rows.length)
+            return undefined;                     // nothing found, next step
+        if (Object.keys(names).length &gt; 1)
+            return null;                          // two different services, never guess
+        rows = narrow(rows, 'here');              // the records answering on the scanned address
+        if (rows.length &gt; 1)
+            rows = narrow(rows, 'live');          // the live records, a retired copy set aside
+        if (rows.length &gt; 1)
+            return null;                          // two records still compete, never guess
+        return rows[0].id;
+    }
+    var steps = [['fqdn', dns], ['name', dns], ['name', label], ['ip_address', ip]];
+    for (var t = 0; t &lt; steps.length; t++) {
+        var found = one(steps[t][0], steps[t][1]);
+        if (found === null)
+            return null;
+        if (found)
+            return found;
+    }
+    return null;
+})(rule, sourceValue, sourcePayload);
+]]&gt;&lt;/script&gt;&lt;source display_value="Qualys Cloud Platform"&gt;ed44bdc453220300e8f9f745911c0801&lt;/source&gt;&lt;source_field&gt;IP&lt;/source_field&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-07 13:41:10&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;2c9e8d3393430310e3aef0aefaba10fb&lt;/sys_id&gt;&lt;sys_mod_count&gt;7&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-17 11:59:20&lt;/sys_updated_on&gt;&lt;table&gt;sn_vul_qualys_host_attrb&lt;/table&gt;&lt;target_field/&gt;&lt;target_field_product_model/&gt;&lt;target_table/&gt;&lt;target_table_product_model&gt;cmdb_application_product_model&lt;/target_table_product_model&gt;&lt;type&gt;custom&lt;/type&gt;&lt;/sn_sec_cmn_ci_lookup_rule&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-1703174033</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Load Balancer Refinements_V1.2">271a5407939b4390e3aef0aefaba101a</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-17 12:12:14</sys_created_on>
+<sys_id>ab1ad44f93db4390e3aef0aefaba102f</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0af3c51990000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-17 12:12:14</sys_updated_on>
+<table>sn_vul_qualys_host_attrb</table>
+<target_name>USEM Load Balancer Service Match</target_name>
+<type>Lookup Rule</type>
+<update_domain>global</update_domain>
+<update_guid>ea27d8cba59b4390529831abd15b0ae3</update_guid>
+<update_guid_history>ea27d8cba59b4390529831abd15b0ae3:-1703174033,c7c50087b6d74390281673cd5db6b8fb:-723267224,2e814443cc9743903743cac859c20af2:-1230897773,e7ceb7327f5743906565d94ac0426383:-863816935,0f591b18745b87101c7c2b685f2e8d79:-144366904,6e641f9cf1d78710a5da80e5aeb07ab5:454143322,0e52421091db4710b99e094470262fbf:1554369333,689e8d331c430310476fa70801bf8ffd:63380897</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sn_sec_cmn_ci_lookup_rule_ef4a4df2932a4310e3aef0aefaba1066</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sn_sec_cmn_ci_lookup_rule"&gt;&lt;sn_sec_cmn_ci_lookup_rule action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;applies_to/&gt;&lt;condition/&gt;&lt;description&gt;DNS Name record -&amp;gt; IP Address record -&amp;gt; Network Adapter -&amp;gt; CI, for hosts whose name is not on the CI record; a CI whose class contradicts the scanned OS is left out (a Linux fingerprint agrees with Network Gear, Load Balancer and Storage Server records); several CIs resolved by the scanned IP or declined; a load balancer device at the end of the chain is refused, the name then belongs to a virtual address.&lt;/description&gt;&lt;lookup_script/&gt;&lt;lookup_target&gt;ci&lt;/lookup_target&gt;&lt;method&gt;script&lt;/method&gt;&lt;name&gt;USEM Layered DNS Match&lt;/name&gt;&lt;order&gt;350&lt;/order&gt;&lt;reapply&gt;true&lt;/reapply&gt;&lt;reapply_version&gt;11&lt;/reapply_version&gt;&lt;script&gt;&lt;![CDATA[/* USEM Layered DNS Match
+   -------------------------------------------------------------------------------------------------
+   Discovery keeps names and addresses as their own records linked to the device: a DNS Name record
+   is tied to an IP Address record, the IP Address record belongs to a Network Adapter, and the
+   adapter belongs to the CI. This rule follows that chain, which is the only way to find a host
+   whose name is not written on the CI record at all, and it resolves aliases to the real machine. A
+   CI at the end of the chain whose class contradicts the scanned OS is left out, because the
+   discovery records then describe a different kind of machine, and a load balancer device at the
+   end of the chain is refused, because the name then belongs to a virtual address the balancer
+   answers on.
+
+   Sample payload (one Qualys host record, used in every note below)
+   {
+     "ID": "42773078",
+     "IP": "167.202.60.26",
+     "TRACKING_METHOD": "IP",
+     "OS": "Red Hat Enterprise Linux Server 7.9",
+     "DNS": "hklvteqoradbp3.hk.baml.com",
+     "QG_HOSTID": "6337dede-02e7-0002-ad2c-0050569765df"
+   }
+   Input  : sourceValue is the DNS field, "hklvteqoradbp3.hk.baml.com"; the rule also reads the OS
+            and the IP from sourcePayload.
+   Returns: the sys_id of the CI at the end of the chain DNS Name -&gt; IP Address -&gt; adapter -&gt; CI,
+            its class agreeing with the scanned OS when one is known (a Linux fingerprint agrees
+            with Network Gear, Load Balancer and Storage Server records too); when several CIs
+            answer to the name, the one whose chain runs through the scanned IP; null otherwise, and
+            null when the CI reached is a load balancer device.
+   Sample : the Linux Server "hklvteqoradbp3", reached through DNS Name "hklvteqoradbp3.hk.baml.com"
+            -&gt; IP Address "167.202.60.26" -&gt; adapter "eth0".
+
+   Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
+   Before : the FQDN and hostname-plus-domain rules looked at name fields stored on the CI record
+            itself.
+   Reaches: hosts whose name lives only in the discovery DNS records, and aliases that point at an
+            address of the device.
+   After  : the plain hostname rules and USEM FQDN Name Hardware Match.
+   ------------------------------------------------------------------------------------------------- */
+(function process(rule, sourceValue, sourcePayload) {
+    if (!sourceValue)                             // nothing to look up
+        return null;
+    var fqdn = ('' + sourceValue).trim().toLowerCase();  // "hklvteqoradbp3.hk.baml.com"
+    if (fqdn.indexOf('.') == -1)                  // a bare label is left to the hostname rules
+        return null;
+    // "167.202.60.26", only used to break a tie
+    var ip = sourcePayload.IP ? '' + sourcePayload.IP : '';
+
+    // Classes that must never be matched (placeholder and technical CIs); the list lives in the
+    // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
+    var ignore = (typeof _ignoreClass != 'undefined' &amp;&amp; _ignoreClass) ?
+        ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
+
+    // -- Class the scanned OS implies, kept as a preference ---------------------------------------
+    // This rule follows discovery records rather than searching a class, so the class is not a
+    // filter; it is used to leave out a CI at the end of the chain whose class contradicts the
+    // scan. An unknown or multi-guess OS gives no class and then nothing is left out.
+    // Sample: classFor("Red Hat Enterprise Linux Server 7.9") gives Linux Server, so pref is
+    //         cmdb_ci_linux_server.
+    //
+    // classFor() maps the OS text Qualys reports to the CMDB class the CI should be in, e.g. "Red
+    // Hat Enterprise Linux 9.8" is a Linux Server, "Windows Server 2016 Standard" a Windows Server
+    // and "VMware ESXi 7.0.3" an ESX Server. A string of guesses separated by "/" comes from an
+    // unauthenticated scan that could not identify the OS; three or more guesses give no class at
+    // all.
+    function classFor(os) {
+        if (!os) return '';
+        var s = ('' + os).toLowerCase();
+        if (s.split('/').length &gt; 2) return '';   // multi-guess fingerprint
+        if (s.indexOf('esx') != -1) return 'cmdb_ci_esx_server';
+        if (s.indexOf('windows') != -1)
+            return s.indexOf('server') != -1 ? 'cmdb_ci_win_server' : 'cmdb_ci_computer';
+        if (s.indexOf('aix') != -1) return 'cmdb_ci_aix_server';
+        if (s.indexOf('solaris') != -1 || s.indexOf('sunos') != -1) return 'cmdb_ci_solaris_server';
+        if (s.indexOf('hp-ux') != -1) return 'cmdb_ci_hpux_server';
+        if (s.indexOf('netapp') != -1 || s.indexOf('ontap') != -1) return 'cmdb_ci_storage_server';
+        if (s.indexOf('printer') != -1 || s.indexOf('laserjet') != -1 || s.indexOf('jetdirect') != -1) return 'cmdb_ci_printer';
+        if (s.indexOf('red hat') != -1 || s.indexOf('linux') != -1 || s.indexOf('centos') != -1 ||
+            s.indexOf('ubuntu') != -1 || s.indexOf('suse') != -1 || s.indexOf('debian') != -1 ||
+            s.indexOf('fedora') != -1 || s.indexOf('euleros') != -1 ||
+            s.indexOf('oracle enterprise') != -1 || s.indexOf('amazon') != -1) return 'cmdb_ci_linux_server';
+        if (s.indexOf('nx-os') != -1 || s.indexOf('catos') != -1 || s.indexOf('cisco') != -1) return 'cmdb_ci_netgear';
+        return '';
+    }
+    var pref = classFor(sourcePayload.OS);
+
+    // agrees() decides whether a CI of class cls can be the scanned host once the OS gave a class:
+    // the same class, one of its sub-classes, or one of its parents (a Cisco IOS host may be kept
+    // as a plain Network Gear or Hardware record). Any other class is a different kind of machine:
+    // a Windows Server named like the scanned Linux host is a namesake, never the host. With no
+    // class from the OS nothing is refused.
+    //
+    // A Linux fingerprint is also accepted against Network Gear, Load Balancer and Storage Server
+    // records: switches, balancers and storage nodes run Linux underneath and Qualys reports that
+    // kernel, so the fingerprint says nothing against those classes.
+    function parentsOf(table) {                   // the class and every class above it
+        var out = [table];
+        var db = new GlideRecord('sys_db_object');
+        db.addQuery('name', table);
+        db.query();
+        while (db.next() &amp;&amp; db.getValue('super_class')) {
+            var parent = '' + db.super_class.name;
+            out.push(parent);
+            db = new GlideRecord('sys_db_object');
+            db.addQuery('name', parent);
+            db.query();
+        }
+        return out;
+    }
+    function agrees(cls) {
+        if (!pref || cls == pref)
+            return true;
+        var above = parentsOf(cls);
+        var appliance = above.indexOf('cmdb_ci_netgear') != -1 ||
+            above.indexOf('cmdb_ci_lb') != -1 || above.indexOf('cmdb_ci_storage_server') != -1;
+        if (pref == 'cmdb_ci_linux_server' &amp;&amp; appliance)  // an appliance reporting its Linux
+            return true;
+        if (above.indexOf(pref) != -1)            // cls is a sub-class of pref
+            return true;
+        return parentsOf(pref).indexOf(cls) != -1;  // cls is a parent of pref
+    }
+
+    // A load balancer answers on virtual addresses for the servers behind it, so it is never the
+    // host that was scanned.
+    function isLoadBalancer(id) {
+        var lb = new GlideRecord('cmdb_ci_lb');
+        return lb.isValid() &amp;&amp; lb.get(id);
+    }
+
+    // -- Follow the chain DNS Name -&gt; IP Address -&gt; adapter -&gt; CI ---------------------------------
+    // cmdb_ip_address_dns_name ties one DNS Name record to one IP Address record; dot-walking
+    // reaches the rest: dns_name.name is the name on the DNS Name record and ip_address.nic.cmdb_ci
+    // is the CI owning the adapter that holds the address. Because the chain ends on whatever
+    // device holds the address, an alias resolves to the real machine.
+    // Sample: the DNS Name record "hklvteqoradbp3.hk.baml.com" is linked to the IP Address record
+    //         "167.202.60.26", which belongs to the adapter "eth0" of the Linux Server
+    //         "hklvteqoradbp3"; that is the one row the query returns.
+    var gr = new GlideRecord('cmdb_ip_address_dns_name');
+    if (!gr.isValid())                            // layered model not installed here, decline
+        return null;
+    gr.addQuery('dns_name.name', fqdn);           // "hklvteqoradbp3.hk.baml.com"
+    gr.addNotNullQuery('ip_address.nic.cmdb_ci');  // the chain must end on a CI
+    if (ignore)
+        gr.addQuery('ip_address.nic.cmdb_ci.sys_class_name', 'NOT IN', ignore);
+    gr.query();
+
+    // -- One CI at the end of the chain: class agreeing, not a load balancer, IP as the tie-break ---
+    // A CI whose class contradicts the scanned OS is skipped: a Computer at the end of the chain
+    // for a Cisco IOS host is a stale or misattributed discovery record, not the router. Each
+    // remaining CI is counted once, and the CIs reached through the scanned address are noted. One
+    // CI is the match. A name that resolves to two devices (an alias moved between hosts, an old
+    // and a new record) is taken only when exactly one of them is reached through the scanned IP;
+    // otherwise the rule declines. The CI chosen is refused when it is a load balancer device: the
+    // name then belongs to a virtual address the balancer answers on, the scanned host sits behind
+    // it, and the load balancer rules take over.
+    // Sample: the chain ends on a Linux Server, the class pref holds, so it is counted: count is 1
+    //         and the sys_id of "hklvteqoradbp3" is returned. A Computer at the end of the chain
+    //         would also count (a parent of Linux Server), and so would an IP Switch, an appliance
+    //         that reports the Linux it runs on; a Windows Server would be skipped. Were the name
+    //         also linked to an address of a second Linux Server, ipOwners would hold only the CI
+    //         reached through "167.202.60.26" and that one would be returned. Were the chain to end
+    //         on the Load Balancer "hklvf5lb01", the rule would decline and the host would go on to
+    //         the load balancer rules.
+    var owners = {}, ipOwners = {};
+    var count = 0, first = null;
+    while (gr.next()) {
+        var owner = '' + gr.ip_address.nic.cmdb_ci;
+        // a class the OS rules out is not counted
+        if (!agrees('' + gr.ip_address.nic.cmdb_ci.sys_class_name))
+            continue;
+        if (!owners[owner]) {
+            owners[owner] = true;
+            count++;
+            if (count == 1)
+                first = owner;
+        }
+        if (ip &amp;&amp; ('' + gr.ip_address.ip_address) == ip)  // this chain runs through the scanned IP
+            ipOwners[owner] = true;
+    }
+    if (count == 1)
+        return isLoadBalancer(first) ? null : first;
+    if (count &gt; 1) {
+        var confirmed = Object.keys(ipOwners);
+        if (confirmed.length == 1 &amp;&amp; !isLoadBalancer(confirmed[0]))
+            return confirmed[0];
+    }
+    return null;
+})(rule, sourceValue, sourcePayload);
+]]&gt;&lt;/script&gt;&lt;source display_value="Qualys Cloud Platform"&gt;ed44bdc453220300e8f9f745911c0801&lt;/source&gt;&lt;source_field&gt;DNS&lt;/source_field&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-08-10 14:17:12&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;ef4a4df2932a4310e3aef0aefaba1066&lt;/sys_id&gt;&lt;sys_mod_count&gt;10&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-17 10:12:54&lt;/sys_updated_on&gt;&lt;table&gt;sn_vul_qualys_host_attrb&lt;/table&gt;&lt;target_field/&gt;&lt;target_field_product_model/&gt;&lt;target_table/&gt;&lt;target_table_product_model&gt;cmdb_application_product_model&lt;/target_table_product_model&gt;&lt;type&gt;custom&lt;/type&gt;&lt;/sn_sec_cmn_ci_lookup_rule&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-110113506</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Load Balancer Refinements_V1.2">271a5407939b4390e3aef0aefaba101a</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-17 12:12:14</sys_created_on>
+<sys_id>ef1ad44f93db4390e3aef0aefaba102f</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0af3c50f60000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-17 12:12:14</sys_updated_on>
+<table>sn_vul_qualys_host_attrb</table>
+<target_name>USEM Layered DNS Match</target_name>
+<type>Lookup Rule</type>
+<update_domain>global</update_domain>
+<update_guid>aa27d8cbb09b4390ba0f3b7204442bdc</update_guid>
+<update_guid_history>aa27d8cbb09b4390ba0f3b7204442bdc:-110113506,17ceb7322757439077b94fa339b58b62:-110113506,e29eb95e631f8b50c0b791b8c7651520:789839333,9de97552631f8b5004b5697a637b42c9:292809534,4309b5c1809f4f1026d2f64268b15458:-1603832581,9bf7f901fb9f4f100d91405739627b1d:141756474,9659d718ea5b87101629982497dd7d45:1807785403,215242101edb47105c0d46e5a4167250:-59941078,3811e53a368b8710526dd46e8a24d886:27985359,601fd5f2828b8710da7d2de2939fe83e:1224457235,d28a997e2f0b8710d565066270f11947:1099334146</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>

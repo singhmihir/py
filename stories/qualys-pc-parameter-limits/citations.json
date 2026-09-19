@@ -1,0 +1,196 @@
+{
+ "groups": [
+  {
+   "title": "How a value reaches the request (ServiceNow)",
+   "items": [
+    {
+     "claim": "The official ServiceNow API reference for RESTMessageV2 documents setStringParameter(String name, String value) as setting a named REST message function variable to a given value, returning void, with XML reserved characters in the value escaped.",
+     "quote": "Sets a REST message function variable with the specified name from the REST message record to the specified value. XML reserved characters in the value are converted to the equivalent escaped characters.",
+     "title": "RESTMessageV2 - Scoped, Global",
+     "url": "https://www.servicenow.com/docs/r/api-reference/server-api-reference/c_RESTMessageV2API.html"
+    },
+    {
+     "claim": "ServiceNow documents that ${variable_name} placeholders in an outbound REST message are allowed in the endpoint URL, HTTP headers, HTTP query parameter values and the POST/PUT content, and are given values at run time by the RESTMessageV2 setStringParameter and setStringParameterNoEscape methods.",
+     "quote": "Variables are allowed in the Endpoint URL, HTTP Header and HTTP Query Parameter Value fields, and the Content field for POST and PUT methods. The syntax for variables is ${variable_name}. You can assign a value to variables when running the request using the RESTMessageV2 API setStringParameter and setStringParameterNoEscape methods.",
+     "title": "Message variable substitution",
+     "url": "https://www.servicenow.com/docs/r/api-reference/web-services/c_VariableSubstitutionREST.html"
+    },
+    {
+     "claim": "The only documented difference between the two methods is XML escaping: setStringParameterNoEscape behaves identically to setStringParameter except that it does not escape XML reserved characters in the value.",
+     "quote": "This method is equivalent to setStringParameter but does not escape XML reserved characters.",
+     "title": "RESTMessageV2 - Scoped, Global (Zurich API Reference)",
+     "url": "https://www.servicenow.com/docs/bundle/zurich-api-reference/page/app-store/dev_portal/API_reference/RESTMessageV2/concept/c_RESTMessageV2API.html"
+    },
+    {
+     "claim": "In an outbound REST message, variables written as ${name} are substituted at run time, and they are permitted in the endpoint URL, in HTTP header values, in HTTP query parameter values, and in the content of POST and PUT methods.",
+     "quote": "Variables are allowed in the Endpoint URL, HTTP Header and HTTP Query Parameter Value fields, and the Content field for POST and PUT methods.",
+     "title": "Message variable substitution",
+     "url": "https://www.servicenow.com/docs/bundle/australia-api-reference/page/integrate/outbound-rest/concept/c_VariableSubstitutionREST.html"
+    },
+    {
+     "claim": "The \"Auto-generate variables\" related link on a REST message HTTP method populates the Variable Substitutions related list from the ${...} variables found in the method endpoint and in the HTTP Headers and HTTP Query Parameters embedded lists.",
+     "quote": "The Variable Substitutions related list is automatically populated for any variables defined in the HTTP Method Endpoint field and the HTTP Headers and HTTP Query Parameters embedded lists.",
+     "title": "Generate REST message variables",
+     "url": "https://www.servicenow.com/docs/bundle/australia-api-reference/page/integrate/outbound-rest/task/t_GenerateMessageVariables.html"
+    },
+    {
+     "claim": "The HTTP Query Parameters related list on a REST Message Function is stored in sys_rest_message_fn_param_defs, not sys_rest_message_fn_parameters; sys_rest_message_fn_parameters holds the Variable Substitutions (the ${varName} declarations).",
+     "quote": "Used within RestMessageFn.queryParams[]. Maps to sys_rest_message_fn_param_defs.",
+     "title": "RestMessage | ServiceNow SDK (ServiceNow SDK reference)",
+     "url": "https://servicenow.github.io/sdk/api/restmessage-api"
+    }
+   ]
+  },
+  {
+   "title": "How field length behaves (ServiceNow)",
+   "items": [
+    {
+     "claim": "ServiceNow's official field types reference documents the String type's Max length behaviour, including that the database maps the value to the nearest column type and that on Oracle-backed instances Max length cannot be raised above 4000 through the application UI.",
+     "quote": "Note: The database may translate the value that you provide in the Max length field to the closest matching database field type. For example, a max string length of 80 maps to the nearest database field type of VARCHAR(100). For Oracle instances, users aren't able to increase the max length of a string field to a value greater than 4000 through the application UI. Changes greater than 4000 require the CLOB data type in Orac...",
+     "title": "Field types reference",
+     "url": "https://www.servicenow.com/docs/r/platform-administration/r_FieldTypes.html"
+    },
+    {
+     "claim": "Max length is changed on the field's dictionary entry (Configure Dictionary), and the platform blocks a length reduction that would truncate data already stored in the column.",
+     "quote": "Right-click the field label in the form and select Configure Dictionary. Change the Max length field to the desired length. [...] Note: You can change between string-based data types as long as length changes do not cause any data loss from truncation. For example, you can change from a MEDIUM database type to a VARCHAR(100) database type if none of the existing data is greater than 100. [...] The system cancels any length...",
+     "title": "Modify string field length",
+     "url": "https://www.servicenow.com/docs/r/platform-administration/t_ModifyingStringFieldLength.html"
+    },
+    {
+     "claim": "COMMUNITY SOURCE (not official documentation): the sys_dictionary max_length value is not enforced on save by the client or the server, so a value longer than max_length is accepted rather than rejected.",
+     "quote": "When you create a new sys_dictionary record to define a new string field, the max_length is mandatory. Despite the similarity of the name to HTML's maxlength attributes for input or textarea tags, this is not enforced as a limit in the client or server. Max length is not enforced on the Now Platform. Fields in ServiceNow accept string inputs greater than the sys_dictionary max_length value. This is the expected behavior of...",
+     "title": "Max length value of string field is not honoured - ServiceNow Community (developer forum) (ServiceNow Community post, not product documentation)",
+     "url": "https://www.servicenow.com/community/developer-forum/max-length-value-of-string-field-is-not-honoured/td-p/3307639"
+    },
+    {
+     "claim": "The sys_properties table is the System Property table where properties are added, and every property value is stored as a string regardless of the Type selected \u2014 so a comma separated list is stored as ordinary string text.",
+     "quote": "All property values are stored as strings. When retrieving properties via the gs.getProperty() method, treat the results as strings. For example, a true|false property returns 'true' or 'false' (strings), not the Boolean equivalent.",
+     "title": "Add a system property \u2014 Zurich Platform Administration",
+     "url": "https://www.servicenow.com/docs/bundle/zurich-platform-administration/page/administer/reference-pages/task/t_AddAPropertyUsingSysPropsList.html"
+    }
+   ]
+  },
+  {
+   "title": "The Qualys integration application (ServiceNow)",
+   "items": [
+    {
+     "claim": "ServiceNow officially documents a host truncation limit as a default setting of the Qualys Cloud Platform integration, and changed that default from 500 to 300 in version 30.6.0 of the Qualys Integration for Security Operations application.",
+     "quote": "Optimized the default Qualys Cloud Platform integration settings by reducing the host truncation limit from 500 to 300 for greater stability, and increasing the KnowledgeBase backfill limit from 100 to 300 for faster processing.",
+     "title": "Qualys Integration for Security Operations release notes",
+     "url": "https://www.servicenow.com/docs/r/store-release-notes/store-secops-rn-qualys-integration.html"
+    },
+    {
+     "claim": "The Qualys Policy Compliance data path into Configuration Compliance is delivered by the Qualys Integration for Security Operations application, which from v12.6.3 provides the Qualys PCRS Policy Host Integration and Qualys PCRS Test Results Integration.",
+     "quote": "Starting with v12.6.3 of Qualys Integration for Security Operations, you can use the Qualys PCRS Policy Host Integration and Qualys PCRS Test Results Integration for importing test results with new sets of Qualys APIs. These integrations need a gateway URL to fetch information from Qualys.",
+     "title": "Qualys integration with Configuration Compliance",
+     "url": "https://www.servicenow.com/docs/r/xanadu/security-management/configuration-compliance/Qualys-cc-Integration.html"
+    },
+    {
+     "claim": "The Qualys integration is distributed as the ServiceNow Store application \"Qualys Integration for Security Operations\", published by ServiceNow.",
+     "quote": "ServiceNow App Store: Qualys Integration for Security Operations by ServiceNow - Integrate your Qualys deployment with ServiceNow Vulnerability Response to prioritize and remediate vulnerabilities.",
+     "title": "Qualys Integration for Security Operations - ServiceNow Store",
+     "url": "https://store.servicenow.com/store/app/9f3b6f2a1b246a50a85b16db234bcb13"
+    }
+   ]
+  },
+  {
+   "title": "The Posture Info API (Qualys)",
+   "items": [
+    {
+     "claim": "For /api/2.0/fo/compliance/posture/info/, the default truncation_limit is 5,000 posture info records per request (not 1,000), it is only valid when a single policy_id is specified, and the configurable range runs from 1 up to 1,000,000.",
+     "quote": "truncation_limit={value} (Optional) The parameter is valid only when the API request is for a single policy and the policy_id parameter is specified. By default, a limit of 5,000 posture info records are returned per request (when \"policy_id\" is specified). You may specify a value less than the default (1-4999) or greater than the default (5001-1000000) to configure the number records returned per request.",
+     "title": "Qualys API (VM and PA) User Guide, Version 10.40, September 7, 2026 \u2014 \"Compliance Posture Information\" chapter, Input Parameters table, page 1707 (truncation_limit entry); see also \"Maximum Postures per API Request\", page 1704",
+     "url": "https://cdn2.qualys.com/docs/qualys-api-vmpc-user-guide.pdf"
+    },
+    {
+     "claim": "Pagination for the Posture Information API works by returning a WARNING element containing the URL of the next batch of records; truncation_limit is invalid when policy_ids (multiple policies) is used, and truncation_limit=0 disables pagination entirely.",
+     "quote": "If the requested list identifies more records than the truncation limit, then the XML output includes the <WARNING> element and the URL for making another request for the next batch of records.",
+     "title": "List Compliance Posture Info",
+     "url": "https://docs.qualys.com/en/vm/qweb-all-api/mergedProjects/qapi-pc/posture/list_posture_info.htm"
+    },
+    {
+     "claim": "The policy_ids parameter of the Qualys PC List Compliance Posture Info API is officially documented, takes a comma-separated list of policy IDs, and has a documented maximum of 10 policies per request.",
+     "quote": "(policy_id or policy_ids is required) Show compliance posture info records for multiple policies - up to 10 policies may be requested. Provide a comma-separated list of valid policy IDs. When this parameter is specified, all posture data is downloaded (and the \"truncation_limit\" parameter is invalid).",
+     "title": "List Compliance Posture Info",
+     "url": "https://docs.qualys.com/en/vm/qweb-all-api/mergedProjects/qapi-pc/posture/list_posture_info.htm"
+    },
+    {
+     "claim": "The policy_id parameter accepts only a single policy ID, and policy_id and policy_ids are mutually exclusive in the same request.",
+     "quote": "(policy_id or policy_ids is required) Show compliance posture info records for a specified policy. A valid policy ID is required. The parameters policy_id and policy_ids cannot be specified in the same request.",
+     "title": "List Compliance Posture Info",
+     "url": "https://docs.qualys.com/en/vm/qweb-all-api/mergedProjects/qapi-pc/posture/list_posture_info.htm"
+    },
+    {
+     "claim": "The 10-policy maximum for policy_ids is independently stated in the Qualys API Quick Reference for the List Posture Info endpoint /api/2.0/fo/compliance/posture/info/.",
+     "quote": "Notes: Up to 10 policies for \"policy_ids\".",
+     "title": "Qualys API Quick Reference (July 30, 2026)",
+     "url": "https://cdn2.qualys.com/docs/qualys-api-quick-reference.pdf"
+    }
+   ]
+  },
+  {
+   "title": "The Policy List API (Qualys)",
+   "items": [
+    {
+     "claim": "For /api/2.0/fo/compliance/policy/?action=list, the ids input parameter accepts one or more policy IDs or ID ranges, comma separated, with a range written using a hyphen such as 160-165.",
+     "quote": "Show only certain policy IDs/ranges. One or more policy IDs/ranges may be specified. Valid host IDs are required. Multiple entries are comma separated. A policy ID range is specified with a hyphen (for example, 160-165).",
+     "title": "List Policies - Qualys VM, PC APIs",
+     "url": "https://docs.qualys.com/en/vm/qweb-all-api/mergedProjects/qapi-pc/policies/list_policies.htm"
+    },
+    {
+     "claim": "The Qualys API user guide states the same ids parameter behaviour for the Compliance Policy List API and clarifies that valid policy IDs (not host IDs) are required.",
+     "quote": "ids={value} \u2014 (Optional) Show only certain policy IDs and/or ID ranges. One or more policy IDs/ranges may be specified. Multiple entries are comma separated. A policy ID range entry is specified with a hyphen (for example, 160-165). Valid policy IDs are required.",
+     "title": "Qualys API (VM and PA) User Guide, Version 10.40, September 7, 2026 - Compliance Policy List",
+     "url": "https://cdn2.qualys.com/docs/qualys-api-vmpc-user-guide.pdf"
+    },
+    {
+     "claim": "No maximum count of IDs is documented for the ids parameter; the only documented ceiling on this API is 1,000 policy records processed per request, which is an output batching limit.",
+     "quote": "A maximum of 1,000 compliance policy records can be processed per request. If the requested list identifies more than 1,000 policies, then the XML output includes the <WARNING> element and instructions for making another request for the next batch of policy records.",
+     "title": "List Policies - Qualys VM, PC APIs (Maximum Policies per API Request)",
+     "url": "https://docs.qualys.com/en/vm/qweb-all-api/mergedProjects/qapi-pc/policies/list_policies.htm"
+    }
+   ]
+  },
+  {
+   "title": "Request method and request length (Qualys and standards)",
+   "items": [
+    {
+     "claim": "Qualys documents that there are toolkit-dependent limits on how much data can be sent using the GET method, and that POST has no such fundamental limit \u2014 the documented basis for switching a long request to POST.",
+     "quote": "2) There are known limits for the amount of data that can be sent using the GET method. These limits are dependent on the toolkit used. There is no fundamental limit with sending data using the POST method.",
+     "title": "Qualys API Quick Reference (July 30, 2026), \"Good to Know\" \u2192 \"API Notes\", note 2",
+     "url": "https://cdn2.qualys.com/docs/qualys-api-quick-reference.pdf"
+    },
+    {
+     "claim": "The primary Qualys VM/PA API user guide states that GET carries known, toolkit-dependent data limits and directs the reader to each individual API function's description to learn which methods that function supports.",
+     "quote": "Qualys API functions allow API users to submit parameters (name=value pairs) using the GET and/or POST method. There are known limits for the amount of data that can be sent using the GET method, and these limits are dependent on the toolkit used. Please refer to the individual descriptions of the API function calls to learn about the supported methods for each function.",
+     "title": "Qualys API (VM and PA) User Guide, Version 10.40 (September 7, 2026), \"Welcome\" \u2192 \"Making API requests\" \u2192 \"GET and POST Methods\"",
+     "url": "https://cdn2.qualys.com/docs/qualys-api-vmpc-user-guide.pdf"
+    },
+    {
+     "claim": "Qualys' HTML documentation positions GET for simple requests and POST with an XML payload for advanced requests that bundle multiple actions into a single call.",
+     "quote": "While it is still possible to create simple API requests using the GET method, you can create API requests using the POST method with an XML payload to make an advanced request.",
+     "title": "Qualys Cloud Agent API \u2014 Making API Calls (\"GET and POST Methods\" and \"Making requests with URL payload\")",
+     "url": "https://docs.qualys.com/en/ca/api/get_started/making_api_requests.htm"
+    },
+    {
+     "claim": "RFC 9110 Section 4.1 sets no hard maximum URI length but recommends that all senders and recipients support URIs of at least 8000 octets in protocol elements, noting the HTTP/1.1 request line will therefore be larger in some cases.",
+     "quote": "It is RECOMMENDED that all senders and recipients support, at a minimum, URIs with lengths of 8000 octets in protocol elements. Note that this implies some structures and on-wire representations (for example, the request line in HTTP/1.1) will necessarily be larger in some cases.",
+     "title": "RFC 9110: HTTP Semantics, Section 4.1 (URI References)",
+     "url": "https://www.rfc-editor.org/rfc/rfc9110.html#name-uri-references"
+    },
+    {
+     "claim": "Apache HTTP Server 2.4 limits the HTTP request-line to 8190 bytes by default via LimitRequestLine, which in turn caps the length of the request-URI (method + URI + protocol version).",
+     "quote": "Default: LimitRequestLine 8190 [...] The LimitRequestLine directive allows the server administrator to set the limit on the allowed size of a client's HTTP request-line. Since the request-line consists of the HTTP method, URI, and protocol version, the LimitRequestLine directive places a restriction on the length of a request-URI allowed for a request on the server.",
+     "title": "core - Apache HTTP Server Version 2.4 (LimitRequestLine Directive)",
+     "url": "https://httpd.apache.org/docs/2.4/mod/core.html#limitrequestline"
+    },
+    {
+     "claim": "IIS request filtering defaults cap the URL at 4096 bytes (maxUrl) and the query string at 2048 bytes (maxQueryString), returning 404.14 (URL Too Long) or 404.15 (Query String Too Long) when exceeded.",
+     "quote": "`maxQueryString` | Optional uint attribute. Specifies the maximum length of the query string, in bytes. The default value is `2048`. ... `maxUrl` | Optional uint attribute. Specifies maximum length of the URL, in bytes. The default value is `4096`. ... \"When request filtering blocks an HTTP request because an HTTP request exceeds the request limits, IIS 7 will return an HTTP 404 error to the client and log one of the follow...",
+     "title": "Request Limits <requestLimits> | Microsoft Learn",
+     "url": "https://learn.microsoft.com/en-us/iis/configuration/system.webserver/security/requestfiltering/requestlimits/"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-18 09:38:31">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="BofA Sim">9d1e03de930b8310e3aef0aefaba10d5</application>
+<application_name>BofA Sim</application_name>
+<application_scope>x_196061_bofasim</application_scope>
+<application_version>1.0.0</application_version>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>VAMP outbound integration for application vulnerable items: payload processor, Kafka producer, properties and the after insert/update rule.</description>
+<inserted/>
+<name>SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.1</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>86ff74d393db0790e3aef0aefaba10db</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-18 09:38:29</sys_created_on>
+<sys_id>c180015793db0790e3aef0aefaba10e9</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-18 09:38:29</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BofA Sim">9d1e03de930b8310e3aef0aefaba10d5</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_06db78d7939b0790e3aef0aefaba10aa</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;x_196061_bofasim.BOFASIKafkaProducerVamp&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;Sends a VAMP payload to the Kafka topic held in usem.vamp.kafka.topic_sys_id with sn_ih_kafka.ProducerV2 (key &amp;lt;table&amp;gt;.&amp;lt;sys_id&amp;gt;).
+Documentation of API used - https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html&lt;/description&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;BOFASIKafkaProducerVamp&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[var BOFASIKafkaProducerVamp = Class.create();
+BOFASIKafkaProducerVamp.prototype = {
+
+    initialize: function() {
+        this.TOPIC_PROPERTY = 'x_196061_bofasim.usem.vamp.kafka.topic_sys_id';
+        this.IS_SYNC = false;
+        this.HEADERS = null;
+        this.SCHEMA_ID = null;
+    },
+
+    sendPayload: function(payload, record) {
+        var key = record.getTableName() + '.' + record.getUniqueValue();
+        try {
+            var topicSysId = gs.getProperty(this.TOPIC_PROPERTY, '');
+            var response = new sn_ih_kafka.ProducerV2().send(topicSysId, key, payload, this.IS_SYNC, this.HEADERS, this.SCHEMA_ID);
+            gs.addInfoMessage('VAMP Kafka response for ' + key + ': ' + JSON.stringify(response))
+        } catch (e) {
+            gs.error(this.type + ': message not sent for ' + key + ' - ' + (e.message || e));
+        }
+    },
+
+    type: 'BOFASIKafkaProducerVamp'
+};
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-18 09:18:04&lt;/sys_created_on&gt;&lt;sys_id&gt;06db78d7939b0790e3aef0aefaba10aa&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFASIKafkaProducerVamp&lt;/sys_name&gt;&lt;sys_package display_value="BofA Sim" source="x_196061_bofasim"&gt;9d1e03de930b8310e3aef0aefaba10d5&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BofA Sim"&gt;9d1e03de930b8310e3aef0aefaba10d5&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_06db78d7939b0790e3aef0aefaba10aa&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-18 09:18:04&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-1255777307</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.1">c180015793db0790e3aef0aefaba10e9</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-18 09:38:29</sys_created_on>
+<sys_id>0580015793db0790e3aef0aefaba10eb</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0b3df9c6a0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-18 09:38:29</sys_updated_on>
+<table/>
+<target_name>BOFASIKafkaProducerVamp</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_guid>1bff78d3b3db0790da4e86e2bb409a0e</update_guid>
+<update_guid_history>1bff78d3b3db0790da4e86e2bb409a0e:-1255777307,46db78d7109b0790636f15087f9cafac:-1255777307</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BofA Sim">9d1e03de930b8310e3aef0aefaba10d5</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_79db78d7939b0790e3aef0aefaba10a3</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;x_196061_bofasim.BOFASIVampOutboundProcessor&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;Builds the outbound VAMP payload (envelope plus one finding element) for an application vulnerable item. Sections and their fields come from the properties usem.vamp.avit.sections and usem.vamp.avit.fields.&amp;lt;section&amp;gt;.&lt;/description&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;BOFASIVampOutboundProcessor&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[var BOFASIVampOutboundProcessor = Class.create();
+BOFASIVampOutboundProcessor.prototype = {
+
+    initialize: function() {
+        this.TOPIC_NAME = 'sn_usem_verification_outbound';
+        this.NAMESPACE = 'com.bofa.usem';
+        this.CORE_VERSION = '1.0.0';
+        this.OUTBOUND_VERSION = '1.0.0';
+        this.DATE_FORMAT = 'MM-dd-yyyy';
+        this.TIME_FORMAT = 'HH:mm:ss';
+        this.FIELDS_PROPERTY_PREFIX = 'x_196061_bofasim.usem.vamp.finding.fields.';
+        this.TASK_KEY = 'remediation_task';
+        this.GROUP_ITEM_TABLE = 'sn_vul_app_m2m_vul_group_item';
+        this.GROUP_ITEM_FIELD = 'sn_vul_app_vulnerable_item';
+        this.GROUP_FIELD = 'sn_vul_app_vulnerability';
+    },
+
+    buildPayload: function(record) {
+        try {
+            var payload = {
+                envelope: this._buildEnvelope(this._activity(record)),
+                findings: [this._buildFinding(record)]
+            };
+            var message = JSON.stringify(payload);
+            gs.addInfoMessage('VAMP payload for ' + record.getValue('number') + ': ' + message)
+            return message;
+        } catch (e) {
+            gs.error(this.type + ': payload not built for ' + record.getTableName() + ' ' + record.getUniqueValue() + ' - ' + (e.message || e));
+            return '';
+        }
+    },
+
+    _activity: function(record) {
+        var operation = String(record.operation() || '').toUpperCase();
+        if (operation)
+            return operation;
+        return parseInt(record.getValue('sys_mod_count')) &gt; 0 ? 'UPDATE' : 'INSERT';
+    },
+
+    _buildEnvelope: function(activity) {
+        return {
+            type: 'record',
+            topic_name: this.TOPIC_NAME,
+            namespace: this.NAMESPACE,
+            core_version: this.CORE_VERSION,
+            outbound_version: this.OUTBOUND_VERSION,
+            event_id: this._newEventId(),
+            event_timestamp: this._utcTimestamp(),
+            element_count: 1,
+            element_activity: activity
+        };
+    },
+
+    _buildFinding: function(record) {
+        var mapping = this._fieldMapping(record.getTableName());
+        var task = this._remediationTask(record);
+        var finding = {};
+        for (var i = 0; i &lt; mapping.length; i++)
+            this._assign(finding, mapping[i].json, this._fieldValue(record, task, mapping[i].field));
+        return finding;
+    },
+
+    _fieldMapping: function(table) {
+        var property = this.FIELDS_PROPERTY_PREFIX + table;
+        var value = gs.getProperty(property, '');
+        if (!value)
+            throw new Error('table ' + table + ' is not configured in property ' + property);
+        var mapping = [];
+        var entries = value.split(/\r?\n|,/);
+        for (var i = 0; i &lt; entries.length; i++) {
+            var pair = entries[i].split('=');
+            var field = pair[0].trim();
+            if (!field)
+                continue;
+            mapping.push({ field: field, json: pair.length &gt; 1 &amp;&amp; pair[1].trim() ? pair[1].trim() : field });
+        }
+        return mapping;
+    },
+
+    _remediationTask: function(record) {
+        var item = new GlideRecord(this.GROUP_ITEM_TABLE);
+        item.addQuery(this.GROUP_ITEM_FIELD, record.getUniqueValue());
+        item.orderByDesc('sys_created_on');
+        item.query();
+        return item.next() ? item.getElement(this.GROUP_FIELD).getRefRecord() : null;
+    },
+
+    _fieldValue: function(record, task, path) {
+        var at = path.lastIndexOf('.');
+        var source = this._source(record, task, at &lt; 0 ? '' : path.substring(0, at));
+        var field = at &lt; 0 ? path : path.substring(at + 1);
+        if (!source || !source.isValidRecord() || !source.isValidField(field))
+            return '';
+        var element = source.getElement(field);
+        if (element === null || element.nil())
+            return '';
+        return this._renderElement(element);
+    },
+
+    _source: function(record, task, path) {
+        var root = record;
+        if (path == this.TASK_KEY || path.indexOf(this.TASK_KEY + '.') == 0) {
+            root = task;
+            path = path.substring(this.TASK_KEY.length + 1);
+        }
+        if (!root || !path)
+            return root;
+        return root.getElement(path).getRefRecord();
+    },
+
+    _assign: function(target, path, value) {
+        var keys = path.split('.');
+        for (var i = 0; i &lt; keys.length - 1; i++) {
+            if (!target[keys[i]])
+                target[keys[i]] = {};
+            target = target[keys[i]];
+        }
+        target[keys[keys.length - 1]] = value;
+    },
+
+    _renderElement: function(element) {
+        switch (String(element.getED().getInternalType())) {
+            case 'glide_date_time':
+                return this._formatDateTime(element.getValue());
+            case 'glide_date':
+                return this._formatDate(element.getValue());
+            case 'journal_input':
+                return String(element.getJournalEntry(1)).trim();
+            case 'reference':
+            case 'glide_list':
+            case 'boolean':
+            case 'glide_duration':
+            case 'timer':
+            case 'domain_id':
+            case 'sys_class_name':
+            case 'integer':
+            case 'string':
+                return String(element.getDisplayValue());
+            default:
+                return String(element.getValue());
+        }
+    },
+
+    _formatDateTime: function(value) {
+        var gdt = new GlideDateTime(value);
+        return gdt.getDate().getByFormat(this.DATE_FORMAT) + ' ' + gdt.getTime().getByFormat(this.TIME_FORMAT);
+    },
+
+    _formatDate: function(value) {
+        var gd = new GlideDate();
+        gd.setValue(value);
+        return gd.getByFormat(this.DATE_FORMAT);
+    },
+
+    _newEventId: function() {
+        var guid = gs.generateGUID();
+        return guid.substring(0, 8) + '-' + guid.substring(8, 12) + '-' + guid.substring(12, 16) + '-' +
+            guid.substring(16, 20) + '-' + guid.substring(20, 32);
+    },
+
+    _utcTimestamp: function() {
+        return new GlideDateTime().getValue().replace(' ', 'T') + 'Z';
+    },
+
+    type: 'BOFASIVampOutboundProcessor'
+};
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-18 09:18:03&lt;/sys_created_on&gt;&lt;sys_id&gt;79db78d7939b0790e3aef0aefaba10a3&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFASIVampOutboundProcessor&lt;/sys_name&gt;&lt;sys_package display_value="BofA Sim" source="x_196061_bofasim"&gt;9d1e03de930b8310e3aef0aefaba10d5&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BofA Sim"&gt;9d1e03de930b8310e3aef0aefaba10d5&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_79db78d7939b0790e3aef0aefaba10a3&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-18 09:36:05&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<payload_hash>1746907130</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.1">c180015793db0790e3aef0aefaba10e9</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-18 09:38:29</sys_created_on>
+<sys_id>4980015793db0790e3aef0aefaba10eb</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0b3df9c300000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-18 09:38:29</sys_updated_on>
+<table/>
+<target_name>BOFASIVampOutboundProcessor</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_guid>57ff38d3badb079014840729e2e62fff</update_guid>
+<update_guid_history>57ff38d3badb079014840729e2e62fff:1746907130,0effb4d312db079097a6c1621f24af18:1746907130,46db78d74e9b07904cd25d224a4e11a8:1606119786</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BofA Sim">9d1e03de930b8310e3aef0aefaba10d5</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_8edb78d7939b0790e3aef0aefaba10df</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_verification_outbound, read by BOFASIKafkaProducerVamp.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_196061_bofasim.usem.vamp.kafka.topic_sys_id</name><read_roles/><suffix>usem.vamp.kafka.topic_sys_id</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-18 09:18:04</sys_created_on><sys_id>8edb78d7939b0790e3aef0aefaba10df</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_196061_bofasim.usem.vamp.kafka.topic_sys_id</sys_name><sys_package display_value="BofA Sim" source="x_196061_bofasim">9d1e03de930b8310e3aef0aefaba10d5</sys_package><sys_policy/><sys_scope display_value="BofA Sim">9d1e03de930b8310e3aef0aefaba10d5</sys_scope><sys_update_name>sys_properties_8edb78d7939b0790e3aef0aefaba10df</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-18 09:18:04</sys_updated_on><type>string</type><value>4edb78d7939b0790e3aef0aefaba10df</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=8edb78d7939b0790e3aef0aefaba10df"/></record_update>]]></payload>
+<payload_hash>-173497087</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.1">c180015793db0790e3aef0aefaba10e9</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-18 09:38:29</sys_created_on>
+<sys_id>8980015793db0790e3aef0aefaba10e9</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0b3df9c8f0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-18 09:38:29</sys_updated_on>
+<table/>
+<target_name>x_196061_bofasim.usem.vamp.kafka.topic_sys_id</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>53ff78d39fdb0790d1fbd3335ae65111</update_guid>
+<update_guid_history>53ff78d39fdb0790d1fbd3335ae65111:-173497087,eaeb7cd73b9b0790a4c287eca9977554:-173497087</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BofA Sim">9d1e03de930b8310e3aef0aefaba10d5</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_c2ffb4d393db0790e3aef0aefaba101b</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>Fields of the VAMP finding payload for sn_vul_app_vulnerable_item, one servicenow_field=json_field pair per line in payload order. The ServiceNow field may dot-walk from the item (cmdb_ci.name; remediation_task.number reaches the item's remediation task); a dot in the json field nests it (ci.name). A field missing on the table or empty is sent as "".</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_196061_bofasim.usem.vamp.finding.fields.sn_vul_app_vulnerable_item</name><read_roles/><suffix>usem.vamp.finding.fields.sn_vul_app_vulnerable_item</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-18 09:36:06</sys_created_on><sys_id>c2ffb4d393db0790e3aef0aefaba101b</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_196061_bofasim.usem.vamp.finding.fields.sn_vul_app_vulnerable_item</sys_name><sys_package display_value="BofA Sim" source="x_196061_bofasim">9d1e03de930b8310e3aef0aefaba10d5</sys_package><sys_policy/><sys_scope display_value="BofA Sim">9d1e03de930b8310e3aef0aefaba10d5</sys_scope><sys_update_name>sys_properties_c2ffb4d393db0790e3aef0aefaba101b</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-18 09:36:06</sys_updated_on><type>string</type><value>number=finding.number,
+sys_created_on=finding.sys_created_on,
+sys_updated_on=finding.sys_updated_on,
+state=finding.state,
+cmdb_ci=finding.configuration_item,
+u_verification_status=finding.u_verification_status,
+source_avit_id=finding.source_avit_id,
+vulnerability.number=tpe.number,
+remediation_task.number=remediation_task.number,
+remediation_task.primary_ait=remediation_task.primary_ait,
+application_release.u_primary_ait.number=ait.number,
+cmdb_ci.name=ci.name,
+cmdb_ci.sys_class_name=ci.class_name,
+change_approval.number=exception.number,
+change_approval.approval_state=exception.approval_state,
+change_approval.desired_validity_date=exception.desired_validity_date,
+u_consequence.number=consequence.number,
+u_consequence.state=consequence.state,
+u_consequence.u_consequence_level=consequence.u_consequence_level,
+assessment_request.number=ptreq.number,
+assessment_request.sys_created_on=ptreq.sys_created_on,
+assessment_request.u_assessment_id=ptreq.u_assessment_id,</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=c2ffb4d393db0790e3aef0aefaba101b"/></record_update>]]></payload>
+<payload_hash>-47627168</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.1">c180015793db0790e3aef0aefaba10e9</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-18 09:38:29</sys_created_on>
+<sys_id>8980015793db0790e3aef0aefaba10ea</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0b3df9cb40000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-18 09:38:29</sys_updated_on>
+<table/>
+<target_name>x_196061_bofasim.usem.vamp.finding.fields.sn_vul_app_vulnerable_item</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>1bff78d3badb079082703910e4c5be13</update_guid>
+<update_guid_history>1bff78d3badb079082703910e4c5be13:-47627168,1effb4d358db07906927b1fcff49a3e4:-47627168</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BofA Sim">9d1e03de930b8310e3aef0aefaba10d5</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_0f0cf41b939b0790e3aef0aefaba106f</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;true&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vul_app_vulnerable_item&lt;/collection&gt;&lt;condition/&gt;&lt;description&gt;Builds the VAMP payload for the application vulnerable item with BOFASIVampOutboundProcessor and sends it with BOFASIKafkaProducerVamp on every insert and update.&lt;/description&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition/&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;BOFA_BR_AVIT_VampOutbound&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous /*null when async*/ ) {
+    try {
+        var payload = new x_196061_bofasim.BOFASIVampOutboundProcessor().buildPayload(current);
+        if (payload)
+            new x_196061_bofasim.BOFASIKafkaProducerVamp().sendPayload(payload, current);
+    } catch (e) {
+        gs.error('BOFA_BR_AVIT_VampOutbound: outbound message failed for ' + current.getTableName() + ' ' + current.getUniqueValue() + ' - ' + (e.message || e));
+    }
+})(current, previous);
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-18 09:18:58&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;0f0cf41b939b0790e3aef0aefaba106f&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA_BR_AVIT_VampOutbound&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="BofA Sim" source="x_196061_bofasim"&gt;9d1e03de930b8310e3aef0aefaba10d5&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BofA Sim"&gt;9d1e03de930b8310e3aef0aefaba10d5&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_0f0cf41b939b0790e3aef0aefaba106f&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-18 09:18:58&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=0f0cf41b939b0790e3aef0aefaba106f"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-727555318</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V1.1">c180015793db0790e3aef0aefaba10e9</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-18 09:38:29</sys_created_on>
+<sys_id>cd80015793db0790e3aef0aefaba10ea</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0b3df9cd60000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-18 09:38:29</sys_updated_on>
+<table>sn_vul_app_vulnerable_item</table>
+<target_name>BOFA_BR_AVIT_VampOutbound</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>93ff78d354db0790093c38f0dcf90d16</update_guid>
+<update_guid_history>93ff78d354db0790093c38f0dcf90d16:-727555318,9f0cf41ba49b0790dbd53e5b6feef693:-727555318</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>

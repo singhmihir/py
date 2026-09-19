@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-15 13:32:08">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Global">global</application>
+<application_name>Global</application_name>
+<application_scope>global</application_scope>
+<application_version/>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>One new USEM Qualys CI lookup rule, 415 Device Name Match, for the device classes the CMDB keeps outside the Hardware tree: IP Phone extends the base CI class directly and Scanner sits under Imaging Hardware, so the hardware-wide name rules never see those records and the class rules need an OS that a phone or a scanner does not report. The rule looks for the scanned host name in exactly those two classes (one device carrying the name is the match, the scanned address breaks a tie), and refuses a host whose OS names a server or desktop system. It resolves the contact-centre phones (cc.bofa.com, named avx plus the MAC tail) and the check scanners that stay unmatched today. No existing rule changes; no system property is read or shipped.</description>
+<inserted/>
+<name>SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Device Name Match_V1.0</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>e34616929353cb50e3aef0aefaba108c</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-15 13:32:08</sys_created_on>
+<sys_id>da395ad29393cb50e3aef0aefaba10f7</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-15 13:32:08</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sn_sec_cmn_ci_lookup_rule_eb4616929353cb50e3aef0aefaba108f</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sn_sec_cmn_ci_lookup_rule"&gt;&lt;sn_sec_cmn_ci_lookup_rule action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;applies_to/&gt;&lt;condition/&gt;&lt;description&gt;Host name searched in the device classes outside the Hardware tree (IP Phone, Imaging Hardware); exactly one device, or the one on the scanned address when the name is shared; refused when the OS names a server or desktop system.&lt;/description&gt;&lt;lookup_script/&gt;&lt;lookup_target&gt;ci&lt;/lookup_target&gt;&lt;method&gt;script&lt;/method&gt;&lt;name&gt;USEM Device Name Match&lt;/name&gt;&lt;order&gt;415&lt;/order&gt;&lt;reapply&gt;true&lt;/reapply&gt;&lt;reapply_version&gt;1&lt;/reapply_version&gt;&lt;script&gt;&lt;![CDATA[/* USEM Device Name Match
+   -------------------------------------------------------------------------------------------------
+   Two device classes sit outside the Hardware tree of the CMDB: IP Phone extends the base CI class
+   directly and Scanner sits under Imaging Hardware. The hardware-wide name rules never see those
+   records, and the class rules need an OS that a phone or a scanner does not report to an
+   unauthenticated scan. This rule looks for the scanned host name in exactly those classes: one
+   device carrying the name is the match, and when the name is shared the scanned address breaks the
+   tie.
+
+   Sample payload (one Qualys host record, used in every note below)
+   {
+     "ID": "753026617",
+     "IP": "10.190.29.132",
+     "TRACKING_METHOD": "IP",
+     "DNS": "avxdd008a.cc.bofa.com"
+   }
+   Input  : sourceValue is the DNS field, "avxdd008a.cc.bofa.com"; the rule also reads the OS and
+            the IP from sourcePayload.
+   Returns: the sys_id of the one IP Phone or Imaging Hardware CI named with the host name; when
+            several carry it, the one whose ip_address is the scanned address; null otherwise, and
+            null when the scanned OS names a server or desktop system.
+   Sample : the IP Phone CI "AVXDD008A" (an Avaya station named "avx" plus the tail of its MAC
+            address), whose ip_address is also "10.190.29.132".
+
+   Place in the chain (the first rule to return a CI wins; a null hands the host to the next rule)
+   Before : USEM Hostname Hardware Match searched the Hardware tree for the plain host name; the
+            phone and scanner classes are not in that tree, so it declined, and every earlier rule
+            needed an OS class, a serial or a Cisco phone label.
+   Reaches: phones and scanners named in DNS, which in our feed scan without an OS; in the
+            contact-centre domain cc.bofa.com nearly every host is such a phone.
+   After  : USEM Management Interface Match, then the interface, service and address rules.
+   ------------------------------------------------------------------------------------------------- */
+(function process(rule, sourceValue, sourcePayload) {
+    if (!sourceValue)                             // nothing to look up
+        return null;
+    var full = ('' + sourceValue).trim().toLowerCase();  // "avxdd008a.cc.bofa.com"
+    var host = full.split('.')[0];                // "avxdd008a"
+    if (!host)
+        return null;
+    // "10.190.29.132", only used to break a tie
+    var ip = sourcePayload.IP ? '' + sourcePayload.IP : '';
+
+    // Classes that must never be matched (placeholder and technical CIs); the list lives in the
+    // property sn_sec_cmn.ignoreCIClass and the framework may pass it in as _ignoreClass.
+    var ignore = (typeof _ignoreClass != 'undefined' &amp;&amp; _ignoreClass) ?
+        ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
+
+    // -- The scanned OS must not name a different kind of machine ---------------------------------
+    // A phone or a scanner reports no OS to an unauthenticated scan, or a guess such as an embedded
+    // Linux kernel, "Unknown OS" or a vendor name. Only an OS that clearly names a server or
+    // desktop system (Windows, ESXi, AIX, Solaris, HP-UX) rules the device out; a Linux kernel
+    // fingerprint is what an appliance shows and is accepted, and so is anything that mentions a
+    // phone.
+    // Sample: the sample carries no OS, so nothing rules the device out; "Foundry Networks",
+    //         "Unknown OS" or "Linux 2.x" on a phone would pass too, "Windows 10 Enterprise" would
+    //         end the rule here.
+    //
+    // classFor() maps the OS text Qualys reports to the CMDB class the CI should be in, e.g. "Red
+    // Hat Enterprise Linux 9.8" is a Linux Server, "Windows Server 2016 Standard" a Windows Server
+    // and "VMware ESXi 7.0.3" an ESX Server. A string of guesses separated by "/" comes from an
+    // unauthenticated scan that could not identify the OS; three or more guesses give no class at
+    // all.
+    function classFor(os) {
+        if (!os) return '';
+        var s = ('' + os).toLowerCase();
+        if (s.split('/').length &gt; 2) return '';   // multi-guess fingerprint
+        if (s.indexOf('esx') != -1) return 'cmdb_ci_esx_server';
+        if (s.indexOf('windows') != -1)
+            return s.indexOf('server') != -1 ? 'cmdb_ci_win_server' : 'cmdb_ci_computer';
+        if (s.indexOf('aix') != -1) return 'cmdb_ci_aix_server';
+        if (s.indexOf('solaris') != -1 || s.indexOf('sunos') != -1) return 'cmdb_ci_solaris_server';
+        if (s.indexOf('hp-ux') != -1) return 'cmdb_ci_hpux_server';
+        if (s.indexOf('netapp') != -1 || s.indexOf('ontap') != -1) return 'cmdb_ci_storage_server';
+        if (s.indexOf('printer') != -1 || s.indexOf('laserjet') != -1 || s.indexOf('jetdirect') != -1) return 'cmdb_ci_printer';
+        if (s.indexOf('red hat') != -1 || s.indexOf('linux') != -1 || s.indexOf('centos') != -1 ||
+            s.indexOf('ubuntu') != -1 || s.indexOf('suse') != -1 || s.indexOf('debian') != -1 ||
+            s.indexOf('fedora') != -1 || s.indexOf('euleros') != -1 ||
+            s.indexOf('oracle enterprise') != -1 || s.indexOf('amazon') != -1) return 'cmdb_ci_linux_server';
+        if (s.indexOf('nx-os') != -1 || s.indexOf('catos') != -1 || s.indexOf('cisco') != -1) return 'cmdb_ci_netgear';
+        return '';
+    }
+    var os = ('' + (sourcePayload.OS || '')).toLowerCase();
+    var pref = classFor(os);
+    if (pref &amp;&amp; pref != 'cmdb_ci_linux_server' &amp;&amp; os.indexOf('phone') == -1)
+        return null;
+
+    // -- Search the device classes outside the Hardware tree --------------------------------------
+    // Each class is searched by name, sub-classes included, with the ignored classes left out. The
+    // classes are listed here rather than derived because they are exactly the device classes the
+    // CMDB keeps outside the Hardware tree; a scanner or phone record loaded elsewhere is not the
+    // concern of this rule.
+    // Sample: cmdb_ci_ip_phone holds one record named "AVXDD008A" (the query is not case-sensitive)
+    //         with ip_address "10.190.29.132"; cmdb_ci_imaging_hardware holds none, so found has
+    //         one entry and onAddress the same one.
+    // IP phones; scanners and other imaging devices
+    var classes = ['cmdb_ci_ip_phone', 'cmdb_ci_imaging_hardware'];
+    var found = [], onAddress = [];
+    for (var i = 0; i &lt; classes.length; i++) {
+        var gr = new GlideRecord(classes[i]);
+        if (!gr.isValid())                        // class not installed here, try the next one
+            continue;
+        gr.addQuery('name', host);
+        if (ignore)
+            gr.addQuery('sys_class_name', 'NOT IN', ignore);
+        gr.query();
+        while (gr.next()) {
+            found.push(gr.getUniqueValue());
+            if (ip &amp;&amp; ('' + gr.getValue('ip_address')) == ip)
+                onAddress.push(gr.getUniqueValue());
+        }
+    }
+
+    // -- One device carrying the name, the scanned address as the tie-break -----------------------
+    // One device named with the host is the match: a phone name is built from its MAC address and a
+    // scanner name from its asset label, so the name alone identifies the device even after its
+    // DHCP address has changed. When the name is shared (a phone re-registered under a new record,
+    // a scanner loaded twice) the one whose ip_address is the scanned address is taken, and only
+    // when exactly one carries it; otherwise the rule declines.
+    // Sample: found holds the one IP Phone "AVXDD008A", so its sys_id is returned. Were a second
+    //         phone named "avxdd008a", only the one on "10.190.29.132" would be taken; two phones
+    //         on that address would make the rule decline.
+    if (found.length == 1)
+        return found[0];
+    if (found.length &gt; 1 &amp;&amp; onAddress.length == 1)
+        return onAddress[0];
+    return null;
+})(rule, sourceValue, sourcePayload);
+]]&gt;&lt;/script&gt;&lt;source display_value="Qualys Cloud Platform"&gt;ed44bdc453220300e8f9f745911c0801&lt;/source&gt;&lt;source_field&gt;DNS&lt;/source_field&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-15 13:19:22&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;eb4616929353cb50e3aef0aefaba108f&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-15 13:19:22&lt;/sys_updated_on&gt;&lt;table&gt;sn_vul_qualys_host_attrb&lt;/table&gt;&lt;target_field/&gt;&lt;target_field_product_model/&gt;&lt;target_table/&gt;&lt;target_table_product_model&gt;cmdb_application_product_model&lt;/target_table_product_model&gt;&lt;type&gt;custom&lt;/type&gt;&lt;/sn_sec_cmn_ci_lookup_rule&gt;&lt;/record_update&gt;</payload>
+<payload_hash>1650069453</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-895_MS_Qualys CI Lookup Rules Device Name Match_V1.0">da395ad29393cb50e3aef0aefaba10f7</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-15 13:32:08</sys_created_on>
+<sys_id>12395ad29393cb50e3aef0aefaba10f8</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0a538e0b60000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-15 13:32:08</sys_updated_on>
+<table>sn_vul_qualys_host_attrb</table>
+<target_name>USEM Device Name Match</target_name>
+<type>Lookup Rule</type>
+<update_domain>global</update_domain>
+<update_guid>2f4616924f53cb50cc34154cf74e7e93</update_guid>
+<update_guid_history>2f4616924f53cb50cc34154cf74e7e93:1650069453</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>

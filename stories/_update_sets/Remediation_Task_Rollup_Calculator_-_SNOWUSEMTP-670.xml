@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-03 11:35:01">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Administration for Security Exposure Management">ad40ffe39c65d61094489c714753f2da</application>
+<application_name>Administration for Security Exposure Management</application_name>
+<application_scope>sn_sec_wf</application_scope>
+<application_version>30.5.0</application_version>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>Rollup calculator for the vulnerability record: highest risk score and risk rating from the active vulnerable items. Single configuration record on sn_sec_wf_rollup_config.</description>
+<inserted/>
+<name>Remediation Task Rollup Calculator - SNOWUSEMTP-670</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>56849f4293528fd0e3aef0aefaba1070</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:01</sys_created_on>
+<sys_id>f15b446a9383c310e3aef0aefaba106c</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:01</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sn_sec_wf_rollup_config_1964574293528fd0e3aef0aefaba10bf</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sn_sec_wf_rollup_config"&gt;&lt;sn_sec_wf_rollup_config action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;advanced_condition/&gt;&lt;advanced_script/&gt;&lt;applies_to&gt;8bce76b0971d4eeabbe397ba7f24c71b&lt;/applies_to&gt;&lt;average_score_weight&gt;0&lt;/average_score_weight&gt;&lt;calculator_group/&gt;&lt;comments/&gt;&lt;condition/&gt;&lt;condition_type&gt;1&lt;/condition_type&gt;&lt;count_score_map&gt;{"range_0":{"min":0,"max":10,"value":0.2},"range_1":{"min":11,"max":100,"value":0.4},"range_2":{"min":101,"max":1000,"value":0.6},"range_3":{"min":1001,"max":10000,"value":0.8},"range_4":{"min":10001,"value":1}}&lt;/count_score_map&gt;&lt;description&gt;Roll up the highest risk score from the active vulnerable items to the vulnerability record.&lt;/description&gt;&lt;filter_group/&gt;&lt;is_basic&gt;true&lt;/is_basic&gt;&lt;item_condition&gt;active=true&lt;/item_condition&gt;&lt;item_count_weight&gt;0&lt;/item_count_weight&gt;&lt;max_score_weight&gt;100&lt;/max_score_weight&gt;&lt;name&gt;Remediation Task Rollup Calculator&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;preview&gt;&lt;![CDATA[&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;]]&gt;&lt;/preview&gt;&lt;script_values&gt;&lt;![CDATA[var SN_TARGET_FIELD = "risk_score";
+var SN_TARGET_TABLE = "sn_vul_vulnerability";
+var calculator = new sn_sec_wf.RollupScoreCalculator();
+current[SN_TARGET_FIELD] = calculator.getRollupScores(current.sys_id, SN_TARGET_TABLE);]]&gt;&lt;/script_values&gt;&lt;sys_class_name&gt;sn_sec_wf_rollup_config&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-07-27 06:09:23&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_id&gt;1964574293528fd0e3aef0aefaba10bf&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-07-27 06:09:23&lt;/sys_updated_on&gt;&lt;table&gt;sn_vul_vulnerability&lt;/table&gt;&lt;target_field&gt;risk_score&lt;/target_field&gt;&lt;template/&gt;&lt;value_type&gt;3&lt;/value_type&gt;&lt;work_notes/&gt;&lt;/sn_sec_wf_rollup_config&gt;&lt;/record_update&gt;</payload>
+<payload_hash>907395862</payload_hash>
+<remote_update_set display_value="Remediation Task Rollup Calculator - SNOWUSEMTP-670">f15b446a9383c310e3aef0aefaba106c</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:01</sys_created_on>
+<sys_id>395b446a9383c310e3aef0aefaba106c</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>19fa231ccc10000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:01</sys_updated_on>
+<table>sn_vul_vulnerability</table>
+<target_name>Remediation Task Rollup Calculator</target_name>
+<type>Rollup Config</type>
+<update_domain>global</update_domain>
+<update_guid>52849f42b0528fd0d44967ad1bd7ec76</update_guid>
+<update_guid_history>52849f42b0528fd0d44967ad1bd7ec76:907395862</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>

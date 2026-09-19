@@ -1,0 +1,931 @@
+{
+ "rules": [
+  {
+   "order": "175",
+   "name": "USEM Serial Number Class Match",
+   "group": "Serial",
+   "purpose": "A serial number stays with a machine for its whole life, while names and addresses get reused. It is the strongest identifier Qualys gives us, so it is tried first, inside the class the scanned OS points at.",
+   "reads": "SERIAL_NUMBER, plus the OS",
+   "returns": "the one CI of that class carrying the serial, else null",
+   "before": "nothing custom runs before this rule.",
+   "reaches": "every host that reports a serial: in this feed the Cloud Agent hosts.",
+   "after": "the hardware-wide serial rule, for hosts whose OS gives no class.",
+   "rows": [
+    [
+     "Refuse placeholder serials",
+     "Vendors ship \"To be filled by O.E.M.\" and \"0123456789\" on thousands of machines; such a value would match dozens of CIs.",
+     [
+      "var junk = ',0,none,n/a,unknown,default string,' +",
+      "    'to be filled by o.e.m.,0123456789,';",
+      "if (serial.length < 4 ||",
+      "    junk.indexOf(',' + serial.toLowerCase() + ',') != -1)",
+      "    return null;"
+     ]
+    ],
+    [
+     "Class from the scanned OS",
+     "classFor() turns the OS text into a CMDB class. The search stays inside it, so a Red Hat host cannot land on a Windows Server.",
+     [
+      "var pref = classFor(sourcePayload.OS);",
+      "if (!pref)                             // unknown or multi-guess OS",
+      "    return null;                       // hand over to the hardware-wide rule"
+     ]
+    ],
+    [
+     "Serial search, exactly one CI",
+     "Exact match on serial_number inside the class, ignored classes left out. Two CIs sharing a serial (a cloned virtual machine, a typo) cannot be told apart here.",
+     [
+      "var gr = new GlideRecord(pref);        // class + sub-classes",
+      "gr.addQuery('serial_number', serial);",
+      "gr.addQuery('sys_class_name', 'NOT IN', ignore);",
+      "gr.query();",
+      "if (!gr.next()) return null;           // nothing found",
+      "var match = gr.getUniqueValue();",
+      "if (gr.hasNext()) return null;         // two CIs, never guess",
+      "return match;"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "180",
+   "name": "USEM Serial Number Hardware Match",
+   "group": "Serial",
+   "purpose": "The same serial search across the whole hardware tree. It exists for hosts whose OS gives no usable class, and for CIs that sit in a different class than the OS suggests.",
+   "reads": "SERIAL_NUMBER",
+   "returns": "the one hardware CI carrying the serial, else null",
+   "before": "the class-scoped serial rule already tried the serial inside the OS class.",
+   "reaches": "hosts with a serial whose OS is unknown, or whose CI is classed differently.",
+   "after": "the phone rule and then the name rules.",
+   "rows": [
+    [
+     "Same guard on the value",
+     "The placeholder list and the four-character minimum are applied again before anything is searched.",
+     [
+      "var serial = ('' + sourceValue).trim();",
+      "if (serial.length < 4 ||",
+      "    junk.indexOf(',' + serial.toLowerCase() + ',') != -1)",
+      "    return null;"
+     ]
+    ],
+    [
+     "Search the whole hardware tree",
+     "cmdb_ci_hardware is the parent of every device class, so nothing is filtered by class. The safety is that the serial must still belong to exactly one CI in the whole tree.",
+     [
+      "var gr = new GlideRecord('cmdb_ci_hardware');   // every device class",
+      "gr.addQuery('serial_number', serial);",
+      "gr.addQuery('sys_class_name', 'NOT IN', ignore);",
+      "gr.query();",
+      "if (!gr.next()) return null;           // nothing found",
+      "var match = gr.getUniqueValue();",
+      "if (gr.hasNext()) return null;         // two CIs, never guess",
+      "return match;"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "200",
+   "name": "USEM Cisco IP Phone MAC",
+   "group": "Phone",
+   "purpose": "Unified Communications Manager names every phone \"SEP\" followed by its MAC address, and Qualys reports that name as the DNS label. The rule turns the label back into a MAC and finds the one IP Phone CI that carries it.",
+   "reads": "DNS",
+   "returns": "the one IP Phone CI carrying that MAC, else null",
+   "before": "the serial rules; phones report no serial.",
+   "reaches": "only labels of \"sep\" plus twelve hex characters. Everything else passes untouched.",
+   "after": "the FQDN and hostname rules, which never see a phone label.",
+   "rows": [
+    [
+     "Strict label, four MAC spellings",
+     "A server called \"sepulveda01\" must not be treated as a phone, hence the strict pattern. Discovery tools and the call manager write MACs differently, hence the four spellings.",
+     [
+      "var m = label.match(/^sep([0-9a-f]{12})$/);",
+      "if (!m)",
+      "    return null;",
+      "var candidates = [colon.toUpperCase(), colon,",
+      "                  hex.toUpperCase(), hex];"
+     ]
+    ],
+    [
+     "Adapter first, then the phone record",
+     "Discovery usually stores the MAC on the adapter. Checking that the owner is an IP Phone keeps a switch or server adapter with a colliding MAC out.",
+     [
+      "nic.addQuery('mac_address', 'IN', candidates.join(','));",
+      "while (nic.next()) {",
+      "    var phone = new GlideRecord('cmdb_ci_ip_phone');",
+      "    if (phone.get(owner) && !phones[owner]) { count++; }",
+      "}",
+      "if (count == 1) return first;"
+     ]
+    ],
+    [
+     "Last resort: the device name",
+     "A phone loaded from the call manager export carries no MAC on either record but is named exactly like the label.",
+     [
+      "byName.addQuery('name', label.toUpperCase());",
+      "if (!byName.next()) return null;",
+      "if (byName.hasNext()) return null;      // two phones",
+      "return named;"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "250",
+   "name": "USEM FQDN Class Match",
+   "group": "Name",
+   "purpose": "The first name rule. An exact FQDN on the CI record is the most precise name evidence there is, so it is matched before any hostname handling, inside the class the OS points at.",
+   "reads": "DNS, plus the OS and the IP",
+   "returns": "the one CI of that class whose fqdn equals the scanned name",
+   "before": "the serial rules and the phone rule found nothing.",
+   "reaches": "every host with a dotted DNS name, which is the bulk of the feed.",
+   "after": "the hardware-wide FQDN rule, then hostname plus domain.",
+   "rows": [
+    [
+     "Class from the scanned OS",
+     "classFor() turns the OS text into a CMDB class. The search stays inside it, so a Red Hat host cannot land on a Windows Server.",
+     [
+      "var pref = classFor(sourcePayload.OS);",
+      "if (!pref)                             // unknown or multi-guess OS",
+      "    return null;                       // hand over to the hardware-wide rule"
+     ]
+    ],
+    [
+     "Exact fqdn match",
+     "Every CI of the class whose fqdn equals the scanned name is collected, together with those that also carry the scanned IP.",
+     [
+      "gr.addQuery('fqdn', fqdn);",
+      "while (gr.next()) {",
+      "    ids.push(gr.getUniqueValue());",
+      "    if (ip && gr.getValue('ip_address') == ip)",
+      "        ipHits.push(gr.getUniqueValue());",
+      "}"
+     ]
+    ],
+    [
+     "One hit, or the IP breaks the tie",
+     "Duplicates do exist: a retired server and its rebuilt replacement, a cluster alias on two nodes. The scanned IP resolves that safely; without it the rule declines.",
+     [
+      "if (ids.length == 1)",
+      "    return ids[0];",
+      "if (ids.length > 1 && ipHits.length == 1)",
+      "    return ipHits[0];                   // IP confirms one",
+      "return null;"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "260",
+   "name": "USEM FQDN Hardware Match",
+   "group": "Name",
+   "purpose": "The exact FQDN search again, across the whole hardware tree. It picks up the hosts whose OS gives no class and the CIs kept in a generic or different class than the OS suggests.",
+   "reads": "DNS, plus the IP",
+   "returns": "the one hardware CI whose fqdn equals the scanned name",
+   "before": "the class-scoped FQDN rule tried the same value inside the OS class.",
+   "reaches": "hosts with a multi-guess or empty OS, or a CI classed differently.",
+   "after": "the hostname plus domain rules, for CIs with no fqdn value at all.",
+   "rows": [
+    [
+     "Same helper, wider scope",
+     "The identical collect-and-decide helper runs, but on cmdb_ci_hardware instead of a single class. Nothing else changes.",
+     [
+      "return pickFqdn('cmdb_ci_hardware');"
+     ]
+    ],
+    [
+     "Collect and decide",
+     "One hit is the match. Several hits with exactly one carrying the scanned IP gives that one. Anything else declines.",
+     [
+      "gr.addQuery('fqdn', fqdn);",
+      "while (gr.next()) {",
+      "    ids.push(gr.getUniqueValue());",
+      "    if (ip && gr.getValue('ip_address') == ip)",
+      "        ipHits.push(gr.getUniqueValue());",
+      "}",
+      "if (ids.length == 1) return ids[0];",
+      "if (ids.length > 1 && ipHits.length == 1) return ipHits[0];"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "300",
+   "name": "USEM Hostname Domain Class Match",
+   "group": "Name",
+   "purpose": "For CIs named with the short hostname that carry the domain somewhere else, in dns_domain or in an fqdn that was never copied into the name. Short name and domain are matched together, inside the class the OS points at.",
+   "reads": "DNS, plus the OS and the IP",
+   "returns": "the one CI of that class whose domain evidence agrees",
+   "before": "the FQDN rules looked in the fqdn field and found nothing.",
+   "reaches": "hosts whose CI is named with the short hostname only.",
+   "after": "the hardware-wide variant, the layered DNS rule, then the plain hostname rules.",
+   "rows": [
+    [
+     "Class from the scanned OS",
+     "classFor() turns the OS text into a CMDB class. The search stays inside it, so a Red Hat host cannot land on a Windows Server.",
+     [
+      "var pref = classFor(sourcePayload.OS);",
+      "if (!pref)                             // unknown or multi-guess OS",
+      "    return null;                       // hand over to the hardware-wide rule"
+     ]
+    ],
+    [
+     "Name matched, domain confirmed",
+     "A CI is kept only when its own record agrees with the scanned domain. The same short name lives in several domains, and this check keeps findings off the namesake.",
+     [
+      "gr.addQuery('name', host);          // \"ah-1047132-001\"",
+      "var cifqdn = ('' + gr.getValue('fqdn')).toLowerCase();",
+      "var cidom = ('' + gr.getValue('dns_domain')).toLowerCase();",
+      "if (cifqdn == full || cidom == domain ||",
+      "    (cifqdn.indexOf(host + '.') == 0 &&",
+      "     cifqdn.indexOf(domain) > 0))",
+      "    good.push(gr.getUniqueValue());"
+     ]
+    ],
+    [
+     "One confirmed CI, IP as tie-break",
+     "Several confirmed CIs are resolved only when exactly one also carries the scanned address.",
+     [
+      "if (good.length == 1) return good[0];",
+      "if (good.length > 1 && ipHits.length == 1)",
+      "    return ipHits[0];",
+      "return null;"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "310",
+   "name": "USEM Hostname Domain Hardware Match",
+   "group": "Name",
+   "purpose": "Short hostname plus domain evidence again, across the whole hardware tree, for CIs classed generically (Server, Computer) or differently from the scanned OS.",
+   "reads": "DNS, plus the IP",
+   "returns": "the one hardware CI whose domain evidence agrees",
+   "before": "the class-scoped variant tried the same evidence inside the OS class.",
+   "reaches": "hosts whose CI is classed generically or differently from the OS.",
+   "after": "the layered DNS rule and then the plain hostname rules.",
+   "rows": [
+    [
+     "Same helper, wider scope",
+     "The identical name-plus-domain helper runs on cmdb_ci_hardware.",
+     [
+      "return pickCombo('cmdb_ci_hardware');"
+     ]
+    ],
+    [
+     "Domain evidence still required",
+     "Widening the search does not weaken the test: a CI named with the hostname is kept only when its fqdn or dns_domain agrees with the scanned domain.",
+     [
+      "gr.addQuery('name', host);",
+      "if (cifqdn == full || cidom == domain ||",
+      "    (cifqdn.indexOf(host + '.') == 0 &&",
+      "     cifqdn.indexOf(domain) > 0))",
+      "    good.push(gr.getUniqueValue());",
+      "if (good.length == 1) return good[0];"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "350",
+   "name": "USEM Layered DNS Match",
+   "group": "Name",
+   "purpose": "Discovery keeps names and addresses as their own records linked to the device. This rule follows that chain, the only way to find a host whose name is not written on the CI record at all, and it resolves aliases to the real machine.",
+   "reads": "DNS, plus the IP",
+   "returns": "the CI at the end of DNS Name to IP Address to adapter to CI",
+   "before": "the FQDN and hostname-plus-domain rules read fields on the CI record.",
+   "reaches": "hosts whose name exists only in the discovery DNS records, and aliases.",
+   "after": "the plain hostname rules and the full-FQDN name rule.",
+   "rows": [
+    [
+     "Follow the chain in one query",
+     "The link table ties a DNS Name record to an IP Address record; dot-walking reaches the adapter and the CI. Because the chain ends on whatever device holds the address, an alias resolves to the real machine.",
+     [
+      "var gr = new GlideRecord('cmdb_ip_address_dns_name');",
+      "gr.addQuery('dns_name.name', fqdn);",
+      "gr.addNotNullQuery('ip_address.nic.cmdb_ci');",
+      "gr.addQuery('ip_address.nic.cmdb_ci.sys_class_name',",
+      "            'NOT IN', ignore);"
+     ]
+    ],
+    [
+     "Count owners, note the IP path",
+     "Each distinct CI is counted once; the CIs reached through the scanned address are remembered separately.",
+     [
+      "var owner = '' + gr.ip_address.nic.cmdb_ci;",
+      "if (!owners[owner]) { owners[owner] = true; count++; }",
+      "if (ip && ('' + gr.ip_address.ip_address) == ip)",
+      "    ipOwners[owner] = true;"
+     ]
+    ],
+    [
+     "One CI, or the IP decides",
+     "A name that resolves to two devices, an alias moved between hosts or an old and a new record, is taken only when exactly one is reached through the scanned IP.",
+     [
+      "if (count == 1) return first;",
+      "if (count > 1 && Object.keys(ipOwners).length == 1)",
+      "    return Object.keys(ipOwners)[0];",
+      "return null;"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "400",
+   "name": "USEM Hostname Class Match",
+   "group": "Name",
+   "purpose": "The short hostname alone, inside the class the scanned OS points at. For CIs that carry only a short name and no domain information; the agreement between CI class and scanned OS stands in for the missing domain evidence.",
+   "reads": "DNS, plus the OS",
+   "returns": "the one CI of that class named with the short hostname",
+   "before": "every rule so far needed domain evidence on the CI.",
+   "reaches": "hosts whose CI carries a short name and nothing else.",
+   "after": "the hardware-wide short name rule with a class sanity check.",
+   "rows": [
+    [
+     "Short label only",
+     "Everything from the first dot onwards is dropped; only the leading label is searched.",
+     [
+      "var full = ('' + sourceValue).trim().toLowerCase();",
+      "var host = full.split('.')[0];      // \"wsaoi01zeapd1\"",
+      "if (!host) return null;"
+     ]
+    ],
+    [
+     "Class from the scanned OS",
+     "classFor() turns the OS text into a CMDB class. The search stays inside it, so a Red Hat host cannot land on a Windows Server.",
+     [
+      "var pref = classFor(sourcePayload.OS);",
+      "if (!pref)                             // unknown or multi-guess OS",
+      "    return null;                       // hand over to the hardware-wide rule"
+     ]
+    ],
+    [
+     "Name search, exactly one CI",
+     "With no domain to confirm, the class is the only safeguard against a namesake, and inside the class the name must still be unique.",
+     [
+      "var gr = new GlideRecord(pref);        // class + sub-classes",
+      "gr.addQuery('name', host);",
+      "gr.addQuery('sys_class_name', 'NOT IN', ignore);",
+      "gr.query();",
+      "if (!gr.next()) return null;           // nothing found",
+      "var match = gr.getUniqueValue();",
+      "if (gr.hasNext()) return null;         // two CIs, never guess",
+      "return match;"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "410",
+   "name": "USEM Hostname Hardware Match",
+   "group": "Name",
+   "purpose": "The short hostname across the whole hardware tree, with a check that the CI found does not contradict the scanned OS. For CIs classed generically (Server, Computer, UNIX Server) or differently from the OS.",
+   "reads": "DNS, plus the OS",
+   "returns": "the one hardware CI named with the hostname, class permitting",
+   "before": "the class-scoped rule required the name to be unique inside the OS class.",
+   "reaches": "hosts whose CI is generically classed, or whose OS gave no class.",
+   "after": "the full-FQDN name rule, then the address rules.",
+   "rows": [
+    [
+     "Class becomes a preference",
+     "The search is not filtered by class here. classFor() is still run, and its answer is used at the end as a veto rather than a filter.",
+     [
+      "var pref = classFor(sourcePayload.OS);   // may be empty",
+      "var generic = {cmdb_ci_hardware: 1, cmdb_ci_computer: 1,",
+      "    cmdb_ci_server: 1, cmdb_ci_unix_server: 1};"
+     ]
+    ],
+    [
+     "One CI carries the name",
+     "Two hardware CIs with one short name, a test and a production box or a retired and a rebuilt one, cannot be told apart by the name alone.",
+     [
+      "gr.addQuery('name', host);",
+      "if (!gr.next()) return null;",
+      "var id = gr.getUniqueValue();",
+      "var cls = '' + gr.getValue('sys_class_name');",
+      "if (gr.hasNext()) return null;         // shared name"
+     ]
+    ],
+    [
+     "Veto a contradicting class",
+     "A host that lands on a Windows Server by name when the scan says AIX is a namesake, not the same machine. Generic classes never contradict.",
+     [
+      "if (pref) {",
+      "    var chk = new GlideRecord(pref);",
+      "    if (!(chk.isValid() && chk.get(id)) && !generic[cls])",
+      "        return null;",
+      "}",
+      "return id;"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "420",
+   "name": "USEM Management Interface Match",
+   "group": "Backlog",
+   "purpose": "Server management controllers (HP iLO, Oracle ILOM, Dell iDRAC, IBM IMM, Cisco CIMC, BMC, IPMI) are scanned under their own label, the server name plus a suffix. The findings belong to the server, so the rule strips the suffix and matches the server.",
+   "reads": "DNS, plus the OS",
+   "returns": "the one hardware CI named like the label without its suffix",
+   "before": "the hostname rules tried the whole label and found nothing.",
+   "reaches": "labels ending in one of the controller suffixes, or a controller named in the OS text; both lists are in the script.",
+   "after": "the network interface rule and the full-FQDN name rule.",
+   "rows": [
+    [
+     "Two ways to recognise a controller",
+     "A listed suffix after the last hyphen is the clean case. Otherwise a controller word in the OS text allows the last segment to be stripped whatever it is, which covers site-specific tails such as \"-r\".",
+     [
+      "var tail = label.substring(dash + 1);   // \"ilo\"",
+      "if (suffixes.indexOf(tail) != -1)",
+      "    base = label.substring(0, dash);    // \"tx6dd630001\"",
+      "else if (osNamesAController(os, markers))",
+      "    base = label.substring(0, dash);",
+      "if (!base) return null;                 // not a controller"
+     ]
+    ],
+    [
+     "The server, uniquely named",
+     "A controller can sit in front of a server, a storage node or a network device, so the whole hardware tree is searched.",
+     [
+      "gr.addQuery('name', base);",
+      "if (!gr.next()) return null;",
+      "var match = gr.getUniqueValue();",
+      "if (gr.hasNext()) return null;          // two servers"
+     ]
+    ],
+    [
+     "Never a load balancer",
+     "A balancer answering on a management address is still not the scanned host.",
+     [
+      "var lb = new GlideRecord('cmdb_ci_lb');",
+      "if (lb.isValid() && lb.get(match))",
+      "    return null;",
+      "return match;"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "430",
+   "name": "USEM Network Interface Name Match",
+   "group": "Backlog",
+   "purpose": "Network devices are scanned through their interface and VLAN addresses, each carrying a label of the device name plus an interface tail. The device CI is named with the leading part only, so the rule walks the label prefix by prefix.",
+   "reads": "DNS, plus the OS",
+   "returns": "the one Network Gear or Load Balancer device named by a prefix",
+   "before": "the hostname rules tried the whole label; the controller rule found no suffix.",
+   "reaches": "labels under an interface domain, or carrying a marker segment; both lists are in the script.",
+   "after": "the full-FQDN name rule and the load balancer service rule.",
+   "rows": [
+    [
+     "Interface evidence first",
+     "Plenty of ordinary server names contain hyphens. Without this check the prefix walk would strip real hostnames and could land on an unrelated device. The two lists sit right here in the script.",
+     [
+      "var domains = ['.network.'];",
+      "var markers = ['vlan', 'v', 'hsrp', 'vrrp', 'po', 'eth',",
+      "               'gi', 'te', 'lo', 'mgmt', 'aom', 'vs', 'fab'];",
+      "if (!evidence) return null;"
+     ]
+    ],
+    [
+     "Longest prefix first",
+     "The device name is the leading part but its length varies by site. Trying the longest prefix first stops \"site-device-01\" being cut down to \"site\" when a CI with the longer name exists.",
+     [
+      "for (var k = segments.length - 1; k >= 1; k--) {",
+      "    var base = segments.slice(0, k).join('-');",
+      "    // \"...-cz04-hsrp\", then \"...-cz04\", then the device",
+      "    hits = searchBoth(base);   // netgear + lb branches",
+      "    if (hits.length == 0) continue;      // shorter prefix"
+     ]
+    ],
+    [
+     "First prefix that hits decides",
+     "One CI is the match; two devices with that name end the rule. Load Balancer devices sit under Server, not Network Gear, so both branches are searched and counted together.",
+     [
+      "    if (hits.length > 1) return null;    // never guess",
+      "    return hits[0];",
+      "}",
+      "return null;"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "450",
+   "name": "USEM FQDN Name Hardware Match",
+   "group": "Name",
+   "purpose": "Some loads name the CI with the whole FQDN string instead of the short hostname, typically the appliance domains ending in .rpg, so a short name search can never find them.",
+   "reads": "DNS",
+   "returns": "the one hardware CI whose name is exactly the scanned FQDN",
+   "before": "every rule so far compared the short hostname or the fqdn field.",
+   "reaches": "CIs named with the full FQDN, invisible to the earlier rules.",
+   "after": "the address rules, and finally the broad name rule.",
+   "rows": [
+    [
+     "Compare the whole string",
+     "The complete lower-cased DNS name, domain included, is compared with the name field.",
+     [
+      "var fqdn = ('' + sourceValue).trim().toLowerCase();",
+      "if (fqdn.indexOf('.') == -1)      // bare label, not for us",
+      "    return null;"
+     ]
+    ],
+    [
+     "Hardware tree, exactly one CI",
+     "The same uniqueness test as everywhere else; a shared full name is never guessed.",
+     [
+      "var gr = new GlideRecord('cmdb_ci_hardware');   // every device class",
+      "gr.addQuery('name', fqdn);",
+      "gr.addQuery('sys_class_name', 'NOT IN', ignore);",
+      "gr.query();",
+      "if (!gr.next()) return null;           // nothing found",
+      "var match = gr.getUniqueValue();",
+      "if (gr.hasNext()) return null;         // two CIs, never guess",
+      "return match;"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "460",
+   "name": "USEM Load Balancer Service Match",
+   "group": "Backlog",
+   "purpose": "A virtual IP answered by a load balancer is not the balancer, and the hardware rules refuse the balancer device on purpose. Such hosts belong to the Load Balancer Service CI that models the VIP.",
+   "reads": "IP, plus the OS and the DNS name",
+   "returns": "the one Load Balancer Service CI for that VIP",
+   "before": "the hardware rules declined: no serial, no server name, address on a balancer.",
+   "reaches": "hosts with a load balancer OS word, or a VIP marker in the label; both lists are in the script.",
+   "after": "the ordinary address rules, for hosts that are not VIPs.",
+   "rows": [
+    [
+     "VIP evidence first",
+     "A Load Balancer Service must never be returned for an ordinary server that happens to share an address with a VIP. The two lists sit right here in the script.",
+     [
+      "var osMarkers = ['f5', 'big-ip', 'big ip', 'netscaler'];",
+      "var labelMarkers = ['vip', 'vs'];",
+      "if (!evidence) return null;"
+     ]
+    ],
+    [
+     "Strongest evidence first",
+     "The DNS name as fqdn, then as name, then its label as name, then the scanned address. Running on the IP field means VIPs without a DNS name are covered too.",
+     [
+      "var steps = [['fqdn', dns], ['name', dns],",
+      "             ['name', label], ['ip_address', ip]];",
+      "for (var t = 0; t < steps.length; t++) {",
+      "    var found = one(steps[t][0], steps[t][1]);"
+     ]
+    ],
+    [
+     "Ambiguity stops the rule",
+     "A step that finds two services ends the rule rather than falling through, because the weaker evidence could pick a different service.",
+     [
+      "    if (found === null) return null;   // two services",
+      "    if (found) return found;           // exactly one",
+      "}",
+      "return null;"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "700",
+   "name": "USEM IP Class Match",
+   "group": "Address",
+   "purpose": "The first address rule. An address is the least trustworthy identifier: addresses move between machines and are shared by load balancers. It is used only for hosts with no serial and no usable name, inside the class the OS points at.",
+   "reads": "IP, plus the OS",
+   "returns": "the one CI of that class whose ip_address equals the scanned address",
+   "before": "every serial and name rule; a host with no DNS name makes them all decline.",
+   "reaches": "hosts scanned without a name: management interfaces and appliances.",
+   "after": "the hardware-wide address rule, then the adapter and layered rules.",
+   "rows": [
+    [
+     "Addresses that identify nothing",
+     "Loopback and link-local addresses appear on every machine and are refused before anything is searched.",
+     [
+      "var ip = ('' + sourceValue).trim();",
+      "if (!ip || ip.indexOf('127.') == 0 ||",
+      "    ip.indexOf('169.254.') == 0)",
+      "    return null;"
+     ]
+    ],
+    [
+     "Class from the scanned OS",
+     "classFor() turns the OS text into a CMDB class. The search stays inside it, so a Red Hat host cannot land on a Windows Server.",
+     [
+      "var pref = classFor(sourcePayload.OS);",
+      "if (!pref)                             // unknown or multi-guess OS",
+      "    return null;                       // hand over to the hardware-wide rule"
+     ]
+    ],
+    [
+     "Address search, exactly one CI",
+     "Inside the agreed class an address is reasonably safe: a virtual IP or a Windows machine that inherited it sits outside the class and never appears.",
+     [
+      "var gr = new GlideRecord(pref);        // class + sub-classes",
+      "gr.addQuery('ip_address', ip);",
+      "gr.addQuery('sys_class_name', 'NOT IN', ignore);",
+      "gr.query();",
+      "if (!gr.next()) return null;           // nothing found",
+      "var match = gr.getUniqueValue();",
+      "if (gr.hasNext()) return null;         // two CIs, never guess",
+      "return match;"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "705",
+   "name": "USEM IP Hardware Match",
+   "group": "Address",
+   "purpose": "The address across the whole hardware tree, with two extra safety checks: the CI must not be a load balancer, and its class must not contradict the scanned OS.",
+   "reads": "IP, plus the OS",
+   "returns": "the one hardware CI on that address, balancer and class permitting",
+   "before": "the class-scoped address rule required a CI of the OS class.",
+   "reaches": "nameless hosts whose CI is generically classed or whose OS gave no class.",
+   "after": "the adapter rule and the layered address rule.",
+   "rows": [
+    [
+     "One CI on the address",
+     "An address answered by several CIs, a shared virtual IP or an address reused after a rebuild, is never a safe match.",
+     [
+      "gr.addQuery('ip_address', ip);",
+      "if (!gr.next()) return null;",
+      "var id = gr.getUniqueValue();",
+      "var cls = '' + gr.getValue('sys_class_name');",
+      "if (gr.hasNext()) return null;         // shared address"
+     ]
+    ],
+    [
+     "Reject a load balancer",
+     "A scanned address that belongs to a balancer is a virtual IP; the findings describe a pool member behind it, not the balancer.",
+     [
+      "function isLoadBalancer(id) {",
+      "    var lb = new GlideRecord('cmdb_ci_lb');",
+      "    return lb.isValid() && lb.get(id);",
+      "}",
+      "if (isLoadBalancer(id)) return null;"
+     ]
+    ],
+    [
+     "Veto a contradicting class",
+     "The same class veto as the hostname rule: the CI must sit in the class the OS implies, or be generically classed.",
+     [
+      "if (pref) {",
+      "    var chk = new GlideRecord(pref);",
+      "    if (!(chk.isValid() && chk.get(id)) && !generic[cls])",
+      "        return null;",
+      "}",
+      "return id;"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "730",
+   "name": "USEM IP Adapter Match",
+   "group": "Address",
+   "purpose": "Discovery stores one Network Adapter record per network card, and a multi-homed server keeps its addresses there rather than on the CI record. This rule finds the adapter carrying the address and takes its owning CI.",
+   "reads": "IP",
+   "returns": "the CI that owns the adapter carrying the scanned address",
+   "before": "the address rules so far read the ip_address field of the CI record.",
+   "reaches": "hosts whose address is recorded on an adapter only.",
+   "after": "the layered address rule and then the broad name rule.",
+   "rows": [
+    [
+     "Adapters, not CIs",
+     "Adapters carrying the scanned address whose owning CI is outside the ignored classes.",
+     [
+      "var nic = new GlideRecord('cmdb_ci_network_adapter');",
+      "nic.addQuery('ip_address', ip);",
+      "nic.addNotNullQuery('cmdb_ci');   // must belong to a CI",
+      "nic.addQuery('cmdb_ci.sys_class_name', 'NOT IN', ignore);"
+     ]
+    ],
+    [
+     "Count owners, not rows",
+     "One server with two adapters on the address counts once; two servers count twice and cannot be told apart by the address.",
+     [
+      "while (nic.next()) {",
+      "    var owner = nic.getValue('cmdb_ci');",
+      "    if (!owners[owner]) { owners[owner] = true; count++; }",
+      "}",
+      "if (count == 1 && !isLoadBalancer(first))",
+      "    return first;",
+      "return null;"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "740",
+   "name": "USEM IP Layered Match",
+   "group": "Address",
+   "purpose": "Newer discovery writes each address as its own IP Address record linked to the adapter, and the adapter record itself may carry no address. This rule reads those records, two links from the CI.",
+   "reads": "IP",
+   "returns": "the CI at the end of IP Address to adapter to CI",
+   "before": "the adapter rule looked for the address on the adapter records.",
+   "reaches": "hosts whose address exists only as an IP Address record.",
+   "after": "the broad name rule, and after that the out-of-box Qualys rules.",
+   "rows": [
+    [
+     "Two links away",
+     "nic.cmdb_ci reaches the CI through the adapter; the chain must end on a CI outside the ignored classes.",
+     [
+      "var ipGr = new GlideRecord('cmdb_ci_ip_address');",
+      "ipGr.addQuery('ip_address', ip);",
+      "ipGr.addNotNullQuery('nic.cmdb_ci');",
+      "ipGr.addQuery('nic.cmdb_ci.sys_class_name', 'NOT IN', ignore);"
+     ]
+    ],
+    [
+     "One owner, and not a balancer",
+     "Identical decision to the adapter rule: one device with two address records counts once, two devices decline, and a balancer is refused.",
+     [
+      "var owner = '' + ipGr.nic.cmdb_ci;",
+      "if (!owners[owner]) { owners[owner] = true; count++; }",
+      "if (count == 1 && !isLoadBalancer(first))",
+      "    return first;",
+      "return null;"
+     ]
+    ]
+   ]
+  },
+  {
+   "order": "850",
+   "name": "USEM FQDN Name Broad Match",
+   "group": "Fallback",
+   "purpose": "The one deliberately late, broad fallback: a CI named with the full FQDN anywhere in the CI table, classes outside the hardware tree included, such as a virtual machine instance.",
+   "reads": "DNS",
+   "returns": "the one CI in any class named exactly with the scanned FQDN",
+   "before": "every hardware-scoped rule has declined for this host.",
+   "reaches": "the rare CI named with the full FQDN that lives outside the hardware tree.",
+   "after": "the out-of-box Qualys rules: host id, cloud resource id, FQDN, NetBIOS, DNS.",
+   "rows": [
+    [
+     "Why it runs last",
+     "This is the only USEM rule that searches outside the hardware tree. Every more precise rule has had its chance, and the ignore list still keeps placeholder classes out.",
+     [
+      "var fqdn = ('' + sourceValue).trim().toLowerCase();",
+      "if (fqdn.indexOf('.') == -1) return null;"
+     ]
+    ],
+    [
+     "Root CI table, exactly one CI",
+     "cmdb_ci is the root of every class. The uniqueness test is unchanged.",
+     [
+      "var gr = new GlideRecord('cmdb_ci');            // every class",
+      "gr.addQuery('name', fqdn);",
+      "gr.addQuery('sys_class_name', 'NOT IN', ignore);",
+      "gr.query();",
+      "if (!gr.next()) return null;           // nothing found",
+      "var match = gr.getUniqueValue();",
+      "if (gr.hasNext()) return null;         // two CIs, never guess",
+      "return match;"
+     ]
+    ]
+   ]
+  }
+ ],
+ "population": [
+  [
+   "Virtual IP of a load balancer",
+   71892,
+   "460 new"
+  ],
+  [
+   "Host with a plain DNS name",
+   63089,
+   "250 to 450"
+  ],
+  [
+   "Network device interface or VLAN",
+   47420,
+   "430 new"
+  ],
+  [
+   "IP only, no DNS name",
+   39790,
+   "700 to 740"
+  ],
+  [
+   "Cisco IP phone, SEP label",
+   30459,
+   "200"
+  ],
+  [
+   "Windows workstation",
+   11679,
+   "400 / 410"
+  ],
+  [
+   "Printer",
+   5341,
+   "250 to 450"
+  ],
+  [
+   "Appliance or embedded device",
+   5164,
+   "250 to 450"
+  ],
+  [
+   "Management controller",
+   4402,
+   "420 new"
+  ],
+  [
+   "Storage system",
+   1350,
+   "250 to 450"
+  ],
+  [
+   "Cisco phone, other label",
+   1056,
+   "none"
+  ],
+  [
+   "Network device by its own name",
+   59,
+   "250 to 450"
+  ]
+ ],
+ "evidence": [
+  [
+   "Hosts with a DNS name",
+   "85.9%",
+   "241,910"
+  ],
+  [
+   "Hosts scanned by IP, unauthenticated",
+   "99.8%",
+   "280,996"
+  ],
+  [
+   "OS text empty",
+   "32.6%",
+   "91,729"
+  ],
+  [
+   "OS text a multi-guess fingerprint",
+   "5.0%",
+   "14,026"
+  ],
+  [
+   "Hosts with a NetBIOS name",
+   "4.9%",
+   "13,674"
+  ],
+  [
+   "Hosts with a Qualys host id",
+   "1.7%",
+   "4,812"
+  ],
+  [
+   "Hosts with a serial number",
+   "0.3%",
+   "763"
+  ],
+  [
+   "Hosts scanned by the Cloud Agent",
+   "0.3%",
+   "704"
+  ]
+ ],
+ "props": [
+  [
+   "suffixes",
+   "420",
+   "['ilo', 'ilom', 'idrac', 'drac', 'ipmi', 'bmc', 'oob', 'mgmt', 'imm', 'cimc', 'rmm', 'con']",
+   "Label suffixes that mark a management controller."
+  ],
+  [
+   "markers",
+   "420",
+   "['ilo', 'ilom', 'idrac', 'drac', 'remote access controller', 'imm', 'cimc', 'bmc', 'ipmi', 'lights out']",
+   "Controller words in the OS text; the last segment is then stripped whatever it is."
+  ],
+  [
+   "domains",
+   "430",
+   "['.network.']",
+   "DNS domains under which network devices are scanned per interface."
+  ],
+  [
+   "markers",
+   "430",
+   "['vlan', 'v', 'hsrp', 'vrrp', 'po', 'eth', 'gi', 'te', 'lo', 'mgmt', 'aom', 'vs', 'fab']",
+   "Label segments that mark an interface or VLAN address."
+  ],
+  [
+   "osMarkers",
+   "460",
+   "['f5', 'big-ip', 'big ip', 'netscaler']",
+   "Load balancer products in the OS text."
+  ],
+  [
+   "labelMarkers",
+   "460",
+   "['vip', 'vs']",
+   "Label segments that mark a virtual IP."
+  ]
+ ]
+}

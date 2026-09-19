@@ -1,0 +1,37 @@
+flowchart TD
+    classDef tbl fill:#EEF1F5,stroke:#9AA0A6,color:#111
+    classDef win fill:#E6F4EA,stroke:#2E7D32,color:#111
+    classDef stop fill:#FBE9E7,stroke:#C0392B,color:#111
+    subgraph one["1  crisp-tx: matched by the fqdn clue"]
+        direction LR
+        A1["IP 171.203.142.26<br/>OS F5 Big IP<br/>DNS crisp-tx.bankofamerica.com"] --> A2["sign: os contains f5"]
+        A2 --> A3[("cmdb_ci_lb_service<br/>fqdn = crisp-tx.bankofamerica.com<br/>one row")]:::tbl
+        A3 --> A4(["return crisp-tx"]):::win
+    end
+    subgraph two["2  rbps-dev3-sve-vip: matched by the label clue"]
+        direction LR
+        B1["IP 164.91.236.18<br/>OS Linux 2.6<br/>DNS rbps-dev3-sve-vip.ecommnp.rpg"] --> B2["sign: no OS marker;<br/>segments rbps, dev3, sve, vip;<br/>vip is a marker"]
+        B2 --> B3[("fqdn = dns: no row<br/>name = dns: no row<br/>name = rbps-dev3-sve-vip: one row")]:::tbl
+        B3 --> B4(["return rbps-dev3-sve-vip"]):::win
+    end
+    subgraph three["3  no DNS name: matched by the address clue"]
+        direction LR
+        C1["IP 171.145.73.51<br/>OS F5 Networks Big-IP<br/>no DNS"] --> C2["sign: os contains f5<br/>dns and label empty"]
+        C2 --> C3[("clues 1 to 3: value empty, skipped<br/>ip_address = 171.145.73.51: one row")]:::tbl
+        C3 --> C4(["return vs_171.145.73.51_443"]):::win
+    end
+    subgraph four["4  two services on one address: declined"]
+        direction LR
+        D1["IP 164.91.176.197<br/>OS F5 Networks Big-IP<br/>no DNS"] --> D2["sign: os contains f5"]
+        D2 --> D3[("ip_address = 164.91.176.197:<br/>two rows (dup-vip-a, dup-vip-b)")]:::tbl
+        D3 --> D4(["null: never guess;<br/>next rule"]):::stop
+    end
+    subgraph five["5  an ordinary server on a shared address: the rule does not run"]
+        direction LR
+        E1["IP 171.203.142.26<br/>OS Red Hat Enterprise Linux 9.8<br/>DNS somehost.corp.bankofamerica.com"] --> E2["sign: no OS marker;<br/>segments somehost: no marker"]
+        E2 --> E3(["null before any query;<br/>the address rules take the host"]):::stop
+    end
+    one ~~~ two
+    two ~~~ three
+    three ~~~ four
+    four ~~~ five

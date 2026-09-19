@@ -1,0 +1,8 @@
+name: BOFA Trident closure lifecycle
+table: sn_vulc_result_group
+when: before
+order: 1000
+update: true
+insert: false
+filter: stateCHANGESTO3^ORstateCHANGESFROM3^ORstateCHANGESTO101^ORstateCHANGESFROM101^ORsubstateCHANGESTO100^ORsubstateCHANGESFROM100^EQ
+description: Single rule for the whole Trident closure lifecycle. Runs only on the transitions it acts on: State changes to/from Closed, State changes to/from Resolved, Reason changes to/from Pending Approval. Every move into Resolved stages a governance closure request in the same write (approval reset to Not Yet Requested, Reason set to Pending Approval) so the Trident Closure Approval flow raises a fresh approval cycle every time, including after a rejection. Also gates Close on an approved request with an attachment, enforces the reopen window, and clears stale requests and leftover approvals whenever the task leaves Pending Approval.

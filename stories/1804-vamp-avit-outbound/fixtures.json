@@ -1,0 +1,17 @@
+{
+ "linked": "8e3c305b939b0790e3aef0aefaba101b",
+ "linked_number": "AVIT0001119",
+ "bare": "4a3c305b939b0790e3aef0aefaba1046",
+ "bare_number": "AVIT0001120",
+ "exception": "4e3c305b939b0790e3aef0aefaba101e",
+ "exception_number": "CA0010007",
+ "m2m": "823c305b939b0790e3aef0aefaba1046",
+ "avul": "AVUL0010093",
+ "links": {
+  "entry": "db89fb585316301031f7ddeeff7b12ac",
+  "release": "78922071935b0750e3aef0aefaba10cf",
+  "ptreq": "11873fd45316301031f7ddeeff7b127c",
+  "consequence": "ccf527da930f8310e3aef0aefaba105e",
+  "avul": "0059e2cbf9442110f877708ae9db024a"
+ }
+}

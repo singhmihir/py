@@ -1,0 +1,106 @@
+[
+ {
+  "table": "sn_vul_app_vul_entry",
+  "payload": "number",
+  "label": "Record Number",
+  "type": "String",
+  "required": "Yes",
+  "notes": "This is the Third party Vulnerable Item table (VBL)"
+ },
+ {
+  "table": "sn_vul_app_vulnerability",
+  "payload": "number",
+  "label": "Record Number",
+  "type": "String",
+  "required": "Yes",
+  "notes": "This is the AVUL (Remediation Task) Table"
+ },
+ {
+  "table": "sn_vul_app_vulnerability",
+  "payload": "primary_ait",
+  "label": "Primary AIT",
+  "type": "Reference",
+  "required": "Yes",
+  "notes": "This will match the AIT"
+ },
+ {
+  "table": "sn_vul_app_vulnerable_item",
+  "payload": "number",
+  "label": "Record Number",
+  "type": "String",
+  "required": "Yes",
+  "notes": "This is the AVIT Table"
+ },
+ {
+  "table": "sn_vul_app_vulnerable_item",
+  "payload": "sys_created_on",
+  "label": "Created",
+  "type": "Date/Time",
+  "required": "Yes",
+  "notes": ""
+ },
+ {
+  "table": "sn_vul_app_vulnerable_item",
+  "payload": "sys_updated_on",
+  "label": "Updated",
+  "type": "Date/Time",
+  "required": "Yes",
+  "notes": ""
+ },
+ {
+  "table": "sn_vul_app_vulnerable_item",
+  "payload": "state",
+  "label": "State",
+  "type": "Integer",
+  "required": "Yes",
+  "notes": ""
+ },
+ {
+  "table": "sn_vul_app_vulnerable_item",
+  "payload": "configuration_item",
+  "label": "Configuration Item",
+  "type": "Reference",
+  "required": "Yes",
+  "notes": "This will match the AIT"
+ },
+ {
+  "table": "sn_vul_app_vulnerable_item",
+  "payload": "u_verification_status",
+  "label": "Verification Status",
+  "type": "String",
+  "required": "Yes",
+  "notes": "Combination of completion status and pass fail flag"
+ },
+ {
+  "table": "sn_vul_app_vulnerable_item",
+  "payload": "source_avit_id",
+  "label": "Source AVIT ID",
+  "type": "String",
+  "required": "Yes",
+  "notes": "Vul ID"
+ },
+ {
+  "table": "sn_vul_pen_test_assessment_request",
+  "payload": "number",
+  "label": "Record Number",
+  "type": "String",
+  "required": "Yes",
+  "notes": "This is the PTREQ Table"
+ },
+ {
+  "table": "sn_vul_pen_test_assessment_request",
+  "payload": "sys_created_on",
+  "label": "Created",
+  "type": "Date/Time",
+  "required": "Yes",
+  "notes": ""
+ },
+ {
+  "table": "sn_vul_pen_test_assessment_request",
+  "payload": "u_assessment_id",
+  "label": "Assessment ID",
+  "type": "String",
+  "required": "Yes",
+  "notes": ""
+ }
+]

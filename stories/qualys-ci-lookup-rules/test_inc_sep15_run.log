@@ -1,0 +1,35 @@
+fixtures: 56 records, 0 created, 56 already present
+PASS run1 SDI000003720429 avxdd008a.cc.bofa.com, no OS: Avaya phone named AVXDD008A on the same address -> Device Name Match | chain 415 AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone] | 415 alone -> AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone]
+PASS run1 the same phone scanned as "Foundry Networks" -> still the phone | chain 415 AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone] | 415 alone -> AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone]
+PASS run1 the same phone scanned as "Linux 2.x" (embedded Linux) -> still the phone | chain 415 AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone] | 415 alone -> AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone]
+PASS run1 the same phone scanned as "Unknown OS" -> still the phone | chain 415 AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone] | 415 alone -> AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone]
+PASS run1 the same phone scanned as "Cisco IP Phone" -> still the phone | chain 415 AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone] | 415 alone -> AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone]
+PASS run1 the same phone scanned as Windows 10 -> refused (a desktop OS is not a phone) | chain (no match)  | 415 alone -> -
+PASS run1 the same phone on a new DHCP address -> still the phone (the name identifies it) | chain 415 AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone] | 415 alone -> AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone]
+PASS run1 a phone label with no phone record -> no match | chain (no match)  | 415 alone -> -
+PASS run1 two phones sharing a name, scanned on the address of the second -> that one | chain 415 AVXDUP001@10.190.29.212 [cmdb_ci_ip_phone] | 415 alone -> AVXDUP001@10.190.29.212 [cmdb_ci_ip_phone]
+PASS run1 two phones sharing a name, scanned on an address neither carries -> declined | chain (no match)  | 415 alone -> -
+PASS run1 SDI000003655772 scr02tx25540101.scanners, no OS, address moved: Scanner named SCR02TX25540101 (certificates of that name are not devices) -> Device Name Match | chain 415 SCR02TX25540101@30.223.74.181 [cmdb_ci_scanner] | 415 alone -> SCR02TX25540101@30.223.74.181 [cmdb_ci_scanner]
+PASS run1 SDI000003719884 usvasdnvetpuatcms1k03, Ubuntu/Linux: the CMS held twice (Communication Distribution Panel and Server, same serial and address) -> stays unmatched | chain (no match)  | 410 alone -> -
+PASS run1 the same CMS through the address rule alone -> declined too (two hardware CIs on the address) | chain (no match)  | 705 alone -> -
+PASS run1 SDI000002541496 pts-zelle-transfer-va2, F5: only the IRE placeholder carries the name and address -> stays unmatched | chain (no match)  | 460 alone -> -
+PASS run1 horizon-vip.dif.gwimnp.rpg, F5: placeholder only -> stays unmatched | chain (no match)  | 460 alone -> -
+PASS run1 pts-zelle-transfer-tt1, F5: placeholder plus DNS Name records of other names on its address -> stays unmatched | chain (no match) 
+PASS run2 SDI000003720429 avxdd008a.cc.bofa.com, no OS: Avaya phone named AVXDD008A on the same address -> Device Name Match | chain 415 AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone] | 415 alone -> AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone]
+PASS run2 the same phone scanned as "Foundry Networks" -> still the phone | chain 415 AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone] | 415 alone -> AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone]
+PASS run2 the same phone scanned as "Linux 2.x" (embedded Linux) -> still the phone | chain 415 AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone] | 415 alone -> AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone]
+PASS run2 the same phone scanned as "Unknown OS" -> still the phone | chain 415 AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone] | 415 alone -> AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone]
+PASS run2 the same phone scanned as "Cisco IP Phone" -> still the phone | chain 415 AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone] | 415 alone -> AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone]
+PASS run2 the same phone scanned as Windows 10 -> refused (a desktop OS is not a phone) | chain (no match)  | 415 alone -> -
+PASS run2 the same phone on a new DHCP address -> still the phone (the name identifies it) | chain 415 AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone] | 415 alone -> AVXDD008A@10.190.29.132 [cmdb_ci_ip_phone]
+PASS run2 a phone label with no phone record -> no match | chain (no match)  | 415 alone -> -
+PASS run2 two phones sharing a name, scanned on the address of the second -> that one | chain 415 AVXDUP001@10.190.29.212 [cmdb_ci_ip_phone] | 415 alone -> AVXDUP001@10.190.29.212 [cmdb_ci_ip_phone]
+PASS run2 two phones sharing a name, scanned on an address neither carries -> declined | chain (no match)  | 415 alone -> -
+PASS run2 SDI000003655772 scr02tx25540101.scanners, no OS, address moved: Scanner named SCR02TX25540101 (certificates of that name are not devices) -> Device Name Match | chain 415 SCR02TX25540101@30.223.74.181 [cmdb_ci_scanner] | 415 alone -> SCR02TX25540101@30.223.74.181 [cmdb_ci_scanner]
+PASS run2 SDI000003719884 usvasdnvetpuatcms1k03, Ubuntu/Linux: the CMS held twice (Communication Distribution Panel and Server, same serial and address) -> stays unmatched | chain (no match)  | 410 alone -> -
+PASS run2 the same CMS through the address rule alone -> declined too (two hardware CIs on the address) | chain (no match)  | 705 alone -> -
+PASS run2 SDI000002541496 pts-zelle-transfer-va2, F5: only the IRE placeholder carries the name and address -> stays unmatched | chain (no match)  | 460 alone -> -
+PASS run2 horizon-vip.dif.gwimnp.rpg, F5: placeholder only -> stays unmatched | chain (no match)  | 460 alone -> -
+PASS run2 pts-zelle-transfer-tt1, F5: placeholder plus DNS Name records of other names on its address -> stays unmatched | chain (no match) 
+
+ALL PASS: 32 passed, 0 failed

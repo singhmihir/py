@@ -1,0 +1,23 @@
+{
+ "set": "aaff9cb5931b0750e3aef0aefaba1041",
+ "name": "SNOWUSEMTP-AIT_MS_Primary AIT Resolution_V1.0",
+ "made": {
+  "script_include": "0710a8f5931b0750e3aef0aefaba1077",
+  "event": "8710a8f5931b0750e3aef0aefaba10bc",
+  "queue": "8f10e8f5931b0750e3aef0aefaba101a",
+  "script_action": "5b10e8f5931b0750e3aef0aefaba1024",
+  "di_rules": {
+   "sn_sec_cmn_src_ci": "ea242cf5935b0750e3aef0aefaba10bc",
+   "sn_vul_app_release": "6e242cf5935b0750e3aef0aefaba10e8",
+   "sn_vul_container_image": "aa242cf5935b0750e3aef0aefaba10ef"
+  },
+  "assoc_rule": "e6242cf5935b0750e3aef0aefaba10f6",
+  "related_rule": "e2242cf5935b0750e3aef0aefaba10fd",
+  "rel_rule": "22246cf5935b0750e3aef0aefaba1004",
+  "app_rule": "6e246cf5935b0750e3aef0aefaba100a",
+  "ait_rule": "6a246cf5935b0750e3aef0aefaba1011",
+  "reconcile_job": "db10e8f5931b0750e3aef0aefaba108b",
+  "catchup_job": "5710e8f5931b0750e3aef0aefaba1095"
+ },
+ "rows": 23
+}

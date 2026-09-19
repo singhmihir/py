@@ -1,0 +1,480 @@
+{
+ "confirmed": [
+  {
+   "topic": "setStringParameter",
+   "question": "The ServiceNow RESTMessageV2 API method setStringParameter(name, value): its official API reference page, exact signature, what it does (substitutes a ${variable} in the endpoint, headers or body of an outbound REST message at run time), and the difference from setStringParameterNoEscape (XML escaping).",
+   "claim": "The official ServiceNow API reference for RESTMessageV2 documents setStringParameter(String name, String value) as setting a named REST message function variable to a given value, returning void, with XML reserved characters in the value escaped.",
+   "url": "https://www.servicenow.com/docs/r/api-reference/server-api-reference/c_RESTMessageV2API.html",
+   "title": "RESTMessageV2 - Scoped, Global",
+   "publisher": "ServiceNow",
+   "reportedQuote": "Sets a REST message function variable with the specified name from the REST message record to the specified value.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "Sets a REST message function variable with the specified name from the REST message record to the specified value. XML reserved characters in the value are converted to the equivalent escaped characters.",
+    "correction": "No substantive correction \u2014 every element of the claim checks out. Two caveats worth recording. (1) The reported quote is truncated without an ellipsis: it reproduces only the first sentence, which supports \"sets a named REST message function variable to a given value\" but NOT the escaping half of the claim. The escaping half comes from the immediately following second sentence (\"XML reserved characters in the value are converted to the equivalent escaped characters.\"), so the claim is supported by the page but not by the quote as reported. (2) The \"Returns\" row is a table containing type \"void\" with an empty description cell \u2014 the page never writes the words \"returns void\" in prose. Confirmed details: signature is rendered as \"RESTMessageV2 - setStringParameter(String name, String value)\"; parameters are name (String, \"Name of the REST message variable. This parameter must be defined in the REST message record before you can assign a value to it.\") and value (String, \"Value to assign the variable.\"); the page also documents the sibling setStringParameterNoEscape for setting a variable without escaping XML reserved characters. Page title matches as reported (\"RESTMessageV2 - Scoped, Global\"). Method-of-verification note: a raw curl of the URL returns only an 8 KB Fluid Topics JavaScript shell titled \"Docs | ServiceNow\" with zero occurrences of \"setStringParameter\", so the content is client-rendered and not visible to a plain HTTP fetch. I confirmed the wording three ways \u2014 two independent rendered fetches of the cited URL, the version-pinned Zurich copy of the same page, and a ServiceNow Community thread quoting the same two sentences from the official docs \u2014 which is why I treat it as genuinely present rather than reconstructed from model memory.",
+    "betterUrl": "https://www.servicenow.com/docs/r/zurich/api-reference/server-api-reference/c_RESTMessageV2API.html"
+   }
+  },
+  {
+   "topic": "setStringParameter",
+   "question": "The ServiceNow RESTMessageV2 API method setStringParameter(name, value): its official API reference page, exact signature, what it does (substitutes a ${variable} in the endpoint, headers or body of an outbound REST message at run time), and the difference from setStringParameterNoEscape (XML escaping).",
+   "claim": "ServiceNow documents that ${variable_name} placeholders in an outbound REST message are allowed in the endpoint URL, HTTP headers, HTTP query parameter values and the POST/PUT content, and are given values at run time by the RESTMessageV2 setStringParameter and setStringParameterNoEscape methods.",
+   "url": "https://www.servicenow.com/docs/r/api-reference/web-services/c_VariableSubstitutionREST.html",
+   "title": "Message variable substitution",
+   "publisher": "ServiceNow",
+   "reportedQuote": "Variables are allowed in the Endpoint URL, HTTP Header and HTTP Query Parameter Value fields, and the Content field for POST and PUT methods.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "Variables are allowed in the Endpoint URL, HTTP Header and HTTP Query Parameter Value fields, and the Content field for POST and PUT methods. The syntax for variables is ${variable_name}. You can assign a value to variables when running the request using the RESTMessageV2 API setStringParameter and setStringParameterNoEscape methods.",
+    "correction": "No correction needed - the page supports every element of the claim. Two minor points of precision worth carrying into any write-up: (1) the page frames the four locations as named fields on the outbound HTTP method record (\"Endpoint URL\", \"HTTP Header\" and \"HTTP Query Parameter Value\" fields, and the \"Content\" field), not as generic parts of a request; (2) the page adds a caveat the claim omits - \"When testing an HTTP method that includes variables, the Test value for each variable in the Variable Substitutions related list is used,\" i.e. the setStringParameter/setStringParameterNoEscape path applies when running the request, while the Test-value path applies when testing from the form. Note also that raw curl of this URL returns only the Fluid Topics single-page-app shell (title \"Docs | ServiceNow\"); the topic text renders client-side, so a shell response is not evidence the page is missing.",
+    "betterUrl": "https://www.servicenow.com/docs/bundle/zurich-api-reference/page/integrate/outbound-rest/concept/c_VariableSubstitutionREST.html"
+   }
+  },
+  {
+   "topic": "setStringParameter",
+   "question": "The ServiceNow RESTMessageV2 API method setStringParameter(name, value): its official API reference page, exact signature, what it does (substitutes a ${variable} in the endpoint, headers or body of an outbound REST message at run time), and the difference from setStringParameterNoEscape (XML escaping).",
+   "claim": "The only documented difference between the two methods is XML escaping: setStringParameterNoEscape behaves identically to setStringParameter except that it does not escape XML reserved characters in the value.",
+   "url": "https://www.servicenow.com/docs/bundle/zurich-api-reference/page/app-store/dev_portal/API_reference/RESTMessageV2/concept/c_RESTMessageV2API.html",
+   "title": "RESTMessageV2 - Scoped, Global (Zurich API Reference)",
+   "publisher": "ServiceNow",
+   "reportedQuote": "This method is equivalent to setStringParameter but does not escape XML reserved characters.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "This method is equivalent to setStringParameter but does not escape XML reserved characters.",
+    "correction": "No contradiction \u2014 the reported quote is verbatim, and the reciprocal statement under setStringParameter agrees: \"XML reserved characters in the value are converted to the equivalent escaped characters. Use setStringParameterNoEscape to set a variable without escaping XML reserved characters.\" One pedantic caveat: the page never uses the words \"the only difference.\" It asserts equivalence-except-escaping in one direction (\"equivalent to setStringParameter but...\"); the stronger \"only documented difference\" framing is an inference, though a sound one, since both methods are documented with the identical signature (String name, String value), identical parameter descriptions, and identical void return, leaving escaping as the sole documented distinction.",
+    "betterUrl": "https://www.servicenow.com/docs/bundle/zurich-api-reference/page/app-store/dev_portal/API_reference/RESTMessageV2/concept/c_RESTMessageV2API.html"
+   }
+  },
+  {
+   "topic": "restQueryParams",
+   "question": "ServiceNow outbound REST messages: how HTTP query parameters are stored and used. Which table holds the HTTP Query Parameters related list on a REST Message Function (sys_rest_message_fn_parameters), how variables written as ${name} in the endpoint become parameters, and the \"Auto-generate variables\" related link.",
+   "claim": "In an outbound REST message, variables written as ${name} are substituted at run time, and they are permitted in the endpoint URL, in HTTP header values, in HTTP query parameter values, and in the content of POST and PUT methods.",
+   "url": "https://www.servicenow.com/docs/bundle/australia-api-reference/page/integrate/outbound-rest/concept/c_VariableSubstitutionREST.html",
+   "title": "Message variable substitution",
+   "publisher": "ServiceNow",
+   "reportedQuote": "Variables are allowed in the Endpoint URL, HTTP Header and HTTP Query Parameter Value fields, and the Content field for POST and PUT methods.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "Variables are allowed in the Endpoint URL, HTTP Header and HTTP Query Parameter Value fields, and the Content field for POST and PUT methods.",
+    "correction": "No material correction \u2014 the page supports both halves of the claim. The reported quote is verbatim, and the run-time substitution point is stated separately: \"The syntax for variables is ${variable_name}. The REST message substitutes this variable with the parameter values provided when the method runs.\" One wording nuance: the page enumerates REST message form FIELDS and says \"HTTP Header\" (not \"HTTP header values\"); the claim's phrase \"HTTP header values\" is marginally more specific than the source, though the page's companion topic reference to generating variables \"based on variables defined in several REST message HTTP method fields\" is consistent with it. Also note the requested bundle URL (australia-api-reference) 302-redirects to the release-independent canonical topic path; it resolves to the same topic, page title \"Message variable substitution\", Release version Australia, updated March 12, 2026.",
+    "betterUrl": "https://www.servicenow.com/docs/r/api-reference/web-services/c_VariableSubstitutionREST.html"
+   }
+  },
+  {
+   "topic": "restQueryParams",
+   "question": "ServiceNow outbound REST messages: how HTTP query parameters are stored and used. Which table holds the HTTP Query Parameters related list on a REST Message Function (sys_rest_message_fn_parameters), how variables written as ${name} in the endpoint become parameters, and the \"Auto-generate variables\" related link.",
+   "claim": "The \"Auto-generate variables\" related link on a REST message HTTP method populates the Variable Substitutions related list from the ${...} variables found in the method endpoint and in the HTTP Headers and HTTP Query Parameters embedded lists.",
+   "url": "https://www.servicenow.com/docs/bundle/australia-api-reference/page/integrate/outbound-rest/task/t_GenerateMessageVariables.html",
+   "title": "Generate REST message variables",
+   "publisher": "ServiceNow",
+   "reportedQuote": "The Variable Substitutions related list is automatically populated for any variables defined in the HTTP Method Endpoint field and the HTTP Headers and HTTP Query Parameters embedded lists.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "The Variable Substitutions related list is automatically populated for any variables defined in the HTTP Method Endpoint field and the HTTP Headers and HTTP Query Parameters embedded lists.",
+    "correction": "The quote is verbatim and the claim is supported, but it is incomplete and carries one detail not on this page. (1) The page continues immediately with a second sentence the claim omits: \"For POST and PUT messages, variables defined in the Content field are also used.\" So the endpoint / HTTP Headers / HTTP Query Parameters trio is not the exhaustive set of population sources - the Content field is a fourth source for POST and PUT methods. The claim is fine as stated but would be wrong if restated as \"only\" those three. (2) The \"${...}\" syntax in the claim is the claimant's gloss, not this page's wording - the page says only \"any variables defined in\" those fields and never shows the ${} syntax. That syntax is documented on the sibling concept page \"Message variable substitution\" (c_VariableSubstitutionREST.html). Context confirmed on the page: the procedure is Navigate to All > System Web Services > REST Message, select a REST Message record, select a method from the HTTP Methods related list, then click the Auto-generate variables related link; role required is web_service_admin. Access note: the bundle URL returns HTTP 200 but 301-redirects to https://www.servicenow.com/docs/r/api-reference/web-services/t_GenerateMessageVariables.html - not a generic landing page, it is the same topic with the same title and still labeled release \"Australia\". Raw curl of either URL returns only an ~8KB Fluid Topics JS shell (the docs site is a SPA), so the sentence is not present in the HTML source and must be read from a rendered fetch; it was confirmed identically across three separate rendered fetches.",
+    "betterUrl": "https://www.servicenow.com/docs/r/api-reference/web-services/t_GenerateMessageVariables.html"
+   }
+  },
+  {
+   "topic": "restQueryParams",
+   "question": "ServiceNow outbound REST messages: how HTTP query parameters are stored and used. Which table holds the HTTP Query Parameters related list on a REST Message Function (sys_rest_message_fn_parameters), how variables written as ${name} in the endpoint become parameters, and the \"Auto-generate variables\" related link.",
+   "claim": "The HTTP Query Parameters related list on a REST Message Function is stored in sys_rest_message_fn_param_defs, not sys_rest_message_fn_parameters; sys_rest_message_fn_parameters holds the Variable Substitutions (the ${varName} declarations).",
+   "url": "https://servicenow.github.io/sdk/api/restmessage-api",
+   "title": "RestMessage | ServiceNow SDK",
+   "publisher": "ServiceNow (ServiceNow SDK documentation, servicenow.github.io/sdk \u2014 official vendor material, not docs.servicenow.com)",
+   "reportedQuote": "Used within RestMessageFn.queryParams[]. Maps to sys_rest_message_fn_param_defs.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "Used within RestMessageFn.queryParams[]. Maps to sys_rest_message_fn_param_defs.",
+    "correction": "No contradiction; the page states both halves, but in ServiceNow SDK (Fluent) terms rather than UI related-list labels. It never uses the phrases \"HTTP Query Parameters\" or \"Variable Substitutions\" \u2014 it names the Fluent properties. Supporting text, verbatim: (1) \"Used within RestMessageFn.queryParams[]. Maps to sys_rest_message_fn_param_defs.\"; (2) \"Used within RestMessageFn.variables[]. Maps to sys_rest_message_fn_parameters. Declares the ${varName} placeholders used in the function's endpoint, content, headers, and queryParams.\"; (3) the Table Mappings table for RestMessageFn -> sys_rest_message_fn lists \"variables | sys_rest_message_fn_parameters | Related list\" and \"queryParams | sys_rest_message_fn_param_defs | Related list\"; (4) the Supporting Objects table maps RestMessageQueryParam -> sys_rest_message_fn_param_defs (columns name, value, order) and RestMessageParamSubstitution -> sys_rest_message_fn_parameters (columns name, type). So the \"Related list\" wording and the table split are the page's own; the only inference left to the reader is that the related list labelled \"HTTP Query Parameters\" on the form is the one the SDK calls queryParams. Also note this is ServiceNow's SDK documentation describing what the Fluent plugin writes, not the platform's own table reference.",
+    "betterUrl": "https://servicenow.github.io/sdk/4.11.2/api/restmessage-api#restmessagequeryparam"
+   }
+  },
+  {
+   "topic": "fieldLength",
+   "question": "ServiceNow string field maximum length: how max_length on a sys_dictionary entry works, the default of 40 for a new string field, the practical maximum for a string column, and CRITICALLY what happens when a value longer than max_length is saved - is it silently truncated or does it error? Also how to change max length of a field.",
+   "claim": "ServiceNow's official field types reference documents the String type's Max length behaviour, including that the database maps the value to the nearest column type and that on Oracle-backed instances Max length cannot be raised above 4000 through the application UI.",
+   "url": "https://www.servicenow.com/docs/r/platform-administration/r_FieldTypes.html",
+   "title": "Field types reference - ServiceNow AI Platform Administration (Australia release)",
+   "publisher": "ServiceNow",
+   "reportedQuote": "Note: The database may translate the value that you provide in the Max length field to the closest matching database field type. For example, a max string length of 80 maps to the nearest database field type of VARCHAR(100). For Oracle instances, users aren't able to increase the max length of a string field to a value greater than 4000 through the application UI. Changes greater than 4000 require the CLOB data type in Oracle. If you require a field to be larger than 4000 characters, log an incident to request the change.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "Note: The database may translate the value that you provide in the Max length field to the closest matching database field type. For example, a max string length of 80 maps to the nearest database field type of VARCHAR(100). For Oracle instances, users aren't able to increase the max length of a string field to a value greater than 4000 through the application UI. Changes greater than 4000 require the CLOB data type in Oracle. If you require a field to be larger than 4000 characters, log an incident to request the change.",
+    "correction": "No contradiction or narrowing \u2014 the quote is present word-for-word as a Note attached to the String row of the field types table, and the displayed title (\"Field types reference\") and release (\"Australia\") match what was reported. Two caveats on the citation rather than the claim: (1) the URL is a release-floating \"latest\" alias, so it currently serves the Australia release but the release label in the title will drift on future releases; (2) the page renders entirely client-side (a Fluid Topics SPA), so a plain curl of the URL returns only an 8 KB shell with none of this text \u2014 the content is only visible to a JS-rendering fetch. Also note the sentence uses \"database field type\", not \"column type\"; the claim's paraphrase of \"maps the value to the nearest column type\" is accurate in substance but is not the page's wording.",
+    "betterUrl": "https://www.servicenow.com/docs/r/UrSRFFKWBbfQBgoRlt~ltw/6k_9a9P38xd3rj_6C8ofiQ"
+   }
+  },
+  {
+   "topic": "fieldLength",
+   "question": "ServiceNow string field maximum length: how max_length on a sys_dictionary entry works, the default of 40 for a new string field, the practical maximum for a string column, and CRITICALLY what happens when a value longer than max_length is saved - is it silently truncated or does it error? Also how to change max length of a field.",
+   "claim": "Max length is changed on the field's dictionary entry (Configure Dictionary), and the platform blocks a length reduction that would truncate data already stored in the column.",
+   "url": "https://www.servicenow.com/docs/r/platform-administration/t_ModifyingStringFieldLength.html",
+   "title": "Modify string field length - ServiceNow AI Platform Administration (Australia release)",
+   "publisher": "ServiceNow",
+   "reportedQuote": "Change the Max length field to the desired length. Note: You can change between string-based data types as long as length changes do not cause any data loss from truncation. For example, you can change from a MEDIUM database type to a VARCHAR(100) database type if none of the existing data is greater than 100. [...] The system cancels any length change that results in data loss due to truncation.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "Right-click the field label in the form and select Configure Dictionary. Change the Max length field to the desired length. [...] Note: You can change between string-based data types as long as length changes do not cause any data loss from truncation. For example, you can change from a MEDIUM database type to a VARCHAR(100) database type if none of the existing data is greater than 100. [...] The system cancels any length change that results in data loss due to truncation.",
+    "correction": "No correction needed \u2014 both halves of the claim are stated on the page. Two minor notes for precision: (1) the page's title/version label is \"Australia\" release, updated March 12, 2026, matching the reported title; (2) the truncation-protection sentence is phrased as the system \"cancels\" the change rather than \"blocks\" it, and the note's worked example is framed around changing between string-based data types (e.g. MEDIUM to VARCHAR(100)), while the cancel sentence itself is stated generally for \"any length change.\" Neither difference narrows the claim. The page also carries two unrelated notes the citation omits: the URL type field hides Max Length on the Dictionary form by default, and browsers support URL length up to 2,083 characters."
+   }
+  },
+  {
+   "topic": "fieldLength",
+   "question": "ServiceNow string field maximum length: how max_length on a sys_dictionary entry works, the default of 40 for a new string field, the practical maximum for a string column, and CRITICALLY what happens when a value longer than max_length is saved - is it silently truncated or does it error? Also how to change max length of a field.",
+   "claim": "COMMUNITY SOURCE (not official documentation): the sys_dictionary max_length value is not enforced on save by the client or the server, so a value longer than max_length is accepted rather than rejected.",
+   "url": "https://www.servicenow.com/community/developer-forum/max-length-value-of-string-field-is-not-honoured/td-p/3307639",
+   "title": "Max length value of string field is not honoured - ServiceNow Community (developer forum)",
+   "publisher": "ServiceNow Community (community post, not official documentation)",
+   "reportedQuote": "Fields in ServiceNow accept string inputs greater than the sys_dictionary max_length value. [...] Despite the similarity of the name to HTML's maxlength attributes for input or textarea tags, this is not enforced as a limit in the client or server.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "When you create a new sys_dictionary record to define a new string field, the max_length is mandatory. Despite the similarity of the name to HTML's maxlength attributes for input or textarea tags, this is not enforced as a limit in the client or server. Max length is not enforced on the Now Platform. Fields in ServiceNow accept string inputs greater than the sys_dictionary max_length value. This is the expected behavior of the product.",
+    "correction": "Substance confirmed, with three qualifications. (1) Quote order: both reported sentences are verbatim, but the reported quote reverses them. On the page \"Despite the similarity of the name to HTML's maxlength attributes...\" comes FIRST, then the bold sub-heading \"Max length is not enforced on the Now Platform\", then \"Fields in ServiceNow accept string inputs greater than the sys_dictionary max_length value.\" The \"[...]\" elision therefore implies an ordering the page does not have. (2) Provenance: the \"COMMUNITY SOURCE (not official documentation)\" label understates it. The text is not an independent community opinion \u2014 it is a near-verbatim copy of official ServiceNow KB0685779, \"Why ServiceNow fields accept string inputs that exceed the max_length value\" (published 2018-05-04, modified 2026-05-12), which the same reply links. The community post is the accepted solution by member \"sandeepdutt\" (Tera Patron), 07-02-2025, answering user Nisar3, whose max_length=30 field accepted a 43-character value. (3) Scope: \"accepted rather than rejected\" is not unlimited. The page immediately ties storage to the database column type (Small 40 = varchar(40), Medium 100 = varchar(100), Large 1000 / Extra Large 4000 = mediumtext), and the thread's remaining replies are entirely about where truncation then occurs. The official KB is explicit that the real limit is the column, not max_length: \"The number of characters stored in a field is controlled by the database, not by the max_length value\" and, under \"Exceptions\", \"Some fields enforce the max_length value based on their database column definition. For example, the sc_task.short_description field is defined in the database as varchar(160) by default, which enforces a maximum of 160 characters.\" So the accurate statement is that max_length itself is not a validation limit, while the underlying column width still is \u2014 some fields do reject/limit input as a result.",
+    "betterUrl": "https://support.servicenow.com/kb?id=kb_article_view&sysparm_article=KB0685779"
+   }
+  },
+  {
+   "topic": "sysProperties",
+   "question": "The ServiceNow sys_properties table: the maximum length of the Value field (believed 4000 characters), what field type it is, and official guidance on storing long comma separated lists in a system property. Also any documented guidance on using system properties for configuration lists.",
+   "claim": "The sys_properties table is the System Property table where properties are added, and every property value is stored as a string regardless of the Type selected \u2014 so a comma separated list is stored as ordinary string text.",
+   "url": "https://www.servicenow.com/docs/bundle/zurich-platform-administration/page/administer/reference-pages/task/t_AddAPropertyUsingSysPropsList.html",
+   "title": "Add a system property \u2014 Zurich ServiceNow AI Platform Administration",
+   "publisher": "ServiceNow",
+   "reportedQuote": "All property values are stored as strings.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "All property values are stored as strings. When retrieving properties via the gs.getProperty() method, treat the results as strings. For example, a true|false property returns 'true' or 'false' (strings), not the Boolean equivalent.",
+    "correction": "Supported, but narrower than the claim's phrasing in two places. (1) The page does state \"Some properties in the system aren't visible in an instance by default and must be added to the System Property [sys_properties] table\" and, in the Value row of the form-field table, \"All property values are stored as strings.\" The \"regardless of the Type selected\" wording is not on the page; it is a fair reading of the Type row (\"Select the appropriate data type from the list (for example, integer, string, or true|false)\") combined with the Value row's true|false-returns-'true'-string example, but the page never uses the words \"regardless of the Type\". (2) The page says nothing about comma separated lists as property values. That clause is an entailment of \"All property values are stored as strings\", not a statement on the page. The page's only mention of commas is the Choices field \u2014 \"Comma-separated values for a choice list. If you need a different choice list label and value, use an equal sign (=) to separate the label from the value. For example, Blue=0000FF, Red=FF0000, Green=00FF00\" \u2014 which defines the picklist offered on the property form, a different mechanism from a comma separated value stored in the Value field. Do not cite this page as documenting a comma separated (or name=value) property-value convention; cite it only for \"sys_properties is the System Property table\" and \"all property values are stored as strings\".",
+    "betterUrl": "https://www.servicenow.com/docs/r/zurich/platform-administration/t_AddAPropertyUsingSysPropsList.html"
+   }
+  },
+  {
+   "topic": "snQualysIntegration",
+   "question": "ServiceNow Vulnerability Response Qualys integration product documentation: the Qualys Vulnerability Integration application, integration configuration records, and any documented setting for a truncation limit or chunk size on the Qualys integrations, especially the Policy Compliance (PC) integrations. Also the \"Qualys PC results\" or \"Configuration Compliance Qualys\" integration if documented.",
+   "claim": "ServiceNow officially documents a host truncation limit as a default setting of the Qualys Cloud Platform integration, and changed that default from 500 to 300 in version 30.6.0 of the Qualys Integration for Security Operations application.",
+   "url": "https://www.servicenow.com/docs/r/store-release-notes/store-secops-rn-qualys-integration.html",
+   "title": "Qualys Integration for Security Operations release notes",
+   "publisher": "ServiceNow",
+   "reportedQuote": "Optimized the default Qualys Cloud Platform integration settings by reducing the host truncation limit from 500 to 300 for greater stability, and increasing the KnowledgeBase backfill limit from 100 to 300 for faster processing.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "Optimized the default Qualys Cloud Platform integration settings by reducing the host truncation limit from 500 to 300 for greater stability, and increasing the KnowledgeBase backfill limit from 100 to 300 for faster processing.",
+    "correction": "No contradiction \u2014 the quote is reproduced verbatim and both elements of the claim hold: the sentence attributes the host truncation limit to \"the default Qualys Cloud Platform integration settings,\" and it sits under Version 30.6.0 (June 2026) on the \"Qualys Integration for Security Operations release notes\" page. Three scoping notes, none of which defeat the claim: (1) this is release-note prose announcing a change of default, not a settings-reference topic \u2014 the page does not otherwise define or document what the host truncation limit does, so cite it as \"the default was changed in 30.6.0,\" not as the canonical description of the setting; (2) the same sentence is a single combined bullet under a \"Changed:\" label that also raises the KnowledgeBase backfill limit from 100 to 300, so quoting only the 500-to-300 half is a partial quotation of one sentence; (3) the page carries no per-version permalink or anchor for the 30.6.0 entry, and 30.6.0 is not the newest release listed (30.6.3, August 2026, sits above it), so the version must be named explicitly when citing. Method caveat for the record: the page is a JavaScript-rendered Fluid Topics SPA \u2014 raw curl returns only an 8KB application shell and the r.jina.ai reader returned an ad-tracker redirect, so confirmation came through rendered fetches; these were validated with two decoy prompts (a fabricated \"Version 44.9.9\" entry and near-miss numbers of 800-to-200 / 50-to-150), both correctly rejected, plus an unprimed extraction that independently surfaced the surrounding \"Changed:\"/\"Fixed:\" bullets and the full version history."
+   }
+  },
+  {
+   "topic": "snQualysIntegration",
+   "question": "ServiceNow Vulnerability Response Qualys integration product documentation: the Qualys Vulnerability Integration application, integration configuration records, and any documented setting for a truncation limit or chunk size on the Qualys integrations, especially the Policy Compliance (PC) integrations. Also the \"Qualys PC results\" or \"Configuration Compliance Qualys\" integration if documented.",
+   "claim": "The Qualys Policy Compliance data path into Configuration Compliance is delivered by the Qualys Integration for Security Operations application, which from v12.6.3 provides the Qualys PCRS Policy Host Integration and Qualys PCRS Test Results Integration.",
+   "url": "https://www.servicenow.com/docs/r/xanadu/security-management/configuration-compliance/Qualys-cc-Integration.html",
+   "title": "Qualys integration with Configuration Compliance",
+   "publisher": "ServiceNow",
+   "reportedQuote": "Starting with v12.6.3 of Qualys Integration for Security Operations, you can use the Qualys PCRS Policy Host Integration and Qualys PCRS Test Results Integration for importing test results with new sets of Qualys APIs.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "Starting with v12.6.3 of Qualys Integration for Security Operations, you can use the Qualys PCRS Policy Host Integration and Qualys PCRS Test Results Integration for importing test results with new sets of Qualys APIs. These integrations need a gateway URL to fetch information from Qualys.",
+    "correction": "Supported, with three caveats worth carrying into any writeup. (1) On the cited page the quoted sentence is not body prose - it is the child-topic link description under \"Integrating Qualys with the ServiceNow Configuration Compliance application\", pointing at the sub-topic \"Configure the PCRS parameters\"; that sub-topic repeats it as its lead paragraph. (2) The page says \"you can use\" the two PCRS integrations, i.e. v12.6.3 adds an optional path over \"new sets of Qualys APIs\" - it does not say the PCRS integrations replaced or became the sole data path, and the quoted sentence itself continues \"These integrations need a gateway URL to fetch information from Qualys.\" (3) The first half of the claim (\"the data path ... is delivered by the Qualys Integration for Security Operations application\") is a fair synthesis rather than a single sentence; the page's own wording is \"The Qualys Policy Compliance collects the data and automatically sends it to the Qualys application, which continuously analyzes and correlates the information. It easily integrates as the Qualys Integration for Security Operations to map configuration findings to CIs and business services...\", and elsewhere \"the ignore_passed_result integration instance parameter for the Qualys Integration for Security Operations\". Note also the page mixes version namespaces - \"v15.2.5 of Configuration Compliance\" for ignore_passed_result vs \"v12.6.3 of Qualys Integration for Security Operations\" - so the 12.6.3 number belongs to the integration app, not to Configuration Compliance. Supporting detail on the sub-topic: the app is installed \"for Vulnerability Response\", the scope is \"Qualys for Security Operations\", gateway_url is set on the integration instance, Qualys PCRS Test Results Integration depends on Qualys PCRS Policy Host Integration, and from v12.21.0 of Qualys Integration for Security Operations and v30.3.0 of Unified Security Exposure Management a posture_api_version parameter (2.0 or 5.0) selects the PCRS API version.",
+    "betterUrl": "https://www.servicenow.com/docs/r/xanadu/security-management/configuration-compliance/cc-config-qualys.html"
+   }
+  },
+  {
+   "topic": "snQualysIntegration",
+   "question": "ServiceNow Vulnerability Response Qualys integration product documentation: the Qualys Vulnerability Integration application, integration configuration records, and any documented setting for a truncation limit or chunk size on the Qualys integrations, especially the Policy Compliance (PC) integrations. Also the \"Qualys PC results\" or \"Configuration Compliance Qualys\" integration if documented.",
+   "claim": "The Qualys integration is distributed as the ServiceNow Store application \"Qualys Integration for Security Operations\", published by ServiceNow.",
+   "url": "https://store.servicenow.com/store/app/9f3b6f2a1b246a50a85b16db234bcb13",
+   "title": "Qualys Integration for Security Operations - ServiceNow Store",
+   "publisher": "ServiceNow",
+   "reportedQuote": "ServiceNow App Store: Qualys Integration for Security Operations by ServiceNow - Integrate your Qualys deployment with ServiceNow Vulnerability Response to prioritize and remediate vulnerabilities.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "ServiceNow App Store: Qualys Integration for Security Operations by ServiceNow - Integrate your Qualys deployment with ServiceNow Vulnerability Response to prioritize and remediate vulnerabilities.",
+    "correction": "Substantively correct, with one narrowing. The quote is genuine and verbatim, but it is the page's <meta name=\"description\"> tag rather than a sentence in the visible body; the visible header reads \"Qualys Integration for Security Operations\" / \"Sold by ServiceNow\" (the page says \"Sold by\", not \"published by\"). The embedded listing JSON independently confirms the publisher: \"company\":{\"name\":\"ServiceNow\"}, \"status\":\"published\", \"release_channel\":\"store\", \"scope\":\"sn_vul_qualys\", version 30.6.3, publish_date 2026-08-07. The narrowing is the definite article in \"The Qualys integration\": this listing is one of several separate Qualys apps on the Store (Qualys Core, Qualys CMDB Sync, Qualys CMDB Bi-directional Sync, Qualys CSPM Integration, Qualys - Policy Audit, Qualys ETM VR Integration, Vulnerability Response Integration with Qualys WAS, Service Graph Connector for Qualys), and a distinct \"Qualys Inc\" seller profile exists, so not all Qualys Store apps are published by ServiceNow. This particular app is the Vulnerability Response integration (host detection and knowledge base import); Configuration Compliance / misconfiguration content ships in the separate Qualys CSPM Integration and Qualys - Policy Audit listings.",
+    "betterUrl": "https://www.servicenow.com/docs/r/security-management/vulnerability-response/install-and-configure-qualys.html"
+   }
+  },
+  {
+   "topic": "qualysPostureInfo",
+   "question": "Qualys Policy Compliance API endpoint /api/2.0/fo/compliance/posture/info/ (Posture Information API): the full parameter list, in particular policy_id, policy_ids, details, truncation_limit. What is the DEFAULT value of truncation_limit for this endpoint (believed 1000) and what is the maximum allowed value? How does pagination work (WARNING element with code 1980 and a URL for the next page)?",
+   "claim": "For /api/2.0/fo/compliance/posture/info/, the default truncation_limit is 5,000 posture info records per request (not 1,000), it is only valid when a single policy_id is specified, and the configurable range runs from 1 up to 1,000,000.",
+   "url": "https://cdn2.qualys.com/docs/qualys-api-vmpc-user-guide.pdf",
+   "title": "Qualys API (VM and PA) User Guide, Version 10.40, September 7, 2026 \u2014 \"Compliance Posture Information\" chapter, Input Parameters table, page 1707 (truncation_limit entry); see also \"Maximum Postures per API Request\", page 1704",
+   "publisher": "Qualys",
+   "reportedQuote": "By default, a limit of 5,000 posture info records are returned per request (when \u201cpolicy_id\u201d is specified). You may specify a value less than the default (1-4999) or greater than the default (5001-1000000) to configure the number records returned per request.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "truncation_limit={value}  (Optional) The parameter is valid only when the API request is for a single policy and the policy_id parameter is specified. By default, a limit of 5,000 posture info records are returned per request (when \u201cpolicy_id\u201d is specified). You may specify a value less than the default (1-4999) or greater than the default (5001-1000000) to configure the number records returned per request.",
+    "correction": "No contradiction \u2014 the quote is verbatim (the only difference is that the PDF line-wraps \"5001-1000000\" as \"(5001-\" / \"1000000)\"), and both cited page numbers are correct: the truncation_limit entry is on page 1707 and \"Maximum Postures per API Request\" on page 1704, in the Version 10.40, September 7, 2026 edition as reported. Page 1704 independently confirms the default: \"The output of the Compliance Posture Info API is paginated when your API request identifies a single policy to report on using the 'policy_id' input parameter. In this case, a maximum of 5,000 posture info records are returned per request by default.\" The single-policy restriction is reinforced in the policy_ids entry: \"When this parameter is specified, all posture data is downloaded (and the 'truncation_limit' parameter is invalid)... When policy_ids is specified, truncation_limit is invalid.\" Two minor caveats, neither of which undercuts the claim: (1) the page never uses the phrase \"not 1,000\" \u2014 that contrast is the claim author's editorial framing, though the 5,000 default itself is plainly stated; (2) the claim's \"range runs from 1 up to 1,000,000\" omits that the page additionally accepts truncation_limit=0, which means no truncation limit at all (unpaginated, all records in a single output, with a warning about large XML). So the accepted values are 0 plus 1-4999 and 5001-1000000, not strictly 1-1,000,000. Also worth flagging for durability rather than accuracy: the cited URL is a rolling \"latest\" pointer that Qualys overwrites on each release (it served Version 10.39.2 as of the last public crawl), so this page number and version citation will drift as the document is republished.",
+    "betterUrl": ""
+   }
+  },
+  {
+   "topic": "qualysPostureInfo",
+   "question": "Qualys Policy Compliance API endpoint /api/2.0/fo/compliance/posture/info/ (Posture Information API): the full parameter list, in particular policy_id, policy_ids, details, truncation_limit. What is the DEFAULT value of truncation_limit for this endpoint (believed 1000) and what is the maximum allowed value? How does pagination work (WARNING element with code 1980 and a URL for the next page)?",
+   "claim": "Pagination for the Posture Information API works by returning a WARNING element containing the URL of the next batch of records; truncation_limit is invalid when policy_ids (multiple policies) is used, and truncation_limit=0 disables pagination entirely.",
+   "url": "https://docs.qualys.com/en/vm/qweb-all-api/mergedProjects/qapi-pc/posture/list_posture_info.htm",
+   "title": "List Compliance Posture Info \u2014 Qualys PC API online documentation",
+   "publisher": "Qualys",
+   "reportedQuote": "If the requested list identifies more records than the truncation limit, then the XML output includes the <WARNING> element and the URL for making another request for the next batch of records.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "If the requested list identifies more records than the truncation limit, then the XML output includes the <WARNING> element and the URL for making another request for the next batch of records.",
+    "correction": "The claim holds, with two small precisions. (1) Wording: the page says the XML output \"includes the <WARNING> element and the URL for making another request for the next batch\" \u2014 it does not literally say the URL is *contained inside* the WARNING element, and no sample WARNING block appears on this page to show the nesting. That is a reasonable reading of Qualys XML but is an inference, not the page's words. (2) The page states the scope more narrowly than \"truncation_limit is invalid when policy_ids is used\": the truncation_limit row opens with \"The parameter is valid only when the API request is for a single policy and the policy_id parameter is specified.\" The policy_ids row adds: \"up to 10 policies may be requested... When this parameter is specified, all posture data is downloaded (and the 'truncation_limit' parameter is invalid)\", and \"When policy_ids is specified, truncation_limit is invalid. For CSV output, policy_id must be specified (and policy_ids is invalid).\" The truncation_limit=0 part is stated exactly: \"You can specify truncation_limit=0 for no truncation limit. This means that the output is not paginated and all the records are returned in a single output.\" The page also documents a default of 5,000 records per request and an accepted range of 1-4999 or 5001-1000000, which the claim omits but does not contradict.",
+    "betterUrl": ""
+   }
+  },
+  {
+   "topic": "qualysPolicyList",
+   "question": "Qualys Policy Compliance API endpoint /api/2.0/fo/compliance/policy/ with action=list (Policy List API): the \"ids\" input parameter. Confirm it accepts one or more policy IDs or ID ranges, that entries are comma separated and a range uses a hyphen such as 160-165. Is there any documented maximum number of IDs?",
+   "claim": "For /api/2.0/fo/compliance/policy/?action=list, the ids input parameter accepts one or more policy IDs or ID ranges, comma separated, with a range written using a hyphen such as 160-165.",
+   "url": "https://docs.qualys.com/en/vm/qweb-all-api/mergedProjects/qapi-pc/policies/list_policies.htm",
+   "title": "List Policies - Qualys VM, PC APIs",
+   "publisher": "Qualys",
+   "reportedQuote": "Show only certain policy IDs/ranges. One or more policy IDs/ranges may be specified. Valid host IDs are required. Multiple entries are comma separated. A policy ID range is specified with a hyphen (for example, 160-165).",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "Show only certain policy IDs/ranges. One or more policy IDs/ranges may be specified. Valid host IDs are required. Multiple entries are comma separated. A policy ID range is specified with a hyphen (for example, 160-165).",
+    "correction": "No contradiction. Two context notes: (1) the page is a merged topic covering V2.0, V3.0 and V4.0, and this identical sentence appears in all three parameter tables \u2014 the V2.0 instance sits under the heading for GET/POST /api/2.0/fo/compliance/policy/?action=list, so the claim's version scoping is correct but not exclusive; (2) the parameter is written as ids={value} with Data Type \"Integer\", and Qualys's own sentence includes the stray line \"Valid host IDs are required\" (apparently a copy-paste from a host API topic, since this endpoint filters on policy IDs). The claim omits that sentence but does not misstate anything.",
+    "betterUrl": "https://docs.qualys.com/en/vm/qweb-all-api/mergedProjects/qapi-pc/policies/list_policies.htm#v_2_0"
+   }
+  },
+  {
+   "topic": "qualysPolicyList",
+   "question": "Qualys Policy Compliance API endpoint /api/2.0/fo/compliance/policy/ with action=list (Policy List API): the \"ids\" input parameter. Confirm it accepts one or more policy IDs or ID ranges, that entries are comma separated and a range uses a hyphen such as 160-165. Is there any documented maximum number of IDs?",
+   "claim": "The Qualys API user guide states the same ids parameter behaviour for the Compliance Policy List API and clarifies that valid policy IDs (not host IDs) are required.",
+   "url": "https://cdn2.qualys.com/docs/qualys-api-vmpc-user-guide.pdf",
+   "title": "Qualys API (VM and PA) User Guide, Version 10.40, September 7, 2026 - Compliance Policy List",
+   "publisher": "Qualys",
+   "reportedQuote": "(Optional) Show only certain policy IDs and/or ID ranges. One or more policy IDs/ranges may be specified. Multiple entries are comma separated. A policy ID range entry is specified with a hyphen (for example, 160-165). Valid policy IDs are required.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "ids={value} \u2014 (Optional) Show only certain policy IDs and/or ID ranges. One or more policy IDs/ranges may be specified. Multiple entries are comma separated. A policy ID range entry is specified with a hyphen (for example, 160-165). Valid policy IDs are required.",
+    "correction": "Substantively the citation holds, with three qualifications worth noting.\n\n1. The quote is verbatim, not paraphrased. I downloaded the PDF (6.8 MB) and extracted the text with pdftotext. The cover page reads exactly \"Qualys API (VM and PA) User Guide / Version 10.40 / September 7, 2026\", matching the reported title and version. The \"Compliance Policy List\" section begins on p. 1631 and the ids row of the Input Parameters table sits on p. 1633; the quoted wording appears there character-for-character (line-wrapped in the PDF table cell). It is repeated identically in the V3.0 and V4.0 blocks of the same section, so the behaviour is stated three times.\n\n2. \"the same ids parameter behaviour\" is fair but is my inference from comparison, not something the page asserts. The page never says \"same as\" anything. The Host List ids parameter elsewhere in the guide reads: \"(Optional) Show only certain host IDs/ranges. One or more host IDs/ranges may be specified. Multiple entries are comma separated. A host ID range is specified with a hyphen (for example, 190-400).Valid host IDs are required.\" The two are structurally identical (optional, one-or-more entries, comma separated, hyphen-delimited range, valid IDs required) and differ only in noun and example range, so the claim of same behaviour is supportable \u2014 but it is a cross-section comparison the reader has to make, not a statement in the Compliance Policy List section.\n\n3. \"(not host IDs)\" is the citing author's gloss, not a clarification the page makes. The word \"host\" does not appear anywhere in the Compliance Policy List section (I grepped the full 800-line span). The page positively specifies policy IDs; it never contrasts them against host IDs or warns that host IDs would be rejected. So the parenthetical is accurate in substance but overstates the page as drawing a distinction it does not draw.\n\nOne caveat about the URL itself: https://cdn2.qualys.com/docs/qualys-api-vmpc-user-guide.pdf is version-floating \u2014 it always serves the current release. Search results still index it as \"Version 10.39.2, August 13, 2026\" while the live file today is 10.40 (September 7, 2026). The quoted sentence is stable across those revisions, but the version/date in the reported title will drift out of sync with this URL, and page number 1633 will move.\n\nAlso relevant if the parameter-limit angle matters: this section does state a cap, but on records rather than on ids entries \u2014 \"A maximum of 1,000 compliance policy records can be processed per request.\" No maximum count of ids entries or ranges is documented.",
+    "betterUrl": "https://cdn2.qualys.com/docs/qualys-api-vmpc-user-guide.pdf"
+   }
+  },
+  {
+   "topic": "qualysPolicyList",
+   "question": "Qualys Policy Compliance API endpoint /api/2.0/fo/compliance/policy/ with action=list (Policy List API): the \"ids\" input parameter. Confirm it accepts one or more policy IDs or ID ranges, that entries are comma separated and a range uses a hyphen such as 160-165. Is there any documented maximum number of IDs?",
+   "claim": "No maximum count of IDs is documented for the ids parameter; the only documented ceiling on this API is 1,000 policy records processed per request, which is an output batching limit.",
+   "url": "https://docs.qualys.com/en/vm/qweb-all-api/mergedProjects/qapi-pc/policies/list_policies.htm",
+   "title": "List Policies - Qualys VM, PC APIs (Maximum Policies per API Request)",
+   "publisher": "Qualys",
+   "reportedQuote": "A maximum of 1,000 compliance policy records can be processed per request. If the requested list identifies more than 1,000 policies, then the XML output includes the <WARNING> element and instructions for making another request for the next batch of policy records.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "A maximum of 1,000 compliance policy records can be processed per request. If the requested list identifies more than 1,000 policies, then the XML output includes the <WARNING> element and instructions for making another request for the next batch of policy records.",
+    "correction": "No contradiction; the claim holds, with two precision notes. (1) The page's own wording is \"processed per request,\" not \"output batching\" \u2014 the batching characterization is an inference, though a well-grounded one, since the documented remedy is the <WARNING> element plus \"instructions for making another request for the next batch of policy records.\" (2) \"No maximum count of IDs is documented\" and \"the only documented ceiling\" are negative/scope claims true of THIS page specifically: I searched the full stripped text for maximum, limit, truncation, rate limit, per hour, characters, page_size, batch and concurren, and the 1,000-record sentence is the only ceiling present (id_max is a filter on policy ID value, not a count cap, and there is no truncation_limit parameter on this endpoint). The full ids description is: \"Show only certain policy IDs/ranges. One or more policy IDs/ranges may be specified. Valid host IDs are required. Multiple entries are comma separated. A policy ID range is specified with a hyphen (for example, 160-165).\" Absence of a documented cap is not the same as absence of a server-side cap. Worth noting the page is a merged doc covering API versions V2.0, V3.0 and V4.0, and the identical 1,000-record sentence and identical ids description appear once per version under a heading titled \"Maximum Policies per API Request,\" so the claim holds for all three versions rather than only one."
+   }
+  },
+  {
+   "topic": "qualysPolicyIds",
+   "question": "Qualys Policy Compliance posture info API: the policy_ids parameter. Is it documented, is it comma separated, and is there a documented maximum number of policy IDs per request (a limit of 10 is claimed - confirm or refute). Also confirm whether policy_id accepts only a single value.",
+   "claim": "The policy_ids parameter of the Qualys PC List Compliance Posture Info API is officially documented, takes a comma-separated list of policy IDs, and has a documented maximum of 10 policies per request.",
+   "url": "https://docs.qualys.com/en/vm/qweb-all-api/mergedProjects/qapi-pc/posture/list_posture_info.htm",
+   "title": "List Compliance Posture Info",
+   "publisher": "Qualys",
+   "reportedQuote": "(policy_id or policy_ids is required) Show compliance posture info records for multiple policies - up to 10 policies may be requested. Provide a comma-separated list of valid policy IDs.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "(policy_id or policy_ids is required) Show compliance posture info records for multiple policies - up to 10 policies may be requested. Provide a comma-separated list of valid policy IDs. When this parameter is specified, all posture data is downloaded (and the \"truncation_limit\" parameter is invalid).",
+    "correction": "No correction to the claim itself \u2014 it is accurate and the reported quote is verbatim (it simply stops one sentence early). Three documented constraints the claim omits are worth carrying, since they narrow how policy_ids can actually be used: (1) \"The parameters policy_id and policy_ids cannot be specified in the same request.\" (2) \"When policy_ids is specified, truncation_limit is invalid\" \u2014 and all posture data is downloaded, so the result set cannot be paged/limited. (3) \"For CSV output, policy_id must be specified (and policy_ids is invalid)\" \u2014 i.e. the 10-policy multi-policy mode is XML-only. Also note the parameter table lists policy_id and policy_ids with type Integer and no \"Optional\" marker (they are conditionally required as a pair), whereas most other parameters are marked Optional.",
+    "betterUrl": "https://docs.qualys.com/en/vm/qweb-all-api/mergedProjects/qapi-pc/posture/list_posture_info.htm"
+   }
+  },
+  {
+   "topic": "qualysPolicyIds",
+   "question": "Qualys Policy Compliance posture info API: the policy_ids parameter. Is it documented, is it comma separated, and is there a documented maximum number of policy IDs per request (a limit of 10 is claimed - confirm or refute). Also confirm whether policy_id accepts only a single value.",
+   "claim": "The policy_id parameter accepts only a single policy ID, and policy_id and policy_ids are mutually exclusive in the same request.",
+   "url": "https://docs.qualys.com/en/vm/qweb-all-api/mergedProjects/qapi-pc/posture/list_posture_info.htm",
+   "title": "List Compliance Posture Info",
+   "publisher": "Qualys",
+   "reportedQuote": "(policy_id or policy_ids is required) Show compliance posture info records for a specified policy. A valid policy ID is required. The parameters policy_id and policy_ids cannot be specified in the same request.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "(policy_id or policy_ids is required) Show compliance posture info records for a specified policy. A valid policy ID is required. The parameters policy_id and policy_ids cannot be specified in the same request.",
+    "correction": "No contradiction; the claim holds, with one wording nuance worth noting. The mutual-exclusivity half is stated verbatim (\"The parameters policy_id and policy_ids cannot be specified in the same request.\" \u2014 it appears twice, in both the policy_id and policy_ids rows of the Input Parameters table). The \"only a single policy ID\" half is not phrased with the words \"only a single\" in the policy_id row itself; that row says \"a specified policy\" / \"A valid policy ID is required\" (singular), and the single-ID reading is made explicit elsewhere on the same page: the truncation_limit row says \"The parameter is valid only when the API request is for a single policy and the policy_id parameter is specified\", and the output_format row says \"For CSV output, you can include only one policy. For this reason, policy_id is required.\" The contrast is also explicit in the policy_ids row: \"Show compliance posture info records for multiple policies - up to 10 policies may be requested. Provide a comma-separated list of valid policy IDs.\" Related constraints the claim omits: policy_ids is capped at 10 policies, and \"When policy_ids is specified, truncation_limit is invalid. For CSV output, policy_id must be specified (and policy_ids is invalid).\" Note also that the reported quote joins two separate lines from the same table cell \u2014 the text is verbatim, but it is not one continuous sentence run in the source. Page fetched at HTTP 200, no redirect, title \"List Compliance Posture Info\", endpoint POST /api/2.0/fo/compliance/posture/info/?action=list."
+   }
+  },
+  {
+   "topic": "qualysPolicyIds",
+   "question": "Qualys Policy Compliance posture info API: the policy_ids parameter. Is it documented, is it comma separated, and is there a documented maximum number of policy IDs per request (a limit of 10 is claimed - confirm or refute). Also confirm whether policy_id accepts only a single value.",
+   "claim": "The 10-policy maximum for policy_ids is independently stated in the Qualys API Quick Reference for the List Posture Info endpoint /api/2.0/fo/compliance/posture/info/.",
+   "url": "https://cdn2.qualys.com/docs/qualys-api-quick-reference.pdf",
+   "title": "Qualys API Quick Reference (July 30, 2026)",
+   "publisher": "Qualys",
+   "reportedQuote": "Notes: Up to 10 policies for \u201cpolicy_ids\u201d.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "Notes: Up to 10 policies for \u201cpolicy_ids\u201d.",
+    "correction": "No contradiction \u2014 the claim holds, with two placement/scope notes. (1) The note is not printed next to the endpoint header: the List Posture Info block starts in the right column of page 28 (/api/2.0/fo/compliance/posture/info/, with \"policy_id={id} or policy_ids={id1,id2,\u2026}&\") and runs off the bottom of that page; the note appears at the top of page 29's left column, directly after that block's last parameter \"filter_hosts={0|1}&\", and before the next heading \"Get Policy List (GET) /pcrs/1.0/posture/policy/list\". Bounding-box check confirms the continuation, and List Posture Info is the only endpoint in that stretch with a policy_ids parameter, so the attribution is sound. (2) The quick reference states only the count limit; it does not state the related constraints (policy_id and policy_ids are mutually exclusive, truncation_limit is invalid when policy_ids is used, CSV output requires policy_id). The document's only other \"policy_ids\" \u2014 the compliance option-profile parameter \"policy_ids={value1,value2}&\" \u2014 carries no such note, so the 10 limit is endpoint-specific, not doc-wide.",
+    "betterUrl": "https://cdn2.qualys.com/docs/qualys-api-vmpc-user-guide.pdf"
+   }
+  },
+  {
+   "topic": "qualysPostGet",
+   "question": "Qualys API general guidance on GET versus POST: Qualys documentation stating that POST should be used when the request is long, or any documented limit on request length or number of parameters for Qualys API calls.",
+   "claim": "Qualys documents that there are toolkit-dependent limits on how much data can be sent using the GET method, and that POST has no such fundamental limit \u2014 the documented basis for switching a long request to POST.",
+   "url": "https://cdn2.qualys.com/docs/qualys-api-quick-reference.pdf",
+   "title": "Qualys API Quick Reference (July 30, 2026), \"Good to Know\" \u2192 \"API Notes\", note 2",
+   "publisher": "Qualys",
+   "reportedQuote": "There are known limits for the amount of data that can be sent using the GET method. These limits are dependent on the toolkit used. There is no fundamental limit with sending data using the POST method.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "2) There are known limits for the amount of data that can be sent using the GET method. These limits are dependent on the toolkit used. There is no fundamental limit with sending data using the POST method.",
+    "correction": "The factual core of the claim is supported verbatim: the URL returns the real PDF (HTTP 200, application/pdf, 889,483 bytes), the cover reads \"Qualys API Quick Reference / July 30, 2026\", and page 73 under \"Good to Know\" -> \"API Notes\" contains note 2 exactly as quoted, word for word, with no paraphrase or alteration. The only unsupported part is the trailing gloss \"the documented basis for switching a long request to POST\" \u2014 that is the citer's inference, not the document's words. Qualys states the limits as a fact and never recommends switching a long request to POST. The same page narrows the option immediately above, under the heading \"GET and POST\": \"Functions support the GET method only, the POST method only or both GET and POST as indicated.\" So POST is not a universally available fallback for a long GET; it is available only where the individual API function is documented as supporting it. Additionally, both the cited URL and the better URL are unversioned rolling pointers to the current edition, so the July 30, 2026 date and the page-73 location are an accessed-on snapshot rather than a stable anchor.",
+    "betterUrl": "https://www.qualys.com/docs/qualys-api-quick-reference.pdf"
+   }
+  },
+  {
+   "topic": "qualysPostGet",
+   "question": "Qualys API general guidance on GET versus POST: Qualys documentation stating that POST should be used when the request is long, or any documented limit on request length or number of parameters for Qualys API calls.",
+   "claim": "The primary Qualys VM/PA API user guide states that GET carries known, toolkit-dependent data limits and directs the reader to each individual API function's description to learn which methods that function supports.",
+   "url": "https://cdn2.qualys.com/docs/qualys-api-vmpc-user-guide.pdf",
+   "title": "Qualys API (VM and PA) User Guide, Version 10.40 (September 7, 2026), \"Welcome\" \u2192 \"Making API requests\" \u2192 \"GET and POST Methods\"",
+   "publisher": "Qualys",
+   "reportedQuote": "Qualys API functions allow API users to submit parameters (name=value pairs) using the GET and/or POST method. There are known limits for the amount of data that can be sent using the GET method, and these limits are dependent on the toolkit used. Please refer to the individual descriptions of the API function calls to learn about the supported methods for each function",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "Qualys API functions allow API users to submit parameters (name=value pairs) using the GET and/or POST method. There are known limits for the amount of data that can be sent using the GET method, and these limits are dependent on the toolkit used. Please refer to the individual descriptions of the API function calls to learn about the supported methods for each function.",
+    "correction": "No correction needed \u2014 the quote is verbatim and the section path is accurate. Verification detail: the URL returned a real 2,049-page PDF (7.1 MB, PDF metadata title \"Qualys API (VM, PA) User Guide\", ModDate 2026-09-07), and the cover reads \"Qualys API (VM and PA) User Guide / Version 10.40 / September 7, 2026\", matching the reported title exactly. The passage sits on the page whose running header is \"Welcome > Making API requests\", under the heading \"GET and POST Methods\", immediately after \"Curl samples in our API docs\" and before \"Parameters in URLs\" \u2014 exactly the path reported. The reported quote matches the document word for word; it merely drops the sentence-final period after \"for each function\". One caveat about the citation rather than the claim: this cdn2.qualys.com/docs/ path is an unversioned \"latest\" link that Qualys overwrites in place (a web index of the same URL still shows Version 10.39.2, August 13, 2026), so the version and date named in the citation title will drift as Qualys republishes, even though the \"GET and POST Methods\" wording itself has been stable across releases.",
+    "betterUrl": "https://cdn2.qualys.com/docs/qualys-api-vmpc-user-guide.pdf"
+   }
+  },
+  {
+   "topic": "qualysPostGet",
+   "question": "Qualys API general guidance on GET versus POST: Qualys documentation stating that POST should be used when the request is long, or any documented limit on request length or number of parameters for Qualys API calls.",
+   "claim": "Qualys' HTML documentation positions GET for simple requests and POST with an XML payload for advanced requests that bundle multiple actions into a single call.",
+   "url": "https://docs.qualys.com/en/ca/api/get_started/making_api_requests.htm",
+   "title": "Qualys Cloud Agent API \u2014 Making API Calls (\"GET and POST Methods\" and \"Making requests with URL payload\")",
+   "publisher": "Qualys",
+   "reportedQuote": "While it is still possible to create simple API requests using the GET method, you can create API requests using the POST method with an XML payload to make an advanced request.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "While it is still possible to create simple API requests using the GET method, you can create API requests using the POST method with an XML payload to make an advanced request.",
+    "correction": "No contradiction \u2014 the quote is verbatim and both reported section headings (\"GET and POST Methods\", \"Making requests with URL payload\") are present. Three scoping notes: (1) The page belongs to the Qualys *Cloud Agent* API doc set (/en/ca/), not a general or PC/VM Qualys API page; the same boilerplate section is repeated across Qualys doc sets, so cite it as Cloud Agent unless you swap to the matching product's copy. (2) The page never says GET is limited to simple requests \u2014 its \"GET and POST Methods\" section says functions accept name=value parameters \"using the GET and/or POST method,\" with \"known limits for the amount of data that can be sent using the GET method, and these limits are dependent on the toolkit used.\" The simple-vs-advanced framing appears only in the URL-payload section. (3) The \"multiple actions in one call\" part of the claim rests on the next sentence, not the quoted one: \"The XML payloads can be compared to a scripting language that allows users to make multiple actions within one single API request, like adding a parameter to an object and updating another parameter.\" Also on the page: \"Qualys Cloud Agent API does not support JSON requests and responses at this time.\" Page footer: Last updated January, 2026."
+   }
+  },
+  {
+   "topic": "urlLength",
+   "question": "HTTP URL length limits: what the standard says (RFC 9110 section 4.1 on URI length, and the recommendation that servers should support at least 8000 octets in a request line), plus real default limits in common servers: Apache LimitRequestLine default 8190, Microsoft IIS maxUrl/maxQueryString defaults, nginx large_client_header_buffers.",
+   "claim": "RFC 9110 Section 4.1 sets no hard maximum URI length but recommends that all senders and recipients support URIs of at least 8000 octets in protocol elements, noting the HTTP/1.1 request line will therefore be larger in some cases.",
+   "url": "https://www.rfc-editor.org/rfc/rfc9110.html#name-uri-references",
+   "title": "RFC 9110: HTTP Semantics, Section 4.1 (URI References)",
+   "publisher": "IETF / RFC Editor",
+   "reportedQuote": "It is RECOMMENDED that all senders and recipients support, at a minimum, URIs with lengths of 8000 octets in protocol elements. Note that this implies some structures and on-wire representations (for example, the request line in HTTP/1.1) will necessarily be larger in some cases.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "It is RECOMMENDED that all senders and recipients support, at a minimum, URIs with lengths of 8000 octets in protocol elements. Note that this implies some structures and on-wire representations (for example, the request line in HTTP/1.1) will necessarily be larger in some cases.",
+    "correction": "The quote is verbatim and is genuinely the final paragraph of Section 4.1 (URI References), immediately preceding Section 4.2 (HTTP-Related URI Schemes); the #name-uri-references anchor resolves to that section. Two nuances worth noting. (1) Section 4.1 never affirmatively states that there is \"no hard maximum\" \u2014 it is silent on any maximum and only RECOMMENDs a minimum supported length. The explicit no-limit language lives elsewhere, in Section 2.3 (Length Requirements): \"HTTP does not have specific length limitations for many of its protocol elements because the lengths that might be appropriate will vary widely, depending on the deployment context and purpose of the implementation.\" So \"sets no hard maximum\" is a correct inference about HTTP generally, but it is sourced to Section 2.3, not to Section 4.1. (2) 8000 octets is a recommended floor for supported URI length, not a cap or a target; Section 2.3 additionally imposes a MUST that a recipient parse element lengths at least as long as those it generates itself. The claim's characterization otherwise matches the page, including the request-line remark.",
+    "betterUrl": "https://www.rfc-editor.org/rfc/rfc9110#section-4.1"
+   }
+  },
+  {
+   "topic": "urlLength",
+   "question": "HTTP URL length limits: what the standard says (RFC 9110 section 4.1 on URI length, and the recommendation that servers should support at least 8000 octets in a request line), plus real default limits in common servers: Apache LimitRequestLine default 8190, Microsoft IIS maxUrl/maxQueryString defaults, nginx large_client_header_buffers.",
+   "claim": "Apache HTTP Server 2.4 limits the HTTP request-line to 8190 bytes by default via LimitRequestLine, which in turn caps the length of the request-URI (method + URI + protocol version).",
+   "url": "https://httpd.apache.org/docs/2.4/mod/core.html#limitrequestline",
+   "title": "core - Apache HTTP Server Version 2.4 (LimitRequestLine Directive)",
+   "publisher": "Apache Software Foundation",
+   "reportedQuote": "Default: LimitRequestLine 8190 [...] Since the request-line consists of the HTTP method, URI, and protocol version, the LimitRequestLine directive places a restriction on the length of a request-URI allowed for a request on the server.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "Default: LimitRequestLine 8190 [...] The LimitRequestLine directive allows the server administrator to set the limit on the allowed size of a client's HTTP request-line. Since the request-line consists of the HTTP method, URI, and protocol version, the LimitRequestLine directive places a restriction on the length of a request-URI allowed for a request on the server.",
+    "correction": "No correction needed \u2014 the page states the claim as reported. Two minor points of context the claim omits, neither contradicting it: the directive's Context is \"server config, virtual host\" (not server config only), and the page adds a warning that under name-based virtual hosting the value is taken from the default (first-listed) virtual host matching the IP/port. Note also that 8190 is the documented default value; the page does not discuss the compile-time ceiling.",
+    "betterUrl": "https://httpd.apache.org/docs/2.4/mod/core.html#limitrequestline"
+   }
+  },
+  {
+   "topic": "urlLength",
+   "question": "HTTP URL length limits: what the standard says (RFC 9110 section 4.1 on URI length, and the recommendation that servers should support at least 8000 octets in a request line), plus real default limits in common servers: Apache LimitRequestLine default 8190, Microsoft IIS maxUrl/maxQueryString defaults, nginx large_client_header_buffers.",
+   "claim": "IIS request filtering defaults cap the URL at 4096 bytes (maxUrl) and the query string at 2048 bytes (maxQueryString), returning 404.14 (URL Too Long) or 404.15 (Query String Too Long) when exceeded.",
+   "url": "https://learn.microsoft.com/en-us/iis/configuration/system.webserver/security/requestfiltering/requestlimits/",
+   "title": "Request Limits <requestLimits> | Microsoft Learn",
+   "publisher": "Microsoft",
+   "reportedQuote": "maxQueryString | Optional uint attribute. Specifies the maximum length of the query string, in bytes. The default value is 2048. | maxUrl | Optional uint attribute. Specifies maximum length of the URL, in bytes. The default value is 4096.",
+   "verdict": {
+    "reachable": true,
+    "supports": true,
+    "exactQuote": "`maxQueryString` | Optional uint attribute. Specifies the maximum length of the query string, in bytes. The default value is `2048`. ... `maxUrl` | Optional uint attribute. Specifies maximum length of the URL, in bytes. The default value is `4096`. ... \"When request filtering blocks an HTTP request because an HTTP request exceeds the request limits, IIS 7 will return an HTTP 404 error to the client and log one of the following HTTP statuses with a unique substatus that identifies the reason that the request was denied: `404.14` | URL Too Long ; `404.15` | Query String Too Long ; `413.1` | Content Length Too Large\"",
+    "correction": "No contradiction \u2014 the reported quote is verbatim from the Attributes table (same order as the page: maxQueryString then maxUrl), and the substatus table gives 404.14 URL Too Long and 404.15 Query String Too Long. Two small scoping notes: (1) the page frames the substatus behaviour as \"IIS 7 will return an HTTP 404 error to the client and log one of the following HTTP statuses with a unique substatus\" \u2014 so 404.14/404.15 are logged substatuses of a returned HTTP 404, not distinct status codes; the Compatibility table says the element was not modified in IIS 7.5 through 10.0, so the behaviour carries forward but is written against IIS 7. (2) The same table lists a third row, 413.1 Content Length Too Large (for maxAllowedContentLength, default 30000000), which is not a 404 \u2014 so the claim's \"returning 404.x when exceeded\" holds only for the URL and query-string limits it names, not for request limits generally. Also worth noting these are the schema defaults for optional attributes and can be overridden per site/application in web.config."
+   }
+  }
+ ],
+ "rejected": [
+  {
+   "topic": "sysProperties",
+   "question": "The ServiceNow sys_properties table: the maximum length of the Value field (believed 4000 characters), what field type it is, and official guidance on storing long comma separated lists in a system property. Also any documented guidance on using system properties for configuration lists.",
+   "claim": "ServiceNow's own out-of-box system properties document comma separated lists as the standard way to hold a configuration list in a single property value, which establishes the pattern as vendor sanctioned.",
+   "url": "https://www.servicenow.com/docs/r/yokohama/platform-administration/r_AvailableSystemProperties.html",
+   "title": "Available system properties \u2014 Yokohama ServiceNow AI Platform Administration",
+   "publisher": "ServiceNow",
+   "reportedQuote": "Comma-separated list of file extensions that can be attached.",
+   "verdict": {
+    "reachable": true,
+    "supports": false,
+    "exactQuote": "Comma-separated list of file extensions that can be attached. No value means that there are no restrictions.",
+    "correction": "REACHABLE and the quote is REAL, but the page does not state the claim.\n\nVerification method: raw curl returns only the Fluid Topics JS shell (8 KB, title \"Docs | ServiceNow\"), so I resolved the underlying content through the docs' own content API \u2014 map \"Yokohama ServiceNow AI Platform Administration\" (id VbEA8DxUy61CFZ25mbYrcQ), whose readerUrl is exactly /r/yokohama/platform-administration, topic \"Available system properties\" (id YagvDEsFnfX7Bb7LXpKzxw), 243 KB of real content. The reported title matches the map title exactly.\n\nOn the quote: it is verbatim and correctly transcribed. It occurs exactly once, as the description of the glide.attachment.extensions property (Type: string; Default value: none; Location: System Properties > Security). The reported quote is the first sentence of a two-sentence description; the second sentence is \"No value means that there are no restrictions.\"\n\nWhy it does not support the claim: the page is a flat reference list of individual property descriptions, not a document about property design. \"Comma-separated\" appears 37 times, but every occurrence is descriptive of what one specific property happens to hold (roles that can create attachments, IP ranges, homepage refresh intervals, LDAP attributes, application names, etc.). The page contains zero occurrences of \"standard\", \"best practice\", \"sanctioned\", \"pattern\", or \"convention\". The only two hits for \"recommended\" are unrelated (a pointer to the Instance Security Hardening Settings doc, and the default ESLint rule set for glide.ui.syntax_editor.linter.eslint_config). There is no introductory or general guidance section on how to format property values \u2014 the intro only notes that some properties are reachable from the system properties form while others require direct access to the sys_properties table.\n\nSo the claim's two load-bearing assertions both fail. The page never \"documents comma separated lists as the standard way to hold a configuration list in a single property value\" \u2014 it never generalizes at all. And \"establishes the pattern as vendor sanctioned\" is an inference a reader draws from seeing many examples, not anything the page asserts. A citation of this URL can support only the much narrower statement that numerous out-of-box ServiceNow system properties happen to store comma-separated lists.\n\nOne incidental note for whoever relies on this page: its opening \"Summary of Available system properties\" block is explicitly labeled by ServiceNow as machine-generated (\"This content was generated using new OpenAI-powered functionality. Results are provided on an as is basis and are not guaranteed to be accurate or complete\"), so prose quoted from that block is not authored vendor documentation. The property descriptions themselves, including the cited sentence, are in the authored body below it.\n\nNo better URL: the given link is already the canonical reader URL for this topic, and it is release-pinned to Yokohama, which is more permanent than a floating \"latest\" alias. I did not find, and will not invent, a ServiceNow page that does make the general normative statement the claim needs; if that assertion is required, it needs a different source or should be dropped."
+   }
+  },
+  {
+   "topic": "sysProperties",
+   "question": "The ServiceNow sys_properties table: the maximum length of the Value field (believed 4000 characters), what field type it is, and official guidance on storing long comma separated lists in a system property. Also any documented guidance on using system properties for configuration lists.",
+   "claim": "The character capacity of a string field such as sys_properties.value is governed by the Max length setting on its dictionary entry, which an administrator can change; ServiceNow documents the procedure but publishes no fixed maximum figure.",
+   "url": "https://www.servicenow.com/docs/bundle/zurich-platform-administration/page/administer/reference-pages/task/t_ModifyingStringFieldLength.html",
+   "title": "Modify string field length \u2014 Zurich ServiceNow AI Platform Administration",
+   "publisher": "ServiceNow",
+   "reportedQuote": "You can modify the maximum character limit for a string field.",
+   "verdict": {
+    "reachable": true,
+    "supports": false,
+    "exactQuote": "You can modify the maximum character limit for a string field.",
+    "correction": "The URL resolves (HTTP 200, redirecting to the canonical short form) and the reported quote is genuine and verbatim \u2014 but the page is much narrower than the claim.\n\nWhat the page actually says, in full: title \"Modify string field length\"; intro \"You can modify the maximum character limit for a string field.\"; \"Role required: personalize_dictionary\"; about this task \"The URL type field hides the Max Length field on the Dictionary form by default. Browsers support URL length up to 2,083 characters. The URL field is a String field.\"; four steps (navigate to a form containing the field, right-click the field label and select Configure Dictionary, \"Change the Max length field to the desired length.\", \"Click Update.\"); notes \"You can change between string-based data types as long as length changes do not cause any data loss from truncation. For example, you can change from a MEDIUM database type to a VARCHAR(100) database type if none of the existing data is greater than 100.\" and \"The system cancels any length change that results in data loss due to truncation.\"\n\nThree mismatches:\n\n1. \"Publishes no fixed maximum figure\" is not something the page states \u2014 it is an argument from silence. The page simply never discusses an upper bound, which is not the same as ServiceNow documenting that none exists. One page's silence cannot support a claim about what ServiceNow does or does not publish anywhere. The page does in fact print a character figure (2,083, for browser URL support) and names concrete database types (MEDIUM, VARCHAR(100)), so even the \"no figure\" framing is loose.\n\n2. \"Governed by\" overstates the page. The page says Max length is where the maximum character limit is configured; it does not say the setting governs actual storage capacity, and it explicitly subordinates the change to the underlying database type \u2014 a length change that would truncate existing data is cancelled outright. ServiceNow's own support material goes further the other way (KB0685779, \"Why ServiceNow fields accept string inputs that exceed the max_length value\"): max_length is not enforced in client or server, and any string column above varchar(255) is created as mediumtext, so real capacity is not governed by the dictionary figure at all. Citing this page for \"governs capacity\" is therefore not just unsupported but arguably contradicted elsewhere in ServiceNow's documentation.\n\n3. \"Which an administrator can change\" is narrower on the page: the stated role is personalize_dictionary, not admin.\n\nThe page does support the mechanical core \u2014 a string field's maximum character limit is set via the Max length field on its dictionary entry, and there is a documented procedure to change it. It does not mention sys_properties or sys_properties.value anywhere, so that example is the citer's extrapolation, not the page's.",
+    "betterUrl": "https://www.servicenow.com/docs/r/zurich/platform-administration/t_ModifyingStringFieldLength.html"
+   }
+  },
+  {
+   "topic": "qualysPostureInfo",
+   "question": "Qualys Policy Compliance API endpoint /api/2.0/fo/compliance/posture/info/ (Posture Information API): the full parameter list, in particular policy_id, policy_ids, details, truncation_limit. What is the DEFAULT value of truncation_limit for this endpoint (believed 1000) and what is the maximum allowed value? How does pagination work (WARNING element with code 1980 and a URL for the next page)?",
+   "claim": "WARNING code 1980 is the generic Qualys FO API pagination signal, but it is documented on the Host List API page (whose truncation_limit default IS 1,000) rather than on the posture/info endpoint \u2014 this Host List default is the likely source of the mistaken 1,000 figure.",
+   "url": "https://docs.qualys.com/en/vm/qweb-all-api/mergedProjects/qapi-assets/host_lists/host_list.htm",
+   "title": "Host List \u2014 Qualys Asset API online documentation",
+   "publisher": "Qualys",
+   "reportedQuote": "<CODE>1980</CODE><TEXT>100 record limit exceeded. Use URL to get next batch of results.</TEXT>",
+   "verdict": {
+    "reachable": true,
+    "supports": false,
+    "exactQuote": "Sample - Record Limit Exceeded Warning: \"A truncated response is returned when the API request returns more host records than the truncation limit. In this case 1,000 host records are included in the XML output and the Warning message (shown below) indicates the URL you need to use to request the next 1,000 host records. ... <WARNING> <CODE>1980</CODE> <TEXT>100 record limit exceeded. Use URL to get next batch of results.</TEXT> <URL><![CDATA[https://qualysapi.p01.eng.sjc01.qualys.com/api/2.0/fo/asset/host/?action=list&details=None&truncation_limit=100&id_min=145359]]></URL> </WARNING>\". Parameter table: \"truncation_limit={value} Optional Integer  Specify the maximum number of host records processed per request. When not specified, the truncation limit is set to 1000 host records. You may specify a value less than the default (1-999) or greater than the default (1001-1000000). If the requested list identifies more host records than the truncation limit, then the XML output includes the <WARNING> element and the URL for making another request for the next batch of host records.\"",
+    "correction": "The page is real (HTTP 200, 300 KB of Host List documentation) and the reported quote is verbatim \u2014 <CODE>1980</CODE> with <TEXT>100 record limit exceeded. Use URL to get next batch of results.</TEXT> appears four times (once per API version block, 2.0/3.0/4.0/5.0), and the page does state the Host List truncation_limit default is 1,000 (\"When not specified, the truncation limit is set to 1000 host records\"; also \"By default, a maximum of 1,000 host records are returned per request\"). But the claim as worded asserts three things the page does not say:\n\n1. \"Generic Qualys FO API pagination signal\" \u2014 not stated. The page documents 1980 only for /api/N.0/fo/asset/host/?action=list. Nothing on it generalizes the code to other FO endpoints. (That generalization is true, but it must be sourced elsewhere: the VM/PC API user guide PDF contains <CODE>1980</CODE> 13 times across different endpoints, e.g. the Authentication Record list sample: \"<CODE>1980</CODE><TEXT>1000 record limit exceeded. Use URL to get next batch of records.</TEXT>\" with URL /api/2.0/fo/auth/?action=list.)\n\n2. \"Rather than on the posture/info endpoint\" \u2014 the Host List page says nothing about compliance posture. Checked separately: https://docs.qualys.com/en/vm/qweb-all-api/mergedProjects/qapi-pc/posture/list_posture_info.htm contains no occurrence of \"1980\" at all, and its default is NOT 1,000 \u2014 it says \"By default, a limit of 5,000 posture info records are returned per request (when 'policy_id' is specified)\", and truncation_limit is only valid for a single-policy request (invalid when policy_ids is used). So the negative half is corroborated by that other page, not by the cited one.\n\n3. \"This Host List default is the likely source of the mistaken 1,000 figure\" \u2014 pure inference by the citing author; the page makes no such causal statement and cannot.\n\nOne further wrinkle the claim glosses over: the number inside the <TEXT> element is the request's own truncation_limit, not a constant. The sample says \"100 record limit exceeded\" because the sample URL carries truncation_limit=100 \u2014 while the surrounding prose on the same page says 1,000 records are returned and the URL gets \"the next 1,000 host records\", so the page's own sample and prose disagree. Anyone quoting this as evidence of a fixed 100- or 1,000-record pagination signal is over-reading it.\n\nNet: the cited page supports \"code 1980 signals truncation/pagination on Host List\" and \"Host List truncation_limit defaults to 1,000\". It does not support \"generic FO API signal\", the posture/info comparison, or the source-of-the-error speculation.",
+    "betterUrl": "https://www.qualys.com/docs/qualys-api-vmpc-user-guide.pdf \u2014 the permanent Qualys API (VM, PC) User Guide PDF, which carries the same Host List sample and also shows code 1980 on other FO endpoints (supporting the \"generic\" half of the claim, which the cited HTML page does not). For the posture-endpoint half: https://docs.qualys.com/en/vm/qweb-all-api/mergedProjects/qapi-pc/posture/list_posture_info.htm (no 1980, default 5,000)."
+   }
+  }
+ ],
+ "topicsWithoutCitation": []
+}

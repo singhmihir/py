@@ -1,0 +1,41 @@
+flowchart TD
+    classDef tbl fill:#EEF1F5,stroke:#9AA0A6,color:#111
+    classDef chk fill:#FFF6DC,stroke:#C9A227,color:#111
+    classDef stop fill:#FBE9E7,stroke:#C0392B,color:#111
+    classDef win fill:#E6F4EA,stroke:#2E7D32,color:#111
+    classDef list fill:#F3F0FA,stroke:#7E57C2,color:#111
+
+    A["Qualys host record<br/>IP, DNS, OS"] --> B{"IP present,<br/>not 127.x, not 169.254.x?"}
+    B -- no --> S0(["null: next rule"]):::stop
+    B -- yes --> C["Notes taken:<br/>ip = IP trimmed<br/>dns = DNS lower case, or empty<br/>label = dns before the first dot<br/>os = OS lower case<br/>ignore = sn_sec_cmn.ignoreCIClass"]
+
+    C --> L1["osMarkers = f5, big-ip, big ip, netscaler<br/>labelMarkers = vip, vs"]:::list
+    L1 --> D1{"os contains<br/>one of osMarkers?"}:::chk
+    D1 -- yes --> EV["evidence = true"]
+    D1 -- no --> D2
+    EV --> D2["segments = label split at hyphens"]
+    D2 --> D3{"any segment is a marker?<br/>isMarker: the word itself (vip),<br/>the word + digits only (vs1),<br/>or, for words of 3+ letters,<br/>a segment ending in the word (multihostvip)"}:::chk
+    D3 -- yes --> EV2["evidence = true"]
+    D3 -- no --> D4
+    EV2 --> D4{"evidence?"}:::chk
+    D4 -- "false" --> S1(["null: not a virtual IP,<br/>an ordinary server stays with the address rules"]):::stop
+
+    D4 -- "true" --> T[("cmdb_ci_lb_service<br/>Load Balancer Service, the virtual server<br/>(ignored classes left out)")]:::tbl
+    T --> Q1["clue 1: fqdn = dns"]
+    Q1 --> R1{"one(): rows?"}:::chk
+    R1 -- "value empty or no row" --> Q2["clue 2: name = dns"]
+    R1 -- "two or more" --> S2(["null: two services, never guess"]):::stop
+    R1 -- "exactly one" --> W1(["return the service"]):::win
+    Q2 --> R2{"one(): rows?"}:::chk
+    R2 -- "value empty or no row" --> Q3["clue 3: name = label"]
+    R2 -- "two or more" --> S2
+    R2 -- "exactly one" --> W1
+    Q3 --> R3{"one(): rows?"}:::chk
+    R3 -- "value empty or no row" --> Q4["clue 4: ip_address = ip"]
+    R3 -- "two or more" --> S2
+    R3 -- "exactly one" --> W1
+    Q4 --> R4{"one(): rows?"}:::chk
+    R4 -- "no row" --> S3(["null: no service carries<br/>the name or the address"]):::stop
+    R4 -- "two or more" --> S2
+    R4 -- "exactly one" --> W1
+    T -. "table not installed" .-> S4(["null: service class absent"]):::stop

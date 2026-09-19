@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-03 11:35:01">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Global">global</application>
+<application_name>Global</application_name>
+<application_scope>global</application_scope>
+<application_version/>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>V2: reopen fixes, de-scripted flow approvals, Request Closure visibility (Resolved only), workspace support.</description>
+<inserted/>
+<name>Trident Closure Governance V2 - Global</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>9e0b137793ce0b90e3aef0aefaba1073</remote_sys_id>
+<state>in_hierarchy</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:00</sys_created_on>
+<sys_id>f15b446a9383c310e3aef0aefaba103c</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:00</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_5e3dace0938a0b10e3aef0aefaba10a8</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>Number of calendar days after closure during which a Trident finding or remediation task can be reopened.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>trident.reopen.window_days</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-07-09 15:52:25</sys_created_on><sys_id>5e3dace0938a0b10e3aef0aefaba10a8</sys_id><sys_mod_count>4</sys_mod_count><sys_name>trident.reopen.window_days</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_5e3dace0938a0b10e3aef0aefaba10a8</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-07-10 13:13:06</sys_updated_on><type>string</type><value>30</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=5e3dace0938a0b10e3aef0aefaba10a8"/></record_update>]]></payload>
+<payload_hash>-1666618293</payload_hash>
+<remote_update_set display_value="Trident Closure Governance V2 - Global">f15b446a9383c310e3aef0aefaba103c</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:00</sys_created_on>
+<sys_id>395b446a9383c310e3aef0aefaba103c</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>19f809f3e1c0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:00</sys_updated_on>
+<table/>
+<target_name>trident.reopen.window_days</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>5def2dc01e568b90e869a768104997ac</update_guid>
+<update_guid_history>5def2dc01e568b90e869a768104997ac:-1666618293,3e5259f4b446cb104e513c375d922589:-1666618293,de52d5f40b46cb10bb8b875566892afc:-934472793,2c23176c05828b10e240be1de8015240:-1666618293,e213936c05828b108ad28c71ce701a07:-934472793,be3dece0d38a0b104bee2b043fbcce37:-1666618293</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_993d2ce0938a0b10e3aef0aefaba10d1</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>Source value that identifies Trident sourced test results. Update per environment if the integration writes a different source.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>trident.finding.source</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-07-09 15:52:21</sys_created_on><sys_id>993d2ce0938a0b10e3aef0aefaba10d1</sys_id><sys_mod_count>0</sys_mod_count><sys_name>trident.finding.source</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_993d2ce0938a0b10e3aef0aefaba10d1</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-07-09 15:52:21</sys_updated_on><type>string</type><value>Trident</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=993d2ce0938a0b10e3aef0aefaba10d1"/></record_update>]]></payload>
+<payload_hash>1836778168</payload_hash>
+<remote_update_set display_value="Trident Closure Governance V2 - Global">f15b446a9383c310e3aef0aefaba103c</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:00</sys_created_on>
+<sys_id>7d5b446a9383c310e3aef0aefaba103c</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>19f809f3e320000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:00</sys_updated_on>
+<table/>
+<target_name>trident.finding.source</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>15ef2dc07a568b90991b2c65febc95af</update_guid>
+<update_guid_history>15ef2dc07a568b90991b2c65febc95af:1836778168,793d6ce0758a0b10889b29bd81846fd1:1836778168</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_d32da8e0938a0b10e3aef0aefaba106e</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>Sys id of the group that reviews and approves closure of Trident remediation tasks. Update per environment.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>trident.closure.governance_group</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-07-09 15:52:12</sys_created_on><sys_id>d32da8e0938a0b10e3aef0aefaba106e</sys_id><sys_mod_count>0</sys_mod_count><sys_name>trident.closure.governance_group</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_d32da8e0938a0b10e3aef0aefaba106e</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-07-09 15:52:12</sys_updated_on><type>string</type><value>822d6ca0938a0b10e3aef0aefaba107e</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=d32da8e0938a0b10e3aef0aefaba106e"/></record_update>]]></payload>
+<payload_hash>2042878761</payload_hash>
+<remote_update_set display_value="Trident Closure Governance V2 - Global">f15b446a9383c310e3aef0aefaba103c</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-03 11:35:00</sys_created_on>
+<sys_id>b15b446a9383c310e3aef0aefaba103d</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>19f809f3e510000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-03 11:35:00</sys_updated_on>
+<table/>
+<target_name>trident.closure.governance_group</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>d9ef2dc06a568b90bed0a27020350cb1</update_guid>
+<update_guid_history>d9ef2dc06a568b90bed0a27020350cb1:2042878761,893d2ce04e8a0b10d3c3a4ebd44fac24:2042878761</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>

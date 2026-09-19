@@ -1,0 +1,33 @@
+SN to VAMP field check on dev390397 - 13 sheet rows
+sn_vul_app_vul_entry.number (Record Number, String): NOT FOUND - no field named number, none labelled "Record Number"
+sn_vul_app_vulnerability.number (Record Number, String): number by same name, type string
+sn_vul_app_vulnerability.primary_ait (Primary AIT, Reference): NOT FOUND - no field named primary_ait, none labelled "Primary AIT"
+sn_vul_app_vulnerable_item.number (Record Number, String): number by same name, type string
+sn_vul_app_vulnerable_item.sys_created_on (Created, Date/Time): sys_created_on by same name, type glide_date_time
+sn_vul_app_vulnerable_item.sys_updated_on (Updated, Date/Time): sys_updated_on by same name, type glide_date_time
+sn_vul_app_vulnerable_item.state (State, Integer): state by same name, type integer
+sn_vul_app_vulnerable_item.configuration_item (Configuration Item, Reference): cmdb_ci by label "Configuration item", type reference -> cmdb_ci
+sn_vul_app_vulnerable_item.u_verification_status (Verification Status, String): NOT FOUND - no field named u_verification_status, none labelled "Verification Status"
+sn_vul_app_vulnerable_item.source_avit_id (Source AVIT ID, String): source_avit_id by same name, type string
+sn_vul_pen_test_assessment_request.number (Record Number, String): number by same name, type string
+sn_vul_pen_test_assessment_request.sys_created_on (Created, Date/Time): sys_created_on by same name, type glide_date_time
+sn_vul_pen_test_assessment_request.u_assessment_id (Assessment ID, String): NOT FOUND - no field named u_assessment_id, none labelled "Assessment ID"; similar labels: risk_assessment_id ("Risk assessment ID")
+Property value to use for usem.vamp.fields.sn_vul_app_vulnerable_item (a row not found keeps the sheet name until the field is known):
+number=number,
+sys_created_on=sys_created_on,
+sys_updated_on=sys_updated_on,
+state=state,
+cmdb_ci=configuration_item,
+u_verification_status=u_verification_status,
+source_avit_id=source_avit_id,
+sn_vul_app_vul_entry.number=number,
+sn_vul_app_vulnerability.number=number,
+sn_vul_app_vulnerability.primary_ait=primary_ait,
+sn_vul_pen_test_assessment_request.number=number,
+sn_vul_pen_test_assessment_request.sys_created_on=sys_created_on,
+sn_vul_pen_test_assessment_request.u_assessment_id=u_assessment_id,
+To raise (4):
+- sn_vul_app_vul_entry.number (Record Number) has no field on this instance
+- sn_vul_app_vulnerability.primary_ait (Primary AIT) has no field on this instance
+- sn_vul_app_vulnerable_item.u_verification_status (Verification Status) has no field on this instance
+- sn_vul_pen_test_assessment_request.u_assessment_id (Assessment ID) has no field on this instance

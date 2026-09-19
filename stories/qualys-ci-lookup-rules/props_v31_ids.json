@@ -1,0 +1,32 @@
+{
+ "usem.ci_lookup.vip_markers": {
+  "sys_id": "f28e0d3393430310e3aef0aefaba1064",
+  "value": "vip,vs",
+  "description": "USEM CI lookup rule 460 (Load Balancer Service Match). Comma separated label segments (the word itself, the word followed by digits, or a segment ending in the word) that mark a virtual IP; such a host is matched to its Load Balancer Service CI."
+ },
+ "usem.ci_lookup.mgmt_os_markers": {
+  "sys_id": "158ec53393430310e3aef0aefaba10f8",
+  "value": "ilo,ilom,idrac,drac,remote access controller,imm,cimc,bmc,ipmi,lights out",
+  "description": "USEM CI lookup rule 420 (Management Interface Match). Comma separated words that identify a management controller in the operating system text reported by the scanner; when one is present the last hyphen segment of the label is stripped whatever it is."
+ },
+ "usem.ci_lookup.interface_markers": {
+  "sys_id": "4a8e893393430310e3aef0aefaba1064",
+  "value": "vlan,v,hsrp,vrrp,po,eth,gi,te,lo,mgmt,aom,vs,fab",
+  "description": "USEM CI lookup rule 430 (Network Interface Name Match). Comma separated label segments (the word itself or the word followed by digits) that mark an interface or VLAN address of a network device."
+ },
+ "usem.ci_lookup.interface_domains": {
+  "sys_id": "f98e493393430310e3aef0aefaba105d",
+  "value": ".network.",
+  "description": "USEM CI lookup rule 430 (Network Interface Name Match). Comma separated DNS domain fragments under which network devices are scanned per interface; a label under such a domain is walked prefix by prefix against Network Gear."
+ },
+ "usem.ci_lookup.mgmt_suffixes": {
+  "sys_id": "ab7e453393430310e3aef0aefaba10f9",
+  "value": "ilo,ilom,idrac,drac,ipmi,bmc,oob,mgmt,imm,cimc,rmm,con",
+  "description": "USEM CI lookup rule 420 (Management Interface Match). Comma separated DNS label suffixes that mark the management controller of a server; the rule strips the suffix and matches the server by the remaining name."
+ },
+ "usem.ci_lookup.vip_os_markers": {
+  "sys_id": "ea8ec93393430310e3aef0aefaba1084",
+  "value": "f5,big-ip,big ip,netscaler",
+  "description": "USEM CI lookup rule 460 (Load Balancer Service Match). Comma separated words that identify a load balancer product in the operating system text reported by the scanner; such a host is matched to its Load Balancer Service CI."
+ }
+}
