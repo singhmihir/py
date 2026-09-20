@@ -53,10 +53,24 @@ EXTRA = {
 ORDERS = ['175', '180', '200', '250', '260', '300', '310', '350', '400', '410', '415', '420', '430', '450', '455', '460', '700', '705', '730', '740', '850']
 
 
+MECHANICS_FILE = os.path.join(HERE, 'mechanics.json')   # verified scripting-level content per rule, written from the readers' output
+MECH = {}
+if os.path.exists(MECHANICS_FILE):
+    for family in json.load(open(MECHANICS_FILE)).values():
+        for r in family.get('rules', []):
+            MECH[r['order']] = r
+
+
 def rule_entry(order):
     r = BY_ORDER.get(order) or EXTRA[order]
-    return dict(order=order, name=r['name'], group=GROUP[r['group']], purpose=r['purpose'], reads=r['reads'], returns=r['returns'],
-                before=r['before'], after=r['after'], stages=[row[0] for row in r['rows']])
+    m = MECH.get(order)
+    entry = dict(order=order, name=r['name'], group=GROUP[r['group']], purpose=r['purpose'], reads=r['reads'], returns=r['returns'],
+                 before=r['before'], after=r['after'], mechanics=[row[0] for row in r['rows']], declines=[])
+    if m:
+        entry.update(purpose=m['purpose'], reads=m['reads'], returns=m['returns'], before=m['before'], after=m['after'],
+                     mechanics=[dict(title=s['title'], detail=s['detail']) for s in m['mechanics']], declines=m['declines'], literals=m['literals'],
+                     sibling_difference=m.get('sibling_difference', ''))
+    return entry
 
 
 RULES = [rule_entry(o) for o in ORDERS]
@@ -240,4 +254,4 @@ CHAIN = [[r['order'], r['name'].replace('USEM ', ''), r['reads'], r['returns']] 
 data = dict(title='Qualys CI Lookup Rules', subtitle='How a scanned host finds its CI', concepts=CONCEPTS, chain=CHAIN, rules=RULES, example_source=source)
 json.dump(data, open(os.path.join(HERE, 'demo_data.json'), 'w'), indent=1)
 have = sum(1 for r in RULES if r['examples'])
-print('rules: %d | rules with examples: %d (%s) | example slides: %d' % (len(RULES), have, source, sum(len(r['examples']) for r in RULES)))
+print('rules: %d | with verified mechanics: %d | rules with examples: %d (%s) | example slides: %d' % (len(RULES), sum(1 for r in RULES if r.get('literals') is not None), have, source, sum(len(r['examples']) for r in RULES)))

@@ -164,11 +164,12 @@
    "returns": "the one CI of that class carrying the serial, else null",
    "before": "nothing custom runs before this rule.",
    "after": "the hardware-wide serial rule, for hosts whose OS gives no class.",
-   "stages": [
+   "mechanics": [
     "Refuse placeholder serials",
     "Class from the scanned OS",
     "Serial search, exactly one CI"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -181,10 +182,11 @@
    "returns": "the one hardware CI carrying the serial, else null",
    "before": "the class-scoped serial rule already tried the serial inside the OS class.",
    "after": "the phone rule and then the name rules.",
-   "stages": [
+   "mechanics": [
     "Same guard on the value",
     "Search the whole hardware tree"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -197,11 +199,12 @@
    "returns": "the one IP Phone CI carrying that MAC, else null",
    "before": "the serial rules; phones report no serial.",
    "after": "the FQDN and hostname rules, which never see a phone label.",
-   "stages": [
+   "mechanics": [
     "Strict label, four MAC spellings",
     "Adapter first, then the phone record",
     "Last resort: the device name"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -214,11 +217,12 @@
    "returns": "the one CI of that class whose fqdn equals the scanned name",
    "before": "the serial rules and the phone rule found nothing.",
    "after": "the hardware-wide FQDN rule, then hostname plus domain.",
-   "stages": [
+   "mechanics": [
     "Class from the scanned OS",
     "Exact fqdn match",
     "One hit, or the IP breaks the tie"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -231,10 +235,11 @@
    "returns": "the one hardware CI whose fqdn equals the scanned name",
    "before": "the class-scoped FQDN rule tried the same value inside the OS class.",
    "after": "the hostname plus domain rules, for CIs with no fqdn value at all.",
-   "stages": [
+   "mechanics": [
     "Same helper, wider scope",
     "Collect and decide"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -247,11 +252,12 @@
    "returns": "the one CI of that class whose domain evidence agrees",
    "before": "the FQDN rules looked in the fqdn field and found nothing.",
    "after": "the hardware-wide variant, the layered DNS rule, then the plain hostname rules.",
-   "stages": [
+   "mechanics": [
     "Class from the scanned OS",
     "Name matched, domain confirmed",
     "One confirmed CI, IP as tie-break"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -264,10 +270,11 @@
    "returns": "the one hardware CI whose domain evidence agrees",
    "before": "the class-scoped variant tried the same evidence inside the OS class.",
    "after": "the layered DNS rule and then the plain hostname rules.",
-   "stages": [
+   "mechanics": [
     "Same helper, wider scope",
     "Domain evidence still required"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -280,11 +287,12 @@
    "returns": "the CI at the end of DNS Name to IP Address to adapter to CI",
    "before": "the FQDN and hostname-plus-domain rules read fields on the CI record.",
    "after": "the plain hostname rules and the full-FQDN name rule.",
-   "stages": [
+   "mechanics": [
     "Follow the chain in one query",
     "Count owners, note the IP path",
     "One CI, or the IP decides"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -297,11 +305,12 @@
    "returns": "the one CI of that class named with the short hostname",
    "before": "every rule so far needed domain evidence on the CI.",
    "after": "the hardware-wide short name rule with a class sanity check.",
-   "stages": [
+   "mechanics": [
     "Short label only",
     "Class from the scanned OS",
     "Name search, exactly one CI"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -314,11 +323,12 @@
    "returns": "the one hardware CI named with the hostname, class permitting",
    "before": "the class-scoped rule required the name to be unique inside the OS class.",
    "after": "the full-FQDN name rule, then the address rules.",
-   "stages": [
+   "mechanics": [
     "Class becomes a preference",
     "One CI carries the name",
     "Veto a contradicting class"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -331,11 +341,12 @@
    "returns": "the one IP Phone or Imaging Hardware CI named with the host name; the scanned address breaks a tie",
    "before": "USEM Hostname Hardware Match, which searches the Hardware tree only.",
    "after": "USEM Management Interface Match.",
-   "stages": [
+   "mechanics": [
     "Refuse when the OS names a server or desktop",
     "Host name searched in IP Phone and Imaging Hardware",
     "One device, else the scanned address breaks the tie"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -348,11 +359,12 @@
    "returns": "the one hardware CI named like the label without its suffix",
    "before": "the hostname rules tried the whole label and found nothing.",
    "after": "the network interface rule and the full-FQDN name rule.",
-   "stages": [
+   "mechanics": [
     "Two ways to recognise a controller",
     "The server, uniquely named",
     "Never a load balancer"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -365,11 +377,12 @@
    "returns": "the one Network Gear or Load Balancer device named by a prefix",
    "before": "the hostname rules tried the whole label; the controller rule found no suffix.",
    "after": "the full-FQDN name rule and the load balancer service rule.",
-   "stages": [
+   "mechanics": [
     "Interface evidence first",
     "Longest prefix first",
     "First prefix that hits decides"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -382,10 +395,11 @@
    "returns": "the one hardware CI whose name is exactly the scanned FQDN",
    "before": "every rule so far compared the short hostname or the fqdn field.",
    "after": "the address rules, and finally the broad name rule.",
-   "stages": [
+   "mechanics": [
     "Compare the whole string",
     "Hardware tree, exactly one CI"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -398,12 +412,13 @@
    "returns": "the one real server behind the virtual server; null with several machines, a member the CMDB cannot place, or no pool data",
    "before": "the hardware rules, which decline a virtual address.",
    "after": "USEM Load Balancer Service Match, which attaches the virtual server record when the CMDB does not show several servers behind it.",
-   "stages": [
+   "mechanics": [
     "VIP sign: load balancer OS or a VIP marker in the name",
     "Virtual server found on fqdn, then name, then address",
     "Service to Pool to Pool Member to server",
     "One machine behind the whole pool, else decline"
    ],
+   "declines": [],
    "examples": [
     {
      "number": "SDI000002418623",
@@ -516,11 +531,12 @@
    "returns": "the one Load Balancer Service CI for that VIP",
    "before": "the hardware rules declined: no serial, no server name, address on a balancer.",
    "after": "the ordinary address rules, for hosts that are not VIPs.",
-   "stages": [
+   "mechanics": [
     "VIP evidence first",
     "Strongest evidence first",
     "Ambiguity stops the rule"
    ],
+   "declines": [],
    "examples": [
     {
      "number": "SDI000003028240",
@@ -660,11 +676,12 @@
    "returns": "the one CI of that class whose ip_address equals the scanned address",
    "before": "every serial and name rule; a host with no DNS name makes them all decline.",
    "after": "the hardware-wide address rule, then the adapter and layered rules.",
-   "stages": [
+   "mechanics": [
     "Addresses that identify nothing",
     "Class from the scanned OS",
     "Address search, exactly one CI"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -677,11 +694,12 @@
    "returns": "the one hardware CI on that address, balancer and class permitting",
    "before": "the class-scoped address rule required a CI of the OS class.",
    "after": "the adapter rule and the layered address rule.",
-   "stages": [
+   "mechanics": [
     "One CI on the address",
     "Reject a load balancer",
     "Veto a contradicting class"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -694,10 +712,11 @@
    "returns": "the CI that owns the adapter carrying the scanned address",
    "before": "the address rules so far read the ip_address field of the CI record.",
    "after": "the layered address rule and then the broad name rule.",
-   "stages": [
+   "mechanics": [
     "Adapters, not CIs",
     "Count owners, not rows"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -710,10 +729,11 @@
    "returns": "the CI at the end of IP Address to adapter to CI",
    "before": "the adapter rule looked for the address on the adapter records.",
    "after": "the broad name rule, and after that the out-of-box Qualys rules.",
-   "stages": [
+   "mechanics": [
     "Two links away",
     "One owner, and not a balancer"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   },
@@ -726,10 +746,11 @@
    "returns": "the one CI in any class named exactly with the scanned FQDN",
    "before": "every hardware-scoped rule has declined for this host.",
    "after": "the out-of-box Qualys rules: host id, cloud resource id, FQDN, NetBIOS, DNS.",
-   "stages": [
+   "mechanics": [
     "Why it runs last",
     "Root CI table, exactly one CI"
    ],
+   "declines": [],
    "examples": [],
    "matched": null
   }
