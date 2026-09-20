@@ -13,7 +13,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 STORY = os.path.dirname(HERE)
 BASE_URL = 'https://bofasecopsdev.service-now.com'
 LB_EXPORTS = '/tmp/claude-0/-home-user-py/92674a7d-a733-5fc3-a7aa-42bdf76f593b/scratchpad/inc3/data.pkl'
-OUTPUT = os.path.join(HERE, 'demo_examples_output.txt')
+OUTPUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, 'demo_examples_output.txt')
 CONTROLLER_SUFFIXES = ['ilo', 'ilom', 'idrac', 'drac', 'ipmi', 'bmc', 'oob', 'mgmt', 'imm', 'cimc', 'rmm', 'con']
 
 CONCEPTS = [
@@ -194,8 +194,9 @@ def walk(order, item, ci, extra):
 
 def ci_facts(ci):
     facts = []
-    for key, label in [('fqdn', 'FQDN'), ('dns_domain', 'DNS domain'), ('ip_address', 'IP address'), ('serial_number', 'Serial number'), ('mac_address', 'MAC address'),
-                       ('load_balancer', 'Load balancer'), ('model', 'Model'), ('install_status', 'Install status'), ('operational_status', 'Operational status')]:
+    for key, label in [('fqdn', 'FQDN'), ('dns_domain', 'DNS domain'), ('ip_address', 'IP address'), ('ip', 'IP address'), ('serial_number', 'Serial number'), ('serial', 'Serial number'),
+                       ('mac_address', 'MAC address'), ('mac', 'MAC address'), ('load_balancer', 'Load balancer'), ('model', 'Model'), ('install_status', 'Install status'), ('status', 'Install status'),
+                       ('operational_status', 'Operational status'), ('operational', 'Operational status')]:
         v = ci.get(key, '')
         if v and v not in ('Unknown', 'null'):
             facts.append([label, v])
@@ -211,15 +212,23 @@ def item_facts(item):
 
 
 def example(order, item, ci, extra):
+    steps = extra.get('steps')
+    if steps:
+        walk_lines = [dict(title=s['title'], detail=s['detail']) for s in steps]
+        verdict = extra.get('verdict') or {}
+        if verdict and not verdict.get('same_as_today', True):
+            walk_lines.append(dict(title='Replay today', detail='the rule now returns ' + (verdict.get('ci_label') or 'nothing') + '; the item still holds the CI matched earlier'))
+    else:
+        walk_lines = walk(order, item, ci, extra)
     return dict(number=item['number'], host=item.get('dns') or item.get('ip', ''),
                 item_link='%s/sn_sec_cmn_src_ci_list.do?sysparm_query=number=%s' % (BASE_URL, item['number']),
-                item_facts=item_facts(item), walk=walk(order, item, ci, extra),
+                item_facts=item_facts(item), walk=walk_lines, path=extra.get('shape', ''),
                 ci_name=ci.get('name', ''), ci_class=ci.get('cls_label') or ci.get('cls', ''),
                 ci_link='%s/%s.do?sys_id=%s' % (BASE_URL, ci.get('cls') or 'cmdb_ci', ci.get('sys_id', '')), ci_facts=ci_facts(ci))
 
 
 def from_script_output(path):
-    """EX lines of the demo examples script, grouped by rule order; plus the matched counts."""
+    """EX lines of the demo evidence script (or the earlier examples script), grouped by rule order; plus the matched counts."""
     examples, counts = {}, {}
     for line in open(path, encoding='utf-8', errors='ignore'):
         line = line.rstrip('\n')
@@ -229,6 +238,8 @@ def from_script_output(path):
         s = line.strip()
         if s.startswith('EX '):
             ex = json.loads(s[3:])
+            if 'ci' in ex and 'cls_label' not in ex['ci']:
+                ex['ci']['cls_label'] = ex['ci'].get('cls', '')
             examples.setdefault(ex['rule'], []).append(example(ex['rule'], ex['item'], ex['ci'], ex))
     return examples, counts
 
@@ -281,6 +292,6 @@ for r in RULES:
 
 CHAIN = [[r['order'], r['name'].replace('USEM ', ''), r['reads'], r['returns']] for r in RULES]
 data = dict(title='Qualys CI Lookup Rules', subtitle='How a scanned host finds its CI', concepts=CONCEPTS, chain=CHAIN, rules=RULES, example_source=source)
-json.dump(data, open(os.path.join(HERE, 'demo_data.json'), 'w'), indent=1)
+json.dump(data, open(sys.argv[2] if len(sys.argv) > 2 else os.path.join(HERE, 'demo_data.json'), 'w'), indent=1)
 have = sum(1 for r in RULES if r['examples'])
 print('rules: %d | with verified mechanics: %d | rules with examples: %d (%s) | example slides: %d' % (len(RULES), sum(1 for r in RULES if r.get('literals') is not None), have, source, sum(len(r['examples']) for r in RULES)))
