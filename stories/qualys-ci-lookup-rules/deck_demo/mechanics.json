@@ -1,0 +1,2362 @@
+{
+ "serial": {
+  "rules": [
+   {
+    "order": "175",
+    "name": "USEM Serial Number Class Match",
+    "purpose": "Trusts the Qualys SERIAL_NUMBER, the one identifier that stays with a machine while names and addresses get reused, but only inside the CMDB class the scanned OS text points at, so a Red Hat host can land only on a Linux Server and a Windows Server carrying the same serial is never seen. It opens the chain because a unique serial inside the right class is the strongest evidence the feed offers.",
+    "reads": "SERIAL_NUMBER (sourceValue) plus sourcePayload.OS; the IP and DNS fields are not read.",
+    "returns": "The sys_id of the single CI in the OS-implied class (sub-classes included, ignored classes excluded) whose serial_number equals the trimmed serial; null in every other case.",
+    "mechanics": [
+     {
+      "title": "Empty serial guard",
+      "detail": "If sourceValue is empty (null, undefined or an empty string) the script returns null at once; nothing else in the payload is read."
+     },
+     {
+      "title": "Trim the serial",
+      "detail": "sourceValue is coerced to a string and trimmed; that trimmed value, with its case unchanged, is the value the search uses. Sample: 'VMware-42 1a 9c 3f 7d 2e 61 b8-55 04 e2 91 6a 27 c3 08' passes through untouched."
+     },
+     {
+      "title": "Placeholder and length guard",
+      "detail": "A serial shorter than four characters is refused, and so is one whose lower-cased form, wrapped in commas, is found in the placeholder list quoted in full under literals, because such vendor values sit on dozens of CIs."
+     },
+     {
+      "title": "Resolve the ignored classes",
+      "detail": "If the framework defined a non-empty _ignoreClass variable its string value is used; otherwise the script reads gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). An empty result means no class filter is added to the query."
+     },
+     {
+      "title": "Class from the OS",
+      "detail": "classFor(sourcePayload.OS) casts the OS to a lower-cased string; more than two '/'-separated parts gives no class; else the first keyword hit in order (esx, windows, aix, solaris, hp-ux, netapp, printer, linux, cisco) names the class. No class: null."
+     },
+     {
+      "title": "Open the class table",
+      "detail": "A GlideRecord is opened on the class chosen; its sub-classes come along by table inheritance. If gr.isValid() is false the class is not installed on the instance and the rule returns null."
+     },
+     {
+      "title": "Query the serial inside the class",
+      "detail": "addQuery('serial_number', serial) as an exact match, plus addQuery('sys_class_name', 'NOT IN', ignore) when the ignore list is non-empty; then query() with no setLimit."
+     },
+     {
+      "title": "Exactly one row",
+      "detail": "If next() is false the rule returns null. The first row's getUniqueValue() is held; if hasNext() is true a second CI in the class carries the same serial (cloned VM, serial typed on the wrong record) and the rule returns null; else the held sys_id is returned."
+     }
+    ],
+    "declines": [
+     "sourceValue is empty",
+     "the trimmed serial is shorter than four characters",
+     "the lower-cased serial is one of the placeholder tokens in the junk list",
+     "sourcePayload.OS is empty or contains none of the classFor keywords",
+     "the OS text holds three or more '/'-separated guesses (split('/').length > 2)",
+     "the class table named by classFor is not valid on the instance (gr.isValid() false)",
+     "no CI in that class (sub-classes included, ignored classes excluded) carries the serial",
+     "two or more CIs in that class carry the serial (hasNext() true), whatever their state, class depth or address"
+    ],
+    "literals": [
+     {
+      "name": "Placeholder serial list (junk)",
+      "values": "',0,none,n/a,na,unknown,empty,not specified,not available,no serial,default string,to be filled by o.e.m.,system serial number,chassis serial number,0123456789,1234567890,' - tested as ',' + serial.toLowerCase() + ',' with indexOf"
+     },
+     {
+      "name": "Minimum serial length",
+      "values": "serial.length < 4 is refused; four characters or more pass"
+     },
+     {
+      "name": "Multi-guess OS threshold",
+      "values": "s.split('/').length > 2 returns '' (three or more '/'-separated guesses give no class; a two-guess string still goes through the keyword checks)"
+     },
+     {
+      "name": "classFor keyword to class (checked in this order, first hit wins, all on the lower-cased OS)",
+      "values": "'esx' -> cmdb_ci_esx_server; 'windows' -> cmdb_ci_win_server when the text also contains 'server', otherwise cmdb_ci_computer; 'aix' -> cmdb_ci_aix_server; 'solaris' or 'sunos' -> cmdb_ci_solaris_server; 'hp-ux' -> cmdb_ci_hpux_server; 'netapp' or 'ontap' -> cmdb_ci_storage_server; 'printer', 'laserjet' or 'jetdirect' -> cmdb_ci_printer; 'red hat', 'linux', 'centos', 'ubuntu', 'suse', 'debian', 'fedora', 'euleros', 'oracle enterprise' or 'amazon' -> cmdb_ci_linux_server; 'nx-os', 'catos' or 'cisco' -> cmdb_ci_netgear; anything else -> '' (no class)"
+     },
+     {
+      "name": "Ignore class source",
+      "values": "_ignoreClass when defined and non-empty (coerced to string), else gs.getProperty('sn_sec_cmn.ignoreCIClass', '')"
+     },
+     {
+      "name": "Search",
+      "values": "GlideRecord(<class from classFor>); gr.isValid() guard; addQuery('serial_number', serial); addQuery('sys_class_name', 'NOT IN', ignore) only when ignore is non-empty; query(); next() then hasNext(); no setLimit"
+     }
+    ],
+    "before": "Nothing custom runs before it; it is the first rule of the chain, so every host that reports a serial reaches it (in this feed the Cloud Agent hosts; unauthenticated network scans rarely carry one).",
+    "after": "USEM Serial Number Hardware Match",
+    "sibling_difference": "Unlike USEM Serial Number Hardware Match it reads sourcePayload.OS, derives a class with classFor, searches only that class tree (the class and its sub-classes) and declines when the OS gives no class or the class table is not valid; the hardware rule never reads the OS and searches all of cmdb_ci_hardware. A second CI outside the chosen class tree that shares the serial is invisible here, so the in-class CI is still returned, while the same pair makes the hardware rule decline."
+   },
+   {
+    "order": "180",
+    "name": "USEM Serial Number Hardware Match",
+    "purpose": "Second and last serial rule: the same serial search, but across the whole hardware tree (cmdb_ci_hardware and every class beneath it: servers, computers, network gear, storage, printers). It exists for hosts whose OS gives no usable class (unauthenticated scans listing several guesses) and for CIs that sit in a different class than the OS suggests; its only safety is that the serial must belong to exactly one CI in the whole tree.",
+    "reads": "SERIAL_NUMBER (sourceValue) only; the OS, IP and DNS fields of the payload are never read.",
+    "returns": "The sys_id of the single CI under cmdb_ci_hardware (any class beneath it, ignored classes excluded) whose serial_number equals the trimmed serial; null in every other case.",
+    "mechanics": [
+     {
+      "title": "Empty serial guard",
+      "detail": "If sourceValue is empty (null, undefined or an empty string) the script returns null at once; nothing else in the payload is read."
+     },
+     {
+      "title": "Trim the serial",
+      "detail": "sourceValue is coerced to a string and trimmed; that trimmed value, with its case unchanged, is the value the search uses. Sample: 'MXQ13005TC'."
+     },
+     {
+      "title": "Placeholder and length guard",
+      "detail": "A serial shorter than four characters is refused, and so is one whose lower-cased form, wrapped in commas, is found in the placeholder list quoted in full under literals, because such vendor values sit on dozens of CIs."
+     },
+     {
+      "title": "Resolve the ignored classes",
+      "detail": "If the framework defined a non-empty _ignoreClass variable its string value is used; otherwise the script reads gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). An empty result means no class filter is added to the query."
+     },
+     {
+      "title": "Query the serial across the hardware tree",
+      "detail": "A GlideRecord on cmdb_ci_hardware (no isValid check, no class restriction, the OS never consulted): addQuery('serial_number', serial) exact match, addQuery('sys_class_name', 'NOT IN', ignore) when the list is non-empty, then query(), no setLimit."
+     },
+     {
+      "title": "Exactly one row",
+      "detail": "If next() is false the rule returns null. The first row's getUniqueValue() is held; if hasNext() is true a second hardware CI of any class carries the serial (say a Storage Server with that value) and the rule returns null; else the held sys_id is returned."
+     }
+    ],
+    "declines": [
+     "sourceValue is empty",
+     "the trimmed serial is shorter than four characters",
+     "the lower-cased serial is one of the placeholder tokens in the junk list",
+     "no CI under cmdb_ci_hardware (ignored classes excluded) carries the serial",
+     "two or more CIs under cmdb_ci_hardware carry the serial, in the same or different classes, whatever their state or address"
+    ],
+    "literals": [
+     {
+      "name": "Placeholder serial list (junk)",
+      "values": "',0,none,n/a,na,unknown,empty,not specified,not available,no serial,default string,to be filled by o.e.m.,system serial number,chassis serial number,0123456789,1234567890,' - tested as ',' + serial.toLowerCase() + ',' with indexOf"
+     },
+     {
+      "name": "Minimum serial length",
+      "values": "serial.length < 4 is refused; four characters or more pass"
+     },
+     {
+      "name": "Ignore class source",
+      "values": "_ignoreClass when defined and non-empty (coerced to string), else gs.getProperty('sn_sec_cmn.ignoreCIClass', '')"
+     },
+     {
+      "name": "Search",
+      "values": "GlideRecord('cmdb_ci_hardware'); addQuery('serial_number', serial); addQuery('sys_class_name', 'NOT IN', ignore) only when ignore is non-empty; query(); next() then hasNext(); no setLimit; no isValid guard"
+     }
+    ],
+    "before": "USEM Serial Number Class Match already tried the serial inside the class the OS implies; hosts reach this rule because the OS gave no class (empty, no keyword, or three or more '/' guesses, as in the sample with seven), the class table was not valid, or the serial was absent or duplicated inside that class. Hosts with no serial or a placeholder serial were declined there and are declined here again by the same guards.",
+    "after": "USEM Cisco IP Phone MAC, then the name rules (USEM FQDN Class Match onwards); a serial that is not unique in the whole hardware tree is never used by any later rule.",
+    "sibling_difference": "Drops the OS reading, the classFor restriction and the isValid guard of USEM Serial Number Class Match: the search runs on cmdb_ci_hardware for every device class at once, so a serial shared by two CIs of different classes (which the class rule would never see together) makes this rule decline."
+   }
+  ],
+  "shared": [
+   {
+    "helper": "classFor(os) - input handling and multi-guess rule",
+    "behaviour": "Present only in USEM Serial Number Class Match, called on sourcePayload.OS. Returns '' for an empty OS. Coerces the OS to a string, lower-cases it and splits it on '/': more than two parts (three or more guesses) returns '' and the rule declines; a two-guess 'A / B' string still reaches the keyword checks. Checks run top to bottom with indexOf; the first hit wins; no hit returns ''."
+   },
+   {
+    "helper": "classFor(os) - keyword to class mapping, first half (in check order)",
+    "behaviour": "'esx' -> cmdb_ci_esx_server; 'windows' -> cmdb_ci_win_server when the text also contains 'server', otherwise cmdb_ci_computer; 'aix' -> cmdb_ci_aix_server; 'solaris' or 'sunos' -> cmdb_ci_solaris_server; 'hp-ux' -> cmdb_ci_hpux_server; 'netapp' or 'ontap' -> cmdb_ci_storage_server; 'printer', 'laserjet' or 'jetdirect' -> cmdb_ci_printer."
+   },
+   {
+    "helper": "classFor(os) - keyword to class mapping, second half (in check order)",
+    "behaviour": "'red hat', 'linux', 'centos', 'ubuntu', 'suse', 'debian', 'fedora', 'euleros', 'oracle enterprise' or 'amazon' -> cmdb_ci_linux_server; 'nx-os', 'catos' or 'cisco' -> cmdb_ci_netgear; anything else -> '' (no class, the class rule declines). The linux family is tested before the cisco family, so a text holding both words is a Linux Server; 'esx' is tested first of all."
+   },
+   {
+    "helper": "Placeholder serial list (junk) and minimum length",
+    "behaviour": "Both rules: after trim, a serial shorter than four characters is refused, and so is one whose lower-cased form is a whole token of the comma-delimited list ',0,none,n/a,na,unknown,empty,not specified,not available,no serial,default string,to be filled by o.e.m.,system serial number,chassis serial number,0123456789,1234567890,' (the serial is wrapped in commas and tested with indexOf)."
+   },
+   {
+    "helper": "Serial normalisation",
+    "behaviour": "Both rules: sourceValue is coerced to a string ('' + sourceValue) and trimmed; the trimmed value is passed unchanged to addQuery('serial_number', serial). The script applies no case change, prefix or suffix stripping for the search itself; lower-casing happens only inside the placeholder test."
+   },
+   {
+    "helper": "Ignore class list",
+    "behaviour": "Both rules: if the framework variable _ignoreClass is defined and non-empty its string value is used, otherwise gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). When non-empty it is applied as addQuery('sys_class_name', 'NOT IN', ignore); an empty list adds no filter. The exclusion is by exact sys_class_name of each row, so sub-classes of a listed class are not excluded by the rule itself."
+   },
+   {
+    "helper": "Exactly-one test (next then hasNext)",
+    "behaviour": "Both rules: query() with no setLimit; if next() is false the rule returns null; the first row's getUniqueValue() is held; if hasNext() is true a second CI carries the same serial and the rule returns null; otherwise the held sys_id is returned. No tie-break of any kind is applied: the second row may be retired, in another class, or on the scanned address and the rule still declines."
+   },
+   {
+    "helper": "Class table validity guard (gr.isValid())",
+    "behaviour": "Only USEM Serial Number Class Match: after choosing the class from the OS it opens the GlideRecord and returns null when gr.isValid() is false (class not installed on the instance). USEM Serial Number Hardware Match opens cmdb_ci_hardware without this check."
+   },
+   {
+    "helper": "agrees(), retired(), narrow(), isRealServer(), IP tie-break, loopback / link-local guard",
+    "behaviour": "None of these appear in either serial rule. Neither script reads the IP or DNS field, tests the scanned address, checks install_status, operational_status or life cycle stage, compares the CI class with the OS after the search, or treats twin records specially: any second row carrying the serial, live or retired, makes the rule decline."
+   }
+  ],
+  "issues": [
+   "USEM Serial Number Class Match, mechanics 'Placeholder and length guard': the placeholder list was quoted with an elision ('...'), which is an inexact quote; the bullet now points to the list quoted in full under literals (the 170-character string does not fit a 260-character bullet).",
+   "USEM Serial Number Hardware Match, mechanics 'Placeholder and length guard': same elided quote of the placeholder list; replaced with a pointer to the full list under literals.",
+   "USEM Serial Number Class Match, sibling_difference: said two CIs of different classes sharing a serial are invisible to this rule; only the CI outside the chosen class tree is invisible and the in-class CI is still returned (a second CI in a sub-class of the chosen class is seen and makes it decline); reworded.",
+   "USEM Serial Number Class Match, mechanics 'Class from the OS' and shared classFor input handling: added that classFor coerces the OS to a string ('' + os) before lower-casing, as the script does."
+  ]
+ },
+ "phones": {
+  "rules": [
+   {
+    "order": "200",
+    "name": "USEM Cisco IP Phone MAC",
+    "purpose": "Trusts the Cisco Unified CM device-name convention: the first DNS label is SEP followed by the phone's MAC address. It sits after the serial number rules (phones report no serial) and before the FQDN and hostname rules so a phone label is never tried as a server name; it searches only IP Phone CIs, so a MAC clash can never pull in a switch or a server.",
+    "reads": "DNS field as sourceValue (sample sep64f69dd5c9b0.voip.bankofamerica.com). No payload field is read: sourcePayload is received but never used. Also reads the framework variable _ignoreClass or, failing that, the property sn_sec_cmn.ignoreCIClass.",
+    "returns": "The sys_id of exactly one cmdb_ci_ip_phone record (sub-classes included): the owner of a network adapter carrying the MAC, else the phone whose mac_address holds it, else the phone named with the device name upper-cased (SEP64F69DD5C9B0). null in every other case.",
+    "mechanics": [
+     {
+      "title": "Empty guard",
+      "detail": "Returns null at once when sourceValue (the DNS field) is empty. sourcePayload is never read: the rule works from the DNS name alone, so OS and IP play no part."
+     },
+     {
+      "title": "Phone label test",
+      "detail": "String-coerces the DNS value (no trim), takes the first label before the first dot and lower-cases it. The label must match ^sep([0-9a-f]{12})$ exactly: literal sep plus twelve hex characters; anything else (a server named sepulveda01) returns null."
+     },
+     {
+      "title": "MAC rebuilt in four spellings",
+      "detail": "The twelve hex characters are cut into six two-character pairs joined with colons. Four candidates are built in this order: colon form upper case, colon form lower case, plain hex upper case, plain hex lower case (64:F6:9D:D5:C9:B0 to 64f69dd5c9b0)."
+     },
+     {
+      "title": "Ignore list",
+      "detail": "Reads the ignored classes from the framework variable _ignoreClass when defined and non-empty, otherwise from gs.getProperty sn_sec_cmn.ignoreCIClass with an empty default. Applied to the second and third attempts only, not to the adapter attempt."
+     },
+     {
+      "title": "Attempt 1: adapter owned by an IP phone",
+      "detail": "Queries cmdb_ci_network_adapter where mac_address IN the four candidates and cmdb_ci is not empty. Each adapter's owner sys_id is tested with a GlideRecord get on cmdb_ci_ip_phone; distinct IP Phone owners are counted once each in a map."
+     },
+     {
+      "title": "Attempt 1 decision",
+      "detail": "Exactly one distinct IP Phone owner returns that owner's sys_id. Zero owners, or two or more phones sharing the MAC on adapters, fall through to the next attempt. An adapter owned by a switch or server is skipped because the get on cmdb_ci_ip_phone fails."
+     },
+     {
+      "title": "Attempt 2: MAC on the phone record",
+      "detail": "Queries cmdb_ci_ip_phone (sub-classes included) where mac_address IN the four candidates, with sys_class_name NOT IN the ignore list when it is non-empty. next() then hasNext(): one row returns its sys_id; none or several rows fall through to the name attempt."
+     },
+     {
+      "title": "Attempt 3: Unified CM device name",
+      "detail": "Queries cmdb_ci_ip_phone where name equals the label upper-cased (SEP64F69DD5C9B0), sys_class_name NOT IN the ignore list when non-empty. No row returns null; next() then hasNext() true returns null; one row returns its sys_id. No setLimit anywhere."
+     }
+    ],
+    "declines": [
+     "sourceValue (DNS) is empty.",
+     "The lower-cased first DNS label does not match ^sep([0-9a-f]{12})$: not a Cisco Unified CM phone label; the host passes to the next rule untouched.",
+     "No IP Phone is found by adapter MAC, by the mac_address field or by the device name.",
+     "The name attempt finds two or more cmdb_ci_ip_phone records named with the device name (hasNext true).",
+     "Two phones share the MAC on adapters or on mac_address and the name attempt then finds none or several: a shared MAC never declines by itself."
+    ],
+    "literals": [
+     {
+      "name": "Phone label regex",
+      "values": "^sep([0-9a-f]{12})$ applied to ('' + sourceValue).split('.')[0].toLowerCase(); no trim; the lower-casing is what lets SEP64F69DD5C9B0 match, the regex itself holds lower-case hex only"
+     },
+     {
+      "name": "Pair loop",
+      "values": "for (i = 0; i < 12; i += 2) hex.substr(i, 2); pairs joined with ':'"
+     },
+     {
+      "name": "MAC candidate spellings",
+      "values": "[colon.toUpperCase(), colon, hex.toUpperCase(), hex] -> [\"64:F6:9D:D5:C9:B0\", \"64:f6:9d:d5:c9:b0\", \"64F69DD5C9B0\", \"64f69dd5c9b0\"]"
+     },
+     {
+      "name": "Ignore class source",
+      "values": "(typeof _ignoreClass != 'undefined' && _ignoreClass) ? '' + _ignoreClass : gs.getProperty('sn_sec_cmn.ignoreCIClass', '')"
+     },
+     {
+      "name": "Adapter query",
+      "values": "cmdb_ci_network_adapter: mac_address IN candidates.join(','); addNotNullQuery('cmdb_ci'); owner verified by new GlideRecord('cmdb_ci_ip_phone').get(owner); no ignore filter"
+     },
+     {
+      "name": "Phone record query",
+      "values": "cmdb_ci_ip_phone: mac_address IN candidates.join(','); sys_class_name NOT IN ignore (when non-empty)"
+     },
+     {
+      "name": "Device name query",
+      "values": "cmdb_ci_ip_phone: name = label.toUpperCase() (\"SEP64F69DD5C9B0\"); sys_class_name NOT IN ignore (when non-empty)"
+     },
+     {
+      "name": "Sample payload",
+      "values": "ID 41277345, IP 30.144.62.108, TRACKING_METHOD IP, OS \"Cisco IP Phone\", DNS sep64f69dd5c9b0.voip.bankofamerica.com; outcome: IP Phone CI SEP64F69DD5C9B0 via adapter eth0 carrying 64:F6:9D:D5:C9:B0"
+     }
+    ],
+    "before": "USEM Serial Number Class Match and USEM Serial Number Hardware Match run first; phones report no serial number to the scan, so both decline and every phone host reaches this rule.",
+    "after": "The FQDN and hostname rules, starting with USEM FQDN Class Match; a null hands the host on unchanged. Hosts whose label is not sep plus twelve hex characters pass straight through.",
+    "sibling_difference": "The only rule keyed on a MAC address rebuilt from the DNS label and the only one that searches cmdb_ci_network_adapter by mac_address (USEM Load Balancer Member Match and USEM IP Adapter Match read that table by ip_address); it restricts itself to cmdb_ci_ip_phone so a colliding MAC on a switch or server is never returned. Unlike USEM Device Name Match it reads neither OS nor IP, has no address tie-break, and tries three places in turn (adapter, mac_address, name) rather than one name search; unlike the class and hostname rules it derives no class from the OS."
+   },
+   {
+    "order": "415",
+    "name": "USEM Device Name Match",
+    "purpose": "Trusts the scanned host name for the two device classes outside the Hardware tree, IP Phone (extends cmdb_ci directly) and Imaging Hardware (scanners), which the hardware-wide name rules never see and which report no OS to an unauthenticated scan. It sits right after USEM Hostname Hardware Match so ordinary hosts are already resolved and only OS-less devices such as Avaya stations (avx plus the tail of the MAC) and scanners reach it.",
+    "reads": "DNS field as sourceValue (sample avxdd008a.cc.bofa.com); from sourcePayload the OS (guard only) and the IP (tie-break only). Also reads _ignoreClass or the property sn_sec_cmn.ignoreCIClass.",
+    "returns": "The sys_id of the one cmdb_ci_ip_phone or cmdb_ci_imaging_hardware record (sub-classes included, ignored classes excluded) whose name equals the host label; when several carry the name, the single one whose ip_address equals the scanned IP. null otherwise, and null when the OS names a server, desktop or other classed system.",
+    "mechanics": [
+     {
+      "title": "Empty guard and host label",
+      "detail": "Returns null when sourceValue (DNS) is empty. The value is string-coerced, trimmed and lower-cased; the host is the first label before the first dot (avxdd008a). An empty first label returns null. No suffix or domain is used in the search."
+     },
+     {
+      "title": "Scanned address",
+      "detail": "Reads sourcePayload.IP as a string ('' + IP), or an empty string when the payload carries none. It is used only to break a tie between several records of one name and is never a search key."
+     },
+     {
+      "title": "Ignore list",
+      "detail": "Reads the ignored classes from _ignoreClass when defined and non-empty, otherwise from gs.getProperty sn_sec_cmn.ignoreCIClass with an empty default; applied as sys_class_name NOT IN on both class queries whenever the list is non-empty."
+     },
+     {
+      "title": "OS guard through classFor",
+      "detail": "Lower-cases sourcePayload.OS (empty when absent) and calls classFor. Null when the class is non-empty, not cmdb_ci_linux_server and the whole OS text lacks the word phone. No OS, Unknown OS, a keyword-free vendor name or a Linux fingerprint passes."
+     },
+     {
+      "title": "What the OS guard rules out",
+      "detail": "Every classFor class except empty and cmdb_ci_linux_server declines: ESX, Windows (server or computer), AIX, Solaris/SunOS, HP-UX, NetApp/ONTAP, printer/LaserJet/JetDirect, NX-OS/CatOS/Cisco. Cisco alone declines; Cisco IP Phone passes on phone."
+     },
+     {
+      "title": "Search the two classes by name",
+      "detail": "Loops over ['cmdb_ci_ip_phone', 'cmdb_ci_imaging_hardware'], skipping a class whose isValid() is false. Each query: name equals host (platform equality, not case-sensitive), sys_class_name NOT IN the ignore list when non-empty; sub-classes included."
+     },
+     {
+      "title": "Collect every row",
+      "detail": "Every matching row's sys_id is pushed to found; a row whose ip_address, string-coerced, equals the scanned IP is also pushed to onAddress (only when an IP was supplied). All rows are read: no next/hasNext short-circuit and no setLimit."
+     },
+     {
+      "title": "Decision and address tie-break",
+      "detail": "found spans both classes. One entry is returned regardless of its ip_address. Two or more with exactly one in onAddress return that one. Otherwise null: none, or several with none or more than one on the scanned address. No retired or class agreement test."
+     }
+    ],
+    "declines": [
+     "sourceValue (DNS) is empty, or its first label before the dot is empty.",
+     "classFor(OS) yields a class other than empty or cmdb_ci_linux_server and the lower-cased OS text does not contain the word phone.",
+     "No cmdb_ci_ip_phone or cmdb_ci_imaging_hardware record (sub-classes included, ignored classes excluded) is named with the host label.",
+     "Several records carry the name and none has ip_address equal to sourcePayload.IP, or the payload carries no IP.",
+     "Several records carry the name and two or more of them have ip_address equal to the scanned IP."
+    ],
+    "literals": [
+     {
+      "name": "Searched classes",
+      "values": "['cmdb_ci_ip_phone', 'cmdb_ci_imaging_hardware'] (each skipped when new GlideRecord(class).isValid() is false)"
+     },
+     {
+      "name": "Host normalisation",
+      "values": "('' + sourceValue).trim().toLowerCase().split('.')[0]"
+     },
+     {
+      "name": "OS normalisation",
+      "values": "os = ('' + (sourcePayload.OS || '')).toLowerCase(); pref = classFor(os)"
+     },
+     {
+      "name": "OS decline condition",
+      "values": "pref && pref != 'cmdb_ci_linux_server' && os.indexOf('phone') == -1 -> return null"
+     },
+     {
+      "name": "Phone keyword",
+      "values": "'phone' tested with indexOf on the whole lower-cased OS text; its presence lifts the guard whatever class classFor gave"
+     },
+     {
+      "name": "Multi-guess threshold",
+      "values": "s.split('/').length > 2 -> '' (two or more '/' separators, three or more guesses)"
+     },
+     {
+      "name": "classFor keywords (substring tests, in this order)",
+      "values": "'esx' -> cmdb_ci_esx_server; 'windows' -> cmdb_ci_win_server when 'server' is present else cmdb_ci_computer; 'aix' -> cmdb_ci_aix_server; 'solaris', 'sunos' -> cmdb_ci_solaris_server; 'hp-ux' -> cmdb_ci_hpux_server; 'netapp', 'ontap' -> cmdb_ci_storage_server; 'printer', 'laserjet', 'jetdirect' -> cmdb_ci_printer; 'red hat', 'linux', 'centos', 'ubuntu', 'suse', 'debian', 'fedora', 'euleros', 'oracle enterprise', 'amazon' -> cmdb_ci_linux_server; 'nx-os', 'catos', 'cisco' -> cmdb_ci_netgear; otherwise ''"
+     },
+     {
+      "name": "Name query",
+      "values": "addQuery('name', host); sys_class_name NOT IN ignore (when non-empty)"
+     },
+     {
+      "name": "Tie-break comparison",
+      "values": "ip && ('' + gr.getValue('ip_address')) == ip, with ip = sourcePayload.IP ? '' + sourcePayload.IP : ''"
+     },
+     {
+      "name": "Decision",
+      "values": "found.length == 1 -> found[0]; found.length > 1 && onAddress.length == 1 -> onAddress[0]; else null"
+     },
+     {
+      "name": "Ignore class source",
+      "values": "(typeof _ignoreClass != 'undefined' && _ignoreClass) ? '' + _ignoreClass : gs.getProperty('sn_sec_cmn.ignoreCIClass', '')"
+     },
+     {
+      "name": "Sample payload",
+      "values": "ID 753026617, IP 10.190.29.132, TRACKING_METHOD IP, no OS, DNS avxdd008a.cc.bofa.com; outcome: IP Phone CI AVXDD008A whose ip_address is 10.190.29.132"
+     }
+    ],
+    "before": "USEM Hostname Hardware Match searched the Hardware tree for the plain host name and declined because IP Phone and Imaging Hardware sit outside that tree; every earlier rule needed an OS class, a serial number or a Cisco phone label (USEM Cisco IP Phone MAC), none of which an Avaya station or a scanner offers.",
+    "after": "USEM Management Interface Match, then the interface, service and address rules (USEM Network Interface Name Match, USEM FQDN Name Hardware Match, the load balancer rules and the IP rules).",
+    "sibling_difference": "The only rule that searches cmdb_ci_imaging_hardware, the only one that searches cmdb_ci_ip_phone by the plain host label (USEM Cisco IP Phone MAC searches it by the upper-cased sep label, by mac_address and through adapters), and the only phone rule that reads the OS and the IP. Its OS guard is inverted relative to the class rules (a class disqualifies instead of restricting the search) and it accepts a Linux fingerprint; it breaks a shared name by ip_address instead of declining outright. Unlike USEM Cisco IP Phone MAC it needs no sep label and never touches network adapters or mac_address; it collects all rows into arrays rather than testing next then hasNext."
+   }
+  ],
+  "shared": [
+   {
+    "helper": "classFor(os) - guards and server classes",
+    "behaviour": "USEM Device Name Match only. Lower-cases the OS; empty gives ''. split('/').length > 2 gives ''. Substring tests in order, first hit wins: 'esx' -> cmdb_ci_esx_server; 'windows' -> cmdb_ci_win_server if 'server' also present, else cmdb_ci_computer; 'aix' -> cmdb_ci_aix_server; 'solaris' or 'sunos' -> cmdb_ci_solaris_server; 'hp-ux' -> cmdb_ci_hpux_server."
+   },
+   {
+    "helper": "classFor(os) - storage, printer, Linux, network gear",
+    "behaviour": "Continues in order: 'netapp' or 'ontap' -> cmdb_ci_storage_server; 'printer', 'laserjet' or 'jetdirect' -> cmdb_ci_printer; 'red hat', 'linux', 'centos', 'ubuntu', 'suse', 'debian', 'fedora', 'euleros', 'oracle enterprise' or 'amazon' -> cmdb_ci_linux_server; 'nx-os', 'catos' or 'cisco' -> cmdb_ci_netgear; else ''. 'esx' is tested before 'linux'; 'cisco ip phone' gives cmdb_ci_netgear."
+   },
+   {
+    "helper": "Multi-guess OS rule",
+    "behaviour": "s.split('/').length > 2: an OS text holding two or more '/' separators (three or more guesses, e.g. a/b/c) yields no class at all; a text with a single '/' (two guesses) is still classified by its keywords. In USEM Device Name Match an unusable OS therefore never disqualifies the device, because the guard fires only on a non-empty class."
+   },
+   {
+    "helper": "Ignore list (sn_sec_cmn.ignoreCIClass)",
+    "behaviour": "Both scripts: ignore = '' + _ignoreClass when typeof _ignoreClass != 'undefined' and truthy, else gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). Applied as addQuery('sys_class_name', 'NOT IN', ignore) only when non-empty. In USEM Cisco IP Phone MAC it filters the mac_address and name attempts on cmdb_ci_ip_phone but not the adapter attempt; in USEM Device Name Match it filters both class queries."
+   },
+   {
+    "helper": "IP tie-break",
+    "behaviour": "USEM Device Name Match only: ip = '' + sourcePayload.IP, or '' when absent. Each row of the name query goes into found and, when ip is non-empty and '' + gr.getValue('ip_address') equals ip, also into onAddress. found.length == 1 returns it; found.length > 1 && onAddress.length == 1 returns onAddress[0]; otherwise null. The IP is never a search key. USEM Cisco IP Phone MAC has no tie-break at all."
+   },
+   {
+    "helper": "Exactly-one tests",
+    "behaviour": "USEM Cisco IP Phone MAC: the adapter attempt counts distinct IP Phone owners in a map and accepts count == 1; the mac_address and name attempts use next() then hasNext(). USEM Device Name Match reads all rows into arrays and tests found.length. Neither script uses setLimit or getRowCount, and neither uses the platform's private _queryMatch."
+   },
+   {
+    "helper": "Class presence guard",
+    "behaviour": "USEM Device Name Match: new GlideRecord(class).isValid() false skips that class silently and continues with the next one, so a missing Imaging Hardware class does not stop the phone search."
+   },
+   {
+    "helper": "MAC rebuild",
+    "behaviour": "USEM Cisco IP Phone MAC only: the twelve hex characters captured by ^sep([0-9a-f]{12})$ are cut into six pairs with hex.substr(i, 2) for i = 0..10 step 2, joined with ':', and searched in four spellings [colon upper, colon lower, plain upper, plain lower] through mac_address IN candidates.join(',')."
+   },
+   {
+    "helper": "Not present in these two scripts",
+    "behaviour": "agrees(), retired(), narrow(), isRealServer(), a placeholder serial list and a loopback / link-local IP guard do not appear in USEM Cisco IP Phone MAC or USEM Device Name Match. Neither script tests install_status, operational_status or life cycle stage, so retired phones and scanners stay candidates, and neither compares the found CI's class with the OS class after the search."
+   }
+  ],
+  "issues": [
+   "USEM Cisco IP Phone MAC, sibling_difference: claimed the only rule that searches cmdb_ci_network_adapter; USEM Load Balancer Member Match and USEM IP Adapter Match also read that table (by ip_address). Narrowed to the only rule that searches it by mac_address.",
+   "USEM Cisco IP Phone MAC, mechanics 'Phone label test' and literal 'Phone label regex': the script never trims the DNS value, and it is the lower-casing that lets an upper-case SEP label pass a regex holding lower-case hex only; both were missing.",
+   "USEM Cisco IP Phone MAC, mechanics 'Attempt 3': the ignore filter is applied only when the list is non-empty; the bullet stated it unconditionally.",
+   "USEM Cisco IP Phone MAC, literal 'Adapter query': added that no ignore filter is applied to the adapter attempt (stated in the mechanics but missing from the literal).",
+   "USEM Cisco IP Phone MAC, declines: the fifth item was a note, not a null condition; rewritten as the condition (a shared MAC plus a name attempt that finds none or several).",
+   "USEM Cisco IP Phone MAC, returns: added that sub-classes of cmdb_ci_ip_phone are included (GlideRecord get and queries on the parent class).",
+   "USEM Device Name Match, mechanics 'OS guard through classFor': 'a vendor name' passes only when it carries no classFor keyword; Cisco alone maps to cmdb_ci_netgear and declines. Also noted that the phone test runs on the whole lower-cased OS text.",
+   "USEM Device Name Match, mechanics 'Search the two classes by name': the ignore filter is applied only when the list is non-empty; the bullet stated it unconditionally.",
+   "USEM Device Name Match, mechanics 'Decision and address tie-break': added that found spans both classes (a phone and a scanner of one name count as two) and that a single record is returned regardless of its ip_address.",
+   "USEM Device Name Match, literals: the classFor keyword lists, the OS normalisation and the phone keyword are literals in this script but were listed only under shared; added them to the rule's literals.",
+   "USEM Device Name Match, sibling_difference: claimed the only rule that searches cmdb_ci_ip_phone by name; USEM Cisco IP Phone MAC also searches cmdb_ci_ip_phone by name (upper-cased sep label). Reworded to the only rule searching cmdb_ci_imaging_hardware and the only one searching cmdb_ci_ip_phone by the plain host label."
+  ]
+ },
+ "fqdn": {
+  "rules": [
+   {
+    "order": "250",
+    "name": "USEM FQDN Class Match",
+    "purpose": "Trusts an exact fqdn value on a CI, but only inside the CMDB class the scanned OS text implies (sub-classes included), so a Red Hat host can never land on a Windows Server that carries the same fqdn. It is the first name rule because an exact fqdn is the most precise name evidence available once the serial number and Cisco phone rules have declined.",
+    "reads": "Source field DNS (sourceValue). Payload fields: OS (through classFor, decides the search table) and IP (tie-break between duplicate fqdn rows only).",
+    "returns": "The sys_id of the single CI of the OS class whose fqdn equals the scanned name; when several carry it, the one whose ip_address equals the scanned IP; null in every other case.",
+    "mechanics": [
+     {
+      "title": "Guard and normalise the DNS value",
+      "detail": "Returns null when sourceValue is empty or absent. Otherwise coerces it to a string, trims it and lower-cases it. The whole dotted string is kept: no first label is cut and no domain suffix is stripped."
+     },
+     {
+      "title": "Require a dotted name",
+      "detail": "Returns null when the normalised value contains no '.' character; a bare label is left to the hostname rules."
+     },
+     {
+      "title": "Read the scanned IP for the tie-break only",
+      "detail": "ip is '' + sourcePayload.IP when the payload carries a non-empty IP, otherwise ''. It is never a search key; it only separates duplicate fqdn rows later."
+     },
+     {
+      "title": "Build the ignored-class list",
+      "detail": "ignore is '' + _ignoreClass when that global is defined and truthy, otherwise gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). When non-empty it becomes the query condition sys_class_name NOT IN that comma-separated list."
+     },
+     {
+      "title": "Derive the class from the scanned OS",
+      "detail": "classFor(sourcePayload.OS) returns '' for an absent OS; else it lower-cases the string, returns '' when splitting on '/' yields more than two parts, then tests fixed substrings in order (esx, windows, aix, ...). An empty result returns null before any query."
+     },
+     {
+      "title": "Query the OS class for the exact fqdn",
+      "detail": "GlideRecord on the class table classFor returned (null when isValid() is false), addQuery('fqdn', normalised name), the NOT IN ignore condition when set, then query(). Sub-classes come in through the table hierarchy; no setLimit."
+     },
+     {
+      "title": "Collect every hit and every IP-confirmed hit",
+      "detail": "while (gr.next()): each sys_id (getUniqueValue) is pushed to ids; when ip is non-empty and gr.getValue('ip_address') equals ip as a plain string, with no normalisation of the CI value, the sys_id is also pushed to ipHits. All rows are read."
+     },
+     {
+      "title": "Decide exactly one",
+      "detail": "ids.length 1 returns that sys_id. ids.length above 1 with ipHits.length exactly 1 returns the IP-confirmed sys_id. Every other outcome (no row; duplicates where none or several carry the scanned IP) returns null rather than guessing."
+     },
+     {
+      "title": "No retired, twin or agreement handling",
+      "detail": "The script tests neither install_status nor operational_status and never compares the CI's sys_class_name with the OS class after the query: a retired CI with the same fqdn is an ordinary duplicate that only the IP can separate."
+     }
+    ],
+    "declines": [
+     "sourceValue is empty or absent",
+     "the normalised DNS value contains no '.' (a bare hostname)",
+     "classFor(OS) returns '': OS absent, OS with more than two '/'-separated parts, or no keyword found in the OS text",
+     "the class table classFor named is not a valid table (gr.isValid() is false)",
+     "no CI of that class outside the ignored classes carries the scanned name in fqdn",
+     "two or more CIs carry the fqdn and the payload has no IP",
+     "two or more CIs carry the fqdn and none of them has ip_address equal to the scanned IP",
+     "two or more CIs carry the fqdn and two or more of them have ip_address equal to the scanned IP"
+    ],
+    "literals": [
+     {
+      "name": "dotted-name guard",
+      "values": "fqdn.indexOf('.') == -1 returns null"
+     },
+     {
+      "name": "empty-OS guard",
+      "values": "!os returns '' inside classFor, so an absent OS declines before any query"
+     },
+     {
+      "name": "multi-guess OS threshold",
+      "values": "s.split('/').length > 2 returns '' (three or more guesses; a single '/' with two guesses is still classified by keyword)"
+     },
+     {
+      "name": "classFor keyword table, in test order",
+      "values": "esx -> cmdb_ci_esx_server; windows -> cmdb_ci_win_server when 'server' is also present, else cmdb_ci_computer; aix -> cmdb_ci_aix_server; solaris, sunos -> cmdb_ci_solaris_server; hp-ux -> cmdb_ci_hpux_server; netapp, ontap -> cmdb_ci_storage_server; printer, laserjet, jetdirect -> cmdb_ci_printer; red hat, linux, centos, ubuntu, suse, debian, fedora, euleros, oracle enterprise, amazon -> cmdb_ci_linux_server; nx-os, catos, cisco -> cmdb_ci_netgear; otherwise ''"
+     },
+     {
+      "name": "ignore list",
+      "values": "_ignoreClass (when defined and truthy) else gs.getProperty('sn_sec_cmn.ignoreCIClass', ''); applied as sys_class_name NOT IN <list>"
+     },
+     {
+      "name": "search table and field",
+      "values": "GlideRecord(<classFor result>), addQuery('fqdn', <trimmed lower-cased DNS>)"
+     },
+     {
+      "name": "tie-break comparison",
+      "values": "gr.getValue('ip_address') == ('' + sourcePayload.IP), tested only when the IP is non-empty"
+     },
+     {
+      "name": "exactly-one decision",
+      "values": "ids.length == 1, or ids.length > 1 && ipHits.length == 1; anything else null"
+     }
+    ],
+    "before": "USEM Serial Number Class Match and USEM Serial Number Hardware Match found no CI for the serial, and USEM Cisco IP Phone MAC, which also reads the DNS field but only looks for the sep label, did not recognise the host as a Cisco phone; this is the first rule that compares the DNS name with a CI name field.",
+    "after": "USEM FQDN Hardware Match repeats the exact fqdn search across cmdb_ci_hardware without the OS class; then USEM Hostname Domain Class Match and USEM Hostname Domain Hardware Match, USEM Layered DNS Match, and the plain hostname rules.",
+    "sibling_difference": "The only one of the four that reads the OS: the search is confined to the class classFor derives from it. It shares the fqdn-field search and the IP tie-break with USEM FQDN Hardware Match; USEM FQDN Name Hardware Match and USEM FQDN Name Broad Match search the name field with next()/hasNext() and no tie-break."
+   },
+   {
+    "order": "260",
+    "name": "USEM FQDN Hardware Match",
+    "purpose": "Trusts an exact fqdn value on any CI under cmdb_ci_hardware without consulting the OS, so hosts whose OS gives no class (multi-guess fingerprints) or whose CI is kept in a generic or different class still match on the fqdn field. It follows USEM FQDN Class Match because the class-restricted search is the more precise of the two.",
+    "reads": "Source field DNS (sourceValue). Payload field: IP (tie-break between duplicate fqdn rows only). OS is not read.",
+    "returns": "The sys_id of the single hardware CI whose fqdn equals the scanned name; when several carry it, the one whose ip_address equals the scanned IP; null in every other case.",
+    "mechanics": [
+     {
+      "title": "Guard and normalise the DNS value",
+      "detail": "Returns null when sourceValue is empty or absent. Otherwise coerces it to a string, trims it and lower-cases it. The whole dotted string is kept: no first label is cut and no domain suffix is stripped."
+     },
+     {
+      "title": "Require a dotted name",
+      "detail": "Returns null when the normalised value contains no '.' character; a bare label is left to the hostname rules."
+     },
+     {
+      "title": "Read the scanned IP for the tie-break only",
+      "detail": "ip is '' + sourcePayload.IP when the payload carries a non-empty IP, otherwise ''. It is never a search key; it only separates duplicate fqdn rows later."
+     },
+     {
+      "title": "Build the ignored-class list",
+      "detail": "ignore is '' + _ignoreClass when that global is defined and truthy, otherwise gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). When non-empty it becomes the query condition sys_class_name NOT IN that comma-separated list."
+     },
+     {
+      "title": "Query cmdb_ci_hardware for the exact fqdn",
+      "detail": "GlideRecord('cmdb_ci_hardware') (null when isValid() is false), addQuery('fqdn', normalised name), the NOT IN ignore condition when set, then query(). Hardware and every class beneath it are searched; the OS is not consulted; no setLimit."
+     },
+     {
+      "title": "Collect every hit and every IP-confirmed hit",
+      "detail": "while (gr.next()): each sys_id (getUniqueValue) is pushed to ids; when ip is non-empty and gr.getValue('ip_address') equals ip as a plain string, with no normalisation of the CI value, the sys_id is also pushed to ipHits. All rows are read."
+     },
+     {
+      "title": "Decide exactly one",
+      "detail": "ids.length 1 returns that sys_id. ids.length above 1 with ipHits.length exactly 1 returns the IP-confirmed sys_id. Every other outcome (no row; duplicates where none or several carry the scanned IP) returns null rather than guessing."
+     },
+     {
+      "title": "No retired, twin or agreement handling",
+      "detail": "No status test and no class agreement: a Windows Server, a Linux Server and a retired duplicate all carrying the fqdn are equal duplicates that only the scanned IP can separate."
+     }
+    ],
+    "declines": [
+     "sourceValue is empty or absent",
+     "the normalised DNS value contains no '.' (a bare hostname)",
+     "GlideRecord('cmdb_ci_hardware').isValid() is false",
+     "no CI under cmdb_ci_hardware outside the ignored classes carries the scanned name in fqdn",
+     "two or more hardware CIs carry the fqdn and the payload has no IP",
+     "two or more hardware CIs carry the fqdn and none of them has ip_address equal to the scanned IP",
+     "two or more hardware CIs carry the fqdn and two or more of them have ip_address equal to the scanned IP"
+    ],
+    "literals": [
+     {
+      "name": "dotted-name guard",
+      "values": "fqdn.indexOf('.') == -1 returns null"
+     },
+     {
+      "name": "ignore list",
+      "values": "_ignoreClass (when defined and truthy) else gs.getProperty('sn_sec_cmn.ignoreCIClass', ''); applied as sys_class_name NOT IN <list>"
+     },
+     {
+      "name": "search table and field",
+      "values": "GlideRecord('cmdb_ci_hardware'), addQuery('fqdn', <trimmed lower-cased DNS>)"
+     },
+     {
+      "name": "tie-break comparison",
+      "values": "gr.getValue('ip_address') == ('' + sourcePayload.IP), tested only when the IP is non-empty"
+     },
+     {
+      "name": "exactly-one decision",
+      "values": "ids.length == 1, or ids.length > 1 && ipHits.length == 1; anything else null"
+     }
+    ],
+    "before": "USEM FQDN Class Match declined: classFor gave no class for the OS (multi-guess or unknown text) or no single CI of that class carried the fqdn. Before that, USEM Serial Number Class Match, USEM Serial Number Hardware Match and USEM Cisco IP Phone MAC found nothing.",
+    "after": "USEM Hostname Domain Class Match and USEM Hostname Domain Hardware Match, the hostname-plus-domain rules for CIs that carry no fqdn value at all; then USEM Layered DNS Match and the plain hostname rules.",
+    "sibling_difference": "Identical to USEM FQDN Class Match with classFor removed and the table fixed to cmdb_ci_hardware, so a CI classed differently from its OS still matches. Unlike USEM FQDN Name Hardware Match and USEM FQDN Name Broad Match it searches the fqdn field and applies the IP tie-break."
+   },
+   {
+    "order": "450",
+    "name": "USEM FQDN Name Hardware Match",
+    "purpose": "Trusts a CI whose name field holds the complete scanned FQDN (loads that named the CI with the whole string, typically the appliance domains ending in .rpg) anywhere under cmdb_ci_hardware. It sits after the fqdn-field and short-hostname rules because those cover normal naming; this one only rescues CIs that none of them can see.",
+    "reads": "Source field DNS (sourceValue). No payload field is read: neither IP nor OS influences the result.",
+    "returns": "The sys_id of the single hardware CI whose name equals the scanned FQDN; null when none or more than one carries it.",
+    "mechanics": [
+     {
+      "title": "Guard and normalise the DNS value",
+      "detail": "Returns null when sourceValue is empty or absent. Otherwise coerces it to a string, trims it and lower-cases it. The whole dotted string is kept: no first label is cut and no domain suffix is stripped."
+     },
+     {
+      "title": "Require a dotted name",
+      "detail": "Returns null when the normalised value contains no '.' character; a bare label is left to the hostname rules."
+     },
+     {
+      "title": "Build the ignored-class list",
+      "detail": "ignore is '' + _ignoreClass when that global is defined and truthy, otherwise gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). When non-empty it becomes the query condition sys_class_name NOT IN that comma-separated list."
+     },
+     {
+      "title": "Query cmdb_ci_hardware on the name field",
+      "detail": "GlideRecord('cmdb_ci_hardware'), addQuery('name', normalised FQDN), the NOT IN ignore condition when set, then query(). The whole string including the domain is compared; Hardware and every class beneath it are searched. No setLimit, no isValid() guard."
+     },
+     {
+      "title": "Take the first row with next()",
+      "detail": "If gr.next() is false the rule returns null. Otherwise match holds gr.getUniqueValue() of that first row."
+     },
+     {
+      "title": "Reject a second row with hasNext()",
+      "detail": "If gr.hasNext() is true a second CI carries the same name and the rule returns null; the scanned IP, the class or a retired status never break the tie."
+     },
+     {
+      "title": "Return the single match",
+      "detail": "match is returned only when the query produced exactly one row. No IP tie-break, OS class, retired test or twin grouping exists in this script."
+     }
+    ],
+    "declines": [
+     "sourceValue is empty or absent",
+     "the normalised DNS value contains no '.' (a bare hostname)",
+     "no CI under cmdb_ci_hardware outside the ignored classes has name equal to the scanned FQDN",
+     "two or more such CIs share that name (gr.hasNext() true), whatever their IP, class or status"
+    ],
+    "literals": [
+     {
+      "name": "dotted-name guard",
+      "values": "fqdn.indexOf('.') == -1 returns null"
+     },
+     {
+      "name": "ignore list",
+      "values": "_ignoreClass (when defined and truthy) else gs.getProperty('sn_sec_cmn.ignoreCIClass', ''); applied as sys_class_name NOT IN <list>"
+     },
+     {
+      "name": "search table and field",
+      "values": "GlideRecord('cmdb_ci_hardware'), addQuery('name', <trimmed lower-cased DNS>)"
+     },
+     {
+      "name": "exactly-one decision",
+      "values": "gr.next() must be true, then gr.hasNext() must be false; no setLimit"
+     }
+    ],
+    "before": "USEM FQDN Class Match and USEM FQDN Hardware Match found no CI with the scanned name in fqdn; USEM Hostname Domain Class Match, USEM Hostname Domain Hardware Match, USEM Layered DNS Match, USEM Hostname Class Match, USEM Hostname Hardware Match, USEM Device Name Match, USEM Management Interface Match and USEM Network Interface Name Match compared the short hostname or its labels and found nothing.",
+    "after": "USEM Load Balancer Member Match and USEM Load Balancer Service Match, then the IP rules (USEM IP Class Match, USEM IP Hardware Match, USEM IP Adapter Match, USEM IP Layered Match), and finally USEM FQDN Name Broad Match, which repeats this name search on the whole cmdb_ci table. The script header names only the IP rules and the broad match as followers.",
+    "sibling_difference": "Searches the name field, not fqdn, and only under cmdb_ci_hardware; exactly-one is decided by next()/hasNext() with no IP tie-break and no OS involvement. Identical to USEM FQDN Name Broad Match except for the table."
+   },
+   {
+    "order": "850",
+    "name": "USEM FQDN Name Broad Match",
+    "purpose": "The last USEM rule and the only one that searches the root cmdb_ci table: a CI whose name is the complete scanned FQDN in any class (a virtual machine instance or another logical CI), still requiring a single row outside the ignored classes. It runs last so every more precise rule has had its chance.",
+    "reads": "Source field DNS (sourceValue). No payload field is read: neither IP nor OS influences the result.",
+    "returns": "The sys_id of the single cmdb_ci row, in any class not on the ignore list, whose name equals the scanned FQDN; null when none or the name is shared.",
+    "mechanics": [
+     {
+      "title": "Guard and normalise the DNS value",
+      "detail": "Returns null when sourceValue is empty or absent. Otherwise coerces it to a string, trims it and lower-cases it. The whole dotted string is kept: no first label is cut and no domain suffix is stripped."
+     },
+     {
+      "title": "Require a dotted name",
+      "detail": "Returns null when the normalised value contains no '.' character; a bare label is left to the hostname rules."
+     },
+     {
+      "title": "Build the ignored-class list",
+      "detail": "ignore is '' + _ignoreClass when that global is defined and truthy, otherwise gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). When non-empty it becomes the query condition sys_class_name NOT IN that comma-separated list."
+     },
+     {
+      "title": "Query the root cmdb_ci table on name",
+      "detail": "GlideRecord('cmdb_ci'), addQuery('name', normalised FQDN), the NOT IN ignore condition when set, then query(). Every class is searched, hardware and logical alike; only the ignore list keeps placeholder classes out. No setLimit, no isValid() guard."
+     },
+     {
+      "title": "Take the first row with next()",
+      "detail": "If gr.next() is false the rule returns null. Otherwise match holds gr.getUniqueValue() of that first row."
+     },
+     {
+      "title": "Reject a second row with hasNext()",
+      "detail": "If gr.hasNext() is true a second CI of any class carries the same name and the rule returns null; the scanned IP, the class or a retired status never break the tie."
+     },
+     {
+      "title": "Return the single match",
+      "detail": "match is returned only when the query produced exactly one row. No IP tie-break, OS class, retired test or twin grouping exists in this script."
+     }
+    ],
+    "declines": [
+     "sourceValue is empty or absent",
+     "the normalised DNS value contains no '.' (a bare hostname)",
+     "no cmdb_ci row outside the ignored classes has name equal to the scanned FQDN",
+     "two or more cmdb_ci rows share that name (gr.hasNext() true), whatever their class, IP or status"
+    ],
+    "literals": [
+     {
+      "name": "dotted-name guard",
+      "values": "fqdn.indexOf('.') == -1 returns null"
+     },
+     {
+      "name": "ignore list",
+      "values": "_ignoreClass (when defined and truthy) else gs.getProperty('sn_sec_cmn.ignoreCIClass', ''); applied as sys_class_name NOT IN <list>"
+     },
+     {
+      "name": "search table and field",
+      "values": "GlideRecord('cmdb_ci'), addQuery('name', <trimmed lower-cased DNS>)"
+     },
+     {
+      "name": "exactly-one decision",
+      "values": "gr.next() must be true, then gr.hasNext() must be false; no setLimit"
+     }
+    ],
+    "before": "Every hardware-scoped USEM rule declined for this host, including USEM FQDN Name Hardware Match, which searched the same full-FQDN name but only under cmdb_ci_hardware, and the IP rules USEM IP Class Match, USEM IP Hardware Match, USEM IP Adapter Match and USEM IP Layered Match.",
+    "after": "The out-of-box Qualys rules: Qualys Host ID, Cloud Resource Id, FQDN, NetBIOS and DNS (the out-of-box IP rules are inactive by default). No USEM rule follows.",
+    "sibling_difference": "Same script as USEM FQDN Name Hardware Match with cmdb_ci in place of cmdb_ci_hardware: the only one of the four that can return a non-hardware CI. Like that sibling it ignores OS and IP entirely and decides with next()/hasNext()."
+   }
+  ],
+  "shared": [
+   {
+    "helper": "classFor(os) - guards and matching method",
+    "behaviour": "Defined only in USEM FQDN Class Match. Returns '' for an empty or absent OS. Lower-cases the string and returns '' when split('/') yields more than two parts (three or more guesses). Otherwise runs substring tests (indexOf) in a fixed order and returns the class of the first keyword found; no keyword gives ''. First keyword wins, so the test order matters."
+   },
+   {
+    "helper": "classFor(os) - keyword table in test order, part 1",
+    "behaviour": "esx -> cmdb_ci_esx_server; windows -> cmdb_ci_win_server when 'server' is also present in the text, else cmdb_ci_computer; aix -> cmdb_ci_aix_server; solaris, sunos -> cmdb_ci_solaris_server; hp-ux -> cmdb_ci_hpux_server; netapp, ontap -> cmdb_ci_storage_server; printer, laserjet, jetdirect -> cmdb_ci_printer."
+   },
+   {
+    "helper": "classFor(os) - keyword table in test order, part 2",
+    "behaviour": "red hat, linux, centos, ubuntu, suse, debian, fedora, euleros, oracle enterprise, amazon -> cmdb_ci_linux_server; nx-os, catos, cisco -> cmdb_ci_netgear; anything else -> '' and the rule declines. Because esx and windows are tested before the Linux keywords, a two-guess string such as 'Windows / Linux' lands on cmdb_ci_computer."
+   },
+   {
+    "helper": "Breadth of cmdb_ci_computer",
+    "behaviour": "The windows branch without 'server' returns cmdb_ci_computer, the parent of every server class, so a Windows workstation fingerprint searches computers and every server class beneath; the OS-class isolation (a Red Hat host never landing on a Windows Server) holds only between the server classes."
+   },
+   {
+    "helper": "Multi-guess OS rule",
+    "behaviour": "s.split('/').length > 2 -> ''. Two guesses joined by one '/' are still classified by keyword; three or more guesses (two or more '/' characters) give no class, and USEM FQDN Class Match returns null without querying, handing the host to USEM FQDN Hardware Match."
+   },
+   {
+    "helper": "Ignored classes (sn_sec_cmn.ignoreCIClass)",
+    "behaviour": "All four scripts: ignore = '' + _ignoreClass when that global is defined and truthy, else gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). When non-empty every query adds sys_class_name NOT IN <the comma-separated list>. Exact class names only, no hierarchy; the property value is passed straight into the NOT IN operator."
+   },
+   {
+    "helper": "DNS normalisation and dotted-name guard",
+    "behaviour": "All four scripts: null on an empty or absent sourceValue; fqdn = ('' + sourceValue).trim().toLowerCase(); null when fqdn.indexOf('.') == -1. The whole string is compared with the CI field; there is no first-label extraction, no suffix stripping and no domain list."
+   },
+   {
+    "helper": "IP duplicate break (pickFqdn)",
+    "behaviour": "USEM FQDN Class Match and USEM FQDN Hardware Match: ip = '' + sourcePayload.IP or ''. Query fqdn = the normalised DNS value; while next() push every sys_id to ids and, when ip is set and getValue('ip_address') == ip, also to ipHits. Return ids[0] when ids.length == 1; ipHits[0] when ids.length > 1 and ipHits.length == 1; else null. The IP never widens the search, it only picks one duplicate."
+   },
+   {
+    "helper": "Exactly-one by next()/hasNext()",
+    "behaviour": "USEM FQDN Name Hardware Match and USEM FQDN Name Broad Match: after query(), a false next() returns null; the first row's sys_id is held; a true hasNext() returns null; otherwise the held sys_id is returned. No setLimit, no IP tie-break, no ranking of any kind."
+   },
+   {
+    "helper": "Table validity guard",
+    "behaviour": "The two fqdn-field rules create the GlideRecord and return null when gr.isValid() is false (the class table classFor named does not exist). The two name-field rules query fixed tables and carry no such guard."
+   },
+   {
+    "helper": "agrees(), retired(), narrow(), isRealServer()",
+    "behaviour": "Not present in any of the four scripts. None tests install_status, operational_status or life cycle stage, none compares the CI class with the OS class after the query, none groups twin records by name and none walks load balancer pools. A retired duplicate counts exactly like a live one and can only be separated by the scanned IP in the two fqdn-field rules."
+   },
+   {
+    "helper": "Placeholder serial list",
+    "behaviour": "Not present: none of the four scripts reads SERIAL_NUMBER or holds a serial marker list."
+   },
+   {
+    "helper": "Loopback and link-local guard",
+    "behaviour": "Not present: the IP is never a search key in these scripts, so no loopback or link-local check exists; an absent IP only removes the duplicate tie-break in the two fqdn-field rules."
+   }
+  ],
+  "issues": [
+   "USEM FQDN Class Match, before: said this is the first rule that reads the DNS name; USEM Cisco IP Phone MAC already takes the DNS field as sourceValue (looking for the sep label), so reworded to the first rule that compares the DNS name with a CI name field.",
+   "USEM FQDN Name Broad Match, purpose: 'the only one allowed outside the hardware tree' overstates it; USEM Cisco IP Phone MAC searches cmdb_ci_ip_phone and USEM Load Balancer Service Match searches cmdb_ci_lb_service, both outside cmdb_ci_hardware; reworded to the only rule that searches the root cmdb_ci table.",
+   "USEM FQDN Class Match, mechanics 'Derive the class from the scanned OS': the empty-OS guard (!os returns '') was missing; added, plus an 'empty-OS guard' literal.",
+   "USEM FQDN Class Match, after: USEM Layered DNS Match was missing between the hostname-plus-domain rules and the plain hostname rules; added.",
+   "USEM FQDN Class Match, mechanics 'No retired, twin or agreement handling': added that the script never compares the CI's sys_class_name with the OS class after the query.",
+   "USEM FQDN Class Match and USEM FQDN Hardware Match, mechanics 'Collect every hit': named getUniqueValue as the source of the sys_id and stated that the ip_address comparison is a plain string compare with no normalisation of the CI value.",
+   "All four rules, mechanics 'Guard and normalise the DNS value' and the first decline: '!sourceValue' also catches an absent value, so 'empty' became 'empty or absent' (same in the shared DNS normalisation helper and the classFor helper).",
+   "USEM FQDN Name Hardware Match, before: 'compared the short hostname or interface names' was loose; the interface rules read labels of the DNS name, so reworded to 'the short hostname or its labels'.",
+   "Shared, IP duplicate break: 'Query fqdn = name' could be read as the name field; reworded to the normalised DNS value.",
+   "Shared: added a 'Breadth of cmdb_ci_computer' helper noting that cmdb_ci_computer is the parent of the server classes, so a Windows workstation fingerprint searches computers and every server class beneath; the Red Hat versus Windows Server isolation in the purpose holds only between the server classes."
+  ]
+ },
+ "hostdomain": {
+  "rules": [
+   {
+    "order": "300",
+    "name": "USEM Hostname Domain Class Match",
+    "purpose": "Trusts the scanned DNS name split into a short hostname and a domain, and requires the CI's own fqdn or dns_domain to agree with that domain, searching only the CMDB class the scanned OS text implies so a namesake in another domain or class is never taken. It sits right after the exact-fqdn rules because it is the strictest name-based search that still tolerates a CI that never had the fqdn copied into its name.",
+    "reads": "DNS (sourceValue); payload OS (for the class) and payload IP (tie-break only); the framework variable _ignoreClass when supplied, otherwise the property sn_sec_cmn.ignoreCIClass. The rule argument is not used.",
+    "returns": "The sys_id of the one CI of the OS-implied class (subclasses included) named with the short hostname whose fqdn or dns_domain agrees with the scanned domain, or the single agreeing CI carrying the scanned IP when several agree; null otherwise.",
+    "mechanics": [
+     {
+      "title": "Source guard and normalisation",
+      "detail": "Returns null when sourceValue (the DNS field) is empty. Otherwise coerces it to a string, trims it and lower-cases it; sample 'ah-1047132-001.sdi.corp.bankofamerica.com'."
+     },
+     {
+      "title": "Split into short hostname and domain",
+      "detail": "Finds the first dot. When there is none or it is the first character the rule returns null (a bare label is left to the hostname rules). host is the text before the first dot ('ah-1047132-001'), domain everything after it ('sdi.corp.bankofamerica.com')."
+     },
+     {
+      "title": "Read the IP and the ignore list",
+      "detail": "ip is the payload IP as a string, or empty when absent. ignore is the framework variable _ignoreClass when defined and non-empty, otherwise the property sn_sec_cmn.ignoreCIClass, a comma list of exact class names."
+     },
+     {
+      "title": "Class from the scanned OS",
+      "detail": "classFor gives no class for an empty OS or three or more '/'-separated guesses; otherwise ordered keyword tests pick ESX, Windows Server or Computer, AIX, Solaris, HP-UX, Storage Server, Printer, Linux Server or Network Gear. No class returns null."
+     },
+     {
+      "title": "Query the class table by short name",
+      "detail": "GlideRecord on the chosen class table (its subclasses included by the table hierarchy); an invalid table returns null. Query: name equals host (case-insensitive), and sys_class_name NOT IN the ignore list when that list is non-empty. No setLimit."
+     },
+     {
+      "title": "Walk every row and test domain agreement",
+      "detail": "Each row's fqdn and dns_domain are read as lower-cased strings. A row agrees when fqdn equals the full scanned name, or dns_domain equals domain, or fqdn starts with host plus a dot and contains domain after position 0; agreeing rows are kept in good."
+     },
+     {
+      "title": "Collect IP hits in the same pass",
+      "detail": "An agreeing row whose ip_address equals the payload IP exactly (plain string compare, no normalisation) is also added to ipHits; nothing is added when the payload carries no IP."
+     },
+     {
+      "title": "Decide",
+      "detail": "Exactly one entry in good: return its sys_id. Two or more in good and exactly one in ipHits: return that one. Anything else (no agreeing CI, or a tie the IP cannot break) returns null. The count comes from the collected arrays, not from next then hasNext."
+     }
+    ],
+    "declines": [
+     "sourceValue (the DNS field) is empty",
+     "The lower-cased name has no dot, or its first character is a dot (bare label left to the hostname rules)",
+     "classFor gives no class: OS empty, OS with three or more '/'-separated guesses, or OS text matching none of the keywords",
+     "The GlideRecord for the OS-implied class table is not valid",
+     "No CI of that class (ignore-listed classes excluded) named with the short hostname has fqdn or dns_domain agreeing with the scanned domain",
+     "Two or more CIs agree and the scanned IP does not single out exactly one of them (no payload IP, no ip_address hit, or several hits)"
+    ],
+    "literals": [
+     {
+      "name": "classFor keyword tests, in order",
+      "values": "'esx' -> cmdb_ci_esx_server; 'windows' -> cmdb_ci_win_server when 'server' also present, else cmdb_ci_computer; 'aix' -> cmdb_ci_aix_server; 'solaris', 'sunos' -> cmdb_ci_solaris_server; 'hp-ux' -> cmdb_ci_hpux_server; 'netapp', 'ontap' -> cmdb_ci_storage_server; 'printer', 'laserjet', 'jetdirect' -> cmdb_ci_printer; 'red hat', 'linux', 'centos', 'ubuntu', 'suse', 'debian', 'fedora', 'euleros', 'oracle enterprise', 'amazon' -> cmdb_ci_linux_server; 'nx-os', 'catos', 'cisco' -> cmdb_ci_netgear; otherwise ''"
+     },
+     {
+      "name": "Multi-guess OS threshold",
+      "values": "s.split('/').length > 2 returns '' (two or more '/' characters, i.e. three or more guesses)"
+     },
+     {
+      "name": "Dot guard",
+      "values": "full.indexOf('.') < 1 returns null"
+     },
+     {
+      "name": "Ignore list source",
+      "values": "_ignoreClass when defined and truthy (coerced with '' +), else gs.getProperty('sn_sec_cmn.ignoreCIClass', '')"
+     },
+     {
+      "name": "Query on the class table",
+      "values": "addQuery('name', host); addQuery('sys_class_name', 'NOT IN', ignore) only when ignore is non-empty; no setLimit"
+     },
+     {
+      "name": "Domain agreement test",
+      "values": "cifqdn == full || cidom == domain || (cifqdn && cifqdn.indexOf(host + '.') == 0 && cifqdn.indexOf(domain) > 0)"
+     },
+     {
+      "name": "IP tie-break",
+      "values": "ip && gr.getValue('ip_address') == ip collected into ipHits; used only when good.length > 1 && ipHits.length == 1"
+     },
+     {
+      "name": "CI fields used",
+      "values": "query terms: name, sys_class_name; read per row: fqdn, dns_domain, ip_address and the sys_id via getUniqueValue"
+     },
+     {
+      "name": "Sample payload in the header",
+      "values": "ID 35832680; IP 171.128.225.96; TRACKING_METHOD AGENT; OS 'Red Hat Enterprise Linux 9.8'; DNS ah-1047132-001.sdi.corp.bankofamerica.com; QG_HOSTID 633769a4-0139-0002-e352-005056bf41ea; outcome: the Linux Server named ah-1047132-001 with dns_domain sdi.corp.bankofamerica.com"
+     }
+    ],
+    "before": "The FQDN rules (the script names them only as 'the FQDN rules') searched the fqdn field for the exact scanned name and returned null because the CI carries no exact fqdn value; the host reaches this rule with a dotted DNS name and an OS that maps to a class.",
+    "after": "USEM Hostname Domain Hardware Match repeats the same short-name-plus-domain search across the whole hardware tree; then USEM Layered DNS Match reads the discovery DNS records; then the plain hostname rules accept a unique short name without domain evidence.",
+    "sibling_difference": "Differs from USEM Hostname Domain Hardware Match only in reading the payload OS, deriving a class with classFor and querying that class table alone, declining outright when the OS yields no class; normalisation, ignore list, agreement test, IP tie-break and decision are identical."
+   },
+   {
+    "order": "310",
+    "name": "USEM Hostname Domain Hardware Match",
+    "purpose": "The same short-hostname-plus-domain evidence, but across all of cmdb_ci_hardware, for CIs classed generically (Server, Computer) or differently from what the scanned OS implies. It follows the class-scoped variant so a class-consistent hit always wins first, and precedes the layered DNS and plain hostname rules, which need less evidence.",
+    "reads": "DNS (sourceValue); payload IP (tie-break only); the framework variable _ignoreClass when supplied, otherwise the property sn_sec_cmn.ignoreCIClass. The OS is not read. The rule argument is not used.",
+    "returns": "The sys_id of the one hardware CI (any class under cmdb_ci_hardware not on the ignore list) named with the short hostname whose fqdn or dns_domain agrees with the scanned domain, or the single agreeing CI carrying the scanned IP when several agree; null otherwise.",
+    "mechanics": [
+     {
+      "title": "Source guard and normalisation",
+      "detail": "Returns null when sourceValue (the DNS field) is empty. Otherwise coerces it to a string, trims it and lower-cases it; sample 'lrche01xtrapd01.sdi.corp.bankofamerica.com'."
+     },
+     {
+      "title": "Split into short hostname and domain",
+      "detail": "Finds the first dot. When there is none or it is the first character the rule returns null (a bare label is left to the hostname rules). host is the text before the first dot ('lrche01xtrapd01'), domain everything after it ('sdi.corp.bankofamerica.com')."
+     },
+     {
+      "title": "Read the IP and the ignore list",
+      "detail": "ip is the payload IP as a string, or empty when absent. ignore is the framework variable _ignoreClass when defined and non-empty, otherwise the property sn_sec_cmn.ignoreCIClass, a comma list of exact class names. No class is derived; the OS is never read."
+     },
+     {
+      "title": "Query cmdb_ci_hardware by short name",
+      "detail": "GlideRecord on cmdb_ci_hardware (an invalid table returns null), so every hardware subclass is searched regardless of the scanned OS. Query: name equals host (case-insensitive); sys_class_name NOT IN ignore when non-empty. No setLimit."
+     },
+     {
+      "title": "Walk every row and test domain agreement",
+      "detail": "Each row's fqdn and dns_domain are read as lower-cased strings. A row agrees when fqdn equals the full scanned name, or dns_domain equals domain, or fqdn starts with host plus a dot and contains domain after position 0; agreeing rows are kept in good."
+     },
+     {
+      "title": "Collect IP hits in the same pass",
+      "detail": "An agreeing row whose ip_address equals the payload IP exactly (plain string compare, no normalisation) is also added to ipHits; nothing is added when the payload carries no IP."
+     },
+     {
+      "title": "Decide",
+      "detail": "Exactly one entry in good: return its sys_id. Two or more in good and exactly one in ipHits: return that one. Anything else (no agreeing CI, or a tie the IP cannot break) returns null. The count comes from the collected arrays, not from next then hasNext."
+     }
+    ],
+    "declines": [
+     "sourceValue (the DNS field) is empty",
+     "The lower-cased name has no dot, or its first character is a dot (bare label left to the hostname rules)",
+     "The GlideRecord for cmdb_ci_hardware is not valid",
+     "No hardware CI (ignore-listed classes excluded) named with the short hostname has fqdn or dns_domain agreeing with the scanned domain",
+     "Two or more hardware CIs agree and the scanned IP does not single out exactly one of them (no payload IP, no ip_address hit, or several hits)"
+    ],
+    "literals": [
+     {
+      "name": "Table searched",
+      "values": "cmdb_ci_hardware (hard-coded; the OS is not consulted)"
+     },
+     {
+      "name": "Dot guard",
+      "values": "full.indexOf('.') < 1 returns null"
+     },
+     {
+      "name": "Ignore list source",
+      "values": "_ignoreClass when defined and truthy (coerced with '' +), else gs.getProperty('sn_sec_cmn.ignoreCIClass', '')"
+     },
+     {
+      "name": "Query on cmdb_ci_hardware",
+      "values": "addQuery('name', host); addQuery('sys_class_name', 'NOT IN', ignore) only when ignore is non-empty; no setLimit"
+     },
+     {
+      "name": "Domain agreement test",
+      "values": "cifqdn == full || cidom == domain || (cifqdn && cifqdn.indexOf(host + '.') == 0 && cifqdn.indexOf(domain) > 0)"
+     },
+     {
+      "name": "IP tie-break",
+      "values": "ip && gr.getValue('ip_address') == ip collected into ipHits; used only when good.length > 1 && ipHits.length == 1"
+     },
+     {
+      "name": "CI fields used",
+      "values": "query terms: name, sys_class_name; read per row: fqdn, dns_domain, ip_address and the sys_id via getUniqueValue"
+     },
+     {
+      "name": "Sample payload in the header",
+      "values": "ID 35884392; IP 171.128.140.192; TRACKING_METHOD IP; OS 'Ubuntu/Linux'; DNS lrche01xtrapd01.sdi.corp.bankofamerica.com; outcome: the CI named lrche01xtrapd01 in the generic Server class whose fqdn is the scanned name (the stage note also cites dns_domain sdi.corp.bankofamerica.com), the only agreeing row"
+     }
+    ],
+    "before": "USEM Hostname Domain Class Match ran the identical hostname-plus-domain test inside the class the OS implies (Linux Server for 'Ubuntu/Linux') and declined because the CI sits in a generic class such as Server or Computer, in a class different from the OS, or because the OS yielded no class; earlier, the FQDN rules found no exact fqdn value.",
+    "after": "USEM Layered DNS Match reads the discovery DNS records, then the plain hostname rules accept a unique short name without domain evidence.",
+    "sibling_difference": "Identical normalisation, ignore list, agreement test, IP tie-break and decision as USEM Hostname Domain Class Match, but it has no classFor, never reads the OS and searches cmdb_ci_hardware so any hardware subclass can match; it is the wider, later fallback of the pair."
+   }
+  ],
+  "shared": [
+   {
+    "helper": "classFor(os) \u2014 guards and order (USEM Hostname Domain Class Match only)",
+    "behaviour": "Present only in USEM Hostname Domain Class Match; the Hardware rule has no classFor. An empty OS gives no class. The text is lower-cased and split on '/': more than two parts (two or more slashes, i.e. three or more guesses) gives no class. Otherwise substring tests run in a fixed order and the first hit wins; no hit gives no class. An empty result makes the rule return null."
+   },
+   {
+    "helper": "classFor(os) \u2014 mapping, part 1",
+    "behaviour": "'esx' -> cmdb_ci_esx_server; 'windows' -> cmdb_ci_win_server when the text also contains 'server', otherwise cmdb_ci_computer; 'aix' -> cmdb_ci_aix_server; 'solaris' or 'sunos' -> cmdb_ci_solaris_server; 'hp-ux' -> cmdb_ci_hpux_server; 'netapp' or 'ontap' -> cmdb_ci_storage_server; 'printer', 'laserjet' or 'jetdirect' -> cmdb_ci_printer."
+   },
+   {
+    "helper": "classFor(os) \u2014 mapping, part 2",
+    "behaviour": "'red hat', 'linux', 'centos', 'ubuntu', 'suse', 'debian', 'fedora', 'euleros', 'oracle enterprise' or 'amazon' -> cmdb_ci_linux_server; 'nx-os', 'catos' or 'cisco' -> cmdb_ci_netgear; anything else -> no class. Because 'esx' and 'windows' are tested first, 'Windows Server 2016 Standard' is a Windows Server and 'VMware ESXi 7.0.3' an ESX Server; 'Ubuntu/Linux' (one slash) is a Linux Server."
+   },
+   {
+    "helper": "Multi-guess OS rule",
+    "behaviour": "s.split('/').length > 2: an OS string with two or more '/' characters (three or more guesses, the fingerprint of an unauthenticated scan) is unusable and yields no class, so USEM Hostname Domain Class Match declines and leaves the host to USEM Hostname Domain Hardware Match. One '/' (two guesses, e.g. 'Ubuntu/Linux') is still classified by the keyword tests."
+   },
+   {
+    "helper": "Name normalisation (both scripts)",
+    "behaviour": "full = sourceValue coerced to string, trimmed, lower-cased. dot = position of the first '.'; dot < 1 (no dot, or a leading dot) returns null. host = text before the first dot; domain = everything after the first dot, so every remaining label is the domain. Nothing else is stripped: no suffix list, no marker keywords, no serial handling in either script."
+   },
+   {
+    "helper": "Ignore list (both scripts)",
+    "behaviour": "ignore = the framework variable _ignoreClass when it is defined and truthy (coerced to string), otherwise gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). When non-empty it is applied as sys_class_name NOT IN ignore on the query, so it compares the exact class name of each row (no class hierarchy). When empty no class filter is applied."
+   },
+   {
+    "helper": "pickCombo(table) (both scripts, inline function)",
+    "behaviour": "GlideRecord on the table (invalid table -> null); addQuery name = host (case-insensitive); the ignore filter; query(); then a while/next() pass over every row, no setLimit and no hasNext. Rows passing the domain test go to good; those also carrying the scanned IP go to ipHits. Returns good[0] when good has one entry, ipHits[0] when good has several and ipHits exactly one, else null."
+   },
+   {
+    "helper": "Domain agreement test (inline; there is no named agrees())",
+    "behaviour": "fqdn and dns_domain are read with getValue, coerced with '' + and lower-cased, so an empty field reads as the text 'null' and never equals a real name or domain. A row agrees when fqdn equals the whole scanned name, or dns_domain equals the scanned domain, or fqdn begins with host plus '.' and contains the domain after position 0 (its truthiness guard never fails: the coerced text is never empty)."
+   },
+   {
+    "helper": "IP tie-break (both scripts)",
+    "behaviour": "ip = payload IP coerced to string, or '' when absent. During the row pass an agreeing row whose ip_address equals ip (string equality) is added to ipHits. The tie-break is consulted only when good holds two or more entries: exactly one ipHit returns it; zero or several ipHits, or no payload IP, decline. A single agreeing CI is returned without looking at the IP."
+   },
+   {
+    "helper": "Helpers absent from these two scripts",
+    "behaviour": "agrees(), retired(), narrow(), isRealServer(), a placeholder serial list and a loopback/link-local guard do not appear in either script. Neither rule reads SERIAL_NUMBER, filters retired CIs, treats twin records specially, or re-checks the found CI's class beyond the table it queries; the class check is the search table itself, with subclasses included by the table hierarchy."
+   }
+  ],
+  "issues": [
+   "USEM Hostname Domain Class Match, mechanics 'Class from the scanned OS': the bullet omitted the empty-OS guard (classFor returns '' before any keyword test when os is falsy); added so the step matches the code and the declines list.",
+   "USEM Hostname Domain Hardware Match, mechanics 'Query cmdb_ci_hardware by short name': the bullet omitted the gr.isValid() guard that returns null for an invalid table, which the script performs and the declines list already cited; added.",
+   "Both rules, literal 'CI fields read': name and sys_class_name are query terms, not values read from the row; renamed to 'CI fields used' and split into query terms (name, sys_class_name) and per-row reads (fqdn, dns_domain, ip_address, sys_id via getUniqueValue).",
+   "Shared 'Domain agreement test': 'fqdn is non-empty' misdescribed the third test's guard; the code tests the truthiness of the coerced text, which is never empty because an empty field reads as 'null', so the guard never fails and only the starts-with test excludes an empty fqdn. Reworded.",
+   "Both rules, reads: added that the rule argument of process(rule, sourceValue, sourcePayload) is not used by either script (payload fields read are exactly OS and IP for the Class rule, IP only for the Hardware rule)."
+  ]
+ },
+ "layered": {
+  "rules": [
+   {
+    "order": "350",
+    "name": "USEM Layered DNS Match",
+    "purpose": "Trusts the scanned DNS name as it is kept in the discovery layered records (DNS Name -> IP Address -> Network Adapter -> CI) rather than in a name field on the CI record, so it finds hosts whose name is not written on the CI at all and resolves an alias to the real machine. It sits between the rules that read fqdn / hostname-plus-domain on the CI record itself and the plain hostname rules; the scanned OS is only a preference applied to the CI at the end of the chain, never a query filter.",
+    "reads": "Source field DNS (sourceValue); from sourcePayload only OS (class preference through classFor) and IP (tie-break between several CIs). No other payload field is read.",
+    "returns": "The sys_id of the CI at ip_address.nic.cmdb_ci of the cmdb_ip_address_dns_name row(s) whose dns_name.name equals the normalised DNS value, when exactly one such CI passes the ignore list and agrees() with the OS class; when several CIs answer to the name, the single one whose chain runs through ip_address.ip_address equal to the scanned IP; null in every other case, and null whenever the CI chosen exists on cmdb_ci_lb.",
+    "mechanics": [
+     {
+      "title": "Normalise the DNS value and guard bare labels",
+      "detail": "Declines when sourceValue is empty or absent. Coerces the DNS field to a string, trims it and lower-cases it into fqdn. Declines when the result holds no '.', a bare label being left to the hostname rules. Nothing is stripped: the whole name is matched as is."
+     },
+     {
+      "title": "Read the scanned IP for the tie-break only",
+      "detail": "ip is sourcePayload.IP coerced to a string, or an empty string when the payload has none. The address is never a filter on the query; it only decides between several CIs that answer to the same name later in the walk."
+     },
+     {
+      "title": "Load the ignored class list",
+      "detail": "Uses _ignoreClass when the framework passes it non-empty, else gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). When non-empty it is applied as a NOT IN on the class of the CI at the end of the chain, so placeholder and technical CIs are never reached."
+     },
+     {
+      "title": "Derive the preferred class from the OS",
+      "detail": "pref = classFor(sourcePayload.OS): the lower-cased OS text matched on keywords gives a class (Red Hat Enterprise Linux Server 7.9 gives cmdb_ci_linux_server). An unknown OS or three or more '/'-separated guesses give '' and then nothing is refused on class."
+     },
+     {
+      "title": "Query the DNS Name to IP Address link table",
+      "detail": "Declines when cmdb_ip_address_dns_name is not a valid table. Else addQuery('dns_name.name', fqdn), addNotNullQuery('ip_address.nic.cmdb_ci') so the chain ends on a CI, and when ignore is non-empty ip_address.nic.cmdb_ci.sys_class_name NOT IN ignore; query()."
+     },
+     {
+      "title": "Walk every row and count distinct agreeing CIs",
+      "detail": "All rows are read, no setLimit or hasNext. owner is ip_address.nic.cmdb_ci; a row failing agrees() is skipped, not counted or marked. Distinct owners count once, first kept. With ip set, a row whose ip_address.ip_address equals ip marks its owner in ipOwners."
+     },
+     {
+      "title": "One CI: return it unless it is a load balancer",
+      "detail": "When count is 1 the rule returns the first owner, but returns null when isLoadBalancer(first) finds that sys_id on cmdb_ci_lb: the name then belongs to a virtual address the balancer answers on, the host sits behind it and the load balancer rules take over."
+     },
+     {
+      "title": "Several CIs: the scanned IP breaks the tie",
+      "detail": "When count is above 1, confirmed = Object.keys(ipOwners). Exactly one CI reached through the scanned address, and not on cmdb_ci_lb, is returned. None, two or more, or a load balancer as the one confirmed CI gives null; no fitness heuristic is applied."
+     },
+     {
+      "title": "No CI: decline",
+      "detail": "count 0 (no DNS Name row for the name, no CI at the end of any chain, every CI on the ignore list, or every CI of a class the OS rules out) returns null and the host goes on to the next rule."
+     }
+    ],
+    "declines": [
+     "sourceValue is empty or absent",
+     "the trimmed, lower-cased value holds no '.' (a bare label, left to the hostname rules)",
+     "cmdb_ip_address_dns_name is not a valid table on the instance",
+     "no cmdb_ip_address_dns_name row has dns_name.name equal to the value with a CI at ip_address.nic.cmdb_ci",
+     "every CI reached is of a class on sn_sec_cmn.ignoreCIClass (or _ignoreClass) or fails agrees() against the class the OS implies",
+     "exactly one CI is reached but its sys_id exists on cmdb_ci_lb (load balancer device)",
+     "several CIs answer to the name and the payload has no IP, or none of their chains runs through ip_address.ip_address equal to the scanned IP",
+     "several CIs answer to the name and two or more of them are reached through the scanned IP",
+     "several CIs answer to the name and the single one reached through the scanned IP exists on cmdb_ci_lb"
+    ],
+    "literals": [
+     {
+      "name": "Sample payload in the header",
+      "values": "ID \"42773078\", IP \"167.202.60.26\", TRACKING_METHOD \"IP\", OS \"Red Hat Enterprise Linux Server 7.9\", DNS \"hklvteqoradbp3.hk.baml.com\", QG_HOSTID \"6337dede-02e7-0002-ad2c-0050569765df\""
+     },
+     {
+      "name": "Sample outcome in the header and walk note",
+      "values": "the Linux Server \"hklvteqoradbp3\", reached through DNS Name \"hklvteqoradbp3.hk.baml.com\" -> IP Address \"167.202.60.26\" -> adapter \"eth0\"; the walk note names the Load Balancer \"hklvf5lb01\" as the refused case"
+     },
+     {
+      "name": "Value normalisation",
+      "values": "('' + sourceValue).trim().toLowerCase(); bare-label guard fqdn.indexOf('.') == -1 returns null"
+     },
+     {
+      "name": "Tie-break address",
+      "values": "ip = sourcePayload.IP ? '' + sourcePayload.IP : ''"
+     },
+     {
+      "name": "Ignore list source",
+      "values": "(typeof _ignoreClass != 'undefined' && _ignoreClass) ? '' + _ignoreClass : gs.getProperty('sn_sec_cmn.ignoreCIClass', '')"
+     },
+     {
+      "name": "Multi-guess OS threshold in classFor",
+      "values": "s.split('/').length > 2 returns '' (three or more '/'-separated guesses)"
+     },
+     {
+      "name": "classFor keyword to class mapping, in test order",
+      "values": "'esx' -> cmdb_ci_esx_server; 'windows' -> cmdb_ci_win_server when 'server' also present, else cmdb_ci_computer; 'aix' -> cmdb_ci_aix_server; 'solaris' | 'sunos' -> cmdb_ci_solaris_server; 'hp-ux' -> cmdb_ci_hpux_server; 'netapp' | 'ontap' -> cmdb_ci_storage_server; 'printer' | 'laserjet' | 'jetdirect' -> cmdb_ci_printer; 'red hat' | 'linux' | 'centos' | 'ubuntu' | 'suse' | 'debian' | 'fedora' | 'euleros' | 'oracle enterprise' | 'amazon' -> cmdb_ci_linux_server; 'nx-os' | 'catos' | 'cisco' -> cmdb_ci_netgear; otherwise ''"
+     },
+     {
+      "name": "Appliance classes a Linux fingerprint agrees with (agrees)",
+      "values": "cmdb_ci_netgear, cmdb_ci_lb, cmdb_ci_storage_server (the CI class itself or any class above it in parentsOf(cls), and pref == 'cmdb_ci_linux_server')"
+     },
+     {
+      "name": "Class hierarchy source (parentsOf)",
+      "values": "sys_db_object queried by name, following super_class.name upwards"
+     },
+     {
+      "name": "Query table and dot-walked fields",
+      "values": "cmdb_ip_address_dns_name: dns_name.name = fqdn; ip_address.nic.cmdb_ci NOT NULL; ip_address.nic.cmdb_ci.sys_class_name NOT IN ignore; ip_address.ip_address compared to ip"
+     },
+     {
+      "name": "Load balancer refusal",
+      "values": "isLoadBalancer(id): GlideRecord('cmdb_ci_lb').isValid() && get(id)"
+     },
+     {
+      "name": "Decision thresholds",
+      "values": "count == 1 -> first unless load balancer; count > 1 -> Object.keys(ipOwners).length == 1 and not a load balancer; else null"
+     }
+    ],
+    "before": "USEM FQDN Class Match, USEM FQDN Hardware Match, USEM Hostname Domain Class Match and USEM Hostname Domain Hardware Match (the FQDN and hostname-plus-domain rules) searched name fields stored on the CI record itself and returned null, so the host reaching this rule has no single CI carrying the scanned name in those fields; this rule is the only way to find a host whose name lives solely in the discovery DNS Name records or is an alias of the device.",
+    "after": "USEM Hostname Class Match and USEM Hostname Hardware Match (the plain hostname rules), then USEM FQDN Name Hardware Match. When the chain ends on a load balancer device this rule declines on purpose so that USEM Load Balancer Member Match and USEM Load Balancer Service Match take over.",
+    "sibling_difference": "Unlike USEM FQDN Class Match, USEM FQDN Hardware Match, USEM Hostname Domain Class Match and USEM Hostname Domain Hardware Match, which query a CI table (the class the OS implies, or cmdb_ci_hardware) on fqdn or name, walk every row and break a tie by the ip_address field of the CI record, and unlike USEM Hostname Class Match and USEM Hostname Hardware Match, which query name and decide exactly-one by next() then hasNext() with no tie-break, this rule queries cmdb_ip_address_dns_name and dot-walks to the CI: the OS class is never the queried table but a preference applied by agrees() to the CI reached (shared among the name rules only with USEM Hostname Hardware Match); an OS that gives no class does not decline here as it does in the Class rules; the tie is broken by ip_address.ip_address on the IP Address record in the chain; an alias resolves to the real machine; and a load balancer device at the end of the chain is refused, which no other name rule does. It has no retired(), narrow() or isRealServer() handling."
+   }
+  ],
+  "shared": [
+   {
+    "helper": "classFor(os) - guards and first tests",
+    "behaviour": "Empty OS gives ''. Lower-cases the text; more than two '/'-separated parts (three or more guesses from an unauthenticated scan) gives ''. Substring tests in order: 'esx' -> cmdb_ci_esx_server; 'windows' -> cmdb_ci_win_server when 'server' is also present, else cmdb_ci_computer; 'aix' -> cmdb_ci_aix_server; 'solaris' or 'sunos' -> cmdb_ci_solaris_server; 'hp-ux' -> cmdb_ci_hpux_server."
+   },
+   {
+    "helper": "classFor(os) - remaining tests",
+    "behaviour": "'netapp' or 'ontap' -> cmdb_ci_storage_server; 'printer', 'laserjet' or 'jetdirect' -> cmdb_ci_printer; 'red hat', 'linux', 'centos', 'ubuntu', 'suse', 'debian', 'fedora', 'euleros', 'oracle enterprise' or 'amazon' -> cmdb_ci_linux_server; 'nx-os', 'catos' or 'cisco' -> cmdb_ci_netgear; no keyword -> ''. The first test that hits wins, so 'esx' beats 'linux' and 'windows' beats every later word."
+   },
+   {
+    "helper": "parentsOf(table)",
+    "behaviour": "Returns [table, parent, grandparent, ...]: reads sys_db_object by name and follows super_class.name upwards until a class with no super_class or no sys_db_object row. Used by agrees() for the sub-class, parent and appliance tests."
+   },
+   {
+    "helper": "agrees(cls)",
+    "behaviour": "True when pref is '' or cls equals pref. Else above = parentsOf(cls), which holds cls itself; true when pref is cmdb_ci_linux_server and above holds cmdb_ci_netgear, cmdb_ci_lb or cmdb_ci_storage_server (an appliance reporting its Linux); true when above holds pref (cls is a sub-class of pref) or parentsOf(pref) holds cls (cls a parent of pref). Any other class is a namesake and fails."
+   },
+   {
+    "helper": "isLoadBalancer(id)",
+    "behaviour": "GlideRecord on cmdb_ci_lb; true when the table is valid and get(id) finds the CI there (a load balancer device or sub-class); when cmdb_ci_lb is not a valid table the test is false and the CI is returned. Applied to the CI about to be returned in both the single-CI branch and the tie-break branch; a hit makes the rule return null so the load balancer rules take over."
+   },
+   {
+    "helper": "Ignore list",
+    "behaviour": "ignore = '' + _ignoreClass when the framework passes that variable non-empty, else gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). When non-empty it is applied as addQuery('ip_address.nic.cmdb_ci.sys_class_name', 'NOT IN', ignore) on the query, so the exact class names on the list are excluded (no hierarchy)."
+   },
+   {
+    "helper": "IP tie-break",
+    "behaviour": "ip = '' + sourcePayload.IP or ''. Only when ip is non-empty, a row that passed agrees() and whose ip_address.ip_address equals ip as an exact string (no normalisation) marks its owner CI in ipOwners. Only when count > 1: the single marked CI (Object.keys(ipOwners).length == 1) not on cmdb_ci_lb is returned; none, several, or a load balancer gives null. With count == 1 the IP is not consulted."
+   },
+   {
+    "helper": "Exactly-one decision",
+    "behaviour": "This script does not use next() then hasNext() and sets no setLimit: it reads every row of the query and counts distinct CIs in an owners map, so several DNS Name rows or several addresses of one CI count as one CI; first is the first agreeing CI in query order (no orderBy); count == 1 is the match, count > 1 goes to the IP tie-break, count == 0 declines."
+   },
+   {
+    "helper": "Absent in this script: retired(), narrow(), isRealServer(), placeholder serial list, loopback/link-local guard",
+    "behaviour": "None of these appear in USEM Layered DNS Match. Retired or decommissioned CIs are not tested by this script; no serial number is read; the IP address is not checked for loopback or link-local ranges because it is used only to break a tie, never to search."
+   }
+  ],
+  "issues": [
+   "USEM Layered DNS Match, sibling_difference: claimed the FQDN and hostname-plus-domain rules decide exactly-one by next() then hasNext(); those four rules walk every row, collect the CIs and break a tie by the ip_address field of the CI record; only USEM Hostname Class Match and USEM Hostname Hardware Match use next() then hasNext().",
+   "USEM Layered DNS Match, sibling_difference: presented the scanned-IP tie-break as unique to this rule; the real difference is the field read (ip_address.ip_address on the IP Address record in the chain versus the CI record's ip_address), and the text now also states that an OS giving no class does not decline here (the Class rules return null on an empty pref), that agrees() is shared with USEM Hostname Hardware Match, and that no other name rule refuses a load balancer device.",
+   "USEM Layered DNS Match, mechanics 'Normalise the DNS value and guard bare labels' and decline 'sourceValue is empty': the test is on a falsy value, so an absent sourceValue declines too; widened to 'empty or absent'.",
+   "USEM Layered DNS Match, mechanics 'Load the ignored class list': the NOT IN clause is added only when the list is non-empty; said so.",
+   "USEM Layered DNS Match, mechanics 'Walk every row and count distinct agreeing CIs': missed that the IP mark needs a non-empty ip and that a row skipped by agrees() is neither counted nor marked in ipOwners.",
+   "USEM Layered DNS Match, shared 'IP tie-break': same omissions (non-empty ip, rows skipped by agrees() never mark) plus the comparison is an exact string comparison with no normalisation of the address.",
+   "USEM Layered DNS Match, shared 'isLoadBalancer(id)': missed that when cmdb_ci_lb is not a valid table the test is false and the CI is returned rather than refused.",
+   "USEM Layered DNS Match, shared 'parentsOf(table)': the loop also stops when no sys_db_object row is found for a class, not only at a class with no super_class.",
+   "USEM Layered DNS Match, shared 'agrees(cls)' and literal 'Appliance classes': parentsOf(cls) includes cls itself, so the appliance test also hits when the CI class is itself cmdb_ci_netgear, cmdb_ci_lb or cmdb_ci_storage_server; 'ancestry' alone read as excluding the class.",
+   "USEM Layered DNS Match, shared 'Exactly-one decision': added that first is the first agreeing CI in query order, the query having no orderBy.",
+   "USEM Layered DNS Match, literals: added the header's sample outcome (Linux Server \"hklvteqoradbp3\" via IP Address \"167.202.60.26\" and adapter \"eth0\", refused case Load Balancer \"hklvf5lb01\"), which the description had left out."
+  ]
+ },
+ "hostname": {
+  "rules": [
+   {
+    "order": "400",
+    "name": "USEM Hostname Class Match",
+    "purpose": "Trusts the short hostname (first DNS label) only inside the CMDB class the scanned OS implies, so the OS-to-class agreement stands in for the domain evidence the CI lacks. It sits right after the domain-evidence rules because it is the first rule that accepts a CI carrying only a short name.",
+    "reads": "Source field DNS (sourceValue) plus payload field OS (sourcePayload.OS); no other payload field is read and the rule argument is never used.",
+    "returns": "The sys_id of the single CI of the OS-implied class (sub-classes included, ignored classes excluded) whose name equals the short hostname; null in every other case.",
+    "mechanics": [
+     {
+      "title": "Guard and normalise the DNS value",
+      "detail": "Declines at once when sourceValue is empty. Otherwise coerces it to a string, trims it and lower-cases it (sample: wsaoi01zeapd1.sdi.corp.bankofamerica.com)."
+     },
+     {
+      "title": "Take the first label as the short host",
+      "detail": "Splits the lowered value on '.' and keeps element 0 (wsaoi01zeapd1). Everything after the first dot is dropped; no suffix list is consulted. An empty first label (value starting with a dot) declines."
+     },
+     {
+      "title": "Resolve the ignore list",
+      "detail": "Uses the framework variable _ignoreClass when it is defined and non-empty (coerced to a string), otherwise reads system property sn_sec_cmn.ignoreCIClass with '' as default. Used later as an exact class-name NOT IN filter."
+     },
+     {
+      "title": "Derive the class from the OS",
+      "detail": "pref = classFor(sourcePayload.OS) (shared helper). Sample: 'Windows Server 2016 Standard 64 bit Edition Version 1607' gives cmdb_ci_win_server. An empty pref (empty OS, no keyword hit, or a multi-guess '/' fingerprint) declines the rule."
+     },
+     {
+      "title": "Open the class table",
+      "detail": "new GlideRecord(pref): the search stays inside that class and its sub-classes, so a Red Hat host can only land on a Linux Server and a Windows Server of the same name is never seen. If isValid() is false (class not installed) the rule declines."
+     },
+     {
+      "title": "Filter by name and ignore list",
+      "detail": "addQuery('name', host) with the lowered short host; the platform compares name case-insensitively, so the CI named WSAOI01ZEAPD1 matches. When the ignore list is non-empty, addQuery('sys_class_name', 'NOT IN', ignore) removes placeholder and technical classes."
+     },
+     {
+      "title": "Decide exactly one",
+      "detail": "query(); a false next() declines. The first row's sys_id is kept with getUniqueValue(); a true hasNext() (a second CI of that class with the same name) declines. No setLimit, no orderBy, no tie-break on the scanned address, no retired or twin handling."
+     },
+     {
+      "title": "Return the sys_id",
+      "detail": "Returns the kept sys_id. Class restriction plus uniqueness of the name inside the class are the only safeguards: the domain of the CI is never read here."
+     }
+    ],
+    "declines": [
+     "sourceValue is empty",
+     "the first label of the trimmed, lowered DNS value is empty",
+     "classFor(OS) returns '' (empty OS, no keyword hit, or an OS text split by '/' into three or more segments)",
+     "the class table named by classFor is not valid on the instance (gr.isValid() false)",
+     "no CI of that class or its sub-classes, outside the ignored classes, is named with the short host",
+     "a second CI of that class carries the same name (gr.hasNext() true)"
+    ],
+    "literals": [
+     {
+      "name": "Name normalisation",
+      "values": "('' + sourceValue).trim().toLowerCase().split('.')[0]"
+     },
+     {
+      "name": "Ignore list source",
+      "values": "(typeof _ignoreClass != 'undefined' && _ignoreClass) ? ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', ''); applied as addQuery('sys_class_name', 'NOT IN', ignore)"
+     },
+     {
+      "name": "Multi-guess threshold",
+      "values": "s.split('/').length > 2 returns '' (an OS text holding two or more '/' separators)"
+     },
+     {
+      "name": "classFor keyword order",
+      "values": "esx; windows (with server / without server); aix; solaris, sunos; hp-ux; netapp, ontap; printer, laserjet, jetdirect; red hat, linux, centos, ubuntu, suse, debian, fedora, euleros, oracle enterprise, amazon; nx-os, catos, cisco"
+     },
+     {
+      "name": "classFor classes",
+      "values": "cmdb_ci_esx_server, cmdb_ci_win_server, cmdb_ci_computer, cmdb_ci_aix_server, cmdb_ci_solaris_server, cmdb_ci_hpux_server, cmdb_ci_storage_server, cmdb_ci_printer, cmdb_ci_linux_server, cmdb_ci_netgear"
+     },
+     {
+      "name": "Search",
+      "values": "new GlideRecord(pref); gr.isValid(); gr.addQuery('name', host); gr.query(); gr.next(); gr.getUniqueValue(); gr.hasNext()"
+     },
+     {
+      "name": "Sample payload",
+      "values": "ID '35850078', IP '30.143.70.11', TRACKING_METHOD 'IP', OS 'Windows Server 2016 Standard 64 bit Edition Version 1607', DNS 'wsaoi01zeapd1.sdi.corp.bankofamerica.com', NETBIOS 'WSAOI01ZEAPD1' -> class cmdb_ci_win_server, name wsaoi01zeapd1"
+     }
+    ],
+    "before": "Every rule ahead of it needed domain evidence on the CI (a match on fqdn, dns_domain or the discovery DNS records); they decline a CI that carries only a short name and no domain information, which is exactly the host this rule reaches.",
+    "after": "USEM Hostname Hardware Match (then USEM FQDN Name Hardware Match for CIs named with the full FQDN)",
+    "sibling_difference": "Unlike USEM Hostname Hardware Match it filters the search by the OS-implied class up front (a Windows Server never sees a Linux host's name), declines outright when the OS gives no class, guards the class table with isValid(), and has no agrees() tolerance for parent or appliance classes."
+   },
+   {
+    "order": "410",
+    "name": "USEM Hostname Hardware Match",
+    "purpose": "Trusts the short hostname across the whole cmdb_ci_hardware tree and, instead of filtering by class, rejects afterwards any CI whose class contradicts the scanned OS. It follows USEM Hostname Class Match to reach CIs kept in a parent class (Server, Computer, Hardware) or whose OS gave no class.",
+    "reads": "Source field DNS (sourceValue) plus payload field OS (sourcePayload.OS); sys_class_name of the CI found and the class hierarchy from sys_db_object (name, super_class.name). The rule argument is never used.",
+    "returns": "The sys_id of the single hardware CI named with the short hostname when its class agrees with the OS-implied class (same class, sub-class, ancestor, or an appliance class for a Linux fingerprint); null when nothing is found, the name is shared or the class contradicts the scan.",
+    "mechanics": [
+     {
+      "title": "Guard and normalise the DNS value",
+      "detail": "Declines at once when sourceValue is empty. Otherwise coerces it to a string, trims it and lower-cases it (sample: va2ausapabw0.bankofamerica.com)."
+     },
+     {
+      "title": "Take the first label as the short host",
+      "detail": "Splits the lowered value on '.' and keeps element 0 (va2ausapabw0). Everything after the first dot is dropped; no suffix list is consulted. An empty first label declines."
+     },
+     {
+      "title": "Resolve the ignore list",
+      "detail": "Uses the framework variable _ignoreClass when it is defined and non-empty (coerced to a string), otherwise reads system property sn_sec_cmn.ignoreCIClass with '' as default. Applied as an exact class-name NOT IN filter on the search."
+     },
+     {
+      "title": "Derive the OS class as a preference only",
+      "detail": "pref = classFor(sourcePayload.OS) (shared helper). Sample: 'AIX 7.3 TL3' gives cmdb_ci_aix_server. An empty pref does not decline here: it only switches the final class check off, so an unknown or multi-guess OS still matches by name alone."
+     },
+     {
+      "title": "Search the whole hardware tree",
+      "detail": "new GlideRecord('cmdb_ci_hardware') (Hardware and every class beneath it, no class filter, no isValid() guard). addQuery('name', host) with the lowered short host, compared case-insensitively; sys_class_name NOT IN ignore when the list is non-empty; query()."
+     },
+     {
+      "title": "Decide exactly one",
+      "detail": "A false next() declines. The first row's sys_id (getUniqueValue) and sys_class_name (coerced to a string) are kept; a true hasNext() means two hardware CIs share the short name (test and production, retired and rebuilt): decline. No setLimit or orderBy."
+     },
+     {
+      "title": "Check class agreement",
+      "detail": "agrees(cls) (shared helper): true when pref is empty or cls equals pref; when pref is cmdb_ci_linux_server and cls or an ancestor is cmdb_ci_netgear, cmdb_ci_lb or cmdb_ci_storage_server; when pref is an ancestor of cls or cls of pref. False declines."
+     },
+     {
+      "title": "Return the sys_id",
+      "detail": "Returns the kept sys_id. Sample: cls cmdb_ci_server is an ancestor of cmdb_ci_aix_server, accepted. A Windows Server or IP Router of that name declines. An IP Switch named cncnshasd03sae0002 scanned as 'Ubuntu/Linux' is accepted through the appliance clause."
+     }
+    ],
+    "declines": [
+     "sourceValue is empty",
+     "the first label of the trimmed, lowered DNS value is empty",
+     "no CI in cmdb_ci_hardware or beneath it, outside the ignored classes, is named with the short host",
+     "a second hardware CI carries the same name (gr.hasNext() true), whatever its class or retired state",
+     "pref is set and cls is not pref, a sub-class or ancestor of it, nor (Linux pref) cmdb_ci_netgear, cmdb_ci_lb, cmdb_ci_storage_server or a class beneath one"
+    ],
+    "literals": [
+     {
+      "name": "Name normalisation",
+      "values": "('' + sourceValue).trim().toLowerCase().split('.')[0]"
+     },
+     {
+      "name": "Ignore list source",
+      "values": "(typeof _ignoreClass != 'undefined' && _ignoreClass) ? ('' + _ignoreClass) : gs.getProperty('sn_sec_cmn.ignoreCIClass', ''); applied as addQuery('sys_class_name', 'NOT IN', ignore)"
+     },
+     {
+      "name": "Multi-guess threshold",
+      "values": "s.split('/').length > 2 returns '' (an OS text holding two or more '/' separators)"
+     },
+     {
+      "name": "classFor keyword order",
+      "values": "esx; windows (with server / without server); aix; solaris, sunos; hp-ux; netapp, ontap; printer, laserjet, jetdirect; red hat, linux, centos, ubuntu, suse, debian, fedora, euleros, oracle enterprise, amazon; nx-os, catos, cisco"
+     },
+     {
+      "name": "classFor classes",
+      "values": "cmdb_ci_esx_server, cmdb_ci_win_server, cmdb_ci_computer, cmdb_ci_aix_server, cmdb_ci_solaris_server, cmdb_ci_hpux_server, cmdb_ci_storage_server, cmdb_ci_printer, cmdb_ci_linux_server, cmdb_ci_netgear"
+     },
+     {
+      "name": "Search table",
+      "values": "cmdb_ci_hardware; gr.addQuery('name', host); gr.query(); gr.next(); gr.getUniqueValue(); '' + gr.getValue('sys_class_name'); gr.hasNext()"
+     },
+     {
+      "name": "Appliance classes accepted for a Linux fingerprint",
+      "values": "cmdb_ci_netgear, cmdb_ci_lb, cmdb_ci_storage_server (tested against the found class and every ancestor of it, only when pref == 'cmdb_ci_linux_server')"
+     },
+     {
+      "name": "Hierarchy source",
+      "values": "sys_db_object: addQuery('name', table), then super_class.name walked upwards while super_class is non-empty"
+     },
+     {
+      "name": "Sample payload",
+      "values": "ID '80217765', IP '171.150.219.123', TRACKING_METHOD 'IP', OS 'AIX 7.3 TL3', DNS 'va2ausapabw0.bankofamerica.com', QG_HOSTID '6337e0dc-007d-0002-c47d-005056a4fcd5' -> pref cmdb_ci_aix_server, name va2ausapabw0, CI found in cmdb_ci_server (an ancestor), accepted"
+     }
+    ],
+    "before": "USEM Hostname Class Match, which searched the same short name only inside the OS-implied class and declined because the CI sits in a parent class (plain Server, Computer, Hardware) or a class the OS does not name, or because the OS gave no class at all.",
+    "after": "USEM FQDN Name Hardware Match, then the IP address rules for hosts without a usable name",
+    "sibling_difference": "Searches cmdb_ci_hardware instead of the OS class, so the OS is a post-check through agrees() rather than a filter; accepts an ancestor class of the OS class and, for a Linux fingerprint, Network Gear, Load Balancer and Storage Server records; still runs when the OS gives no class; has no isValid() guard."
+   }
+  ],
+  "shared": [
+   {
+    "helper": "classFor(os) - guards and precedence (both scripts)",
+    "behaviour": "An empty or missing OS gives ''. Lower-cases the text. s.split('/').length > 2 (two or more '/', i.e. three or more guesses from an unauthenticated scan) gives ''; a single '/' (two guesses) is still classified. Tests are substring indexOf tests, not whole words, run in a fixed order; the first hit wins whichever guess it sits in. No hit gives ''."
+   },
+   {
+    "helper": "classFor(os) - server keywords (both scripts)",
+    "behaviour": "'esx' -> cmdb_ci_esx_server; 'windows' -> cmdb_ci_win_server when the text also contains 'server', otherwise cmdb_ci_computer; 'aix' -> cmdb_ci_aix_server; 'solaris' or 'sunos' -> cmdb_ci_solaris_server; 'hp-ux' -> cmdb_ci_hpux_server. Tested in this order, ahead of the storage, printer, Linux and network keywords."
+   },
+   {
+    "helper": "classFor(os) - storage, printer, Linux and network keywords (both scripts)",
+    "behaviour": "'netapp' or 'ontap' -> cmdb_ci_storage_server; 'printer', 'laserjet' or 'jetdirect' -> cmdb_ci_printer; 'red hat', 'linux', 'centos', 'ubuntu', 'suse', 'debian', 'fedora', 'euleros', 'oracle enterprise' or 'amazon' -> cmdb_ci_linux_server; 'nx-os', 'catos' or 'cisco' -> cmdb_ci_netgear; anything else -> ''."
+   },
+   {
+    "helper": "agrees(cls) (USEM Hostname Hardware Match only)",
+    "behaviour": "True when pref is empty or cls == pref. Else above = parentsOf(cls); appliance = above holds cmdb_ci_netgear, cmdb_ci_lb or cmdb_ci_storage_server; pref cmdb_ci_linux_server with appliance -> true; above holds pref (cls is a sub-class) -> true; parentsOf(pref) holds cls (cls is an ancestor) -> true; otherwise false. A desktop Windows pref (cmdb_ci_computer) thus agrees with every server class."
+   },
+   {
+    "helper": "parentsOf(table) (USEM Hostname Hardware Match only)",
+    "behaviour": "Starts with [table], queries sys_db_object where name = table; while a row exists with a non-empty super_class, pushes super_class.name and re-queries sys_db_object for that parent; returns the class followed by every ancestor up to the topmost class. Read live from the dictionary on each call, no cache, no ignore filtering."
+   },
+   {
+    "helper": "ignore list (both scripts)",
+    "behaviour": "ignore = _ignoreClass when that framework variable is defined and truthy (coerced to string), otherwise gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). When non-empty it is applied as addQuery('sys_class_name', 'NOT IN', ignore) on the CI search: an exact class-name list, no hierarchy expansion, so a sub-class of an ignored class is not excluded by it."
+   },
+   {
+    "helper": "exactly-one test (both scripts)",
+    "behaviour": "gr.query(); a false gr.next() declines; the first row's getUniqueValue() (and in USEM Hostname Hardware Match '' + getValue('sys_class_name')) is kept; a true gr.hasNext() declines. No setLimit, no orderBy, no tie-break by the scanned address, no preference between live and retired records, no twin merging: any second row of the name declines."
+   },
+   {
+    "helper": "name normalisation (both scripts)",
+    "behaviour": "host = ('' + sourceValue).trim().toLowerCase().split('.')[0]; an empty sourceValue or an empty first label declines. No domain suffix list is stripped and the domain part is never compared; the first label alone is queried against name, which the platform compares case-insensitively (WSAOI01ZEAPD1 matches wsaoi01zeapd1)."
+   },
+   {
+    "helper": "not present in these two scripts",
+    "behaviour": "retired(), narrow(), isRealServer(), the IP tie-break on the scanned address, the loopback / link-local guard and a placeholder serial list do not appear in either script; neither script reads IP, SERIAL_NUMBER, NETBIOS, QG_HOSTID or TRACKING_METHOD, and neither touches ip_address, fqdn, dns_domain, cmdb_ci_lb_service or cmdb_ci_lb_pool_member."
+   }
+  ],
+  "issues": [
+   "USEM Hostname Class Match / literals / Sample payload: the header sample also carries ID '35850078', IP '30.143.70.11' and TRACKING_METHOD 'IP'; only OS, DNS and NETBIOS were quoted, so the missing fields were added.",
+   "USEM Hostname Hardware Match / literals / Sample payload: the header sample also carries ID '80217765', IP '171.150.219.123', TRACKING_METHOD 'IP' and QG_HOSTID '6337e0dc-007d-0002-c47d-005056a4fcd5'; added.",
+   "USEM Hostname Hardware Match / declines / class contradiction: 'under cmdb_ci_netgear, cmdb_ci_lb or cmdb_ci_storage_server' implied only descendants; parentsOf(cls) starts with cls itself, so a CI in the appliance class itself also agrees; reworded to cover the class or a class beneath it.",
+   "USEM Hostname Hardware Match / mechanics 'Return the sys_id', returns, sibling_difference and shared agrees(): 'parent' of cmdb_ci_aix_server changed to 'ancestor'; parentsOf(pref).indexOf(cls) accepts any class up the chain and cmdb_ci_server is not the direct parent of cmdb_ci_aix_server.",
+   "USEM Hostname Hardware Match / mechanics 'Decide exactly one', literal 'Search table' and shared 'exactly-one test': the script keeps sys_class_name as '' + gr.getValue('sys_class_name') (string coercion) before agrees(); the coercion was missing.",
+   "Both rules / reads: added that the rule argument is never read by either script.",
+   "Both rules / mechanics 'Resolve the ignore list': added the string coercion ('' + _ignoreClass) the script applies to the framework variable.",
+   "Shared classFor guards: 'Empty OS gives '' ' widened to 'empty or missing OS' because the guard is a falsy test (if (!os)), so an absent OS key also gives ''.",
+   "USEM Hostname Class Match / mechanics 'Filter by name and ignore list': case-insensitive matching is the platform's name comparison, not a step the script performs; attributed to the platform instead of stated as a script action."
+  ]
+ },
+ "controllers": {
+  "rules": [
+   {
+    "order": "420",
+    "name": "USEM Management Interface Match",
+    "purpose": "Trusts the DNS label of a server management controller (HP iLO, Oracle ILOM, Dell iDRAC, IBM IMM, Cisco CIMC, generic BMC or IPMI), which is the server name plus a controller suffix, and returns the server CI named by the label without that suffix. It sits after the hostname rules because they have already shown that no CI carries the full controller label, and before the interface-name rule so that a '-mgmt' controller resolves to its server before any prefix walk on network devices.",
+    "reads": "Source field DNS (sourceValue). Payload field OS (sourcePayload.OS), lower-cased, empty when absent, used only for the controller marker words. IP and SERIAL_NUMBER are not read.",
+    "returns": "The sys_id of the one record of cmdb_ci_hardware or any class beneath it (outside sn_sec_cmn.ignoreCIClass and not a cmdb_ci_lb record or a class beneath cmdb_ci_lb) whose name equals the label with its last hyphen segment removed; null in every other case.",
+    "mechanics": [
+     {
+      "title": "Guard the input",
+      "detail": "Returns null when sourceValue is empty. Otherwise coerces it to a string, trims it and lower-cases it; the label is the text before the first dot, so the domain part never takes part in the match."
+     },
+     {
+      "title": "Locate the last hyphen",
+      "detail": "dash is the position of the last hyphen in the label; the rule declines when dash is below 1, that is no hyphen at all or a hyphen in first position. Exactly one segment, the one after that hyphen, can ever be stripped."
+     },
+     {
+      "title": "Read OS text and the ignore list",
+      "detail": "os is sourcePayload.OS coerced to a string (empty when absent) and lower-cased; sourcePayload itself is not guarded. ignore is _ignoreClass when the framework fills it, else gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). The IP field is never read."
+     },
+     {
+      "title": "Controller evidence and the server name",
+      "detail": "tail is the segment after the last hyphen. If tail is in suffixes, base is the label up to that hyphen. Otherwise, if any markers entry is a substring of os, base is the same cut whatever the tail. Neither sign: base stays empty, null is returned."
+     },
+     {
+      "title": "Search the whole hardware tree by name",
+      "detail": "One GlideRecord on cmdb_ci_hardware with addQuery('name', base) and, when ignore is non-empty, addQuery('sys_class_name', 'NOT IN', ignore). No setLimit, no active, status, address or OS condition; Hardware itself and every class beneath it are included."
+     },
+     {
+      "title": "Decide exactly one",
+      "detail": "If next() is false the rule returns null. The first row's sys_id is taken with getUniqueValue(); if hasNext() is then true a second CI carries the server name and the rule returns null rather than choose. Retired records count like any other row."
+     },
+     {
+      "title": "Refuse a load balancer",
+      "detail": "A GlideRecord on cmdb_ci_lb is opened; when the table is valid and get(match) finds the chosen sys_id there (cmdb_ci_lb or a class beneath it) the rule returns null. An invalid table skips the check. Otherwise the sys_id is returned as the match."
+     }
+    ],
+    "declines": [
+     "sourceValue is empty",
+     "The label has no hyphen, or its only hyphen is in first position (lastIndexOf('-') < 1)",
+     "The last segment is not in suffixes and no markers word appears as a substring of the OS text",
+     "No cmdb_ci_hardware row outside the ignore classes is named like the stripped label",
+     "Two or more cmdb_ci_hardware rows carry the stripped name (hasNext() true after the first)",
+     "The single row found is a record of cmdb_ci_lb or a class beneath it (load balancer device)"
+    ],
+    "literals": [
+     {
+      "name": "suffixes (label tail after the last hyphen)",
+      "values": "['ilo', 'ilom', 'idrac', 'drac', 'ipmi', 'bmc', 'oob', 'mgmt', 'imm', 'cimc', 'rmm', 'con']"
+     },
+     {
+      "name": "markers (words searched as substrings of the lower-cased OS)",
+      "values": "['ilo', 'ilom', 'idrac', 'drac', 'remote access controller', 'imm', 'cimc', 'bmc', 'ipmi', 'lights out']"
+     },
+     {
+      "name": "hyphen threshold",
+      "values": "label.lastIndexOf('-') < 1 declines"
+     },
+     {
+      "name": "search table and field",
+      "values": "cmdb_ci_hardware, field name = base, with sys_class_name NOT IN ignore when ignore is non-empty"
+     },
+     {
+      "name": "refused class",
+      "values": "cmdb_ci_lb and every class beneath it, tested by lb.isValid() && lb.get(match); skipped when the table is not valid"
+     },
+     {
+      "name": "ignore list source",
+      "values": "_ignoreClass when defined and truthy, else gs.getProperty('sn_sec_cmn.ignoreCIClass', '')"
+     },
+     {
+      "name": "payload fields",
+      "values": "sourceValue = DNS; sourcePayload.OS coerced with ('' + (sourcePayload.OS || '')).toLowerCase()"
+     },
+     {
+      "name": "exactly-one test",
+      "values": "gr.next() false = null; gr.getUniqueValue(); gr.hasNext() true = null; no setLimit"
+     }
+    ],
+    "before": "USEM Hostname Class Match and USEM Hostname Hardware Match (with the FQDN and hostname-domain rules ahead of them) searched the whole label, for the sample tx6dd630001-ilo, as a CI name and declined because no CI is named after the controller; USEM Device Name Match sits immediately before and likewise found no device of that full name. What is left for this rule is a label whose last segment is a controller suffix, or whose OS text names a controller.",
+    "after": "USEM Network Interface Name Match takes the host on a null, then USEM FQDN Name Hardware Match.",
+    "sibling_difference": "Strips exactly one trailing segment and only on controller evidence (suffix list or OS marker word); searches the whole cmdb_ci_hardware tree with next()/hasNext() and refuses a cmdb_ci_lb record. USEM Network Interface Name Match instead walks every prefix longest-first on interface evidence, searches only cmdb_ci_netgear and cmdb_ci_lb, accepts a load balancer device and never reads the OS. 'mgmt' sits in both lists: a '-mgmt' label naming one hardware CI resolves here; when that CI is a load balancer this rule declines and the interface rule then returns it."
+   },
+   {
+    "order": "430",
+    "name": "USEM Network Interface Name Match",
+    "purpose": "Trusts the DNS label of a network device scanned through an interface or VLAN address, which is the device name plus an interface tail, and returns the device named by the longest hyphen prefix of the label that names exactly one Network Gear or Load Balancer CI. It sits after USEM Management Interface Match so controller labels resolve to servers first, and before the FQDN name and load balancer rules.",
+    "reads": "Source field DNS (sourceValue) only. The header says the OS is also read from sourcePayload, but the code never references sourcePayload: no OS, IP or SERIAL_NUMBER value takes part in the match.",
+    "returns": "The sys_id of the one record of cmdb_ci_netgear or cmdb_ci_lb, or any class beneath them, outside sn_sec_cmn.ignoreCIClass, whose name equals the longest hyphen-joined prefix of the label that names anything at all; null in every other case.",
+    "mechanics": [
+     {
+      "title": "Guard and normalise the DNS value",
+      "detail": "Returns null when sourceValue is empty. Otherwise coerces to a string, trims and lower-cases it; label is the text before the first dot; segments is the label split on '-'. Fewer than two segments (no hyphen) means no interface tail and the rule returns null."
+     },
+     {
+      "title": "Read the ignore list",
+      "detail": "ignore is _ignoreClass when the framework defines and fills it, otherwise gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). When non-empty every name search below adds sys_class_name NOT IN ignore."
+     },
+     {
+      "title": "isMarker: recognise an interface segment",
+      "detail": "A segment is a marker when it equals a listed word, or starts with the word and the rest is digits only (/^[0-9]+$/, so 'vlan705', 'v201', 'po10', 'lo0'), or, for words of three letters or more, is longer than the word and ends with it ('fasteth')."
+     },
+     {
+      "title": "Require interface evidence",
+      "detail": "evidence is true when the full DNS string contains a domains entry ('.network.') or any segment after the first is a marker; the first segment is never tested. Without it the rule returns null, so hyphenated hostnames like ah-1047132-001 are never cut."
+     },
+     {
+      "title": "Walk the prefixes, longest first",
+      "detail": "k runs from segments.length - 1 down to 1; base is the first k segments joined by '-'. The full label is never tried, and the single first segment is the last prefix tried. Sample order: '...-cz04-hsrp', '...-cz04', 'uspaltwrr01drm0119'."
+     },
+     {
+      "title": "Search Network Gear and Load Balancer by name",
+      "detail": "Per prefix a fresh empty hits array, then one GlideRecord per table (cmdb_ci_netgear, then cmdb_ci_lb; a table failing isValid() is skipped): addQuery('name', base) plus the ignore filter; both tables push sys_ids into that array while under two."
+     },
+     {
+      "title": "Decide at the first prefix that finds anything",
+      "detail": "Zero hits: continue with the next shorter prefix. Two hits, whether in one table or one per table: return null and never guess. One hit: return that sys_id. No setLimit, no active, status, address, OS or retired test; a retired record counts as a hit."
+     },
+     {
+      "title": "Exhausted walk",
+      "detail": "When no prefix down to the first segment names any Network Gear or Load Balancer record, the loop ends and the rule returns null; the host passes to USEM FQDN Name Hardware Match."
+     }
+    ],
+    "declines": [
+     "sourceValue is empty",
+     "The label has no hyphen (segments.length < 2)",
+     "No evidence: the DNS contains no '.network.' and no segment after the first is a listed marker",
+     "The first prefix that names anything names two or more CIs across cmdb_ci_netgear and cmdb_ci_lb together",
+     "No prefix from the longest down to the first segment names any CI in either table (a table failing isValid() contributes nothing)"
+    ],
+    "literals": [
+     {
+      "name": "domains (searched as substrings of the full lower-cased DNS)",
+      "values": "['.network.']"
+     },
+     {
+      "name": "markers (interface / VLAN segment words)",
+      "values": "['vlan', 'v', 'hsrp', 'vrrp', 'po', 'eth', 'gi', 'te', 'lo', 'mgmt', 'aom', 'vs', 'fab']"
+     },
+     {
+      "name": "tables searched",
+      "values": "['cmdb_ci_netgear', 'cmdb_ci_lb'], field name = base, with sys_class_name NOT IN ignore when ignore is non-empty"
+     },
+     {
+      "name": "digits test after a marker word",
+      "values": "/^[0-9]+$/ on segment.substring(w.length)"
+     },
+     {
+      "name": "trailing-word form",
+      "values": "w.length >= 3 and segment.length > w.length, so only 'vlan', 'hsrp', 'vrrp', 'eth', 'mgmt', 'aom', 'fab' match as a segment ending; 'v', 'po', 'gi', 'te', 'lo', 'vs' match only whole or followed by digits"
+     },
+     {
+      "name": "hit cap and decision",
+      "values": "hits = [] per prefix; push while hits.length < 2 across both tables; hits.length == 0 next prefix, > 1 null, else hits[0]"
+     },
+     {
+      "name": "minimum segments",
+      "values": "segments.length < 2 declines"
+     },
+     {
+      "name": "prefix range",
+      "values": "k from segments.length - 1 down to 1, base = segments.slice(0, k).join('-')"
+     },
+     {
+      "name": "evidence segment range",
+      "values": "segments index 1 to the end (the first segment is never a marker)"
+     },
+     {
+      "name": "ignore list source",
+      "values": "_ignoreClass when defined and truthy, else gs.getProperty('sn_sec_cmn.ignoreCIClass', '')"
+     },
+     {
+      "name": "payload fields",
+      "values": "sourceValue = DNS; sourcePayload is not referenced in the code"
+     }
+    ],
+    "before": "USEM Management Interface Match ran just before and declined because the last segment (for the sample 'vlan705') is neither in its controller suffix list nor backed by a controller word in the OS; ahead of it, USEM Hostname Class Match and USEM Hostname Hardware Match searched the whole label as a CI name and found nothing, since device CIs are named with the leading part only. The interface domain '.network.' or a marker segment is what this rule then reads.",
+    "after": "USEM FQDN Name Hardware Match takes the host on a null; further down sit USEM Load Balancer Member Match and USEM Load Balancer Service Match.",
+    "sibling_difference": "Walks every hyphen prefix longest-first and needs interface evidence ('.network.' domain or a marker segment after the first), where USEM Management Interface Match strips only the last segment on controller evidence. Searches only cmdb_ci_netgear and cmdb_ci_lb and returns a load balancer device, which the controller rule refuses. Counts hits across both tables in one array, so one switch plus one balancer of the same name decline. Reads no OS despite its header."
+   }
+  ],
+  "shared": [
+   {
+    "helper": "Ignore class list (both scripts)",
+    "behaviour": "ignore = _ignoreClass when the framework defines it and it is truthy, coerced to a string; otherwise gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). When non-empty every name query adds addQuery('sys_class_name', 'NOT IN', ignore); the comparison is on exact class names, no hierarchy. An empty list means no class filter at all."
+   },
+   {
+    "helper": "isMarker(segment, words) (USEM Network Interface Name Match only)",
+    "behaviour": "Loops the words: true when segment == word; when segment starts with the word and the remainder passes /^[0-9]+$/; or when the word has three or more letters, the segment is longer and ends with the word. Otherwise false. The comment's example 'multihostvip' would not match, since 'vip' is not a listed word."
+   },
+   {
+    "helper": "Exactly-one test",
+    "behaviour": "USEM Management Interface Match: query(), next() false = null, getUniqueValue(), hasNext() true = null. USEM Network Interface Name Match: one hits array per prefix shared across cmdb_ci_netgear and cmdb_ci_lb, filled while hits.length < 2; 0 hits = next shorter prefix, more than 1 = null, exactly 1 = match. Neither uses setLimit or getRowCount."
+   },
+   {
+    "helper": "Label normalisation (both scripts)",
+    "behaviour": "('' + sourceValue).trim().toLowerCase(), then split('.')[0] for the label so the domain part never joins the name. The name search is an equals query on the lower-cased value; neither script applies case handling of its own. The controller rule cuts once at lastIndexOf('-') and needs that position to be 1 or more; the interface rule splits on every hyphen and needs at least two segments."
+   },
+   {
+    "helper": "classFor, agrees, retired, narrow, isRealServer, service_one, placeholder serial list, loopback / link-local guard, IP tie-break",
+    "behaviour": "None of these appears in either script. Neither reads IP or SERIAL_NUMBER, neither tests install_status, operational_status or life cycle stage, neither compares the OS with the CI class, and neither breaks a tie by the scanned address: two records of one name always decline, and a retired record is an ordinary hit."
+   }
+  ],
+  "issues": [
+   "USEM Management Interface Match, returns and 'Search the whole hardware tree by name': said 'any class beneath Hardware'; the query on cmdb_ci_hardware also returns rows of that class itself, now 'cmdb_ci_hardware or any class beneath it'.",
+   "USEM Management Interface Match, 'Refuse a load balancer', last decline and 'refused class' literal: lb.get(match) on cmdb_ci_lb also finds records of classes beneath cmdb_ci_lb, and the refusal is skipped (sys_id returned) when the table is not valid; both were missing.",
+   "USEM Management Interface Match, 'Read OS text and the ignore list': added that sourcePayload itself is not guarded; only its OS member is defaulted to empty (absent or null).",
+   "USEM Network Interface Name Match, returns: records of classes beneath cmdb_ci_netgear and cmdb_ci_lb are included by the two GlideRecord queries; added.",
+   "USEM Network Interface Name Match, 'Search Network Gear and Load Balancer by name' and 'hit cap and decision' literal: the hits array is emptied at each prefix; the description implied one array for the whole walk.",
+   "USEM Network Interface Name Match, last decline: a table failing isValid() contributes nothing, so with neither table valid the walk ends null; was missing.",
+   "USEM Network Interface Name Match, 'trailing-word form' literal: named the seven words the ending form applies to ('vlan', 'hsrp', 'vrrp', 'eth', 'mgmt', 'aom', 'fab'), not only the short words it excludes.",
+   "Shared 'Exactly-one test' and 'Label normalisation': hits array stated as per prefix; added that the name search is an equals query on the lower-cased value with no case handling in either script."
+  ]
+ },
+ "loadbalancer": {
+  "rules": [
+   {
+    "order": "455",
+    "name": "USEM Load Balancer Member Match",
+    "purpose": "Trusts the CMDB's own load balancer model rather than any host identifier: when the virtual server the scan hit has a fully known pool whose every member leads to one and the same machine, that machine owns the findings. It sits after the hardware rules, which find no server for a VIP, and before USEM Load Balancer Service Match so that a real server is preferred to the VIP record.",
+    "reads": "Source field IP (sourceValue); payload fields DNS and OS from sourcePayload; the framework variable _ignoreClass when it is passed, else the property sn_sec_cmn.ignoreCIClass.",
+    "returns": "The sys_id of the one cmdb_ci_hardware record behind the virtual server (the single live record when that machine is recorded more than once under one name); otherwise null.",
+    "mechanics": [
+     {
+      "title": "Address guard and normalisation",
+      "detail": "Null when sourceValue is empty. The IP is coerced to a string and trimmed; empty, or starting with \"127.\" or \"169.254.\", returns null. DNS is trimmed and lower-cased, the label is the text before the first \".\", OS is lower-cased without trimming."
+     },
+     {
+      "title": "Ignore list",
+      "detail": "The ignore classes come from the framework variable _ignoreClass when defined and non-empty, else gs.getProperty('sn_sec_cmn.ignoreCIClass', ''); when non-empty, applied as sys_class_name NOT IN on each service query and by exact class name in isRealServer."
+     },
+     {
+      "title": "VIP sign",
+      "detail": "Goes on only when the lower-cased OS contains 'f5', 'big-ip', 'big ip' or 'netscaler', or a hyphen segment of the label equals 'vip' or 'vs', is that word plus digits only, or (words of 3+ letters, so 'vip') ends in the word. Otherwise null."
+     },
+     {
+      "title": "The virtual server in cmdb_ci_lb_service",
+      "detail": "Four steps, stopping at the first that finds rows: fqdn = dns, name = dns, name = label, ip_address = ip, with sys_class_name NOT IN the ignore list when it is non-empty. An empty search value skips its step; an invalid cmdb_ci_lb_service table returns null."
+     },
+     {
+      "title": "Twins of one virtual server",
+      "detail": "Each step reads all rows with next() and collects trimmed lower-cased names before narrowing; two distinct names return null. Rows narrow to those whose ip_address equals the scanned IP, then, if more than one remains, to the live ones; all left are twins."
+     },
+     {
+      "title": "Pools behind every twin",
+      "detail": "For each twin: the pool reference field on cmdb_ci_lb_service, every cmdb_ci_lb_pool whose service field is the twin, and every cmdb_ci_lb_pool tied to the twin through cmdb_rel_ci in either direction. No pool at all returns null."
+     },
+     {
+      "title": "Members and their addresses",
+      "detail": "Members are cmdb_ci_lb_pool_member rows (table valid) with pool IN the pool ids, plus members tied to a pool through cmdb_rel_ci, one already listed skipped; each is kept with its ip_address, an empty one as '' so no address search runs. None returns null."
+     },
+     {
+      "title": "Placing each member on a server",
+      "detail": "Each address is looked for in cmdb_ci_hardware.ip_address, cmdb_ci_network_adapter.ip_address (cmdb_ci not empty) and cmdb_ci_ip_address.ip_address (nic.cmdb_ci not empty); each member also follows cmdb_rel_ci to hardware. Hits pass isRealServer through keep."
+     },
+     {
+      "title": "Deciding the one machine",
+      "detail": "Servers are keyed by the first label of their lower-cased name; a member leading to none counts as unplaced. Any unplaced member, or not exactly one name, returns null. One record is returned; of several records of one name, a single live one, else null."
+     }
+    ],
+    "declines": [
+     "sourceValue is empty, or the trimmed IP is empty or starts with \"127.\" or \"169.254.\"",
+     "No VIP sign: the OS contains none of 'f5', 'big-ip', 'big ip', 'netscaler' and no hyphen segment of the DNS label is a 'vip' or 'vs' marker",
+     "cmdb_ci_lb_service is not a valid table on the instance",
+     "A search step returns cmdb_ci_lb_service records with two or more distinct names (trimmed, lower-cased)",
+     "None of the four steps (fqdn = dns, name = dns, name = label, ip_address = ip) finds a cmdb_ci_lb_service record outside the ignore classes",
+     "No pool reached from any kept service record: empty pool field, no cmdb_ci_lb_pool with service = that record, no pool related through cmdb_rel_ci",
+     "The pools have no cmdb_ci_lb_pool_member, neither by the member's pool field nor by a cmdb_rel_ci relationship",
+     "Any member leads to no real server (unresolved count above zero), leaving the pool partly unknown",
+     "The servers found carry zero, or two or more, distinct name labels (no server, or two different machines)",
+     "The one machine is recorded more than once and the live (not retired) records among them number zero or more than one"
+    ],
+    "literals": [
+     {
+      "name": "osMarkers (looked for in the lower-cased OS text)",
+      "values": "['f5', 'big-ip', 'big ip', 'netscaler']"
+     },
+     {
+      "name": "labelMarkers (tested on each hyphen segment of the DNS label)",
+      "values": "['vip', 'vs']"
+     },
+     {
+      "name": "isMarker tests",
+      "values": "segment == word; segment starts with word and remainder matches /^[0-9]+$/; word length >= 3 and segment longer than word and segment ends in word"
+     },
+     {
+      "name": "Loopback and link-local prefixes",
+      "values": "'127.' and '169.254.' (ip.indexOf(prefix) == 0)"
+     },
+     {
+      "name": "Search steps in cmdb_ci_lb_service",
+      "values": "[['fqdn', dns], ['name', dns], ['name', label], ['ip_address', ip]]"
+     },
+     {
+      "name": "Ignore class source",
+      "values": "(typeof _ignoreClass != 'undefined' && _ignoreClass) ? '' + _ignoreClass : gs.getProperty('sn_sec_cmn.ignoreCIClass', '')"
+     },
+     {
+      "name": "retired thresholds",
+      "values": "install_status == '7', operational_status == '6', life_cycle_stage_status display value == 'Retired'"
+     },
+     {
+      "name": "Label and segment separators",
+      "values": "label = dns.split('.')[0]; segments = label.split('-'); server name key = name.trim().toLowerCase().split('.')[0] || sys_id"
+     },
+     {
+      "name": "Tables read",
+      "values": "cmdb_ci_lb_service, cmdb_ci_lb_pool, cmdb_ci_lb_pool_member, cmdb_rel_ci, cmdb_ci_hardware, cmdb_ci_network_adapter, cmdb_ci_ip_address, cmdb_ci_lb"
+     },
+     {
+      "name": "Fields read",
+      "values": "fqdn, name, ip_address, sys_class_name, pool, service, parent, child, cmdb_ci, nic.cmdb_ci, install_status, operational_status, life_cycle_stage_status"
+     },
+     {
+      "name": "Table validity checks",
+      "values": "cmdb_ci_lb_service invalid declines; cmdb_ci_lb_pool, cmdb_ci_lb_pool_member, cmdb_ci_ip_address and cmdb_ci_lb are skipped when invalid; related() keeps an id only when the target table is valid"
+     },
+     {
+      "name": "Unused working variable",
+      "values": "identities (member address, or the member sys_id when the address is empty, mapped to true) is filled for every member but read nowhere"
+     }
+    ],
+    "before": "The hardware rules declined the host: USEM Serial Number Class Match and USEM Serial Number Hardware Match (a VIP carries no serial); USEM Cisco IP Phone MAC (the VIP label is not \"sep\" plus twelve hex characters); USEM FQDN Class Match, USEM FQDN Hardware Match, USEM Hostname Domain Class Match, USEM Hostname Domain Hardware Match, USEM Layered DNS Match, USEM Hostname Class Match, USEM Hostname Hardware Match, USEM Device Name Match, USEM Management Interface Match, USEM Network Interface Name Match and USEM FQDN Name Hardware Match (the VIP name is not a server name, the label carries no controller suffix or interface marker, and the scanned address belongs to a load balancer device, not to a server).",
+    "after": "USEM Load Balancer Service Match, which attaches the Load Balancer Service record whenever this rule cannot name the machine.",
+    "sibling_difference": "Walks Load Balancer Service to Pool to Pool Member to server and returns a cmdb_ci_hardware record, never the service. Keeps every twin left after narrowing (two live records of an HA pair both have their pools walked) where the service rule declines on two. Adds isRealServer, related and keep, and reads cmdb_ci_lb_pool, cmdb_ci_lb_pool_member, cmdb_rel_ci, cmdb_ci_hardware, cmdb_ci_network_adapter, cmdb_ci_ip_address and cmdb_ci_lb, which the service rule never touches."
+   },
+   {
+    "order": "460",
+    "name": "USEM Load Balancer Service Match",
+    "purpose": "Trusts the Load Balancer Service CI that models the virtual IP: a VIP is not the balancer device, which the hardware rules refuse on purpose, so the host is attached to the service record found by fqdn, then name, then address. It runs on the IP field so VIPs without a DNS name are covered, after USEM Load Balancer Member Match so a real server is preferred, and before the IP address rules.",
+    "reads": "Source field IP (sourceValue); payload fields DNS and OS from sourcePayload; the framework variable _ignoreClass when it is passed, else the property sn_sec_cmn.ignoreCIClass.",
+    "returns": "The sys_id of the one cmdb_ci_lb_service record left after narrowing by scanned address and then by live status; otherwise null.",
+    "mechanics": [
+     {
+      "title": "Address guard and normalisation",
+      "detail": "Null when sourceValue is empty. The IP is coerced to a string and trimmed; empty, or starting with \"127.\" or \"169.254.\", returns null. DNS is trimmed and lower-cased, the label is the text before the first \".\", OS is lower-cased without trimming."
+     },
+     {
+      "title": "Ignore list",
+      "detail": "The ignore classes come from the framework variable _ignoreClass when defined and non-empty, else from gs.getProperty('sn_sec_cmn.ignoreCIClass', ''); when non-empty it is added as sys_class_name NOT IN on every cmdb_ci_lb_service query."
+     },
+     {
+      "title": "VIP evidence",
+      "detail": "Goes on only when the lower-cased OS contains 'f5', 'big-ip', 'big ip' or 'netscaler', or a hyphen segment of the label equals 'vip' or 'vs', is that word plus digits only, or (words of 3+ letters, so 'vip') ends in the word. Otherwise null."
+     },
+     {
+      "title": "Four search steps in cmdb_ci_lb_service",
+      "detail": "In order: fqdn = dns, name = dns, name = label, ip_address = ip, with sys_class_name NOT IN the ignore list when non-empty. An empty search value skips its step; a step with no rows hands over to the next; an invalid cmdb_ci_lb_service table returns null."
+     },
+     {
+      "title": "Narrowing the rows of a step",
+      "detail": "Rows are read with next(); names (trimmed, lower-cased) are collected before narrowing; two distinct names return null. Rows narrow to those with ip_address equal to the scanned IP, then, if more than one remains, to the live ones; more than one left is null."
+     },
+     {
+      "title": "Result",
+      "detail": "The single row left in the first step that found anything is returned as its sys_id. When all four steps find nothing the rule returns null and the host passes to the IP address rules."
+     }
+    ],
+    "declines": [
+     "sourceValue is empty, or the trimmed IP is empty or starts with \"127.\" or \"169.254.\"",
+     "No VIP evidence: the OS contains none of 'f5', 'big-ip', 'big ip', 'netscaler' and no hyphen segment of the DNS label is a 'vip' or 'vs' marker",
+     "cmdb_ci_lb_service is not a valid table on the instance",
+     "A search step returns cmdb_ci_lb_service records with two or more distinct names (trimmed, lower-cased)",
+     "More than one record of the one virtual server survives narrowing by scanned address and then by live status (both devices of a pair live)",
+     "None of the four steps (fqdn = dns, name = dns, name = label, ip_address = ip) finds a cmdb_ci_lb_service record outside the ignore classes"
+    ],
+    "literals": [
+     {
+      "name": "osMarkers (looked for in the lower-cased OS text)",
+      "values": "['f5', 'big-ip', 'big ip', 'netscaler']"
+     },
+     {
+      "name": "labelMarkers (tested on each hyphen segment of the DNS label)",
+      "values": "['vip', 'vs']"
+     },
+     {
+      "name": "isMarker tests",
+      "values": "segment == word; segment starts with word and remainder matches /^[0-9]+$/; word length >= 3 and segment longer than word and segment ends in word"
+     },
+     {
+      "name": "Loopback and link-local prefixes",
+      "values": "'127.' and '169.254.' (ip.indexOf(prefix) == 0)"
+     },
+     {
+      "name": "Search steps in cmdb_ci_lb_service",
+      "values": "[['fqdn', dns], ['name', dns], ['name', label], ['ip_address', ip]]"
+     },
+     {
+      "name": "Ignore class source",
+      "values": "(typeof _ignoreClass != 'undefined' && _ignoreClass) ? '' + _ignoreClass : gs.getProperty('sn_sec_cmn.ignoreCIClass', '')"
+     },
+     {
+      "name": "retired thresholds",
+      "values": "install_status == '7', operational_status == '6', life_cycle_stage_status display value == 'Retired'"
+     },
+     {
+      "name": "Label and segment separators",
+      "values": "label = dns.split('.')[0]; segments = label.split('-')"
+     },
+     {
+      "name": "Tables and fields read",
+      "values": "cmdb_ci_lb_service: fqdn, name, ip_address, sys_class_name, install_status, operational_status, life_cycle_stage_status"
+     }
+    ],
+    "before": "USEM Load Balancer Member Match declined: no pool known behind the virtual server, no members, a member the CMDB cannot place, several machines behind it, or two live records of one machine. Before that the hardware rules declined: USEM Serial Number Class Match and USEM Serial Number Hardware Match (a VIP carries no serial); USEM Cisco IP Phone MAC (the VIP label is not \"sep\" plus twelve hex characters); USEM FQDN Class Match, USEM FQDN Hardware Match, USEM Hostname Domain Class Match, USEM Hostname Domain Hardware Match, USEM Layered DNS Match, USEM Hostname Class Match, USEM Hostname Hardware Match, USEM Device Name Match, USEM Management Interface Match, USEM Network Interface Name Match and USEM FQDN Name Hardware Match (the VIP name is not a server name, the label carries no controller suffix or interface marker, and the address belongs to a load balancer device, not to a server).",
+    "after": "USEM IP Class Match, the first of the IP address rules (followed by USEM IP Hardware Match, USEM IP Adapter Match, USEM IP Layered Match and USEM FQDN Name Broad Match), for hosts that are not VIPs.",
+    "sibling_difference": "Never reads the pool, its members or any server; returns the cmdb_ci_lb_service record itself. Declines when two records of one virtual server survive narrowing (both devices of a pair live) where the member rule keeps both and walks their pools. Its header calls the check 'evidence' and invites extending the two lists; the member rule calls it 'sign' and asks that both lists stay identical in the two rules."
+   }
+  ],
+  "shared": [
+   {
+    "helper": "classFor (OS text to CMDB class)",
+    "behaviour": "Not present in either load balancer script. The OS is lower-cased and used only for the product-word check ('f5', 'big-ip', 'big ip', 'netscaler'); no OS-to-class mapping exists here and no class is derived from the OS."
+   },
+   {
+    "helper": "Multi-guess OS rule (count of '/')",
+    "behaviour": "Not present. Neither script splits or counts '/' in the OS text; an OS with several guesses still passes as long as it contains one of the four product words."
+   },
+   {
+    "helper": "Placeholder serial list",
+    "behaviour": "Not present. Neither script reads SERIAL_NUMBER or any serial field."
+   },
+   {
+    "helper": "agrees (class agreement)",
+    "behaviour": "Not present. Neither script compares the OS with the class of the CI. The only class restrictions are the ignore list (sys_class_name NOT IN on cmdb_ci_lb_service) and, in the member rule only, isRealServer (record readable through cmdb_ci_hardware, class not on the ignore list, not a cmdb_ci_lb record)."
+   },
+   {
+    "helper": "retired(ci)",
+    "behaviour": "Both scripts, identical: true when ci.getValue('install_status') == '7', or ci.getValue('operational_status') == '6', or ci.life_cycle_stage_status.getDisplayValue() == 'Retired'. Sets the live flag (live = !retired) on every cmdb_ci_lb_service row; the member rule applies it again, only when the one machine has several cmdb_ci_hardware records under one name label, to keep the single live one."
+   },
+   {
+    "helper": "narrow(list, flag)",
+    "behaviour": "Present in both scripts, identical: returns the items whose flag property is truthy, or the whole list unchanged when none carries it, so a preference never empties the candidate set. Called first with 'here', then only when more than one item remains with 'live'."
+   },
+   {
+    "helper": "IP tie-break ('here' flag)",
+    "behaviour": "Each cmdb_ci_lb_service row is flagged here when gr.getValue('ip_address') equals the trimmed scanned IP exactly (string equality, no normalisation of the record value); narrow(rows, 'here') keeps those rows when any has the flag. It applies in every search step, including the fqdn and name steps, and precedes the live test."
+   },
+   {
+    "helper": "Loopback and link-local guard",
+    "behaviour": "Present in both scripts: after coercing sourceValue to a string and trimming, an empty value, ip.indexOf('127.') == 0 or ip.indexOf('169.254.') == 0 returns null before anything is read. No IPv6, RFC 1918 or other range test exists."
+   },
+   {
+    "helper": "Ignore list",
+    "behaviour": "ignore = (typeof _ignoreClass != 'undefined' && _ignoreClass) ? '' + _ignoreClass : gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). When non-empty it is added as addQuery('sys_class_name', 'NOT IN', ignore) on every cmdb_ci_lb_service query in both rules; the member rule also tests whether ',' + ignore + ',' contains ',' + sys_class_name + ',' inside isRealServer (exact class names, no hierarchy)."
+   },
+   {
+    "helper": "isMarker(segment, words)",
+    "behaviour": "Present in both scripts, identical: a hyphen segment of the DNS label is a marker when it equals a listed word, when it starts with the word and the remainder matches /^[0-9]+$/, or, for words of three letters or more, when the segment is longer than the word and ends in it. So 'vip', 'vip2', 'multihostvip', 'vs' and 'vs1' qualify; 'xvs' and 'vsa' do not."
+   },
+   {
+    "helper": "Input normalisation",
+    "behaviour": "ip = ('' + sourceValue).trim(); dns = ('' + (sourcePayload.DNS || '')).trim().toLowerCase(); label = dns.split('.')[0]; os = ('' + (sourcePayload.OS || '')).toLowerCase() (no trim); segments = label.split('-') when the label is non-empty, else an empty array. The || '' coercion keeps an absent DNS or OS from becoming the string 'undefined'."
+   },
+   {
+    "helper": "one(field, value) and exactly-one",
+    "behaviour": "Present in both: undefined skips to the next step (empty value or no rows); null declines the rule (table invalid, or two or more distinct trimmed lower-cased names). All rows are read with next() into an array; no setLimit, no hasNext. The member rule keeps every id left after narrowing in twins and returns twins[0]; the service rule returns null when more than one row remains, else the one id."
+   },
+   {
+    "helper": "isRealServer(id) (member rule only)",
+    "behaviour": "A candidate is a real server when new GlideRecord('cmdb_ci_hardware').get(id) succeeds (record in the Hardware tree), when ',' + its sys_class_name + ',' does not occur in ',' + ignore + ',', and when cmdb_ci_lb is either not a valid table or cmdb_ci_lb.get(id) fails, so a load balancer device is never accepted as the machine behind a VIP."
+   },
+   {
+    "helper": "related(id, table) (member rule only)",
+    "behaviour": "Reads cmdb_rel_ci where parent = id or child = id, takes the other end of each relationship and keeps it only when a GlideRecord on the given table is valid and can get it, limiting the result to that class and its sub-classes. Used to reach cmdb_ci_lb_pool from a service, cmdb_ci_lb_pool_member from a pool and cmdb_ci_hardware from a member."
+   },
+   {
+    "helper": "keep(id) (member rule only)",
+    "behaviour": "Returns false for an empty id; true at once for an id already kept; false when isRealServer fails; otherwise stores the server under its name key (name trimmed, lower-cased, text before the first '.'; the sys_id when the name is empty) and returns true. A member's led flag is the or-accumulation of keep over its hits; led false increments unresolved, and any unresolved member declines."
+   },
+   {
+    "helper": "identities (member rule only)",
+    "behaviour": "An object keyed by each member's address, or by the member sys_id when the address is empty, set to true for every member. It is filled and never read, so it takes no part in any decision."
+   },
+   {
+    "helper": "Twin handling",
+    "behaviour": "Several cmdb_ci_lb_service rows with one trimmed lower-cased name are one virtual server recorded more than once (HA pair, test copy): narrowed by here, then by live. The member rule keeps every survivor as a twin and collects all their pools; the service rule declines on two survivors. Server twins (member rule) share a first name label: one record returns, of several one live one, else null."
+   }
+  ],
+  "issues": [
+   "455 before: the list of rules that run earlier omitted USEM Cisco IP Phone MAC, which sits between the serial number rules and USEM FQDN Class Match; added with why it declines a VIP (the label is not \"sep\" plus twelve hex characters).",
+   "460 before: same omission of USEM Cisco IP Phone MAC in the list of earlier rules; added.",
+   "455 and 460 before: the parenthesis said the interface rules refuse a load balancer device; USEM Network Interface Name Match returns Load Balancer devices for interface labels, so reworded to the reasons the script header gives (not a server name, no controller suffix or interface marker, address on a balancer device, not a server).",
+   "455 purpose: 'which refuse the balancer device' claimed for all hardware rules; reworded to 'which find no server for a VIP'.",
+   "455 mechanics 'Ignore list' and 'The virtual server in cmdb_ci_lb_service': the NOT IN clause is added only when the ignore string is non-empty (if (ignore)); added the condition.",
+   "460 mechanics 'Four search steps': same missing condition on the NOT IN clause; added.",
+   "455 mechanics 'Twins of one virtual server' and 460 'Narrowing the rows of a step': the distinct-name test runs on all rows before narrowing, so two names decline even when narrowing would drop one; made explicit.",
+   "455 mechanics 'Members and their addresses': a member reached through cmdb_rel_ci that is already in the map is skipped (continue); added.",
+   "455 mechanics 'Placing each member on a server': hits do not pass isRealServer directly but through keep(); reworded.",
+   "455 literals: added the unused identities map (filled per member, read nowhere) and, in Table validity checks, that related() drops ids whose target table is invalid.",
+   "455 sibling_difference: the list of tables only the member rule reads omitted cmdb_ci_hardware and cmdb_ci_lb; added.",
+   "shared keep(id): the order of the tests was misstated; the script tests empty id, then already kept, then isRealServer.",
+   "shared retired(ci): the member rule applies the live test to server records only when the one machine has more than one record; added that condition.",
+   "shared: added an entry for the identities map of the member rule, a working variable the script fills but never reads."
+  ]
+ },
+ "ip": {
+  "rules": [
+   {
+    "order": "700",
+    "name": "USEM IP Class Match",
+    "purpose": "Trusts the scanned IP only inside the CMDB class the scanned OS implies, and only when exactly one CI of that class (sub-classes included) carries it on ip_address. It is the first address rule: every serial and name rule has already declined, and an address is the weakest identifier (addresses move between machines and are shared by load balancers), so the class restriction plus host-name agreement make it safe.",
+    "reads": "Source field IP (sourceValue). Payload fields: OS (class choice through classFor) and DNS (host-name agreement). The rule argument is never read.",
+    "returns": "The sys_id of the single CI of the OS-implied class whose ip_address equals the trimmed scanned address and whose name agrees with the scanned DNS label; null in every other case.",
+    "mechanics": [
+     {
+      "title": "Address guard",
+      "detail": "Return null when sourceValue is empty. ip = ('' + sourceValue).trim(). Return null again when ip is empty, starts with '127.' (loopback) or starts with '169.254.' (link-local): such addresses identify no machine."
+     },
+     {
+      "title": "Ignored class list",
+      "detail": "ignore = the framework variable _ignoreClass when defined and non-empty, otherwise gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). Placeholder and technical classes on that list are excluded from the query that follows, by exact class name."
+     },
+     {
+      "title": "Class from the scanned OS",
+      "detail": "pref = classFor(sourcePayload.OS): the OS text lower-cased, '' when it splits on '/' into more than two guesses, otherwise the first keyword hit in fixed order. An empty pref ends the rule with null and USEM IP Hardware Match takes the host."
+     },
+     {
+      "title": "Search inside that class only",
+      "detail": "gr = new GlideRecord(pref) covers the class and its sub-classes; null when gr.isValid() is false (class not installed). addQuery('ip_address', ip); when ignore is non-empty addQuery('sys_class_name', 'NOT IN', ignore); query()."
+     },
+     {
+      "title": "Exactly one row",
+      "detail": "If next() is false, null. match = getUniqueValue() of the first row. If hasNext() is true a second CI of the class carries the address (an address reused after a rebuild) and the rule returns null. No setLimit, no ordering, no tie-break."
+     },
+     {
+      "title": "Host-name agreement",
+      "detail": "nameAgrees(match): label = DNS trimmed, lower-cased, first dot label; empty label passes. name = cmdb_ci.name of the CI, same normalisation; empty passes. Pass when name == label or one starts with the other plus '-' ('<name>-mgmt', '<name>-a')."
+     },
+     {
+      "title": "Return",
+      "detail": "Return match when the name agrees; null when the CI is named after another machine, which is what a reused address (a moved lease, a decommissioned host whose address was handed on) produces."
+     }
+    ],
+    "declines": [
+     "sourceValue is empty, or the trimmed address is empty",
+     "the address starts with '127.' or '169.254.'",
+     "classFor gives '': OS empty, more than two '/'-separated guesses, or no keyword matched",
+     "the table classFor returned is not valid on the instance (gr.isValid() false)",
+     "no CI of that class or its sub-classes, outside the ignore list, carries the address on ip_address",
+     "a second CI of that class carries the same address (hasNext() true)",
+     "the payload carries a DNS name and the CI name's first label neither equals it nor differs from it only by a hyphenated tail on either side"
+    ],
+    "literals": [
+     {
+      "name": "Non-routable prefixes",
+      "values": "'127.' and '169.254.', tested with ip.indexOf(prefix) == 0 on the trimmed address"
+     },
+     {
+      "name": "Ignore list",
+      "values": "_ignoreClass (framework variable) when defined and truthy, else gs.getProperty('sn_sec_cmn.ignoreCIClass', ''); applied as addQuery('sys_class_name', 'NOT IN', ignore) when non-empty"
+     },
+     {
+      "name": "Multi-guess threshold",
+      "values": "s.split('/').length > 2 returns '' (three or more '/'-separated guesses give no class; a two-guess string is still classified by keyword)"
+     },
+     {
+      "name": "classFor keywords (indexOf on the lower-cased OS, tested in this order, first hit wins)",
+      "values": "'esx' -> cmdb_ci_esx_server; 'windows' -> cmdb_ci_win_server when 'server' is also present, else cmdb_ci_computer; 'aix' -> cmdb_ci_aix_server; 'solaris' | 'sunos' -> cmdb_ci_solaris_server; 'hp-ux' -> cmdb_ci_hpux_server; 'netapp' | 'ontap' -> cmdb_ci_storage_server; 'printer' | 'laserjet' | 'jetdirect' -> cmdb_ci_printer; 'red hat' | 'linux' | 'centos' | 'ubuntu' | 'suse' | 'debian' | 'fedora' | 'euleros' | 'oracle enterprise' | 'amazon' -> cmdb_ci_linux_server; 'nx-os' | 'catos' | 'cisco' -> cmdb_ci_netgear; otherwise ''"
+     },
+     {
+      "name": "Searched table and field",
+      "values": "new GlideRecord(pref), i.e. the classFor result with its sub-classes; field ip_address"
+     },
+     {
+      "name": "Scanned label normalisation",
+      "values": "('' + (sourcePayload.DNS || '')).trim().toLowerCase().split('.')[0]"
+     },
+     {
+      "name": "CI name normalisation",
+      "values": "('' + ci.getValue('name')).trim().toLowerCase().split('.')[0], the CI read from cmdb_ci by sys_id"
+     },
+     {
+      "name": "Name agreement test",
+      "values": "name == label || label.indexOf(name + '-') == 0 || name.indexOf(label + '-') == 0 (empty label or empty name passes without a check)"
+     }
+    ],
+    "before": "Every serial rule and every name rule runs before it and declined: the host carries no usable serial and no usable host name (the sample ESXi management interface has no DNS at all). This is the first rule to read the address.",
+    "after": "USEM IP Hardware Match",
+    "sibling_difference": "The only address rule that filters by class before searching: the query runs on the classFor table itself, so it relies on the class restriction instead of an agrees() post-check or an isLoadBalancer() refusal (neither helper exists in this script). It declines outright when the OS gives no class, where the other three carry on with no class preference."
+   },
+   {
+    "order": "705",
+    "name": "USEM IP Hardware Match",
+    "purpose": "Trusts the scanned IP across the whole hardware tree (cmdb_ci_hardware and every class beneath it) when exactly one hardware CI carries it on ip_address; safety comes from four checks after the query: one row, not a load balancer, name agreement, class agreement with the scanned OS. It sits after the class-restricted rule to reach CIs kept in a parent class or hosts whose OS gave no class.",
+    "reads": "Source field IP (sourceValue). Payload fields: OS (class preference consumed only by agrees()) and DNS (host-name agreement). The rule argument is never read.",
+    "returns": "The sys_id of the one cmdb_ci_hardware row (any sub-class outside the ignore list) whose ip_address equals the scanned address, provided it is not in cmdb_ci_lb, its name agrees with the scanned label and its class agrees with the OS-implied class; null otherwise.",
+    "mechanics": [
+     {
+      "title": "Address guard",
+      "detail": "Return null when sourceValue is empty. ip = ('' + sourceValue).trim(). Return null again when ip is empty, starts with '127.' (loopback) or starts with '169.254.' (link-local): such addresses identify no machine."
+     },
+     {
+      "title": "Ignored class list",
+      "detail": "ignore = the framework variable _ignoreClass when defined and non-empty, otherwise gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). Placeholder and technical classes on that list are excluded from the query that follows, by exact class name."
+     },
+     {
+      "title": "Class preference from the OS",
+      "detail": "pref = classFor(sourcePayload.OS), the same mapping as USEM IP Class Match. An empty pref does not end the rule here: it only means agrees() refuses nothing in the last stage (the sample's seven-guess fingerprint gives '')."
+     },
+     {
+      "title": "Search across the hardware tree",
+      "detail": "gr = new GlideRecord('cmdb_ci_hardware'), which covers Hardware and every class beneath it, with no isValid() guard; addQuery('ip_address', ip); when ignore is non-empty addQuery('sys_class_name', 'NOT IN', ignore); query(). No class filter beyond the tree."
+     },
+     {
+      "title": "Exactly one row",
+      "detail": "If next() is false, null. id = getUniqueValue() and cls = '' + getValue('sys_class_name') of the first row. If hasNext() is true (a shared virtual IP, an address reused after a rebuild) the rule returns null. No setLimit, no tie-break."
+     },
+     {
+      "title": "Load balancer refusal",
+      "detail": "isLoadBalancer(id): new GlideRecord('cmdb_ci_lb'), isValid() && get(id), so a CI of cmdb_ci_lb or any class beneath it counts. True means the address is a virtual IP answered for the pool members behind the balancer, and the rule returns null."
+     },
+     {
+      "title": "Host-name agreement",
+      "detail": "nameAgrees(id): label = DNS trimmed, lower-cased, first dot label; empty label passes. name = cmdb_ci.name of the CI, same normalisation; empty passes. Pass when name == label or one starts with the other plus '-'. A failure returns null."
+     },
+     {
+      "title": "Class agreement",
+      "detail": "agrees(cls): true when pref is '' or cls == pref; true when parentsOf(cls) contains pref (cls is a sub-class); true when parentsOf(pref) contains cls (cls is a parent, e.g. cmdb_ci_server for an ESXi host). Any other class returns null."
+     },
+     {
+      "title": "Return",
+      "detail": "Return id once all four checks pass, in this order: a single hardware row, not a load balancer, name agreeing with the scan, class agreeing with the OS."
+     }
+    ],
+    "declines": [
+     "sourceValue is empty, or the trimmed address is empty",
+     "the address starts with '127.' or '169.254.'",
+     "no cmdb_ci_hardware row outside the ignore list carries the address on ip_address",
+     "a second hardware row carries the same address (hasNext() true), whatever the classes involved",
+     "the single CI is a load balancer: cmdb_ci_lb is a valid table and cmdb_ci_lb.get(sys_id) succeeds",
+     "the payload carries a DNS name and the CI name's first label neither equals it nor differs from it only by a hyphenated tail",
+     "the OS gave a class and the CI's sys_class_name is neither that class, a sub-class of it, nor a parent of it"
+    ],
+    "literals": [
+     {
+      "name": "Non-routable prefixes",
+      "values": "'127.' and '169.254.', tested with ip.indexOf(prefix) == 0 on the trimmed address"
+     },
+     {
+      "name": "Ignore list",
+      "values": "_ignoreClass (framework variable) when defined and truthy, else gs.getProperty('sn_sec_cmn.ignoreCIClass', ''); applied as addQuery('sys_class_name', 'NOT IN', ignore) when non-empty"
+     },
+     {
+      "name": "Multi-guess threshold",
+      "values": "s.split('/').length > 2 returns '' (three or more '/'-separated guesses give no class; a two-guess string is still classified by keyword)"
+     },
+     {
+      "name": "classFor keywords (indexOf on the lower-cased OS, tested in this order, first hit wins)",
+      "values": "'esx' -> cmdb_ci_esx_server; 'windows' -> cmdb_ci_win_server when 'server' is also present, else cmdb_ci_computer; 'aix' -> cmdb_ci_aix_server; 'solaris' | 'sunos' -> cmdb_ci_solaris_server; 'hp-ux' -> cmdb_ci_hpux_server; 'netapp' | 'ontap' -> cmdb_ci_storage_server; 'printer' | 'laserjet' | 'jetdirect' -> cmdb_ci_printer; 'red hat' | 'linux' | 'centos' | 'ubuntu' | 'suse' | 'debian' | 'fedora' | 'euleros' | 'oracle enterprise' | 'amazon' -> cmdb_ci_linux_server; 'nx-os' | 'catos' | 'cisco' -> cmdb_ci_netgear; otherwise ''"
+     },
+     {
+      "name": "Searched table and field",
+      "values": "cmdb_ci_hardware (all sub-classes), field ip_address; the class taken from sys_class_name of the row found"
+     },
+     {
+      "name": "Load balancer test",
+      "values": "new GlideRecord('cmdb_ci_lb'); lb.isValid() && lb.get(id) (cmdb_ci_lb and every class beneath it)"
+     },
+     {
+      "name": "Class hierarchy walk",
+      "values": "parentsOf(table): sys_db_object queried by name, super_class.name followed upward while present; returns [table, parent, grandparent, ...]"
+     },
+     {
+      "name": "Class agreement test",
+      "values": "!pref || cls == pref || parentsOf(cls).indexOf(pref) != -1 || parentsOf(pref).indexOf(cls) != -1"
+     },
+     {
+      "name": "Scanned label normalisation",
+      "values": "('' + (sourcePayload.DNS || '')).trim().toLowerCase().split('.')[0]"
+     },
+     {
+      "name": "CI name normalisation",
+      "values": "('' + ci.getValue('name')).trim().toLowerCase().split('.')[0], the CI read from cmdb_ci by sys_id"
+     },
+     {
+      "name": "Name agreement test",
+      "values": "name == label || label.indexOf(name + '-') == 0 || name.indexOf(label + '-') == 0 (empty label or empty name passes without a check)"
+     }
+    ],
+    "before": "USEM IP Class Match runs first and declined because the OS gave no class (a multi-guess fingerprint like the sample), the address belongs to no CI or to two CIs of the OS-implied class, or the CI is kept in a parent class such as cmdb_ci_server that the class-restricted search never reaches.",
+    "after": "USEM IP Adapter Match",
+    "sibling_difference": "Widens the search from the OS-implied class to the whole cmdb_ci_hardware tree and turns the class from a filter into a post-check (agrees(), parents and sub-classes allowed), adding the cmdb_ci_lb refusal. It still reads ip_address on the CI record itself, unlike the adapter and layered rules."
+   },
+   {
+    "order": "730",
+    "name": "USEM IP Adapter Match",
+    "purpose": "Trusts the scanned IP as recorded on a Network Adapter (cmdb_ci_network_adapter.ip_address) and takes the adapter's owning CI (its cmdb_ci reference). It sits after the two rules that read the CI record because a multi-homed server keeps its addresses on adapter records rather than in its own ip_address field.",
+    "reads": "Source field IP (sourceValue). Payload fields: OS (class preference consumed by agrees() inside the owner loop) and DNS (host-name agreement). The rule argument is never read.",
+    "returns": "The sys_id of the single CI (counted once however many of its adapters carry the address) owning an adapter with the scanned ip_address, when its class agrees with the OS, it is not a cmdb_ci_lb row and its name agrees with the scanned label; null otherwise.",
+    "mechanics": [
+     {
+      "title": "Address guard",
+      "detail": "Return null when sourceValue is empty. ip = ('' + sourceValue).trim(). Return null again when ip is empty, starts with '127.' (loopback) or starts with '169.254.' (link-local): such addresses identify no machine."
+     },
+     {
+      "title": "Ignored class list",
+      "detail": "ignore = the framework variable _ignoreClass when defined and non-empty, otherwise gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). Placeholder and technical classes on that list are excluded from the query that follows, by exact class name."
+     },
+     {
+      "title": "Class preference from the OS",
+      "detail": "pref = classFor(sourcePayload.OS). Not a filter: it is consulted inside the owner loop to skip an owning CI whose class contradicts the scan. An empty pref (unknown or multi-guess OS, as in the sample) skips nothing."
+     },
+     {
+      "title": "Adapter query",
+      "detail": "nic = new GlideRecord('cmdb_ci_network_adapter'), no isValid() guard; addQuery('ip_address', ip); addNotNullQuery('cmdb_ci') so the adapter must belong to a CI; when ignore is non-empty addQuery('cmdb_ci.sys_class_name', 'NOT IN', ignore); query()."
+     },
+     {
+      "title": "Distinct owners with class agreement",
+      "detail": "Walk every row with next(): owner = getValue('cmdb_ci'); continue when agrees('' + nic.cmdb_ci.sys_class_name) is false; each new owner sys_id is recorded once in an object, count is incremented and first keeps the first distinct owner."
+     },
+     {
+      "title": "Exactly one owner",
+      "detail": "Decided by count == 1 over the whole result set, not by hasNext(): one server with two adapters on the address counts once, two servers count twice and the rule declines. A load balancer owner counts too when agrees() accepted its class (always with pref '')."
+     },
+     {
+      "title": "Refusals on the single owner",
+      "detail": "Return first only when !isLoadBalancer(first) (no row of cmdb_ci_lb with that sys_id) and nameAgrees(first) (scanned first label equals the CI name's first label or differs by a hyphenated tail). Otherwise null."
+     }
+    ],
+    "declines": [
+     "sourceValue is empty, or the trimmed address is empty",
+     "the address starts with '127.' or '169.254.'",
+     "no cmdb_ci_network_adapter row with that ip_address has a non-empty cmdb_ci owner outside the ignore list",
+     "every owning CI has a class agrees() refuses, so count stays 0",
+     "adapters of two or more distinct CIs (after the class skip) carry the address",
+     "the single owner is a load balancer: cmdb_ci_lb is a valid table and cmdb_ci_lb.get(sys_id) succeeds",
+     "the payload carries a DNS name and the owner's name does not agree with it"
+    ],
+    "literals": [
+     {
+      "name": "Non-routable prefixes",
+      "values": "'127.' and '169.254.', tested with ip.indexOf(prefix) == 0 on the trimmed address"
+     },
+     {
+      "name": "Ignore list",
+      "values": "_ignoreClass when defined and truthy, else gs.getProperty('sn_sec_cmn.ignoreCIClass', ''); applied as addQuery('cmdb_ci.sys_class_name', 'NOT IN', ignore) when non-empty"
+     },
+     {
+      "name": "Multi-guess threshold",
+      "values": "s.split('/').length > 2 returns '' (three or more '/'-separated guesses give no class; a two-guess string is still classified by keyword)"
+     },
+     {
+      "name": "classFor keywords (indexOf on the lower-cased OS, tested in this order, first hit wins)",
+      "values": "'esx' -> cmdb_ci_esx_server; 'windows' -> cmdb_ci_win_server when 'server' is also present, else cmdb_ci_computer; 'aix' -> cmdb_ci_aix_server; 'solaris' | 'sunos' -> cmdb_ci_solaris_server; 'hp-ux' -> cmdb_ci_hpux_server; 'netapp' | 'ontap' -> cmdb_ci_storage_server; 'printer' | 'laserjet' | 'jetdirect' -> cmdb_ci_printer; 'red hat' | 'linux' | 'centos' | 'ubuntu' | 'suse' | 'debian' | 'fedora' | 'euleros' | 'oracle enterprise' | 'amazon' -> cmdb_ci_linux_server; 'nx-os' | 'catos' | 'cisco' -> cmdb_ci_netgear; otherwise ''"
+     },
+     {
+      "name": "Searched table and fields",
+      "values": "cmdb_ci_network_adapter: ip_address (equals the scanned address), cmdb_ci (addNotNullQuery), cmdb_ci.sys_class_name (ignore filter and agrees())"
+     },
+     {
+      "name": "Owner identity",
+      "values": "nic.getValue('cmdb_ci'), de-duplicated in an object keyed by sys_id; count == 1 required"
+     },
+     {
+      "name": "Load balancer test",
+      "values": "new GlideRecord('cmdb_ci_lb'); lb.isValid() && lb.get(id) (cmdb_ci_lb and every class beneath it)"
+     },
+     {
+      "name": "Class hierarchy walk",
+      "values": "parentsOf(table): sys_db_object queried by name, super_class.name followed upward while present; returns [table, parent, grandparent, ...]"
+     },
+     {
+      "name": "Class agreement test",
+      "values": "!pref || cls == pref || parentsOf(cls).indexOf(pref) != -1 || parentsOf(pref).indexOf(cls) != -1"
+     },
+     {
+      "name": "Scanned label normalisation",
+      "values": "('' + (sourcePayload.DNS || '')).trim().toLowerCase().split('.')[0]"
+     },
+     {
+      "name": "CI name normalisation",
+      "values": "('' + ci.getValue('name')).trim().toLowerCase().split('.')[0], the CI read from cmdb_ci by sys_id"
+     },
+     {
+      "name": "Name agreement test",
+      "values": "name == label || label.indexOf(name + '-') == 0 || name.indexOf(label + '-') == 0 (empty label or empty name passes without a check)"
+     }
+    ],
+    "before": "USEM IP Class Match and USEM IP Hardware Match both read the ip_address field on the CI record; they declined because that field is empty or holds a different address for a multi-homed host whose scanned address is recorded on an adapter only, or because their own one-row, balancer, name or class checks failed.",
+    "after": "USEM IP Layered Match",
+    "sibling_difference": "First rule to follow discovery records rather than the CI's own ip_address: cmdb_ci_network_adapter -> cmdb_ci. 'Exactly one' becomes a distinct-owner count over all rows, and a class disagreement skips that row instead of ending the rule, so a stale adapter owned by a different kind of machine cannot block the match."
+   },
+   {
+    "order": "740",
+    "name": "USEM IP Layered Match",
+    "purpose": "Trusts the scanned IP recorded as its own IP Address record (cmdb_ci_ip_address) linked through nic to a Network Adapter that links to a CI. It is the last address rule because newer discovery writes each address there and may leave the adapter's own ip_address empty, so the previous three rules find nothing.",
+    "reads": "Source field IP (sourceValue). Payload fields: OS (class preference consumed by agrees() inside the owner loop) and DNS (host-name agreement). The rule argument is never read.",
+    "returns": "The sys_id of the single CI at the end of cmdb_ci_ip_address -> nic (cmdb_ci_network_adapter) -> cmdb_ci, counted once across its address records, when its class agrees with the OS, it is not in cmdb_ci_lb and its name agrees with the scanned label; null otherwise.",
+    "mechanics": [
+     {
+      "title": "Address guard",
+      "detail": "Return null when sourceValue is empty. ip = ('' + sourceValue).trim(). Return null again when ip is empty, starts with '127.' (loopback) or starts with '169.254.' (link-local): such addresses identify no machine."
+     },
+     {
+      "title": "Ignored class list",
+      "detail": "ignore = the framework variable _ignoreClass when defined and non-empty, otherwise gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). Placeholder and technical classes on that list are excluded from the query that follows, by exact class name."
+     },
+     {
+      "title": "Class preference from the OS",
+      "detail": "pref = classFor(sourcePayload.OS). Not a filter: it is consulted inside the owner loop to skip a CI at the end of the chain whose class contradicts the scan. An empty pref (unknown or multi-guess OS, as in the sample) skips nothing."
+     },
+     {
+      "title": "IP Address record query",
+      "detail": "ipGr = new GlideRecord('cmdb_ci_ip_address'); null when isValid() is false. addQuery('ip_address', ip); addNotNullQuery('nic.cmdb_ci') so the chain ends on a CI; when ignore is non-empty addQuery('nic.cmdb_ci.sys_class_name', 'NOT IN', ignore); query()."
+     },
+     {
+      "title": "Distinct owners with class agreement",
+      "detail": "Walk every row: owner = '' + ipGr.nic.cmdb_ci (IP Address -> adapter -> CI, two dot-walks); continue when agrees('' + ipGr.nic.cmdb_ci.sys_class_name) is false; each new owner recorded once in an object, count incremented, first kept."
+     },
+     {
+      "title": "Exactly one owner",
+      "detail": "count == 1 over the whole result set, not hasNext(): one device with two address records counts once, two devices count twice and the rule declines. A load balancer owner counts too whenever agrees() accepted its class (always when pref is '')."
+     },
+     {
+      "title": "Refusals on the single owner",
+      "detail": "Return first only when !isLoadBalancer(first) (no cmdb_ci_lb row with that sys_id) and nameAgrees(first). Otherwise null, and the host passes to USEM FQDN Name Broad Match."
+     }
+    ],
+    "declines": [
+     "sourceValue is empty, or the trimmed address is empty",
+     "the address starts with '127.' or '169.254.'",
+     "the cmdb_ci_ip_address table is not valid on the instance (ipGr.isValid() false)",
+     "no cmdb_ci_ip_address row with that ip_address reaches a CI (nic.cmdb_ci empty) outside the ignore list",
+     "every CI reached has a class agrees() refuses, so count stays 0",
+     "address records of two or more distinct CIs (after the class skip) carry the address",
+     "the single owner is a load balancer: cmdb_ci_lb is a valid table and cmdb_ci_lb.get(sys_id) succeeds",
+     "the payload carries a DNS name and the owner's name does not agree with it"
+    ],
+    "literals": [
+     {
+      "name": "Non-routable prefixes",
+      "values": "'127.' and '169.254.', tested with ip.indexOf(prefix) == 0 on the trimmed address"
+     },
+     {
+      "name": "Ignore list",
+      "values": "_ignoreClass when defined and truthy, else gs.getProperty('sn_sec_cmn.ignoreCIClass', ''); applied as addQuery('nic.cmdb_ci.sys_class_name', 'NOT IN', ignore) when non-empty"
+     },
+     {
+      "name": "Multi-guess threshold",
+      "values": "s.split('/').length > 2 returns '' (three or more '/'-separated guesses give no class; a two-guess string is still classified by keyword)"
+     },
+     {
+      "name": "classFor keywords (indexOf on the lower-cased OS, tested in this order, first hit wins)",
+      "values": "'esx' -> cmdb_ci_esx_server; 'windows' -> cmdb_ci_win_server when 'server' is also present, else cmdb_ci_computer; 'aix' -> cmdb_ci_aix_server; 'solaris' | 'sunos' -> cmdb_ci_solaris_server; 'hp-ux' -> cmdb_ci_hpux_server; 'netapp' | 'ontap' -> cmdb_ci_storage_server; 'printer' | 'laserjet' | 'jetdirect' -> cmdb_ci_printer; 'red hat' | 'linux' | 'centos' | 'ubuntu' | 'suse' | 'debian' | 'fedora' | 'euleros' | 'oracle enterprise' | 'amazon' -> cmdb_ci_linux_server; 'nx-os' | 'catos' | 'cisco' -> cmdb_ci_netgear; otherwise ''"
+     },
+     {
+      "name": "Searched table and fields",
+      "values": "cmdb_ci_ip_address: ip_address (equals the scanned address), nic.cmdb_ci (addNotNullQuery, owner identity), nic.cmdb_ci.sys_class_name (ignore filter and agrees())"
+     },
+     {
+      "name": "Owner identity",
+      "values": "'' + ipGr.nic.cmdb_ci, de-duplicated in an object keyed by sys_id; count == 1 required"
+     },
+     {
+      "name": "Load balancer test",
+      "values": "new GlideRecord('cmdb_ci_lb'); lb.isValid() && lb.get(id) (cmdb_ci_lb and every class beneath it)"
+     },
+     {
+      "name": "Class hierarchy walk",
+      "values": "parentsOf(table): sys_db_object queried by name, super_class.name followed upward while present; returns [table, parent, grandparent, ...]"
+     },
+     {
+      "name": "Class agreement test",
+      "values": "!pref || cls == pref || parentsOf(cls).indexOf(pref) != -1 || parentsOf(pref).indexOf(cls) != -1"
+     },
+     {
+      "name": "Scanned label normalisation",
+      "values": "('' + (sourcePayload.DNS || '')).trim().toLowerCase().split('.')[0]"
+     },
+     {
+      "name": "CI name normalisation",
+      "values": "('' + ci.getValue('name')).trim().toLowerCase().split('.')[0], the CI read from cmdb_ci by sys_id"
+     },
+     {
+      "name": "Name agreement test",
+      "values": "name == label || label.indexOf(name + '-') == 0 || name.indexOf(label + '-') == 0 (empty label or empty name passes without a check)"
+     }
+    ],
+    "before": "USEM IP Adapter Match declined because the cmdb_ci_network_adapter records carry no ip_address for the host (newer discovery stores each address as its own IP Address record and may leave the adapter's field empty), or because its own owner-count, balancer, name or class checks failed.",
+    "after": "USEM FQDN Name Broad Match, then the out-of-box Qualys rules",
+    "sibling_difference": "Same distinct-owner logic as USEM IP Adapter Match, one link deeper: cmdb_ci_ip_address.ip_address -> nic -> cmdb_ci, with dot-walked queries (nic.cmdb_ci, nic.cmdb_ci.sys_class_name) and an isValid() guard because the IP Address table may not exist. It is the last of the four address rules."
+   }
+  ],
+  "shared": [
+   {
+    "helper": "Script shape",
+    "behaviour": "Each rule is one function expression named process(rule, sourceValue, sourcePayload), invoked immediately with those three variables; rule is never read. It returns a CI sys_id string or null; the first rule in the chain to return a sys_id wins and a null hands the host to the next rule. No setLimit, no orderBy, no try/catch and no gs.info, gs.warn or gs.error anywhere in the four scripts."
+   },
+   {
+    "helper": "Address guard (loopback and link-local)",
+    "behaviour": "Identical in all four. ip = ('' + sourceValue).trim(); return null when sourceValue is falsy, when ip is empty, when ip.indexOf('127.') == 0 (loopback) or when ip.indexOf('169.254.') == 0 (link-local). Plain prefix tests on the string; no IPv6 form or private-range test is made."
+   },
+   {
+    "helper": "Ignore list (sn_sec_cmn.ignoreCIClass)",
+    "behaviour": "Identical in all four. ignore = ('' + _ignoreClass) when the framework variable _ignoreClass is defined and truthy, else gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). Applied only when non-empty, as NOT IN on the exact class name: sys_class_name (Class and Hardware Match), cmdb_ci.sys_class_name (Adapter Match), nic.cmdb_ci.sys_class_name (Layered Match). No hierarchy on the list."
+   },
+   {
+    "helper": "classFor(os) - normalisation and multi-guess rule",
+    "behaviour": "Identical in all four. Returns '' for an empty OS. s = ('' + os).toLowerCase(). If s.split('/').length > 2, i.e. the text holds three or more '/'-separated guesses from an unauthenticated scan, returns '' (no class); a two-guess string (one '/') is still classified. Keywords are then tested with indexOf on the whole lower-cased string in fixed order and the first hit wins."
+   },
+   {
+    "helper": "classFor(os) - keyword mapping, first half (in test order)",
+    "behaviour": "'esx' -> cmdb_ci_esx_server; 'windows' -> cmdb_ci_win_server when 'server' is also present, else cmdb_ci_computer; 'aix' -> cmdb_ci_aix_server; 'solaris' or 'sunos' -> cmdb_ci_solaris_server; 'hp-ux' -> cmdb_ci_hpux_server; 'netapp' or 'ontap' -> cmdb_ci_storage_server; 'printer', 'laserjet' or 'jetdirect' -> cmdb_ci_printer."
+   },
+   {
+    "helper": "classFor(os) - keyword mapping, second half (in test order)",
+    "behaviour": "'red hat', 'linux', 'centos', 'ubuntu', 'suse', 'debian', 'fedora', 'euleros', 'oracle enterprise' or 'amazon' -> cmdb_ci_linux_server; 'nx-os', 'catos' or 'cisco' -> cmdb_ci_netgear; anything else -> ''. Because 'esx' and 'windows' are tested first and 'cisco' last, an OS naming both Cisco and Linux resolves to cmdb_ci_linux_server and 'VMware ESXi' never falls through to Linux."
+   },
+   {
+    "helper": "How each rule uses the class",
+    "behaviour": "Class Match uses it as the search table (new GlideRecord(pref), sub-classes included) and declines when it is ''. Hardware Match keeps it as pref and applies agrees() to the single row found. Adapter Match and Layered Match keep it as pref and apply agrees() to each owner while walking rows, skipping owners of a contradicting class before counting. With pref '' nothing is ever refused on class."
+   },
+   {
+    "helper": "agrees(cls) and parentsOf(table)",
+    "behaviour": "In Hardware, Adapter and Layered Match. parentsOf reads sys_db_object by name and follows super_class.name upward: [table, parent, grandparent, ...]. agrees is true when pref is '' or cls == pref, when parentsOf(cls) contains pref (cls a sub-class of the OS class) or when parentsOf(pref) contains cls (cls a parent, e.g. cmdb_ci_server for an ESXi host). Any other class is refused."
+   },
+   {
+    "helper": "isLoadBalancer(id)",
+    "behaviour": "In Hardware, Adapter and Layered Match; absent from Class Match. new GlideRecord('cmdb_ci_lb'); lb.isValid() && lb.get(id): cmdb_ci_lb and every class beneath it count; no refusal if cmdb_ci_lb is not a valid table. Applied to the single candidate only, never removed from the count: Hardware Match declines on server plus balancer; Adapter and Layered count a balancer only if agrees() accepts it."
+   },
+   {
+    "helper": "nameAgrees(ciId)",
+    "behaviour": "Identical in all four. label = ('' + (sourcePayload.DNS || '')).trim().toLowerCase().split('.')[0]; empty label returns true. CI read from cmdb_ci by sys_id; name = ('' + ci.getValue('name')).trim().toLowerCase().split('.')[0]; empty name returns true. Else name == label, or label starts with name + '-', or name starts with label + '-' ('<name>-mgmt'). A CI named after another machine fails."
+   },
+   {
+    "helper": "nameAgrees(ciId) - coercion caveat",
+    "behaviour": "The DNS side is guarded by || '' and coerces to an empty label. The CI side is not: '' + ci.getValue('name') is the string 'null' for an empty name, so the empty-name pass fires only for a whitespace-only name, and an unnamed CI fails agreement unless the scanned label is 'null' or starts with 'null-'."
+   },
+   {
+    "helper": "Exactly-one decision and IP tie-break",
+    "behaviour": "Class and Hardware Match: next() then hasNext() on the CI query, no setLimit, no ordering; two rows decline. Adapter and Layered Match: every row is walked and distinct owner sys_ids counted; count == 1 is required, so several adapters or address records of one CI count once. None of the four breaks a tie by scanned address, class depth or update time: a tie stays unmatched."
+   },
+   {
+    "helper": "retired(), narrow(), isRealServer(), placeholder serial list",
+    "behaviour": "Not present in these four scripts. They read no install_status, operational_status or life cycle stage, so a retired CI is a candidate like any other and a second, retired CI on the address makes the rule decline. There is no twin narrowing, no walk from a load balancer service through pool and member to a real server, and no serial placeholder list, since the source field is the IP."
+   }
+  ],
+  "issues": [
+   "shared / Script shape: called the script an anonymous function; it is a function expression named process(...) invoked immediately. Added that the rule argument is never read and that there is no try/catch or gs.error either (confirmed by search).",
+   "shared / isLoadBalancer(id): claimed server plus balancer on one address always declines; true for Hardware Match (hasNext before the refusal) but Adapter and Layered Match run agrees() before counting, so a balancer owner is counted only when its class agrees (always with an empty pref). Also added that no refusal fires where cmdb_ci_lb is not a valid table.",
+   "USEM IP Adapter Match / mechanics 'Exactly one owner': 'A load balancer owner still counts toward this total' was unconditional; corrected to count only when agrees() accepted its class.",
+   "USEM IP Layered Match / mechanics 'Exactly one owner': same unconditional load balancer claim corrected.",
+   "shared / nameAgrees(ciId) - coercion caveat: the fail condition missed the label starting with 'null-' (label.indexOf(name + '-') == 0); added that the empty-name pass fires only for a whitespace-only name; removed the trailing sentence that was a note about publishing rather than script behaviour.",
+   "USEM IP Hardware Match, Adapter Match, Layered Match / declines 'the single owner is a load balancer': added that cmdb_ci_lb must be a valid table (lb.isValid() is part of the test).",
+   "USEM IP Adapter Match / mechanics 'Adapter query': added that the script has no isValid() guard on cmdb_ci_network_adapter, unlike the IP Address query of the Layered rule.",
+   "USEM IP Hardware Match / mechanics 'Search across the hardware tree': added that there is no isValid() guard on cmdb_ci_hardware.",
+   "USEM IP Hardware Match / mechanics 'Return': stated the order of the four checks (one row, balancer, name, class) as the script runs them.",
+   "All four rules / reads: added that the rule argument is never read.",
+   "USEM IP Class Match / sibling_difference: noted that agrees() and isLoadBalancer() helpers do not exist in this script at all."
+  ]
+ }
+}

@@ -100,28 +100,26 @@ D.concepts.forEach(c => {
 D.rules.forEach(r => {
   const s = pres.addSlide(); light(s);
   kickerTitle(s, 'Rule ' + r.order + '  ·  ' + r.group, r.name.replace('USEM ', ''));
-  card(s, M, 1.45, 8.3, 5.55);
-  heading(s, M + 0.3, 1.62, 7.6, 'What it looks for');
-  s.addText(r.purpose, { x: M + 0.3, y: 1.9, w: 7.7, h: 0.85, fontFace: SANS, fontSize: 12, color: INK, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
-  heading(s, M + 0.3, 2.8, 7.6, 'How the script works');
-  bullets(s, M + 0.3, 3.08, 7.7, 3.8, r.mechanics, 10.5, 4);
-  card(s, 9.1, 1.45, 3.73, 5.55);
-  const side = [['Reads', r.reads], ['Returns', r.returns]];
-  const runs = [];
-  side.forEach(p => {
-    runs.push({ text: p[0].toUpperCase(), options: { color: NAVY, bold: true, fontSize: 9, charSpacing: 1.2, breakLine: true } });
-    runs.push({ text: p[1], options: { color: INK, fontSize: 10.5, breakLine: true, paraSpaceAfter: 8 } });
-  });
-  runs.push({ text: 'DECLINES WHEN', options: { color: NAVY, bold: true, fontSize: 9, charSpacing: 1.2, breakLine: true } });
-  r.declines.forEach(d => runs.push({ text: d, options: { color: INK, fontSize: 9.5, bullet: { indent: 10 }, breakLine: true, paraSpaceAfter: 2 } }));
-  const tail = [['Runs after', r.before], ['Hands over to', r.after]];
-  if (r.matched != null) tail.push(['Items matched', String(r.matched)]);
-  tail.forEach((p, i) => {
-    runs.push({ text: p[0].toUpperCase(), options: { color: NAVY, bold: true, fontSize: 9, charSpacing: 1.2, breakLine: true, paraSpaceBefore: 6 } });
-    runs.push({ text: p[1], options: { color: INK, fontSize: 10, breakLine: i < tail.length - 1, paraSpaceAfter: 6 } });
-  });
-  s.addText(runs, { x: 9.35, y: 1.65, w: 3.3, h: 5.2, fontFace: SANS, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
-
+  const strip = [
+    { text: 'READS  ', options: { bold: true, color: NAVY } }, { text: r.reads + '   ', options: { color: INK } },
+    { text: 'RETURNS  ', options: { bold: true, color: NAVY } }, { text: r.returns, options: { color: INK, breakLine: true } },
+    { text: 'RUNS AFTER  ', options: { bold: true, color: NAVY } }, { text: (r.before_names || r.before) + '   ', options: { color: INK } },
+    { text: 'HANDS OVER TO  ', options: { bold: true, color: NAVY } }, { text: r.after_names || r.after, options: { color: INK } },
+  ];
+  if (r.matched != null) strip.push({ text: '   ITEMS MATCHED  ', options: { bold: true, color: NAVY } }, { text: String(r.matched), options: { color: INK } });
+  s.addText(strip, { x: M, y: 1.28, w: 12.33, h: 0.62, fontFace: SANS, fontSize: 9.5, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
+  card(s, M, 1.98, 12.33, 3.6);
+  heading(s, M + 0.3, 2.12, 12, 'What it looks for');
+  s.addText(r.purpose, { x: M + 0.3, y: 2.38, w: 11.75, h: 0.62, fontFace: SANS, fontSize: 11.5, color: INK, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
+  heading(s, M + 0.3, 3.05, 12, 'How the script works');
+  const half = Math.ceil(r.mechanics.length / 2), colW = (12.33 - 0.6 - 0.35) / 2;
+  bullets(s, M + 0.3, 3.32, colW, 2.18, r.mechanics.slice(0, half), 10, 3);
+  bullets(s, M + 0.3 + colW + 0.35, 3.32, colW, 2.18, r.mechanics.slice(half), 10, 3);
+  card(s, M, 5.7, 12.33, 1.5, SOFT);
+  heading(s, M + 0.3, 5.82, 12, 'Declines when');
+  const dh = Math.ceil(r.declines.length / 2);
+  bullets(s, M + 0.3, 6.06, colW, 1.08, r.declines.slice(0, dh), 9, 1);
+  bullets(s, M + 0.3 + colW + 0.35, 6.06, colW, 1.08, r.declines.slice(dh), 9, 1);
   if (!r.examples.length) {
     const e = pres.addSlide(); light(e);
     kickerTitle(e, 'Rule ' + r.order + '  ·  Examples', 'Three matched discovered items');
