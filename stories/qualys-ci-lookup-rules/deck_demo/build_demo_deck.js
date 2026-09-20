@@ -29,7 +29,16 @@ function heading(s, x, y, w, text) {
   s.addText(text.toUpperCase(), { x, y, w, h: 0.26, fontFace: SANS, fontSize: 9.5, bold: true, color: NAVY, charSpacing: 1.2, isTextBox: true, margin: 0 });
 }
 function bullets(s, x, y, w, h, items, size, para) {
-  const runs = items.map((t, i) => ({ text: t, options: { bullet: { indent: 14 }, breakLine: i < items.length - 1, paraSpaceAfter: para == null ? 6 : para } }));
+  const runs = [];
+  items.forEach((t, i) => {
+    const last = i === items.length - 1, sp = para == null ? 6 : para;
+    if (typeof t === 'string') {
+      runs.push({ text: t, options: { bullet: { indent: 14 }, breakLine: !last, paraSpaceAfter: sp } });
+    } else {
+      runs.push({ text: t.title + '  ', options: { bullet: { indent: 14 }, bold: true, color: NAVY } });
+      runs.push({ text: t.detail, options: { breakLine: !last, paraSpaceAfter: sp } });
+    }
+  });
   s.addText(runs, { x, y, w, h, fontFace: SANS, fontSize: size || 14, color: INK, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
 }
 function facts(s, x, y, w, h, rows, size) {
@@ -62,8 +71,19 @@ function footer(s, text) {
 D.concepts.forEach(c => {
   const s = pres.addSlide(); light(s);
   kickerTitle(s, c.kicker, c.title);
-  card(s, M, 1.45, 12.33, 5.2);
-  bullets(s, M + 0.4, 1.8, 11.5, 4.6, c.bullets, 18, 14);
+  if (c.columns) {
+    const cw = (12.33 - 0.3) / 2;
+    c.columns.forEach((col, i) => {
+      const x = M + i * (cw + 0.3);
+      card(s, x, 1.45, cw, 5.55);
+      heading(s, x + 0.3, 1.62, cw - 0.6, col.heading);
+      bullets(s, x + 0.3, 1.92, cw - 0.6, 4.95, col.bullets, c.size || 11.5, 5);
+    });
+  } else {
+    card(s, M, 1.45, 12.33, 5.55);
+    bullets(s, M + 0.4, 1.8, 11.5, 5.0, c.bullets, c.size || 16, 10);
+  }
+  if (c.footer) footer(s, c.footer);
 });
 
 // ---------------------------------------------------------------- chain at a glance
@@ -80,20 +100,27 @@ D.concepts.forEach(c => {
 D.rules.forEach(r => {
   const s = pres.addSlide(); light(s);
   kickerTitle(s, 'Rule ' + r.order + '  ·  ' + r.group, r.name.replace('USEM ', ''));
-  card(s, M, 1.45, 7.9, 4.3);
-  heading(s, M + 0.3, 1.65, 7, 'What it does');
-  s.addText(r.purpose, { x: M + 0.3, y: 1.95, w: 7.3, h: 1.5, fontFace: SANS, fontSize: 15, color: INK, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
-  heading(s, M + 0.3, 3.55, 7, 'How it matches');
-  bullets(s, M + 0.3, 3.85, 7.3, 1.8, r.stages, 15, 6);
-  card(s, 8.7, 1.45, 4.13, 4.3);
-  const side = [['Reads', r.reads], ['Returns', r.returns], ['Runs after', r.before], ['Hands over to', r.after]];
-  if (r.matched != null) side.push(['Items matched', String(r.matched)]);
+  card(s, M, 1.45, 8.3, 5.55);
+  heading(s, M + 0.3, 1.62, 7.6, 'What it looks for');
+  s.addText(r.purpose, { x: M + 0.3, y: 1.9, w: 7.7, h: 0.85, fontFace: SANS, fontSize: 12, color: INK, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
+  heading(s, M + 0.3, 2.8, 7.6, 'How the script works');
+  bullets(s, M + 0.3, 3.08, 7.7, 3.8, r.mechanics, 10.5, 4);
+  card(s, 9.1, 1.45, 3.73, 5.55);
+  const side = [['Reads', r.reads], ['Returns', r.returns]];
   const runs = [];
-  side.forEach((p, i) => {
-    runs.push({ text: p[0].toUpperCase(), options: { color: NAVY, bold: true, fontSize: 9.5, charSpacing: 1.2, breakLine: true } });
-    runs.push({ text: p[1], options: { color: INK, fontSize: 12.5, breakLine: i < side.length - 1, paraSpaceAfter: 12 } });
+  side.forEach(p => {
+    runs.push({ text: p[0].toUpperCase(), options: { color: NAVY, bold: true, fontSize: 9, charSpacing: 1.2, breakLine: true } });
+    runs.push({ text: p[1], options: { color: INK, fontSize: 10.5, breakLine: true, paraSpaceAfter: 8 } });
   });
-  s.addText(runs, { x: 8.95, y: 1.68, w: 3.65, h: 3.9, fontFace: SANS, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
+  runs.push({ text: 'DECLINES WHEN', options: { color: NAVY, bold: true, fontSize: 9, charSpacing: 1.2, breakLine: true } });
+  r.declines.forEach(d => runs.push({ text: d, options: { color: INK, fontSize: 9.5, bullet: { indent: 10 }, breakLine: true, paraSpaceAfter: 2 } }));
+  const tail = [['Runs after', r.before], ['Hands over to', r.after]];
+  if (r.matched != null) tail.push(['Items matched', String(r.matched)]);
+  tail.forEach((p, i) => {
+    runs.push({ text: p[0].toUpperCase(), options: { color: NAVY, bold: true, fontSize: 9, charSpacing: 1.2, breakLine: true, paraSpaceBefore: 6 } });
+    runs.push({ text: p[1], options: { color: INK, fontSize: 10, breakLine: i < tail.length - 1, paraSpaceAfter: 6 } });
+  });
+  s.addText(runs, { x: 9.35, y: 1.65, w: 3.3, h: 5.2, fontFace: SANS, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
 
   if (!r.examples.length) {
     const e = pres.addSlide(); light(e);
