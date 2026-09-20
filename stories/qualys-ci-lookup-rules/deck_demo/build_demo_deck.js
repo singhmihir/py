@@ -3,8 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const PptxGenJS = require('pptxgenjs');   // NODE_PATH points at the node_modules holding pptxgenjs
 
-const D = JSON.parse(fs.readFileSync(path.join(__dirname, 'demo_data.json'), 'utf8'));
-const OUT = path.join(__dirname, '..', 'Qualys CI Lookup Rules - CMDB Team Demo.pptx');
+const D = JSON.parse(fs.readFileSync(process.argv[2] || path.join(__dirname, 'demo_data.json'), 'utf8'));
+const OUT = process.argv[3] || path.join(__dirname, '..', 'Qualys CI Lookup Rules - CMDB Team Demo.pptx');
 
 const INK = '24272A', RED = 'E31837', NAVY = '012169', LIGHT = 'F4F5F6', WHITE = 'FFFFFF';
 const MUTED = '6B7177', LINE = 'DDE0E3', SOFT = 'EAF0F8';
@@ -142,8 +142,14 @@ D.rules.forEach(r => {
     const x2 = M + cw + gap;
     card(e, x2, y0, cw + 0.5, ch, WHITE);
     heading(e, x2 + 0.25, y0 + 0.18, cw, 'What the rule did');
-    const steps = x.walk.map((t, i) => ({ text: t, options: { bullet: { type: 'number' }, breakLine: i < x.walk.length - 1, paraSpaceAfter: 8 } }));
-    e.addText(steps, { x: x2 + 0.25, y: y0 + 0.52, w: cw, h: ch - 0.75, fontFace: SANS, fontSize: 13.5, color: INK, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
+    const steps = [];
+    x.walk.forEach((t, i) => {
+      const last = i === x.walk.length - 1;
+      if (typeof t === 'string') steps.push({ text: t, options: { bullet: { type: 'number' }, breakLine: !last, paraSpaceAfter: 8 } });
+      else { steps.push({ text: t.title + '  ', options: { bullet: { type: 'number' }, bold: true, color: NAVY } }); steps.push({ text: t.detail, options: { breakLine: !last, paraSpaceAfter: 7 } }); }
+    });
+    e.addText(steps, { x: x2 + 0.25, y: y0 + 0.52, w: cw, h: ch - 0.75, fontFace: SANS, fontSize: x.walk.length > 5 ? 10.5 : 12, color: INK, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
+    if (x.path) e.addText([{ text: 'PATH  ', options: { bold: true, color: RED } }, { text: x.path, options: { color: MUTED } }], { x: M, y: 1.22, w: 12.3, h: 0.24, fontFace: SANS, fontSize: 9.5, isTextBox: true, margin: 0 });
     // ci
     const x3 = x2 + cw + 0.5 + gap;
     card(e, x3, y0, W - M - x3, ch, WHITE);

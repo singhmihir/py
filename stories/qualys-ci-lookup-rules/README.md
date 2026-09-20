@@ -486,8 +486,18 @@ configuration note for the instance administrator, also to be confirmed by Mihir
 share), the chain at a glance, then for each of the 21 custom rules one explanation slide (purpose, how it matches,
 reads, returns, place in the chain, items matched) and three example slides, one matched discovered item per slide with
 the scanned values, the numbered steps the rule took and the CI it returned, both with record links to the client
-development instance. `Lookup Rules - Demo Examples Script.js` (read-only, on INC0010003) prints, per active Qualys rule,
-the matched count and three matched items with the scanned values and the CI (one EX line each); its output pasted into
-`deck_demo/demo_examples_output.txt` fills every rule. Until then the two load balancer rules take their examples from
-the 17 Sep client exports and the other rules show a placeholder slide. Rebuild with
-`python3 deck_demo/build_demo_data.py && NODE_PATH=<node_modules with pptxgenjs> node deck_demo/build_demo_deck.js`.
+development instance. The rule pages are written from `deck_demo/mechanics.json`, the scripting-level description of
+every rule (steps in execution order, decline conditions, literal lists, shared helpers) extracted from the delivered
+scripts by one reader per rule family and corrected by one checker per family against the same scripts.
+
+`Lookup Rules - Demo Evidence Script.js` (read-only, on INC0010003; it replaces the simpler examples script) counts, per
+active Qualys rule, the items the rule matched, replays the rule on the newest of them, records what each step found (the
+records carrying the serial, MAC, name, fqdn or address, the adapter and IP address records walked, the pool and members
+behind a virtual server, the flags that decided) and prints three examples per rule chosen to show different paths through
+the rule (one readable line and one EX line each, the EX line holding the item, the CI, the replay verdict and the steps).
+Its output saved as `deck_demo/demo_examples_output.txt` fills every rule's example pages with the steps as the walk;
+`build_demo_data.py <output> <json>` and `build_demo_deck.js <json> <pptx>` take other paths for test builds. Until the
+output exists the two load balancer rules take their examples from the 17 Sep client exports and the other rules show a
+placeholder page. Data held from earlier work covers only those two rules with matched items (640 items with services,
+pools and members), the four 15 Sep incident hosts and the exception lists of the measurement runs; the rest needs the run.
+Rebuild with `python3 deck_demo/build_demo_data.py && NODE_PATH=<node_modules with pptxgenjs> node deck_demo/build_demo_deck.js`.
