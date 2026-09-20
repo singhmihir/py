@@ -17,20 +17,43 @@ OUTPUT = os.path.join(HERE, 'demo_examples_output.txt')
 CONTROLLER_SUFFIXES = ['ilo', 'ilom', 'idrac', 'drac', 'ipmi', 'bmc', 'oob', 'mgmt', 'imm', 'cimc', 'rmm', 'con']
 
 CONCEPTS = [
-    dict(title='What a CI lookup rule does', kicker='Key concepts', bullets=[
-        'Qualys sends one record per scanned host: DNS name, IP address, operating system, serial number, NetBIOS name. Each record lands as a Discovered Item.',
-        'The platform runs the CI lookup rules in order. Each rule reads one source field (serial, DNS or IP) plus the rest of the record, searches the CMDB and returns one CI or nothing.',
-        'The first rule that returns a CI wins: the item is matched to it and every vulnerable item of that host attaches to that CI.',
-        'When no rule answers, the item stays unmatched and receives a placeholder record (Unclassed Hardware) until it is evaluated again.',
-        'Items are evaluated again on the next import, when a rule changes, or on demand with the list action "Reapply CI lookup rules".',
+    dict(title='How every script runs', kicker='Key concepts', size=10.5, columns=[
+        dict(heading='The contract and the search', bullets=[
+            dict(title='Contract.', detail='process(rule, sourceValue, sourcePayload) returns one sys_id or null. sourceValue is the rule\'s source field (SERIAL_NUMBER, DNS or IP); the OS, DNS and IP come from the payload.'),
+            dict(title='Normalisation.', detail='The value is coerced to a string and trimmed; names are lower-cased; the text before the first dot is the short host; an absent DNS or OS reads as empty, never as the string "undefined".'),
+            dict(title='Ignored classes.', detail='The framework\'s _ignoreClass, else sn_sec_cmn.ignoreCIClass, added as sys_class_name NOT IN on every search. Exact class names, no hierarchy.'),
+            dict(title='Exactly one.', detail='query() with no setLimit, then next() and hasNext(): a second row declines. The rules that walk records count distinct owning CIs instead, and two owners decline.'),
+            dict(title='Address tie-break.', detail='Only the FQDN, host name with domain, layered DNS and device name rules break several candidates with the scanned IP. The address rules never tie-break.'),
+            dict(title='Loopback and link-local.', detail='The address and virtual server rules refuse 127. and 169.254. before reading anything else.'),
+            dict(title='Retired records.', detail='retired(): install_status 7, operational_status 6 or life cycle stage Retired. The virtual server rules set a retired twin aside; the platform property filterOutDecommissionedCI drops retired CIs after any rule.'),
+        ]),
+        dict(heading='Class from the scanned OS', bullets=[
+            dict(title='classFor(OS).', detail='Lower-cased OS text; three or more "/"-separated guesses give no class. Keywords in order, first hit wins: esx; windows (with server) / windows; aix; solaris, sunos; hp-ux; netapp, ontap; printer, laserjet, jetdirect; red hat, linux, centos, ubuntu, suse, debian, fedora, euleros, oracle enterprise, amazon; nx-os, catos, cisco.'),
+            dict(title='Classes.', detail='ESX Server, Windows Server or Computer, AIX Server, Solaris Server, HP-UX Server, Storage Server, Printer, Linux Server, Network Gear. Anything else: no class.'),
+            dict(title='Class rules.', detail='Search the OS class and its sub-classes only, and decline without a class. Hardware rules search the whole cmdb_ci_hardware tree and keep the OS class as a preference.'),
+            dict(title='Class agreement.', detail='agrees(cls): the CI class equals the OS class, sits beneath it or above it (parentsOf through sys_db_object.super_class). A Cisco IOS router therefore never lands on a Computer.'),
+            dict(title='Appliances.', detail='In Layered DNS Match and Hostname Hardware Match a Linux fingerprint also agrees with Network Gear, Load Balancer and Storage Server records, because appliances answer scans as Linux.'),
+            dict(title='Load balancer devices.', detail='A cmdb_ci_lb record is never accepted as the host behind a name or an address; the virtual server rules handle those addresses instead.'),
+            dict(title='Host name agreement.', detail='The IP rules also require the CI\'s first name label to equal the scanned label, or to differ from it only by a hyphenated suffix such as -mgmt.'),
+        ]),
     ]),
-    dict(title='Principles the USEM rules share', kicker='Key concepts', bullets=[
-        'Exactly one record or decline. A rule never picks between two candidates; ambiguity stays unmatched for the CMDB to resolve.',
-        'The scanned OS sets the class: Red Hat means Linux Server, Windows Server means Windows Server, NetApp means Storage Server. The search stays inside that class first, then goes hardware-wide.',
-        'Class agreement: a CI reached through DNS or IP records must be of a class the OS implies (same, parent or child), so a Cisco IOS router never lands on a Computer.',
-        'Ignored classes never answer: adapters, IP address records, storage volumes, certificates and the other classes on sn_sec_cmn.ignoreCIClass.',
-        'Strongest identifier first: serial, then FQDN, host name with domain, DNS layers, host name, controllers and interfaces, virtual servers, IP address, and a broad name search last.',
-        'No fitness heuristics: no "best" record by class depth or last update. A retired duplicate is set aside for the live record; two live records decline.',
+    dict(title='The signs the scripts look for', kicker='Key concepts', size=10.5, columns=[
+        dict(heading='Serials, phones, controllers', bullets=[
+            dict(title='Placeholder serials.', detail='Refused when shorter than four characters or one of: 0, none, n/a, na, unknown, empty, not specified, not available, no serial, default string, to be filled by o.e.m., system serial number, chassis serial number, 0123456789, 1234567890.'),
+            dict(title='Cisco phones.', detail='DNS label ^sep([0-9a-f]{12})$: the twelve hex characters are the MAC, rebuilt in four spellings (64:F6:9D:D5:C9:B0, lower case, 64F69DD5C9B0, lower case). Search: a network adapter with that MAC owned by an IP Phone, then the phone\'s own mac_address, then the Unified CM device name SEP... in upper case.'),
+            dict(title='Other phones and scanners.', detail='No MAC in the name (Avaya avx... stations, scanners). The host label is searched by name in IP Phone and Imaging Hardware only, outside the hardware tree. Declined when the OS gives a server or desktop class (Linux excepted) unless the OS text says phone; several hits: the one on the scanned address.'),
+            dict(title='Management controllers.', detail='Label tail after the last hyphen in ilo, ilom, idrac, drac, ipmi, bmc, oob, mgmt, imm, cimc, rmm, con, or OS text with ilo, ilom, idrac, drac, remote access controller, imm, cimc, bmc, ipmi, lights out. The label before the hyphen is the server name, searched hardware-wide; a load balancer device is refused.'),
+            dict(title='Network interfaces.', detail='DNS in a .network. domain, or a hyphen segment that is an interface marker: vlan, v, hsrp, vrrp, po, eth, gi, te, lo, mgmt, aom, vs, fab, whole or followed by digits. Prefixes are tried longest first on Network Gear and Load Balancer devices; two hits decline.'),
+        ]),
+        dict(heading='Virtual servers, names, addresses', bullets=[
+            dict(title='Virtual server sign.', detail='OS text with f5, big-ip, big ip or netscaler, or a label segment vip or vs (vip, vip2, ...-vip, vs1). Load Balancer Service searched on fqdn, then name, then the label, then ip_address.'),
+            dict(title='Twins.', detail='Several service records of one name are one virtual server recorded more than once (HA pair, test copy): kept to the one on the scanned address, then the live one. Two different names decline.'),
+            dict(title='Member rule.', detail='Service to pools to pool members through cmdb_rel_ci, each member to its server record (in cmdb_ci_hardware, not ignored, not a balancer). One machine behind every member returns the server; a member the CMDB cannot place, several machines or two live records of one machine decline.'),
+            dict(title='Service rule.', detail='Never reads the pool. Attaches the one live virtual server record; two live twins decline.'),
+            dict(title='Names.', detail='FQDN rules: the whole dotted name on fqdn. FQDN Name rules: the whole dotted name on the name field. Host name rules: the first label on name. Domain rules: the first label on name and the rest on dns_domain. A bare label without a dot declines the FQDN rules.'),
+            dict(title='Addresses.', detail='ip_address on the OS class, then on the hardware tree; then the adapter walk (cmdb_ci_network_adapter.ip_address to cmdb_ci) and the IP Address record walk (cmdb_ci_ip_address to nic.cmdb_ci), distinct owners counted, class and host name agreement on the one owner.'),
+            dict(title='Last resort.', detail='FQDN Name Broad Match searches the whole cmdb_ci table by name when everything else declined, still one record only.'),
+        ]),
     ]),
 ]
 
@@ -67,13 +90,19 @@ def rule_entry(order):
     entry = dict(order=order, name=r['name'], group=GROUP[r['group']], purpose=r['purpose'], reads=r['reads'], returns=r['returns'],
                  before=r['before'], after=r['after'], mechanics=[row[0] for row in r['rows']], declines=[])
     if m:
+        names = lambda text: ', '.join(dict.fromkeys(n.replace('USEM ', '') for n in re.findall(r'USEM [A-Z][A-Za-z ]+? Match', text) + re.findall(r'USEM Cisco IP Phone MAC', text)))
+        entry['before_names'] = names(m['before']) or ('none, it opens the chain' if 'first rule' in m['before'].lower() or 'nothing custom' in m['before'].lower() else m['before'])
+        entry['after_names'] = names(m['after']) or m['after']
         entry.update(purpose=m['purpose'], reads=m['reads'], returns=m['returns'], before=m['before'], after=m['after'],
-                     mechanics=[dict(title=s['title'], detail=s['detail']) for s in m['mechanics']], declines=m['declines'], literals=m['literals'],
-                     sibling_difference=m.get('sibling_difference', ''))
+                     mechanics=[dict(title=s['title'] + '.', detail=s['detail']) for s in m['mechanics']], declines=m['declines'], literals=m['literals'],
+                     sibling=m.get('sibling_difference', ''))
     return entry
 
 
 RULES = [rule_entry(o) for o in ORDERS]
+for i, r in enumerate(RULES):
+    r['before_names'] = RULES[i - 1]['name'].replace('USEM ', '') if i else 'none, it opens the chain'
+    r['after_names'] = RULES[i + 1]['name'].replace('USEM ', '') if i + 1 < len(RULES) else "the platform's own rules (FQDN, NetBIOS, DNS)"
 
 # ------------------------------------------------------------------ examples
 def first_label(dns):
