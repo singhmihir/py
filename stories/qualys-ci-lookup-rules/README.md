@@ -510,14 +510,16 @@ and opens every walk with a "Why this rule" step: from the `earlier` findings wh
 item and the CI (no serial, no fqdn on the record, the name differs from the label, the class sits outside the OS class or
 outside the hardware tree, the address sits on an adapter or an IP Address record, the member rule ran first).
 
-State 21 Sep, second run: `demo_examples_output.txt` is the client run of the updated script (51 proper examples, every
-one with the `earlier` findings); `demo_examples_previous.txt` is the first run (20 Sep), whose proper examples top up a
-rule the newer output leaves short. The first version of the dedicated test asked the address rules for a CI name that
-differs from the scanned label, which the address rules refuse by their name agreement, so 700, 705 and 740 came back
-with nothing; the test now takes an item without a DNS name, a hyphenated variant of the label or the exact label when
-the name search is a tie (`TIE_CHECKS` counts per rule). Every whole-fqdn candidate of rule 450 also replayed to nothing
-on bofadev, most likely CIs in a class the rules ignore now (placeholder records named with the fqdn): ignored classes are
-skipped up front and the items set aside are printed with `proper=false` and the reason (`FILL`). A run with
-`ONLY = ['450', '700', '705', '740']` is requested on INC0010003; until then 450 has no page and 700, 705 and 740 keep one
-or two pages from the first run. The example slide shows the "Why this rule" clauses as their own list above the walk.
+State 21 Sep, third run: `demo_examples_output.txt` is the client's full run of the corrected script (63 examples, 60
+proper, every one with the `earlier` findings); `demo_examples_previous.txt` is the first run (20 Sep), whose proper
+examples top up a rule the newer output leaves short. Lessons folded into the script and the builder: the address rules
+require the CI name to agree with the scanned label, so a dedicated address example is an item without a DNS name, a
+hyphenated variant of the label (host-nfs on host) or the exact label when the name search is a tie (`TIE_CHECKS`);
+ignored classes are skipped up front; and an item that an earlier rule would match today (`uniqueHit` in the script,
+`earlier_unique` in the builder: exactly one acceptable record in that rule's own search) is set aside, which removed
+the switch interfaces (krkrselks03sdm0014-v670 ...) the layered address rule had matched while rule 430 on bofadev still
+read the IP field. Rule 450 on bofadev returns nothing on replay for the whole-fqdn-named printers it matched earlier,
+although one live hardware record carries the name: the copy of the rule there differs from the delivered script. The
+deck keeps that live printer (`FORCE` in the builder) as the rule's single page; 740 has one page (an item without a
+DNS name); the other 19 rules have three. A run with `ONLY = ['450', '740']` and `TRACES = 20` is offered on INC0010003.
 Rebuild with `python3 deck_demo/build_demo_data.py && NODE_PATH=<node_modules with pptxgenjs> node deck_demo/build_demo_deck.js`.

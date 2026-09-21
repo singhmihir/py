@@ -479,6 +479,20 @@ function finding(kind, p) {
     return '';
 }
 
+// the first earlier rule whose own search finds exactly one acceptable record today: that rule would match the item now
+function uniqueHit(earlier) {
+    for (var i = 0; i < earlier.length; i++) {
+        var f = earlier[i].found;
+        if (f.indexOf('disagrees') != -1 || f.indexOf('refused') != -1 || f.indexOf('differs') != -1) continue;
+        var dom = /^\d+ records? named "[^"]+", (\d+) with the domain/.exec(f);
+        if (dom) { if (dom[1] == '1') return earlier[i]; continue; }
+        if (/^1 records? (in [^ ]+( tree)? )?(carry|carries|named) /.test(f) || /^1 DNS Name record/.test(f) || /^1 device at the prefix/.test(f) ||
+            /; 1 records? named "/.test(f) || /^(1 IP Phone and 0|0 IP Phone and 1) Imaging/.test(f) || /^\d+ adapter records? on the address, 1 owning CI$/.test(f) || /^\d+ IP Address records? on the address, 1 owning CI$/.test(f) ||
+            f.indexOf('one live virtual server record') == 0 || f.indexOf('the member rule returns it') != -1) return earlier[i];
+    }
+    return null;
+}
+
 // ---------------------------------------------------------------- rules, items, examples
 var rules = [], rl = new GlideRecord('sn_sec_cmn_ci_lookup_rule');
 rl.addQuery('source.name', 'CONTAINS', 'Qualys'); rl.addQuery('method', 'script'); rl.addActiveQuery(); rl.orderBy('order'); rl.query();
@@ -489,8 +503,8 @@ function build(rule, kind, cand, before) {
     var t = trace(kind, cand.p), verdict = runRule(rule.rec, rule.field, cand.p), facts = ciFacts(cand.c.id), p = cand.p;
     var earlier = [];
     for (var b = 0; b < before.length; b++) earlier.push({ order: before[b].order, rule: before[b].name, found: finding(before[b].name.replace(/^(USEM|BOFA)\s+/, ''), p) });
-    var same = verdict == cand.c.id, live = facts && facts.live;
-    return { rule: rule.order, rule_name: rule.name, shape: t.shape, steps: t.steps, proper: !!(same && live && !cand.why), why: cand.why || (!same ? 'the rule replayed today returns ' + (verdict ? (ciFacts(verdict) || { name: verdict }).name : 'nothing') : !live ? 'the CI is retired now' : ''), earlier: earlier,
+    var same = verdict == cand.c.id, live = facts && facts.live, unique = uniqueHit(earlier);
+    return { rule: rule.order, rule_name: rule.name, shape: t.shape, steps: t.steps, proper: !!(same && live && !cand.why && !unique), why: cand.why || (!same ? 'the rule replayed today returns ' + (verdict ? (ciFacts(verdict) || { name: verdict }).name : 'nothing') : !live ? 'the CI is retired now' : unique ? 'earlier rule ' + unique.rule + ' finds exactly one record today: ' + unique.found : ''), earlier: earlier,
         item: { number: cand.number, sys_id: cand.sys_id, dns: '' + (p.DNS || ''), ip: '' + (p.IP || ''), os: '' + (p.OS || ''), netbios: '' + (p.NETBIOS || ''), serial: '' + (p.SERIAL_NUMBER || ''), tracking: '' + (p.TRACKING_METHOD || ''), qualys_id: '' + (p.ID || ''), updated: cand.updated },
         ci: facts || { name: '?', cls: cand.c.cls }, verdict: { ci: verdict, same_as_today: same, ci_label: verdict && verdict.indexOf('error') != 0 ? (ciFacts(verdict) || { name: '?' }).name : '' } };
 }

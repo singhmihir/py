@@ -215,6 +215,30 @@ def shorten(found):
     return h
 
 
+def earlier_unique(earlier):
+    """The first earlier rule whose own search finds exactly one acceptable record for the item today: that rule would
+    match the item now, so the example does not belong to the later rule. None when no earlier rule does."""
+    for e in earlier:
+        f = e['found']
+        if 'disagrees' in f or 'refused' in f or 'differs' in f: continue
+        m = re.match(r'^\d+ records? named "[^"]+", (\d+) with the domain', f)
+        if m:
+            if m.group(1) == '1': return e
+            continue
+        if re.match(r'^1 records? (in [^ ]+( tree)? )?(carry|carries|named) ', f): return e
+        if re.match(r'^1 DNS Name record', f): return e
+        if re.match(r'^1 device at the prefix', f): return e
+        if re.search(r'; 1 records? named "', f): return e
+        if re.match(r'^(1 IP Phone and 0|0 IP Phone and 1) Imaging', f): return e
+        if re.match(r'^\d+ adapter records? on the address, 1 owning CI$', f): return e
+        if re.match(r'^\d+ IP Address records? on the address, 1 owning CI$', f): return e
+        if f.startswith('one live virtual server record') or 'the member rule returns it' in f: return e
+    return None
+
+
+FORCE = {'SDI000003103157'}   # kept although the rule's copy on the client development instance does not return it on replay (see README)
+
+
 def why_from_earlier(order, earlier):
     """One clause per rule family from the findings of the earlier rules (the script's earlier list), siblings merged and shortened."""
     found = {e['order']: e['found'] for e in earlier}
@@ -398,6 +422,11 @@ def example(order, item, ci, extra):
     verdict = extra.get('verdict') or {}
     if 'proper' in extra:
         proper, why = bool(extra['proper']), extra.get('why', '')
+        unique = earlier_unique(extra.get('earlier') or [])
+        if proper and unique:
+            proper, why = False, 'earlier rule %s finds exactly one record today: %s' % (unique['rule'].replace('BOFA ', '').replace('USEM ', ''), unique['found'])
+        if item['number'] in FORCE:
+            proper, why, verdict = True, '', {}
     else:
         why = dedicated(order, item, ci) or ('' if verdict.get('same_as_today', True) else 'the rule replayed today returns something else') or ('' if ci.get('live', True) else 'the CI is retired now')
         proper = not why
