@@ -64,7 +64,7 @@ function footer(s, text) {
   s.addText('USEM  ·  VULNERABILITY RESPONSE', { x: 1.0, y: 2.2, w: 11, h: 0.3, fontFace: SANS, fontSize: 12, bold: true, color: 'C9D1E3', charSpacing: 2, isTextBox: true, margin: 0 });
   s.addText(D.title, { x: 1.0, y: 2.6, w: 11, h: 1.0, fontFace: SANS, fontSize: 40, bold: true, color: WHITE, isTextBox: true, margin: 0 });
   s.addText(D.subtitle, { x: 1.0, y: 3.6, w: 11, h: 0.5, fontFace: SANS, fontSize: 20, color: 'E4E8F0', isTextBox: true, margin: 0 });
-  s.addText('Demo for the CMDB team  ·  22 September 2026  ·  Mihir Kumar Singh', { x: 1.0, y: 5.6, w: 11, h: 0.3, fontFace: SANS, fontSize: 12, color: 'C9D1E3', isTextBox: true, margin: 0 });
+  s.addText('Demo for the CMDB team  ·  21 September 2026  ·  Mihir Kumar Singh', { x: 1.0, y: 5.6, w: 11, h: 0.3, fontFace: SANS, fontSize: 12, color: 'C9D1E3', isTextBox: true, margin: 0 });
 }
 
 // ---------------------------------------------------------------- concepts
@@ -106,7 +106,7 @@ D.rules.forEach(r => {
     { text: 'RUNS AFTER  ', options: { bold: true, color: NAVY } }, { text: (r.before_names || r.before) + '   ', options: { color: INK } },
     { text: 'HANDS OVER TO  ', options: { bold: true, color: NAVY } }, { text: r.after_names || r.after, options: { color: INK } },
   ];
-  if (r.matched != null) strip.push({ text: '   ITEMS MATCHED  ', options: { bold: true, color: NAVY } }, { text: String(r.matched), options: { color: INK } });
+  if (r.matched != null) strip.push({ text: '   ITEMS MATCHED  ', options: { bold: true, color: NAVY } }, { text: String(r.matched).replace(/\B(?=(\d{3})+(?!\d))/g, ','), options: { color: INK } });
   s.addText(strip, { x: M, y: 1.28, w: 12.33, h: 0.62, fontFace: SANS, fontSize: 9.5, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
   card(s, M, 1.98, 12.33, 3.6);
   heading(s, M + 0.3, 2.12, 12, 'What it looks for');
@@ -131,7 +131,7 @@ D.rules.forEach(r => {
   r.examples.forEach((x, k) => {
     const e = pres.addSlide(); light(e);
     kickerTitle(e, 'Rule ' + r.order + '  ·  Example ' + (k + 1) + ' of ' + r.examples.length, x.host, 24);
-    const cw = 3.95, gap = 0.24, y0 = 1.45, ch = 4.7;
+    const cw = 3.3, gap = 0.24, y0 = 1.45, ch = 4.9, mw = 5.55;
     // discovered item
     card(e, M, y0, cw, ch);
     heading(e, M + 0.25, y0 + 0.18, cw - 0.5, 'Discovered item');
@@ -140,18 +140,18 @@ D.rules.forEach(r => {
     link(e, M + 0.25, y0 + ch - 0.42, cw - 0.5, 'Open the discovered item', x.item_link);
     // walk
     const x2 = M + cw + gap;
-    card(e, x2, y0, cw + 0.5, ch, WHITE);
-    heading(e, x2 + 0.25, y0 + 0.18, cw, 'What the rule did');
+    card(e, x2, y0, mw, ch, WHITE);
+    heading(e, x2 + 0.25, y0 + 0.18, mw - 0.5, 'What the rule did');
     const steps = [];
     x.walk.forEach((t, i) => {
       const last = i === x.walk.length - 1;
       if (typeof t === 'string') steps.push({ text: t, options: { bullet: { type: 'number' }, breakLine: !last, paraSpaceAfter: 8 } });
       else { steps.push({ text: t.title + '  ', options: { bullet: { type: 'number' }, bold: true, color: NAVY } }); steps.push({ text: t.detail, options: { breakLine: !last, paraSpaceAfter: 7 } }); }
     });
-    e.addText(steps, { x: x2 + 0.25, y: y0 + 0.52, w: cw, h: ch - 0.75, fontFace: SANS, fontSize: x.walk.length > 5 ? 10.5 : 12, color: INK, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
+    e.addText(steps, { x: x2 + 0.25, y: y0 + 0.52, w: mw - 0.5, h: ch - 0.75, fontFace: SANS, fontSize: x.walk.length > 6 ? 10 : x.walk.length > 4 ? 11 : 12, color: INK, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
     if (x.path) e.addText([{ text: 'PATH  ', options: { bold: true, color: RED } }, { text: x.path, options: { color: MUTED } }], { x: M, y: 1.22, w: 12.3, h: 0.24, fontFace: SANS, fontSize: 9.5, isTextBox: true, margin: 0 });
     // ci
-    const x3 = x2 + cw + 0.5 + gap;
+    const x3 = x2 + mw + gap;
     card(e, x3, y0, W - M - x3, ch, WHITE);
     e.addShape(pres.ShapeType.rect, { x: x3, y: y0, w: 0.09, h: ch, fill: { color: RED }, line: { width: 0 } });
     heading(e, x3 + 0.3, y0 + 0.18, W - M - x3 - 0.5, 'CI matched');

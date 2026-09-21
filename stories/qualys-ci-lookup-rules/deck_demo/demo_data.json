@@ -352,8 +352,242 @@
     }
    ],
    "sibling": "Unlike USEM Serial Number Hardware Match it reads sourcePayload.OS, derives a class with classFor, searches only that class tree (the class and its sub-classes) and declines when the OS gives no class or the class table is not valid; the hardware rule never reads the OS and searches all of cmdb_ci_hardware. A second CI outside the chosen class tree that shares the serial is invisible here, so the in-class CI is still returned, while the same pair makes the hardware rule decline.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000002377246",
+     "host": "ah-1208237-001.sdi.corp.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002377246",
+     "item_facts": [
+      [
+       "DNS name",
+       "ah-1208237-001.sdi.corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.157.112.215"
+      ],
+      [
+       "Operating system",
+       "Red Hat Enterprise Linux 9.8"
+      ],
+      [
+       "Serial number",
+       "VMware-42 0c aa d7 9e 6a 54 b0-a9 39 25 29 a3 6c 82 9c"
+      ],
+      [
+       "Tracking",
+       "Cloud Agent"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:59:50"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Serial read",
+       "detail": "\"VMware-42 0c aa d7 9e 6a 54 b0-a9 39 25 29 a3 6c 82 9c\""
+      },
+      {
+       "title": "Class",
+       "detail": "OS \"Red Hat Enterprise Linux 9.8\" gives the class linux_server"
+      },
+      {
+       "title": "Records carrying the serial",
+       "detail": "1 record: ah-1208237-001 [linux_server] ip 30.157.112.215 -> exactly one, accepted"
+      }
+     ],
+     "path": "linux_server / 1 rows",
+     "ci_name": "ah-1208237-001",
+     "ci_class": "Linux Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "ah-1208237-001.sdi.corp.bankofamerica.com"
+      ],
+      [
+       "DNS domain",
+       "SDI.CORP.BANKOFAMERICA.COM"
+      ],
+      [
+       "IP address",
+       "30.157.112.215"
+      ],
+      [
+       "Serial number",
+       "VMware-42 0c aa d7 9e 6a 54 b0-a9 39 25 29 a3 6c 82 9c"
+      ],
+      [
+       "Model",
+       "VMware, Inc. VMware Virtual Platform"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002397607",
+     "host": "wva45bhnicvo0av.corp.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002397607",
+     "item_facts": [
+      [
+       "DNS name",
+       "wva45bhnicvo0av.corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.207.107.120"
+      ],
+      [
+       "Operating system",
+       "Windows 10 / Windows 11"
+      ],
+      [
+       "Serial number",
+       "VMware-42 1f d0 17 8e 8d d7 41-05 c6 e9 43 38 74 4a 99"
+      ],
+      [
+       "NetBIOS name",
+       "WVA45BHNICVO0AV"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:55:31"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Serial read",
+       "detail": "\"VMware-42 1f d0 17 8e 8d d7 41-05 c6 e9 43 38 74 4a 99\""
+      },
+      {
+       "title": "Class",
+       "detail": "OS \"Windows 10 / Windows 11\" gives the class computer"
+      },
+      {
+       "title": "Records carrying the serial",
+       "detail": "1 record: wva45bhnicvo0av [win_server] ip 30.207.107.120 -> exactly one, accepted"
+      }
+     ],
+     "path": "computer / 1 rows",
+     "ci_name": "wva45bhnicvo0av",
+     "ci_class": "Windows Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "wva45bhnicvo0av.corp.bankofamerica.com"
+      ],
+      [
+       "DNS domain",
+       "corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.207.107.120"
+      ],
+      [
+       "Serial number",
+       "VMware-42 1f d0 17 8e 8d d7 41-05 c6 e9 43 38 74 4a 99"
+      ],
+      [
+       "Model",
+       "VMware, Inc. VMware Virtual Platform"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002324951",
+     "host": "md9-948-01-t01.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002324951",
+     "item_facts": [
+      [
+       "DNS name",
+       "md9-948-01-t01.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.120.31.137"
+      ],
+      [
+       "Operating system",
+       "HP LaserJet Printer"
+      ],
+      [
+       "Serial number",
+       "MXBCTBJ09N"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:51:33"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Serial read",
+       "detail": "\"MXBCTBJ09N\""
+      },
+      {
+       "title": "Class",
+       "detail": "OS \"HP LaserJet Printer\" gives the class printer"
+      },
+      {
+       "title": "Records carrying the serial",
+       "detail": "1 record: md9-931-01-t02 [printer] ip 10.120.31.137 -> exactly one, accepted"
+      }
+     ],
+     "path": "printer / 1 rows",
+     "ci_name": "md9-931-01-t02",
+     "ci_class": "Printer",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.120.31.137"
+      ],
+      [
+       "Serial number",
+       "MXBCTBJ09N"
+      ],
+      [
+       "Model",
+       "Hewlett-Packard HP LaserJet Flow MFP E52645"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 25257
   },
   {
    "order": "180",
@@ -418,8 +652,218 @@
     }
    ],
    "sibling": "Drops the OS reading, the classFor restriction and the isValid guard of USEM Serial Number Class Match: the search runs on cmdb_ci_hardware for every device class at once, so a serial shared by two CIs of different classes (which the class rule would never see together) makes this rule decline.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000002368092",
+     "host": "wb9492p203.gwm.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002368092",
+     "item_facts": [
+      [
+       "DNS name",
+       "wb9492p203.gwm.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.218.145.248"
+      ],
+      [
+       "Operating system",
+       "Ubuntu/Linux"
+      ],
+      [
+       "Serial number",
+       "MXBCS730XY"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 02:19:45"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Serial read",
+       "detail": "\"MXBCS730XY\""
+      },
+      {
+       "title": "Class",
+       "detail": "the whole hardware tree, the OS is not read"
+      },
+      {
+       "title": "Records carrying the serial",
+       "detail": "1 record: npifdcd73 [printer] ip 30.218.145.248 -> exactly one, accepted"
+      }
+     ],
+     "path": "printer / 1 rows",
+     "ci_name": "npifdcd73",
+     "ci_class": "Printer",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "30.218.145.248"
+      ],
+      [
+       "Serial number",
+       "MXBCS730XY"
+      ],
+      [
+       "Model",
+       "Hewlett-Packard HP Color LaserJet MFP X57945"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002326199",
+     "host": "azgndgd01p02.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002326199",
+     "item_facts": [
+      [
+       "DNS name",
+       "azgndgd01p02.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.136.88.137"
+      ],
+      [
+       "Operating system",
+       "HP LaserJet Printer"
+      ],
+      [
+       "Serial number",
+       "VNCCSB20Y7"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 02:18:50"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Serial read",
+       "detail": "\"VNCCSB20Y7\""
+      },
+      {
+       "title": "Class",
+       "detail": "the whole hardware tree, the OS is not read"
+      },
+      {
+       "title": "Records carrying the serial",
+       "detail": "1 record: VNCCSB20Y7 - LASERJET ENT M507DN [hardware] -> exactly one, accepted"
+      }
+     ],
+     "path": "hardware / 1 rows",
+     "ci_name": "VNCCSB20Y7 - LASERJET ENT M507DN",
+     "ci_class": "Hardware",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_hardware.do?sys_id=",
+     "ci_facts": [
+      [
+       "Serial number",
+       "VNCCSB20Y7"
+      ],
+      [
+       "Model",
+       "Hewlett Packard LASERJET ENT M507DN"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002397486",
+     "host": "rvpqtfvlpn14.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002397486",
+     "item_facts": [
+      [
+       "DNS name",
+       "rvpqtfvlpn14.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "171.203.6.231"
+      ],
+      [
+       "Operating system",
+       "Red Hat Enterprise Linux 9.6"
+      ],
+      [
+       "Serial number",
+       "2M214505F1"
+      ],
+      [
+       "Tracking",
+       "Cloud Agent"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 01:54:30"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Serial read",
+       "detail": "\"2M214505F1\""
+      },
+      {
+       "title": "Class",
+       "detail": "the whole hardware tree, the OS is not read"
+      },
+      {
+       "title": "Records carrying the serial",
+       "detail": "1 record: RVPQTFVLPN14 [outofband_device] ip 171.203.6.231 -> exactly one, accepted"
+      }
+     ],
+     "path": "outofband_device / 1 rows",
+     "ci_name": "RVPQTFVLPN14",
+     "ci_class": "Out-of-Band Device",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_outofband_device.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "171.203.6.231"
+      ],
+      [
+       "Serial number",
+       "2M214505F1"
+      ],
+      [
+       "Model",
+       "Hewlett Packard ProLiant DL380 Gen10"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 574
   },
   {
    "order": "200",
@@ -508,8 +952,246 @@
     }
    ],
    "sibling": "The only rule keyed on a MAC address rebuilt from the DNS label and the only one that searches cmdb_ci_network_adapter by mac_address (USEM Load Balancer Member Match and USEM IP Adapter Match read that table by ip_address); it restricts itself to cmdb_ci_ip_phone so a colliding MAC on a switch or server is never returned. Unlike USEM Device Name Match it reads neither OS nor IP, has no address tie-break, and tries three places in turn (adapter, mac_address, name) rather than one name search; unlike the class and hostname rules it derives no class from the OS.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000002627752",
+     "host": "sep6c710d8adc3b.ipt.bofa.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002627752",
+     "item_facts": [
+      [
+       "DNS name",
+       "sep6c710d8adc3b.ipt.bofa.com"
+      ],
+      [
+       "IP address",
+       "10.188.95.168"
+      ],
+      [
+       "Operating system",
+       "Cisco IP Phone CP-8861"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 03:28:09"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Phone label",
+       "detail": "\"sep6c710d8adc3b\" matches sep plus twelve hex characters"
+      },
+      {
+       "title": "MAC rebuilt",
+       "detail": "6C:71:0D:8A:DC:3B, 6c:71:0d:8a:dc:3b, 6C710D8ADC3B, 6c710d8adc3b"
+      },
+      {
+       "title": "Attempt 1: adapter with the MAC",
+       "detail": "0 adapters -> 0 phone owners, next attempt"
+      },
+      {
+       "title": "Attempt 2: phone record with the MAC",
+       "detail": "1 record: SEP6C710D8ADC3B [ip_phone] ip 10.188.95.168 -> exactly one, accepted"
+      },
+      {
+       "title": "Attempt 3: Unified CM device name",
+       "detail": "1 record: SEP6C710D8ADC3B [ip_phone] ip 10.188.95.168 -> exactly one, accepted"
+      }
+     ],
+     "path": "phone mac",
+     "ci_name": "SEP6C710D8ADC3B",
+     "ci_class": "IP Phone",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.188.95.168"
+      ],
+      [
+       "Serial number",
+       "FCH2346EAUJ"
+      ],
+      [
+       "MAC address",
+       "6c:71:0d:8a:dc:3b"
+      ],
+      [
+       "Model",
+       "Cisco Systems, Inc. IP Phone 8800 Series 8861"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002617321",
+     "host": "sep6026aa8f08cd.ipt.bofa.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002617321",
+     "item_facts": [
+      [
+       "DNS name",
+       "sep6026aa8f08cd.ipt.bofa.com"
+      ],
+      [
+       "IP address",
+       "10.188.41.140"
+      ],
+      [
+       "Operating system",
+       "Cisco IP Phone CP-8861"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 03:28:02"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Phone label",
+       "detail": "\"sep6026aa8f08cd\" matches sep plus twelve hex characters"
+      },
+      {
+       "title": "MAC rebuilt",
+       "detail": "60:26:AA:8F:08:CD, 60:26:aa:8f:08:cd, 6026AA8F08CD, 6026aa8f08cd"
+      },
+      {
+       "title": "Attempt 1: adapter with the MAC",
+       "detail": "0 adapters -> 0 phone owners, next attempt"
+      },
+      {
+       "title": "Attempt 2: phone record with the MAC",
+       "detail": "1 record: SEP6026AA8F08CD [ip_phone] ip 10.188.41.140 -> exactly one, accepted"
+      },
+      {
+       "title": "Attempt 3: Unified CM device name",
+       "detail": "1 record: SEP6026AA8F08CD [ip_phone] ip 10.188.41.140 -> exactly one, accepted"
+      }
+     ],
+     "path": "phone mac",
+     "ci_name": "SEP6026AA8F08CD",
+     "ci_class": "IP Phone",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.188.41.140"
+      ],
+      [
+       "Serial number",
+       "FCH26223JSR"
+      ],
+      [
+       "MAC address",
+       "60:26:aa:8f:08:cd"
+      ],
+      [
+       "Model",
+       "Cisco Systems, Inc. IP Phone 8800 Series 8861"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002619434",
+     "host": "sep3c26e4a7cb09.ipt.bofa.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002619434",
+     "item_facts": [
+      [
+       "DNS name",
+       "sep3c26e4a7cb09.ipt.bofa.com"
+      ],
+      [
+       "IP address",
+       "10.188.95.137"
+      ],
+      [
+       "Operating system",
+       "Cisco IP Phone CP-8861"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 03:27:03"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Phone label",
+       "detail": "\"sep3c26e4a7cb09\" matches sep plus twelve hex characters"
+      },
+      {
+       "title": "MAC rebuilt",
+       "detail": "3C:26:E4:A7:CB:09, 3c:26:e4:a7:cb:09, 3C26E4A7CB09, 3c26e4a7cb09"
+      },
+      {
+       "title": "Attempt 1: adapter with the MAC",
+       "detail": "0 adapters -> 0 phone owners, next attempt"
+      },
+      {
+       "title": "Attempt 2: phone record with the MAC",
+       "detail": "1 record: SEP3C26E4A7CB09 [ip_phone] ip 10.188.95.137 -> exactly one, accepted"
+      },
+      {
+       "title": "Attempt 3: Unified CM device name",
+       "detail": "1 record: SEP3C26E4A7CB09 [ip_phone] ip 10.188.95.137 -> exactly one, accepted"
+      }
+     ],
+     "path": "phone mac",
+     "ci_name": "SEP3C26E4A7CB09",
+     "ci_class": "IP Phone",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.188.95.137"
+      ],
+      [
+       "Serial number",
+       "FCH263122ZJ"
+      ],
+      [
+       "MAC address",
+       "3c:26:e4:a7:cb:09"
+      ],
+      [
+       "Model",
+       "Cisco Systems, Inc. IP Phone 8800 Series 8861"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 196849
   },
   {
    "order": "250",
@@ -605,8 +1287,222 @@
     }
    ],
    "sibling": "The only one of the four that reads the OS: the search is confined to the class classFor derives from it. It shares the fqdn-field search and the IP tie-break with USEM FQDN Hardware Match; USEM FQDN Name Hardware Match and USEM FQDN Name Broad Match search the name field with next()/hasNext() and no tie-break.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000002864117",
+     "host": "rukev4satalnc.corp.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002864117",
+     "item_facts": [
+      [
+       "DNS name",
+       "rukev4satalnc.corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.196.32.73"
+      ],
+      [
+       "Operating system",
+       "Windows Server 2019 Standard 64 bit Edition Version 1809 Build 17763"
+      ],
+      [
+       "NetBIOS name",
+       "RUKEV4SATALNC"
+      ],
+      [
+       "Tracking",
+       "AGENT"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 05:00:07"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Name",
+       "detail": "\"rukev4satalnc.corp.bankofamerica.com\"; OS \"Windows Server 2019 Standard 64 bit Edition Version 1809 Build 17763\" gives the class win_server"
+      },
+      {
+       "title": "Records carrying the fqdn",
+       "detail": "1 record: rukev4satalnc [win_server] ip 30.196.32.73 -> exactly one, accepted"
+      }
+     ],
+     "path": "win_server / one row",
+     "ci_name": "rukev4satalnc",
+     "ci_class": "Windows Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "rukev4satalnc.corp.bankofamerica.com"
+      ],
+      [
+       "DNS domain",
+       "EMEA.SDI.CORP.BANKOFAMERICA.COM"
+      ],
+      [
+       "IP address",
+       "30.196.32.73"
+      ],
+      [
+       "Serial number",
+       "VMware-42 02 ea f3 06 df 05 c3-72 93 f9 d5 43 bb 6d 78"
+      ],
+      [
+       "Model",
+       "VMware, Inc. VMware Virtual Platform"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002982595",
+     "host": "lvtifxluap109.sdi.corp.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002982595",
+     "item_facts": [
+      [
+       "DNS name",
+       "lvtifxluap109.sdi.corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.30.4.49"
+      ],
+      [
+       "Operating system",
+       "Red Hat Enterprise Linux 9.8"
+      ],
+      [
+       "Tracking",
+       "AGENT"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 05:00:07"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Name",
+       "detail": "\"lvtifxluap109.sdi.corp.bankofamerica.com\"; OS \"Red Hat Enterprise Linux 9.8\" gives the class linux_server"
+      },
+      {
+       "title": "Records carrying the fqdn",
+       "detail": "1 record: lvtifxluap109 [linux_server] ip 30.30.4.49 -> exactly one, accepted"
+      }
+     ],
+     "path": "linux_server / one row",
+     "ci_name": "lvtifxluap109",
+     "ci_class": "Linux Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "lvtifxluap109.sdi.corp.bankofamerica.com"
+      ],
+      [
+       "DNS domain",
+       "sdi.corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.30.4.49"
+      ],
+      [
+       "Serial number",
+       "8NMRYS3"
+      ],
+      [
+       "Model",
+       "Dell Inc. PowerEdge R740xd"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Non-Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002914013",
+     "host": "ilchifr01p03.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002914013",
+     "item_facts": [
+      [
+       "DNS name",
+       "ilchifr01p03.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.110.104.10"
+      ],
+      [
+       "Operating system",
+       "HP LaserJet Printer"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 05:00:06"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Name",
+       "detail": "\"ilchifr01p03.bankofamerica.com\"; OS \"HP LaserJet Printer\" gives the class printer"
+      },
+      {
+       "title": "Records carrying the fqdn",
+       "detail": "1 record: ILCHIFR01P03.BANKOFAMERICA.COM [printer] ip 10.110.104.10 -> exactly one, accepted"
+      }
+     ],
+     "path": "printer / one row",
+     "ci_name": "ILCHIFR01P03.BANKOFAMERICA.COM",
+     "ci_class": "Printer",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "ilchifr01p03.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.110.104.10"
+      ],
+      [
+       "Serial number",
+       "MXBCS350HY"
+      ],
+      [
+       "Model",
+       "Hewlett Packard HP E52645c MFP"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 298759
   },
   {
    "order": "260",
@@ -685,8 +1581,226 @@
     }
    ],
    "sibling": "Identical to USEM FQDN Class Match with classFor removed and the table fixed to cmdb_ci_hardware, so a CI classed differently from its OS still matches. Unlike USEM FQDN Name Hardware Match and USEM FQDN Name Broad Match it searches the fqdn field and applies the IP tie-break.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000003381469",
+     "host": "htuwdlmssql04.corp.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003381469",
+     "item_facts": [
+      [
+       "DNS name",
+       "htuwdlmssql04.corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.46.205.4"
+      ],
+      [
+       "Operating system",
+       "(not reported)"
+      ],
+      [
+       "NetBIOS name",
+       "HTUWDLMSSQL04"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:59:45"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Name",
+       "detail": "\"htuwdlmssql04.corp.bankofamerica.com\"; the whole hardware tree"
+      },
+      {
+       "title": "Records carrying the fqdn",
+       "detail": "1 record: htuwdlmssql04 [win_server] ip 30.46.205.4 -> exactly one, accepted"
+      }
+     ],
+     "path": "win_server / one row",
+     "ci_name": "htuwdlmssql04",
+     "ci_class": "Windows Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "htuwdlmssql04.corp.bankofamerica.com"
+      ],
+      [
+       "DNS domain",
+       "corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.46.205.4"
+      ],
+      [
+       "Serial number",
+       "4096-9979-4919-1937-7792-1621-67"
+      ],
+      [
+       "Model",
+       "Microsoft Corporation Virtual Machine"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002982242",
+     "host": "vaehs06137.ussdnve.baml.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002982242",
+     "item_facts": [
+      [
+       "DNS name",
+       "vaehs06137.ussdnve.baml.com"
+      ],
+      [
+       "IP address",
+       "30.141.98.222"
+      ],
+      [
+       "Operating system",
+       "Red Hat Enterprise Linux Server 7.9"
+      ],
+      [
+       "Tracking",
+       "AGENT"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:59:12"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Name",
+       "detail": "\"vaehs06137.ussdnve.baml.com\"; the whole hardware tree"
+      },
+      {
+       "title": "Records carrying the fqdn",
+       "detail": "1 record: vaehs06137 [outofband_device] ip 30.151.193.170 -> exactly one, accepted"
+      }
+     ],
+     "path": "outofband_device / one row",
+     "ci_name": "vaehs06137",
+     "ci_class": "Out-of-Band Device",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_outofband_device.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "vaehs06137.ussdnve.baml.com"
+      ],
+      [
+       "DNS domain",
+       "ussdnve.baml.com"
+      ],
+      [
+       "IP address",
+       "30.151.193.170"
+      ],
+      [
+       "Serial number",
+       "2M271602RV"
+      ],
+      [
+       "Model",
+       "Hewlett-Packard iLO 4"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000003642669",
+     "host": "ljp1anhmeapp.jp.apac.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003642669",
+     "item_facts": [
+      [
+       "DNS name",
+       "ljp1anhmeapp.jp.apac.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "171.157.242.133"
+      ],
+      [
+       "Operating system",
+       "EulerOS / Ubuntu / Fedora / Tiny Core Linux / Linux 3.x / IBM / FortiSOAR / F5 Networks Big-IP / Paloalto networks Global Protect PAN-OS"
+      ],
+      [
+       "Tracking",
+       "AGENT"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:58:29"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Name",
+       "detail": "\"ljp1anhmeapp.jp.apac.bankofamerica.com\"; the whole hardware tree"
+      },
+      {
+       "title": "Records carrying the fqdn",
+       "detail": "1 record: ljp1anhmeapp [linux_server] ip 171.157.242.133 -> exactly one, accepted"
+      }
+     ],
+     "path": "linux_server / one row",
+     "ci_name": "ljp1anhmeapp",
+     "ci_class": "Linux Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "ljp1anhmeapp.jp.apac.bankofamerica.com"
+      ],
+      [
+       "DNS domain",
+       "JP.APAC.BANKOFAMERICA.COM"
+      ],
+      [
+       "IP address",
+       "171.157.242.133"
+      ],
+      [
+       "Serial number",
+       "VMware-42 34 42 6a 8e 51 1c d8-ef e4 fd 3f 9d 30 12 10"
+      ],
+      [
+       "Model",
+       "VMware, Inc. VMware20,1"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 82224
   },
   {
    "order": "300",
@@ -780,8 +1894,214 @@
     }
    ],
    "sibling": "Differs from USEM Hostname Domain Hardware Match only in reading the payload OS, deriving a class with classFor and querying that class table alone, declining outright when the OS yields no class; normalisation, ignore list, agreement test, IP tie-break and decision are identical.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000002911539",
+     "host": "usohmohmt01p04.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002911539",
+     "item_facts": [
+      [
+       "DNS name",
+       "usohmohmt01p04.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.107.59.12"
+      ],
+      [
+       "Operating system",
+       "HP LaserJet Printer"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 05:00:07"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Split",
+       "detail": "host \"usohmohmt01p04\", domain \"bankofamerica.com\"; OS \"HP LaserJet Printer\" gives the class printer"
+      },
+      {
+       "title": "Records carrying the host name",
+       "detail": "1: usohmohmt01p04 [printer] ip 10.107.59.12 domain \"bankofamerica.com\" agrees -> 1 agree on the domain"
+      }
+     ],
+     "path": "printer / one row",
+     "ci_name": "usohmohmt01p04",
+     "ci_class": "Printer",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
+     "ci_facts": [
+      [
+       "DNS domain",
+       "bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.107.59.12"
+      ],
+      [
+       "Serial number",
+       "JPCCS6W1RJ"
+      ],
+      [
+       "Model",
+       "Hewlett-Packard HP LaserJet E50145"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002952749",
+     "host": "ah-1261717-001.sdi.corp.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002952749",
+     "item_facts": [
+      [
+       "DNS name",
+       "ah-1261717-001.sdi.corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.93.232.220"
+      ],
+      [
+       "Operating system",
+       "Red Hat Enterprise Linux 9.8"
+      ],
+      [
+       "Tracking",
+       "AGENT"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:59:29"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Split",
+       "detail": "host \"ah-1261717-001\", domain \"sdi.corp.bankofamerica.com\"; OS \"Red Hat Enterprise Linux 9.8\" gives the class linux_server"
+      },
+      {
+       "title": "Records carrying the host name",
+       "detail": "1: AH-1261717-001 [linux_server] ip 30.93.232.220 domain \"SDI.CORP.BANKOFAMERICA.COM\" agrees -> 1 agree on the domain"
+      }
+     ],
+     "path": "linux_server / one row",
+     "ci_name": "AH-1261717-001",
+     "ci_class": "Linux Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "DNS domain",
+       "SDI.CORP.BANKOFAMERICA.COM"
+      ],
+      [
+       "IP address",
+       "30.93.232.220"
+      ],
+      [
+       "Serial number",
+       "VMWARE-42 1F F8 9E F2 BF 14 A6-25 32 4E DB 86 B9 0B 25"
+      ],
+      [
+       "Model",
+       "VMware VMWARE VIRTUAL PLATFORM"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002982131",
+     "host": "wrdna250xcrs1.ssc.ext.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002982131",
+     "item_facts": [
+      [
+       "DNS name",
+       "wrdna250xcrs1.ssc.ext.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "171.145.185.62"
+      ],
+      [
+       "Operating system",
+       "Windows Server 2022 Standard 64 bit Edition Version 21H2"
+      ],
+      [
+       "NetBIOS name",
+       "WRDNA250XCRS1"
+      ],
+      [
+       "Tracking",
+       "AGENT"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:59:01"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Split",
+       "detail": "host \"wrdna250xcrs1\", domain \"ssc.ext.bankofamerica.com\"; OS \"Windows Server 2022 Standard 64 bit Edition Version 21H2\" gives the class win_server"
+      },
+      {
+       "title": "Records carrying the host name",
+       "detail": "1: WRDNA250XCRS1 [win_server] ip 171.145.185.62 domain \"SSC.EXT.BANKOFAMERICA.COM\" agrees -> 1 agree on the domain"
+      }
+     ],
+     "path": "win_server / one row",
+     "ci_name": "WRDNA250XCRS1",
+     "ci_class": "Windows Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "DNS domain",
+       "SSC.EXT.BANKOFAMERICA.COM"
+      ],
+      [
+       "IP address",
+       "171.145.185.62"
+      ],
+      [
+       "Serial number",
+       "VMWARE-42 18 09 8C 55 AC 5F B2-AE E7 B4 A7 C0 3A 2E 33"
+      ],
+      [
+       "Model",
+       "VMware VMWARE VIRTUAL PLATFORM"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 133544
   },
   {
    "order": "310",
@@ -866,8 +2186,210 @@
     }
    ],
    "sibling": "Identical normalisation, ignore list, agreement test, IP tie-break and decision as USEM Hostname Domain Class Match, but it has no classFor, never reads the OS and searches cmdb_ci_hardware so any hardware subclass can match; it is the wider, later fallback of the pair.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000002982480",
+     "host": "vaetfxlwsq23.sdi.ssc3.ext3.bankofamerica3.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002982480",
+     "item_facts": [
+      [
+       "DNS name",
+       "vaetfxlwsq23.sdi.ssc3.ext3.bankofamerica3.com"
+      ],
+      [
+       "IP address",
+       "171.184.196.24"
+      ],
+      [
+       "Operating system",
+       "Red Hat Enterprise Linux 9.8"
+      ],
+      [
+       "Tracking",
+       "AGENT"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:59:38"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Split",
+       "detail": "host \"vaetfxlwsq23\", domain \"sdi.ssc3.ext3.bankofamerica3.com\"; the whole hardware tree"
+      },
+      {
+       "title": "Records carrying the host name",
+       "detail": "1: vaetfxlwsq23 [server] ip 171.184.196.24 domain \"sdi.ssc3.ext3.bankofamerica3.com\" agrees -> 1 agree on the domain"
+      }
+     ],
+     "path": "server / one row",
+     "ci_name": "vaetfxlwsq23",
+     "ci_class": "Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "DNS domain",
+       "sdi.ssc3.ext3.bankofamerica3.com"
+      ],
+      [
+       "IP address",
+       "171.184.196.24"
+      ],
+      [
+       "Serial number",
+       "VMware-42274bac-812c-9756-f5d6-453fa50e537a"
+      ],
+      [
+       "Model",
+       "VMware, Inc. VMware Virtual Platform"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Non-Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002982283",
+     "host": "lva61pezudws04v.sdi.ssc3.ext3.bankofamerica3.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002982283",
+     "item_facts": [
+      [
+       "DNS name",
+       "lva61pezudws04v.sdi.ssc3.ext3.bankofamerica3.com"
+      ],
+      [
+       "IP address",
+       "171.184.196.14"
+      ],
+      [
+       "Operating system",
+       "Red Hat Enterprise Linux 9.8"
+      ],
+      [
+       "Tracking",
+       "AGENT"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:59:17"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Split",
+       "detail": "host \"lva61pezudws04v\", domain \"sdi.ssc3.ext3.bankofamerica3.com\"; the whole hardware tree"
+      },
+      {
+       "title": "Records carrying the host name",
+       "detail": "2: lva61pezudws04v [server, retired] ip 30.122.1.6 domain \"sdi.ssc3.ext3.bankofamerica3.com\" agrees ; lva61pezudws04v [server] ip 171.184.196.14 domain \"sdi.ssc3.ext3.bankofamerica3.com\" agrees -> 2 agree on the domain, 1 on the scanned address"
+      }
+     ],
+     "path": "server / tie by address",
+     "ci_name": "lva61pezudws04v",
+     "ci_class": "Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "DNS domain",
+       "sdi.ssc3.ext3.bankofamerica3.com"
+      ],
+      [
+       "IP address",
+       "171.184.196.14"
+      ],
+      [
+       "Serial number",
+       "VMware-422717de-8f23-d0b1-a097-8c797bed73ca"
+      ],
+      [
+       "Model",
+       "VMware, Inc. VMware Virtual Platform"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Non-Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002970891",
+     "host": "rveqbt1utilb01b.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002970891",
+     "item_facts": [
+      [
+       "DNS name",
+       "rveqbt1utilb01b.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "171.205.31.6"
+      ],
+      [
+       "Operating system",
+       "BIG-IP 17.5.1.8 Build 0.27.19"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:54:54"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Split",
+       "detail": "host \"rveqbt1utilb01b\", domain \"bankofamerica.com\"; the whole hardware tree"
+      },
+      {
+       "title": "Records carrying the host name",
+       "detail": "3: RVEQBT1UTILB01B [lb] ip 171.205.31.6 domain \"-\" differs ; RVEQBT1UTILB01B [lb] ip 171.205.31.6 domain \"-\" differs ; rveqbt1utilb01b [lb_bigip] ip 171.205.31.6 domain \"bankofamerica.com\" agrees -> 1 agree on the domain"
+      }
+     ],
+     "path": "lb / domain separates",
+     "ci_name": "rveqbt1utilb01b",
+     "ci_class": "F5 BIG-IP",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_bigip.do?sys_id=",
+     "ci_facts": [
+      [
+       "DNS domain",
+       "bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "171.205.31.6"
+      ],
+      [
+       "Serial number",
+       "f5-hggt-knwu"
+      ],
+      [
+       "Model",
+       "F5 Networks BIG-IP vCMP Guest"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Non-Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 97157
   },
   {
    "order": "350",
@@ -980,8 +2502,210 @@
     }
    ],
    "sibling": "Unlike USEM FQDN Class Match, USEM FQDN Hardware Match, USEM Hostname Domain Class Match and USEM Hostname Domain Hardware Match, which query a CI table (the class the OS implies, or cmdb_ci_hardware) on fqdn or name, walk every row and break a tie by the ip_address field of the CI record, and unlike USEM Hostname Class Match and USEM Hostname Hardware Match, which query name and decide exactly-one by next() then hasNext() with no tie-break, this rule queries cmdb_ip_address_dns_name and dot-walks to the CI: the OS class is never the queried table but a preference applied by agrees() to the CI reached (shared among the name rules only with USEM Hostname Hardware Match); an OS that gives no class does not decline here as it does in the Class rules; the tie is broken by ip_address.ip_address on the IP Address record in the chain; an alias resolves to the real machine; and a load balancer device at the end of the chain is refused, which no other name rule does. It has no retired(), narrow() or isRealServer() handling.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000002933541",
+     "host": "txhoulp01p02.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002933541",
+     "item_facts": [
+      [
+       "DNS name",
+       "txhoulp01p02.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.130.61.9"
+      ],
+      [
+       "Operating system",
+       "HP JetDirect"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 05:00:13"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Name",
+       "detail": "\"txhoulp01p02.bankofamerica.com\"; OS \"HP JetDirect\" gives the class printer (agreement includes appliances for a Linux fingerprint)"
+      },
+      {
+       "title": "DNS Name -> IP Address -> adapter -> CI",
+       "detail": "1 row: address 10.130.61.9 -> adapter HP ETHERNET MULTI-ENVIRONMENT,ROM none,JETDIRECT,JD153,EEPROM JSI25080326 -> npi535536 [printer]"
+      },
+      {
+       "title": "Decision",
+       "detail": "1 agreeing CI"
+      }
+     ],
+     "path": "one owner / 1 rows",
+     "ci_name": "npi535536",
+     "ci_class": "Printer",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.130.61.9"
+      ],
+      [
+       "Serial number",
+       "MXBCQDD1CN"
+      ],
+      [
+       "Model",
+       "Hewlett-Packard HP LaserJet Flow MFP E52645"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002912440",
+     "host": "ups01mo32130101.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002912440",
+     "item_facts": [
+      [
+       "DNS name",
+       "ups01mo32130101.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.107.26.21"
+      ],
+      [
+       "Operating system",
+       "(not reported)"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 05:00:12"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Name",
+       "detail": "\"ups01mo32130101.bankofamerica.com\"; OS \"not reported\" gives no class (agreement includes appliances for a Linux fingerprint)"
+      },
+      {
+       "title": "DNS Name -> IP Address -> adapter -> CI",
+       "detail": "1 row: address 10.107.26.21 -> adapter vmac0 -> ups01mo32130101 [ups]"
+      },
+      {
+       "title": "Decision",
+       "detail": "1 agreeing CI"
+      }
+     ],
+     "path": "one owner / 1 rows",
+     "ci_name": "ups01mo32130101",
+     "ci_class": "UPS",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ups.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.107.26.21"
+      ],
+      [
+       "Serial number",
+       "N12439320561"
+      ],
+      [
+       "Model",
+       "APC Smart-UPS 2200"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002915116",
+     "host": "ups01nv11270101.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002915116",
+     "item_facts": [
+      [
+       "DNS name",
+       "ups01nv11270101.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.175.33.21"
+      ],
+      [
+       "Operating system",
+       "(not reported)"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 05:00:12"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Name",
+       "detail": "\"ups01nv11270101.bankofamerica.com\"; OS \"not reported\" gives no class (agreement includes appliances for a Linux fingerprint)"
+      },
+      {
+       "title": "DNS Name -> IP Address -> adapter -> CI",
+       "detail": "1 row: address 10.175.33.21 -> adapter vmac0 -> ups01nv11270101 [ups]"
+      },
+      {
+       "title": "Decision",
+       "detail": "1 agreeing CI"
+      }
+     ],
+     "path": "one owner / 1 rows",
+     "ci_name": "ups01nv11270101",
+     "ci_class": "UPS",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ups.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.175.33.21"
+      ],
+      [
+       "Serial number",
+       "N12521120051"
+      ],
+      [
+       "Model",
+       "APC Smart-UPS 2200"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 114574
   },
   {
    "order": "400",
@@ -1067,8 +2791,230 @@
     }
    ],
    "sibling": "Unlike USEM Hostname Hardware Match it filters the search by the OS-implied class up front (a Windows Server never sees a Linux host's name), declines outright when the OS gives no class, guards the class table with isValid(), and has no agrees() tolerance for parent or appliance classes.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000002978226",
+     "host": "wrchb013sqsesr",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002978226",
+     "item_facts": [
+      [
+       "DNS name",
+       "wrchb013sqsesr"
+      ],
+      [
+       "IP address",
+       "30.52.36.137"
+      ],
+      [
+       "Operating system",
+       "Windows Server 2019 Standard 64 bit Edition Version 1809 Build 17763"
+      ],
+      [
+       "NetBIOS name",
+       "WRCHB013SQSESR"
+      ],
+      [
+       "Tracking",
+       "AGENT"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 05:00:17"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Host name",
+       "detail": "\"wrchb013sqsesr\"; OS \"Windows Server 2019 Standard 64 bit Edition Version 1809 Build 17763\" gives the class win_server"
+      },
+      {
+       "title": "Records carrying the name",
+       "detail": "1 record: wrchb013sqsesr [win_server] ip 30.52.36.137 -> exactly one, accepted"
+      }
+     ],
+     "path": "win_server / 1 rows",
+     "ci_name": "wrchb013sqsesr",
+     "ci_class": "Windows Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "wrchb013sqsesr.corp.bankofamerica.com"
+      ],
+      [
+       "DNS domain",
+       "SDI.CORP.BANKOFAMERICA.COM"
+      ],
+      [
+       "IP address",
+       "30.52.36.137"
+      ],
+      [
+       "Serial number",
+       "VMware-42 29 d6 39 ad 46 d2 d8-40 0c 3e 07 9c 50 ea 9c"
+      ],
+      [
+       "Model",
+       "VMware, Inc. VMware Virtual Platform"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002984465",
+     "host": "ckd0ad0856d1cf.il.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002984465",
+     "item_facts": [
+      [
+       "DNS name",
+       "ckd0ad0856d1cf.il.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.239.133.166"
+      ],
+      [
+       "Operating system",
+       "Windows 11 Enterprise 64 bit Edition Version 23H2"
+      ],
+      [
+       "NetBIOS name",
+       "CKD0AD0856D1CF"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 05:00:14"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Host name",
+       "detail": "\"ckd0ad0856d1cf\"; OS \"Windows 11 Enterprise 64 bit Edition Version 23H2\" gives the class computer"
+      },
+      {
+       "title": "Records carrying the name",
+       "detail": "1 record: ckd0ad0856d1cf [computer] ip 10.239.133.166 -> exactly one, accepted"
+      }
+     ],
+     "path": "computer / 1 rows",
+     "ci_name": "ckd0ad0856d1cf",
+     "ci_class": "Computer",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_computer.do?sys_id=",
+     "ci_facts": [
+      [
+       "DNS domain",
+       "corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.239.133.166"
+      ],
+      [
+       "Serial number",
+       "MXL4072CY7"
+      ],
+      [
+       "Model",
+       "Hewlett Packard PRODESK 600 G9"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002950473",
+     "host": "ah-1201846-001",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002950473",
+     "item_facts": [
+      [
+       "DNS name",
+       "ah-1201846-001"
+      ],
+      [
+       "IP address",
+       "30.157.81.15"
+      ],
+      [
+       "Operating system",
+       "Windows Server 2019 Standard 64 bit Edition Version 1809 Build 17763"
+      ],
+      [
+       "NetBIOS name",
+       "AH-1201846-001"
+      ],
+      [
+       "Tracking",
+       "AGENT"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 05:00:17"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Host name",
+       "detail": "\"ah-1201846-001\"; OS \"Windows Server 2019 Standard 64 bit Edition Version 1809 Build 17763\" gives the class win_server"
+      },
+      {
+       "title": "Records carrying the name",
+       "detail": "1 record: ah-1201846-001 [win_server] ip 30.157.81.15 -> exactly one, accepted"
+      }
+     ],
+     "path": "win_server / 1 rows",
+     "ci_name": "ah-1201846-001",
+     "ci_class": "Windows Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "ah-1201846-001.corp.bankofamerica.com"
+      ],
+      [
+       "DNS domain",
+       "SDI.CORP.BANKOFAMERICA.COM"
+      ],
+      [
+       "IP address",
+       "30.157.81.15"
+      ],
+      [
+       "Serial number",
+       "VMware-42 0c ae 4b dc fc 38 c8-0b 5a d2 0e b0 14 2f fb"
+      ],
+      [
+       "Model",
+       "VMware, Inc. VMware Virtual Platform"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 144019
   },
   {
    "order": "410",
@@ -1161,8 +3107,210 @@
     }
    ],
    "sibling": "Searches cmdb_ci_hardware instead of the OS class, so the OS is a post-check through agrees() rather than a filter; accepts an ancestor class of the OS class and, for a Linux fingerprint, Network Gear, Load Balancer and Storage Server records; still runs when the OS gives no class; has no isValid() guard.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000002474031",
+     "host": "hcpinp55760-102.hcpinp55760-d.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002474031",
+     "item_facts": [
+      [
+       "DNS name",
+       "hcpinp55760-102.hcpinp55760-d.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "165.46.139.142"
+      ],
+      [
+       "Operating system",
+       "EulerOS / Ubuntu / Fedora / Tiny Core Linux / Linux 3.x / IBM / FortiSOAR / F5 Networks Big-IP / Paloalto networks Global Protect PAN-OS"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 05:00:13"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Host name",
+       "detail": "\"hcpinp55760-102\"; the whole hardware tree, the OS class kept as a preference"
+      },
+      {
+       "title": "Records carrying the name",
+       "detail": "1 record: HCPINP55760-102 [msd] ip 165.46.140.72 -> exactly one, accepted; class msd agrees with the OS"
+      }
+     ],
+     "path": "msd / 1 rows",
+     "ci_name": "HCPINP55760-102",
+     "ci_class": "Mass Storage Device",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_msd.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "165.46.140.72"
+      ],
+      [
+       "Serial number",
+       "QTFCR2308000C"
+      ],
+      [
+       "Model",
+       "HDS HDS HCP G11 CAS ARRAY"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002982545",
+     "host": "usvasdntbqbz1ccvlb01b.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002982545",
+     "item_facts": [
+      [
+       "DNS name",
+       "usvasdntbqbz1ccvlb01b.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "171.175.193.217"
+      ],
+      [
+       "Operating system",
+       "BIG-IP 17.5.1.8 Build 0.27.19"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:59:59"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Host name",
+       "detail": "\"usvasdntbqbz1ccvlb01b\"; the whole hardware tree, the OS class kept as a preference"
+      },
+      {
+       "title": "Records carrying the name",
+       "detail": "1 record: USVASDNTBQBZ1CCVLB01B [lb] ip 171.175.193.217 -> exactly one, accepted; class lb agrees with the OS"
+      }
+     ],
+     "path": "lb / 1 rows",
+     "ci_name": "USVASDNTBQBZ1CCVLB01B",
+     "ci_class": "Load Balancer",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "171.175.193.217"
+      ],
+      [
+       "Serial number",
+       "F5-FNLS-THMD"
+      ],
+      [
+       "Model",
+       "F5 NETWORKS INC BIG-IP Tenant"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002984882",
+     "host": "dc93960fbaf9mac",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002984882",
+     "item_facts": [
+      [
+       "DNS name",
+       "dc93960fbaf9mac"
+      ],
+      [
+       "IP address",
+       "30.86.100.93"
+      ],
+      [
+       "Operating system",
+       "macOS 26.6.1"
+      ],
+      [
+       "NetBIOS name",
+       "DC93960FBAF9MAC"
+      ],
+      [
+       "Tracking",
+       "AGENT"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:59:59"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Host name",
+       "detail": "\"dc93960fbaf9mac\"; the whole hardware tree, the OS class kept as a preference"
+      },
+      {
+       "title": "Records carrying the name",
+       "detail": "1 record: dc93960fbaf9mac [computer] ip 30.178.65.64 -> exactly one, accepted; class computer agrees with the OS"
+      }
+     ],
+     "path": "computer / 1 rows",
+     "ci_name": "dc93960fbaf9mac",
+     "ci_class": "Computer",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_computer.do?sys_id=",
+     "ci_facts": [
+      [
+       "DNS domain",
+       "corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.178.65.64"
+      ],
+      [
+       "Serial number",
+       "D299GXHFH2"
+      ],
+      [
+       "MAC address",
+       "dc:93:96:0f:ba:f9"
+      ],
+      [
+       "Model",
+       "Apple MacBook Air 13\" (M4) MW133LL/A"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 106576
   },
   {
    "order": "415",
@@ -1267,8 +3415,210 @@
     }
    ],
    "sibling": "The only rule that searches cmdb_ci_imaging_hardware, the only one that searches cmdb_ci_ip_phone by the plain host label (USEM Cisco IP Phone MAC searches it by the upper-cased sep label, by mac_address and through adapters), and the only phone rule that reads the OS and the IP. Its OS guard is inverted relative to the class rules (a class disqualifies instead of restricting the search) and it accepts a Linux fingerprint; it breaks a shared name by ip_address instead of declining outright. Unlike USEM Cisco IP Phone MAC it needs no sep label and never touches network adapters or mac_address; it collects all rows into arrays rather than testing next then hasNext.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000002909659",
+     "host": "scr03ga85150101.scanners.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002909659",
+     "item_facts": [
+      [
+       "DNS name",
+       "scr03ga85150101.scanners.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.79.86.15"
+      ],
+      [
+       "Operating system",
+       "Linux 2.6"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:53:53"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "OS guard",
+       "detail": "OS \"Linux 2.6\" gives the class linux_server: no server or desktop class, the search runs"
+      },
+      {
+       "title": "Name searched in IP Phone and Imaging Hardware",
+       "detail": "cmdb_ci_ip_phone: 0 records | cmdb_ci_imaging_hardware: 1 record: SCR03GA85150101 [scanner] ip 10.79.86.15"
+      },
+      {
+       "title": "Decision",
+       "detail": "one device, accepted"
+      }
+     ],
+     "path": "scanner / one row",
+     "ci_name": "SCR03GA85150101",
+     "ci_class": "Scanner",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_scanner.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.79.86.15"
+      ],
+      [
+       "Serial number",
+       "532075630"
+      ],
+      [
+       "Model",
+       "Panini EVERNEXT WIRELESS SCANNER"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002524718",
+     "host": "sepcc79d79ffb43.ipt.bofa.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002524718",
+     "item_facts": [
+      [
+       "DNS name",
+       "sepcc79d79ffb43.ipt.bofa.com"
+      ],
+      [
+       "IP address",
+       "10.24.75.151"
+      ],
+      [
+       "Operating system",
+       "Cisco IP Phone CP-8861"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-20 17:03:14"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "OS guard",
+       "detail": "OS \"Cisco IP Phone CP-8861\" gives the class netgear: no server or desktop class, the search runs"
+      },
+      {
+       "title": "Name searched in IP Phone and Imaging Hardware",
+       "detail": "cmdb_ci_ip_phone: 2 records: SEPCC79D79FFB43 [ip_phone] ip 10.24.75.151 ; sepcc79d79ffb43 [ip_phone] | cmdb_ci_imaging_hardware: 0 records"
+      },
+      {
+       "title": "Decision",
+       "detail": "2 devices, 1 on the scanned address 10.24.75.151: that one is accepted"
+      }
+     ],
+     "path": "ip_phone / tie by address",
+     "ci_name": "SEPCC79D79FFB43",
+     "ci_class": "IP Phone",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.24.75.151"
+      ],
+      [
+       "Serial number",
+       "FVH26430ZJP"
+      ],
+      [
+       "Model",
+       "Cisco Systems, Inc. IP Phone 8800 Series 8861"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002909706",
+     "host": "scr01ga85150101.scanners.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002909706",
+     "item_facts": [
+      [
+       "DNS name",
+       "scr01ga85150101.scanners.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.79.86.16"
+      ],
+      [
+       "Operating system",
+       "Linux 2.6"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:51:23"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "OS guard",
+       "detail": "OS \"Linux 2.6\" gives the class linux_server: no server or desktop class, the search runs"
+      },
+      {
+       "title": "Name searched in IP Phone and Imaging Hardware",
+       "detail": "cmdb_ci_ip_phone: 0 records | cmdb_ci_imaging_hardware: 1 record: SCR01GA85150101 [scanner] ip 10.79.86.16"
+      },
+      {
+       "title": "Decision",
+       "detail": "one device, accepted"
+      }
+     ],
+     "path": "scanner / one row",
+     "ci_name": "SCR01GA85150101",
+     "ci_class": "Scanner",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_scanner.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.79.86.16"
+      ],
+      [
+       "Serial number",
+       "532074961"
+      ],
+      [
+       "Model",
+       "Panini EVERNEXT WIRELESS SCANNER"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 25717
   },
   {
    "order": "420",
@@ -1354,8 +3704,206 @@
     }
    ],
    "sibling": "Strips exactly one trailing segment and only on controller evidence (suffix list or OS marker word); searches the whole cmdb_ci_hardware tree with next()/hasNext() and refuses a cmdb_ci_lb record. USEM Network Interface Name Match instead walks every prefix longest-first on interface evidence, searches only cmdb_ci_netgear and cmdb_ci_lb, accepts a load balancer device and never reads the OS. 'mgmt' sits in both lists: a '-mgmt' label naming one hardware CI resolves here; when that CI is a load balancer this rule declines and the interface rule then returns it.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000003659125",
+     "host": "hcpinp55760-102-b.asia.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003659125",
+     "item_facts": [
+      [
+       "DNS name",
+       "hcpinp55760-102-b.asia.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "165.46.140.82"
+      ],
+      [
+       "Operating system",
+       "Linux 2.4-2.6 / Embedded Device / F5 Networks Big-IP / Integrated Dell Remote Access Controller / Linux 2.4-2.6 / Embedded Device / F5 Networks Big-IP / NetBotz Appliance / Fabric OS"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 05:00:13"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Controller sign",
+       "detail": "OS word \"remote access controller\" on \"hcpinp55760-102-b\"; server name \"hcpinp55760-102\""
+      },
+      {
+       "title": "Records carrying the server name",
+       "detail": "1 record: HCPINP55760-102 [msd] ip 165.46.140.72 -> exactly one, accepted"
+      }
+     ],
+     "path": "os word / msd",
+     "ci_name": "HCPINP55760-102",
+     "ci_class": "Mass Storage Device",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_msd.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "165.46.140.72"
+      ],
+      [
+       "Serial number",
+       "QTFCR2308000C"
+      ],
+      [
+       "Model",
+       "HDS HDS HCP G11 CAS ARRAY"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002725119",
+     "host": "ltx10megbxpr10-r.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002725119",
+     "item_facts": [
+      [
+       "DNS name",
+       "ltx10megbxpr10-r.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.41.168.89"
+      ],
+      [
+       "Operating system",
+       "HP iLO"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:59:24"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Controller sign",
+       "detail": "OS word \"ilo\" on \"ltx10megbxpr10-r\"; server name \"ltx10megbxpr10\""
+      },
+      {
+       "title": "Records carrying the server name",
+       "detail": "1 record: ltx10megbxpr10 [linux_server] ip 171.155.76.17 -> exactly one, accepted"
+      }
+     ],
+     "path": "os word / linux_server",
+     "ci_name": "ltx10megbxpr10",
+     "ci_class": "Linux Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "ltx10megbxpr10.ecomm.device.rpg"
+      ],
+      [
+       "DNS domain",
+       "ecomm.device.rpg"
+      ],
+      [
+       "IP address",
+       "171.155.76.17"
+      ],
+      [
+       "Serial number",
+       "MXQ73402KV"
+      ],
+      [
+       "Model",
+       "HP ProLiant DL380 Gen9"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002970736",
+     "host": "usnccltij020is04-rmm.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002970736",
+     "item_facts": [
+      [
+       "DNS name",
+       "usnccltij020is04-rmm.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "172.24.46.57"
+      ],
+      [
+       "Operating system",
+       "Ubuntu / Linux 3.x"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:54:58"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Controller sign",
+       "detail": "suffix \"-rmm\" on \"usnccltij020is04-rmm\"; server name \"usnccltij020is04\""
+      },
+      {
+       "title": "Records carrying the server name",
+       "detail": "1 record: USNCCLTIJ020IS04 [netgear] ip 172.24.46.57 -> exactly one, accepted"
+      }
+     ],
+     "path": "suffix rmm / netgear",
+     "ci_name": "USNCCLTIJ020IS04",
+     "ci_class": "Network Gear",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_netgear.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "172.24.46.57"
+      ],
+      [
+       "Serial number",
+       "NS8200196076A"
+      ],
+      [
+       "Model",
+       "NetScout InfiniStreamNG 9800 Appliances 9895"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 9556
   },
   {
    "order": "430",
@@ -1456,8 +4004,198 @@
     }
    ],
    "sibling": "Walks every hyphen prefix longest-first and needs interface evidence ('.network.' domain or a marker segment after the first), where USEM Management Interface Match strips only the last segment on controller evidence. Searches only cmdb_ci_netgear and cmdb_ci_lb and returns a load balancer device, which the controller rule refuses. Counts hits across both tables in one array, so one switch plus one balancer of the same name decline. Reads no OS despite its header.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000003659155",
+     "host": "uswavanoh01fin0001-dhcpra-vlan120.network.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003659155",
+     "item_facts": [
+      [
+       "DNS name",
+       "uswavanoh01fin0001-dhcpra-vlan120.network.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.179.93.62"
+      ],
+      [
+       "Operating system",
+       "(not reported)"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:40:57"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Interface sign",
+       "detail": "domain \".network.\", segment \"vlan120\""
+      },
+      {
+       "title": "Prefixes tried, longest first, on Network Gear and Load Balancer",
+       "detail": "\"uswavanoh01fin0001-dhcpra\": nothing | \"uswavanoh01fin0001\": USWAVANOH01FIN0001 [ip_router] ip 10.179.93.122 -> one device at prefix \"uswavanoh01fin0001\", accepted"
+      }
+     ],
+     "path": "prefix depth 1 / ip_router",
+     "ci_name": "USWAVANOH01FIN0001",
+     "ci_class": "IP Router",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_router.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.179.93.122"
+      ],
+      [
+       "Serial number",
+       "30-006637-9305"
+      ],
+      [
+       "Model",
+       "Palo Alto Networks Prisma SD-WAN ion 3000"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000003292615",
+     "host": "ldgaatlso04bdm02-vlan618.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003292615",
+     "item_facts": [
+      [
+       "DNS name",
+       "ldgaatlso04bdm02-vlan618.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.80.69.3"
+      ],
+      [
+       "Operating system",
+       "Cisco IOS 12.1 / Cisco IOS 12.2 / Cisco IOS 12.3 / Cisco IOS 12.4"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:38:52"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Interface sign",
+       "detail": "segment \"vlan618\""
+      },
+      {
+       "title": "Prefixes tried, longest first, on Network Gear and Load Balancer",
+       "detail": "\"ldgaatlso04bdm02\": LDGAATLSO04BDM02 [ip_switch] ip 10.80.254.69 -> one device at prefix \"ldgaatlso04bdm02\", accepted"
+      }
+     ],
+     "path": "prefix depth 1 / ip_switch",
+     "ci_name": "LDGAATLSO04BDM02",
+     "ci_class": "IP Switch",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_switch.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.80.254.69"
+      ],
+      [
+       "Serial number",
+       "SMG1028NR1D"
+      ],
+      [
+       "Model",
+       "Cisco Systems, Inc. Catalyst 6500 Series Switches 6509"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000003659311",
+     "host": "ustxsanrp01fin0001-dhcpra-vlan120.network.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003659311",
+     "item_facts": [
+      [
+       "DNS name",
+       "ustxsanrp01fin0001-dhcpra-vlan120.network.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.131.70.62"
+      ],
+      [
+       "Operating system",
+       "(not reported)"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:40:14"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Interface sign",
+       "detail": "domain \".network.\", segment \"vlan120\""
+      },
+      {
+       "title": "Prefixes tried, longest first, on Network Gear and Load Balancer",
+       "detail": "\"ustxsanrp01fin0001-dhcpra\": nothing | \"ustxsanrp01fin0001\": USTXSANRP01FIN0001 [ip_router] ip 10.131.70.122 -> one device at prefix \"ustxsanrp01fin0001\", accepted"
+      }
+     ],
+     "path": "prefix depth 1 / ip_router",
+     "ci_name": "USTXSANRP01FIN0001",
+     "ci_class": "IP Router",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_router.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.131.70.122"
+      ],
+      [
+       "Serial number",
+       "30-007737-4947"
+      ],
+      [
+       "Model",
+       "Palo Alto Networks Prisma SD-WAN ion 3000"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 8782
   },
   {
    "order": "450",
@@ -1525,8 +4263,210 @@
     }
    ],
    "sibling": "Searches the name field, not fqdn, and only under cmdb_ci_hardware; exactly-one is decided by next()/hasNext() with no IP tie-break and no OS involvement. Identical to USEM FQDN Name Broad Match except for the table.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000003711486",
+     "host": "ustxhoutf01fin0001-dhcpra-vlan120.network.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003711486",
+     "item_facts": [
+      [
+       "DNS name",
+       "ustxhoutf01fin0001-dhcpra-vlan120.network.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.130.77.62"
+      ],
+      [
+       "Operating system",
+       "(not reported)"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:54:59"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Name",
+       "detail": "\"ustxhoutf01fin0001-dhcpra-vlan120.network.bankofamerica.com\" searched on the name field of the whole hardware tree"
+      },
+      {
+       "title": "Records named with the whole fqdn",
+       "detail": "0 records -> none"
+      },
+      {
+       "title": "Why the item is matched anyway",
+       "detail": "On the development instance this rule carries a longer script that also cuts interface names down to the device name (the walk of Network Interface Name Match); this item resolved through that extension. The delivered rule searches the whole fqdn on the name field, as the steps above show."
+      }
+     ],
+     "path": "none / 0 rows",
+     "ci_name": "USTXHOUTF01FIN0001",
+     "ci_class": "IP Router",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_router.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.130.77.122"
+      ],
+      [
+       "Serial number",
+       "30-008340-7870"
+      ],
+      [
+       "Model",
+       "Palo Alto Networks Prisma SD-WAN ion 3000"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000003659454",
+     "host": "ustxhousm01fin0001-dhcpra-vlan120.network.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003659454",
+     "item_facts": [
+      [
+       "DNS name",
+       "ustxhousm01fin0001-dhcpra-vlan120.network.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.130.79.190"
+      ],
+      [
+       "Operating system",
+       "(not reported)"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:53:56"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Name",
+       "detail": "\"ustxhousm01fin0001-dhcpra-vlan120.network.bankofamerica.com\" searched on the name field of the whole hardware tree"
+      },
+      {
+       "title": "Records named with the whole fqdn",
+       "detail": "0 records -> none"
+      },
+      {
+       "title": "Why the item is matched anyway",
+       "detail": "On the development instance this rule carries a longer script that also cuts interface names down to the device name (the walk of Network Interface Name Match); this item resolved through that extension. The delivered rule searches the whole fqdn on the name field, as the steps above show."
+      }
+     ],
+     "path": "none / 0 rows",
+     "ci_name": "USTXHOUSM01FIN0001",
+     "ci_class": "IP Router",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_router.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.130.79.250"
+      ],
+      [
+       "Serial number",
+       "30-008871-8722"
+      ],
+      [
+       "Model",
+       "Palo Alto Networks Prisma SD-WAN ion 3000"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000003659447",
+     "host": "ustxhoukd01fin0001-dhcpra-vlan120.network.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003659447",
+     "item_facts": [
+      [
+       "DNS name",
+       "ustxhoukd01fin0001-dhcpra-vlan120.network.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.130.59.62"
+      ],
+      [
+       "Operating system",
+       "(not reported)"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:53:44"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Name",
+       "detail": "\"ustxhoukd01fin0001-dhcpra-vlan120.network.bankofamerica.com\" searched on the name field of the whole hardware tree"
+      },
+      {
+       "title": "Records named with the whole fqdn",
+       "detail": "0 records -> none"
+      },
+      {
+       "title": "Why the item is matched anyway",
+       "detail": "On the development instance this rule carries a longer script that also cuts interface names down to the device name (the walk of Network Interface Name Match); this item resolved through that extension. The delivered rule searches the whole fqdn on the name field, as the steps above show."
+      }
+     ],
+     "path": "none / 0 rows",
+     "ci_name": "USTXHOUKD01FIN0001",
+     "ci_class": "IP Router",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_router.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.130.59.122"
+      ],
+      [
+       "Serial number",
+       "30-009566-8101"
+      ],
+      [
+       "Model",
+       "Palo Alto Networks Prisma SD-WAN ion 3000"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 29770
   },
   {
    "order": "455",
@@ -1642,6 +4582,180 @@
    "sibling": "Walks Load Balancer Service to Pool to Pool Member to server and returns a cmdb_ci_hardware record, never the service. Keeps every twin left after narrowing (two live records of an HA pair both have their pools walked) where the service rule declines on two. Adds isRealServer, related and keep, and reads cmdb_ci_lb_pool, cmdb_ci_lb_pool_member, cmdb_rel_ci, cmdb_ci_hardware, cmdb_ci_network_adapter, cmdb_ci_ip_address and cmdb_ci_lb, which the service rule never touches.",
    "examples": [
     {
+     "number": "SDI000002993687",
+     "host": "boluiv4-dev2-benefits-l7-vip1.dev.gwimnp.rpg",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002993687",
+     "item_facts": [
+      [
+       "DNS name",
+       "boluiv4-dev2-benefits-l7-vip1.dev.gwimnp.rpg"
+      ],
+      [
+       "IP address",
+       "10.143.53.96"
+      ],
+      [
+       "Operating system",
+       "F5 Networks Big-IP"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-20 10:40:47"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "VIP sign",
+       "detail": "OS has \"f5\", OS has \"big-ip\", label segment \"vip1\""
+      },
+      {
+       "title": "Clues fqdn, name, name",
+       "detail": "no service record; next clue"
+      },
+      {
+       "title": "Clue 4: ip_address = \"10.143.53.96\"",
+       "detail": "1 service record: /Common/ihscore-dev2-boluiv4_benefits-6011-vip on 10.143.53.96 (svedpz1rp1lb12)"
+      },
+      {
+       "title": "Pools",
+       "detail": "1: /Common/ihscore-dev2-boluiv4_benefits-6011-pool (pool field)"
+      },
+      {
+       "title": "Members",
+       "detail": "1: /Common/ihscore-dev2-lva62pwbolws51v-node 171.184.193.14 -> lva62pwbolws51v (device record, adapter, IP Address record)"
+      },
+      {
+       "title": "Decision",
+       "detail": "1 member(s), 1 server record(s), 1 machine(s) by name; one machine, one record: the member rule returns it"
+      }
+     ],
+     "path": "one service / 1 member / 1 machine",
+     "ci_name": "lva62pwbolws51v",
+     "ci_class": "Linux Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "lva62pwbolws51v.sdi.ssc3.ext3.bankofamerica3.com"
+      ],
+      [
+       "IP address",
+       "171.184.193.14"
+      ],
+      [
+       "Serial number",
+       "VMware-42 27 25 b9 6c 36 c0 37-53 0a ac 92 8d 40 9f 3c"
+      ],
+      [
+       "Model",
+       "VMware, Inc. VMware Virtual Platform"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000003786277",
+     "host": "aim-xfer-dev-ltwbt1-vip.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003786277",
+     "item_facts": [
+      [
+       "DNS name",
+       "aim-xfer-dev-ltwbt1-vip.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "171.206.7.25"
+      ],
+      [
+       "Operating system",
+       "Ubuntu/Linux"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-19 23:40:12"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "VIP sign",
+       "detail": "label segment \"vip\""
+      },
+      {
+       "title": "Clues fqdn, name, name",
+       "detail": "no service record; next clue"
+      },
+      {
+       "title": "Clue 4: ip_address = \"171.206.7.25\"",
+       "detail": "4 service records: /Common/aim-xfer-dev_t_22 on 171.206.7.25 (ltwqbt1utilb01a) ; /Common/aim-xfer-dev_t_22 on 171.206.7.25 (ltwqbt1utilb01b) ; /Common/aim-xfer-dev_t_22 on 171.206.7.25 (ltwqbt1utilb01b) ; ..."
+      },
+      {
+       "title": "Twins",
+       "detail": "4 records of one name are one virtual server recorded more than once: 4 kept on the scanned address; the member rule walks the pools of all 4, the service rule declines on 4 live records"
+      },
+      {
+       "title": "Pools",
+       "detail": "4: /Common/aim-xfer-dev_t_22 (pool field) ; /Common/aim-xfer-dev_t_22 (pool field) ; /Common/aim-xfer-dev_t_22 (pool field) ; ..."
+      },
+      {
+       "title": "Members",
+       "detail": "4: /Common/30.123.135.170 30.123.135.170 -> ah-1062287-001 (device record, adapter, IP Address record) ; /Common/30.123.135.170 30.123.135.170 -> ah-1062287-001 (device record, adapter, IP Address record) ; /Common/30.123.135.170 30.123.135.170 -> ah-1062287-001 (device record, adapter, IP Address record) ; /Common/30.123.135.170 30.123.135.170 -> ah-1062287-001 (device record, adapter, IP Address record)"
+      },
+      {
+       "title": "Decision",
+       "detail": "4 member(s), 1 server record(s), 1 machine(s) by name; one machine, one record: the member rule returns it"
+      }
+     ],
+     "path": "twins / 4 members / 1 machine",
+     "ci_name": "ah-1062287-001",
+     "ci_class": "Linux Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "ah-1062287-001.sdi.corp.bankofamerica.com"
+      ],
+      [
+       "DNS domain",
+       "SDI.CORP.BANKOFAMERICA.COM"
+      ],
+      [
+       "IP address",
+       "30.123.135.170"
+      ],
+      [
+       "Serial number",
+       "VMware-42 13 33 b1 97 f0 9e 97-b1 a0 ca 1b 8a 2c fc 7b"
+      ],
+      [
+       "Model",
+       "VMware, Inc. VMware Virtual Platform"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
      "number": "SDI000002418623",
      "host": "ccgw-l7-vip2.sit1.gwimnp.rpg",
      "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002418623",
@@ -1659,89 +4773,77 @@
        "F5 Networks Big-IP"
       ],
       [
+       "Tracking",
+       "IP"
+      ],
+      [
        "Last evaluated",
-       "2026-09-17 02:11:52"
+       "2026-09-20 03:12:39"
       ]
      ],
      "walk": [
-      "VIP sign: OS \"F5 Networks Big-IP\" or a VIP marker in \"ccgw-l7-vip2.sit1.gwimnp.rpg\"",
-      "Virtual server /Common/ihscore-sit1-ccgw-6011-vip on 10.143.52.217, pool /Common/ihscore-sit1-ccgw-443-pool, 1 member",
-      "Every member (10.143.72.200) leads to the same machine",
-      "Server returned: lva71pwbolcc01v [Linux Server]"
+      {
+       "title": "VIP sign",
+       "detail": "OS has \"f5\", OS has \"big-ip\", label segment \"vip2\""
+      },
+      {
+       "title": "Clues fqdn, name, name",
+       "detail": "no service record; next clue"
+      },
+      {
+       "title": "Clue 4: ip_address = \"10.143.52.217\"",
+       "detail": "1 service record: /Common/ihscore-sit1-ccgw-6011-vip on 10.143.52.217 (svedpz1rp4lb10)"
+      },
+      {
+       "title": "Pools",
+       "detail": "1: /Common/ihscore-sit1-ccgw-443-pool (pool field)"
+      },
+      {
+       "title": "Members",
+       "detail": "1: /Common/ihscore-sit1-lva71pwbolcc01v-node 10.143.72.200 -> lva71pwbolcc01v (device record, adapter, IP Address record)"
+      },
+      {
+       "title": "Decision",
+       "detail": "1 member(s), 1 server record(s), 1 machine(s) by name; one machine, one record: the member rule returns it"
+      }
      ],
+     "path": "one service / 1 member / 1 machine",
      "ci_name": "lva71pwbolcc01v",
      "ci_class": "Linux Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=ddcdddf02b462294d50dffbdbe91bf9b",
-     "ci_facts": []
-    },
-    {
-     "number": "SDI000002411394",
-     "host": "ccgw-l7-vip2.dev.gwimnp.rpg",
-     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002411394",
-     "item_facts": [
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_facts": [
       [
-       "DNS name",
-       "ccgw-l7-vip2.dev.gwimnp.rpg"
+       "FQDN",
+       "lva71pwbolcc01v.sdi.ssc3.ext3.bankofamerica3.com"
+      ],
+      [
+       "DNS domain",
+       "SDI.SSC3.EXT3.BANKOFAMERICA3.COM"
       ],
       [
        "IP address",
-       "10.143.52.163"
+       "10.143.72.200"
       ],
       [
-       "Operating system",
-       "F5 Networks Big-IP"
+       "Serial number",
+       "VMware-42 27 ff a8 e9 3d 0e ce-24 f6 1e f2 a0 ea 46 11"
       ],
       [
-       "Last evaluated",
-       "2026-09-17 02:08:45"
+       "Model",
+       "VMware, Inc. VMware Virtual Platform"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
       ]
-     ],
-     "walk": [
-      "VIP sign: OS \"F5 Networks Big-IP\" or a VIP marker in \"ccgw-l7-vip2.dev.gwimnp.rpg\"",
-      "Virtual server /Common/ihscore-dev-ccgw-6011-vip on 10.143.52.163, pool /Common/ihscore-dev-ccgw-443-pool, 1 member",
-      "Every member (10.143.72.198) leads to the same machine",
-      "Server returned: lva68pwbolcc01v [Linux Server]"
-     ],
-     "ci_name": "lva68pwbolcc01v",
-     "ci_class": "Linux Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=d78e25b82b8e2294d50dffbdbe91bf32",
-     "ci_facts": []
-    },
-    {
-     "number": "SDI000002375027",
-     "host": "multi-benefits-l7-vip2.dev.gwimnp.rpg",
-     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002375027",
-     "item_facts": [
-      [
-       "DNS name",
-       "multi-benefits-l7-vip2.dev.gwimnp.rpg"
-      ],
-      [
-       "IP address",
-       "10.143.52.154"
-      ],
-      [
-       "Operating system",
-       "F5 Networks Big-IP"
-      ],
-      [
-       "Last evaluated",
-       "2026-09-17 01:55:40"
-      ]
-     ],
-     "walk": [
-      "VIP sign: OS \"F5 Networks Big-IP\" or a VIP marker in \"multi-benefits-l7-vip2.dev.gwimnp.rpg\"",
-      "Virtual server /Common/ihscore-dev-multilang_benefits-6011-vip on 10.143.52.154, pool /Common/ihscore-dev-de_benefits-444-pool, 1 member",
-      "Every member (10.143.72.171) leads to the same machine",
-      "Server returned: wva68pwbolts51v [Windows Server]"
-     ],
-     "ci_name": "wva68pwbolts51v",
-     "ci_class": "Windows Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=813bd5383b0e6254a052e71864e45a35",
-     "ci_facts": []
+     ]
     }
    ],
-   "matched": null
+   "matched": 7
   },
   {
    "order": "460",
@@ -1829,133 +4931,208 @@
    "sibling": "Never reads the pool, its members or any server; returns the cmdb_ci_lb_service record itself. Declines when two records of one virtual server survive narrowing (both devices of a pair live) where the member rule keeps both and walks their pools. Its header calls the check 'evidence' and invites extending the two lists; the member rule calls it 'sign' and asks that both lists stay identical in the two rules.",
    "examples": [
     {
-     "number": "SDI000003028240",
-     "host": "171.159.246.128",
-     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003028240",
+     "number": "SDI000003055580",
+     "host": "olmerrillweb-review1-l7-vip1.gwimnp.rpg",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003055580",
      "item_facts": [
       [
        "DNS name",
-       "(none)"
+       "olmerrillweb-review1-l7-vip1.gwimnp.rpg"
       ],
       [
        "IP address",
-       "171.159.246.128"
+       "10.143.52.113"
       ],
       [
        "Operating system",
        "F5 Networks Big-IP"
       ],
       [
+       "Tracking",
+       "IP"
+      ],
+      [
        "Last evaluated",
-       "2026-09-15 22:22:39"
+       "2026-09-20 11:16:34"
       ]
      ],
      "walk": [
-      "VIP sign: OS \"F5 Networks Big-IP\" or a VIP marker in \"\"",
-      "Load Balancer Service record looked up on fqdn, then name, then the address 171.159.246.128; the pool is not read",
-      "One live record for that virtual server: /Common/ait71454-pt1-mlonefeeui-443-vip",
-      "The virtual server record stands for the host"
+      {
+       "title": "VIP sign",
+       "detail": "OS has \"f5\", OS has \"big-ip\", label segment \"vip1\""
+      },
+      {
+       "title": "Clues fqdn, name, name",
+       "detail": "no service record; next clue"
+      },
+      {
+       "title": "Clue 4: ip_address = \"10.143.52.113\"",
+       "detail": "1 service record: /Common/ait74300-review1-origin_mymerrill_cdn-6001-vip on 10.143.52.113 (svedpz1rp2lb10)"
+      },
+      {
+       "title": "Decision",
+       "detail": "one live virtual server record left, attached (the pool is not read)"
+      }
      ],
-     "ci_name": "/Common/ait71454-pt1-mlonefeeui-443-vip",
+     "path": "ip_address / one record",
+     "ci_name": "/Common/ait74300-review1-origin_mymerrill_cdn-6001-vip",
      "ci_class": "Load Balancer Service",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=a029dc43931183d03854f05ea903d6b7",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=",
      "ci_facts": [
       [
        "IP address",
-       "171.159.246.128"
+       "10.143.52.113"
       ],
       [
        "Load balancer",
-       "sveqbt1rp1lb02b"
+       "svedpz1rp2lb10"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Non-Operational"
       ]
      ]
     },
     {
-     "number": "SDI000003069763",
-     "host": "prsapp-va-vip.pt1.gwimnp.rpg",
-     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003069763",
+     "number": "SDI000003036490",
+     "host": "olmerrillweb-preview1-l7-vip1.gwimnp.rpg",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003036490",
      "item_facts": [
       [
        "DNS name",
-       "prsapp-va-vip.pt1.gwimnp.rpg"
+       "olmerrillweb-preview1-l7-vip1.gwimnp.rpg"
       ],
       [
        "IP address",
-       "171.159.246.4"
+       "10.143.52.108"
       ],
       [
        "Operating system",
        "F5 Networks Big-IP"
       ],
       [
+       "Tracking",
+       "IP"
+      ],
+      [
        "Last evaluated",
-       "2026-09-15 21:48:23"
+       "2026-09-20 11:05:41"
       ]
      ],
      "walk": [
-      "VIP sign: OS \"F5 Networks Big-IP\" or a VIP marker in \"prsapp-va-vip.pt1.gwimnp.rpg\"",
-      "Load Balancer Service record looked up on fqdn, then name, then the address 171.159.246.4; the pool is not read",
-      "One live record for that virtual server: /Common/ait71551-pt1-prsapp-443-vip",
-      "The virtual server record stands for the host"
+      {
+       "title": "VIP sign",
+       "detail": "OS has \"f5\", OS has \"big-ip\", label segment \"vip1\""
+      },
+      {
+       "title": "Clues fqdn, name, name",
+       "detail": "no service record; next clue"
+      },
+      {
+       "title": "Clue 4: ip_address = \"10.143.52.108\"",
+       "detail": "1 service record: /Common/ait74300-preview1-origin_mymerrill_cdn-6001-vip on 10.143.52.108 (svedpz1rp2lb10)"
+      },
+      {
+       "title": "Decision",
+       "detail": "one live virtual server record left, attached (the pool is not read)"
+      }
      ],
-     "ci_name": "/Common/ait71551-pt1-prsapp-443-vip",
+     "path": "ip_address / one record",
+     "ci_name": "/Common/ait74300-preview1-origin_mymerrill_cdn-6001-vip",
      "ci_class": "Load Balancer Service",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=917ce0282f9e87103819983fafa4e37e",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=",
      "ci_facts": [
       [
        "IP address",
-       "171.159.246.4"
+       "10.143.52.108"
       ],
       [
        "Load balancer",
-       "sveqbt1rp1lb02b"
+       "svedpz1rp2lb10"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
       ]
      ]
     },
     {
-     "number": "SDI000003069406",
-     "host": "lki-nao-flash-svc-tt-mw.ecnp.bankofamerica.com",
-     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003069406",
+     "number": "SDI000003008717",
+     "host": "pbui-va2-vip.gwim.rpg",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003008717",
      "item_facts": [
       [
        "DNS name",
-       "lki-nao-flash-svc-tt-mw.ecnp.bankofamerica.com"
+       "pbui-va2-vip.gwim.rpg"
       ],
       [
        "IP address",
-       "171.176.215.217"
+       "158.171.199.147"
       ],
       [
        "Operating system",
        "F5 Networks Big-IP"
       ],
       [
+       "Tracking",
+       "IP"
+      ],
+      [
        "Last evaluated",
-       "2026-09-15 21:48:46"
+       "2026-09-20 10:48:18"
       ]
      ],
      "walk": [
-      "VIP sign: OS \"F5 Networks Big-IP\" or a VIP marker in \"lki-nao-flash-svc-tt-mw.ecnp.bankofamerica.com\"",
-      "Load Balancer Service record looked up on fqdn, then name, then the address 171.176.215.217; the pool is not read",
-      "One live record for that virtual server: /Common/LKI-NAO-FLASH-SVC-TT-443",
-      "The virtual server record stands for the host"
+      {
+       "title": "VIP sign",
+       "detail": "OS has \"f5\", OS has \"big-ip\", label segment \"vip\""
+      },
+      {
+       "title": "Clues fqdn, name, name",
+       "detail": "no service record; next clue"
+      },
+      {
+       "title": "Clue 4: ip_address = \"158.171.199.147\"",
+       "detail": "1 service record: /Common/ait32589-rvcpbt2-pbui-443-vip on 158.171.199.147 (svedbt1gwmlb01a)"
+      },
+      {
+       "title": "Decision",
+       "detail": "one live virtual server record left, attached (the pool is not read)"
+      }
      ],
-     "ci_name": "/Common/LKI-NAO-FLASH-SVC-TT-443",
+     "path": "ip_address / one record",
+     "ci_name": "/Common/ait32589-rvcpbt2-pbui-443-vip",
      "ci_class": "Load Balancer Service",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=31ccec6c2f56871006a8a93fafa4e397",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=",
      "ci_facts": [
       [
        "IP address",
-       "171.176.215.217"
+       "158.171.199.147"
       ],
       [
        "Load balancer",
-       "rtxqbt1conlb03a"
+       "svedbt1gwmlb01a"
+      ],
+      [
+       "Install status",
+       "Absent"
+      ],
+      [
+       "Operational status",
+       "Operational"
       ]
      ]
     }
    ],
-   "matched": null
+   "matched": 634
   },
   {
    "order": "700",
@@ -2042,8 +5219,218 @@
     }
    ],
    "sibling": "The only address rule that filters by class before searching: the query runs on the classFor table itself, so it relies on the class restriction instead of an agrees() post-check or an isLoadBalancer() refusal (neither helper exists in this script). It declines outright when the OS gives no class, where the other three carry on with no class preference.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000002111413",
+     "host": "a-vsdnd085i0018.sdi.corp.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002111413",
+     "item_facts": [
+      [
+       "DNS name",
+       "a-vsdnd085i0018.sdi.corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.129.237.14"
+      ],
+      [
+       "Operating system",
+       "VMware ESXi 8.0.3 build 25205845"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:59:59"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Address",
+       "detail": "\"30.129.237.14\"; OS \"VMware ESXi 8.0.3 build 25205845\" gives the class esx_server"
+      },
+      {
+       "title": "Records carrying the address",
+       "detail": "1 record: a-vsdnd085i0018 [esx_server] ip 30.129.237.14 -> exactly one, accepted; name agrees with the scanned label \"a-vsdnd085i0018\""
+      }
+     ],
+     "path": "esx_server / 1 rows",
+     "ci_name": "a-vsdnd085i0018",
+     "ci_class": "ESX Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_esx_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "a-vsdnd085i0018.sdi.corp.bankofamerica.com"
+      ],
+      [
+       "DNS domain",
+       "sdi.corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.129.237.14"
+      ],
+      [
+       "Serial number",
+       "84CD673"
+      ],
+      [
+       "Model",
+       "Dell Inc. POWEREDGE R640"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002931100",
+     "host": "10.131.81.11",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002931100",
+     "item_facts": [
+      [
+       "DNS name",
+       "(none)"
+      ],
+      [
+       "IP address",
+       "10.131.81.11"
+      ],
+      [
+       "Operating system",
+       "HP LaserJet Printer"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:57:28"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Address",
+       "detail": "\"10.131.81.11\"; OS \"HP LaserJet Printer\" gives the class printer"
+      },
+      {
+       "title": "Records carrying the address",
+       "detail": "1 record: txsanwz01p04 [printer] ip 10.131.81.11 -> exactly one, accepted; name agrees with the scanned label \"\""
+      }
+     ],
+     "path": "printer / 1 rows",
+     "ci_name": "txsanwz01p04",
+     "ci_class": "Printer",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.131.81.11"
+      ],
+      [
+       "Serial number",
+       "VNCCS7K0Y5"
+      ],
+      [
+       "Model",
+       "Hewlett-Packard HP LaserJet E50145"
+      ],
+      [
+       "Install status",
+       "In Stock"
+      ],
+      [
+       "Operational status",
+       "Ready"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002935135",
+     "host": "gbvmsqssiu04",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002935135",
+     "item_facts": [
+      [
+       "DNS name",
+       "gbvmsqssiu04"
+      ],
+      [
+       "IP address",
+       "30.196.237.48"
+      ],
+      [
+       "Operating system",
+       "Windows Server 2022 Standard 64 bit Edition Version 21H2"
+      ],
+      [
+       "NetBIOS name",
+       "GBVMSQSSIU04"
+      ],
+      [
+       "Tracking",
+       "AGENT"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:54:13"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Address",
+       "detail": "\"30.196.237.48\"; OS \"Windows Server 2022 Standard 64 bit Edition Version 21H2\" gives the class win_server"
+      },
+      {
+       "title": "Records carrying the address",
+       "detail": "1 record: gbvmsqssiu04 [win_server] ip 30.196.237.48 -> exactly one, accepted; name agrees with the scanned label \"gbvmsqssiu04\""
+      }
+     ],
+     "path": "win_server / 1 rows",
+     "ci_name": "gbvmsqssiu04",
+     "ci_class": "Windows Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "gbvmsqssiu04.corp.bankofamerica.com"
+      ],
+      [
+       "DNS domain",
+       "emea.sdi.corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.196.237.48"
+      ],
+      [
+       "Serial number",
+       "VMware-42 07 db d6 46 43 40 93-5e 0c 51 0f 20 bb 94 b7"
+      ],
+      [
+       "Model",
+       "VMware, Inc. VMware Virtual Platform"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 15674
   },
   {
    "order": "705",
@@ -2150,8 +5537,202 @@
     }
    ],
    "sibling": "Widens the search from the OS-implied class to the whole cmdb_ci_hardware tree and turns the class from a filter into a post-check (agrees(), parents and sub-classes allowed), adding the cmdb_ci_lb refusal. It still reads ip_address on the CI record itself, unlike the adapter and layered rules.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000002958949",
+     "host": "10.16.37.6",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002958949",
+     "item_facts": [
+      [
+       "DNS name",
+       "(none)"
+      ],
+      [
+       "IP address",
+       "10.16.37.6"
+      ],
+      [
+       "Operating system",
+       "UNIX"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:49:19"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Address",
+       "detail": "\"10.16.37.6\"; the whole hardware tree, the OS class kept as a preference"
+      },
+      {
+       "title": "Records carrying the address",
+       "detail": "1 record: sgsgsinhf04idf0003 [ip_switch] ip 10.16.37.6 -> exactly one, accepted; not a load balancer device; class agrees with the OS; name agrees with the scanned label \"\""
+      }
+     ],
+     "path": "ip_switch / 1 rows",
+     "ci_name": "sgsgsinhf04idf0003",
+     "ci_class": "IP Switch",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_switch.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.16.37.6"
+      ],
+      [
+       "Serial number",
+       "FOX2904PHRC"
+      ],
+      [
+       "MAC address",
+       "C88234705D80"
+      ],
+      [
+       "Model",
+       "Cisco Systems, Inc. Catalyst 9400 Series Switches 9407R"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002893787",
+     "host": "171.147.250.213",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002893787",
+     "item_facts": [
+      [
+       "DNS name",
+       "(none)"
+      ],
+      [
+       "IP address",
+       "171.147.250.213"
+      ],
+      [
+       "Operating system",
+       "(not reported)"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:45:49"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Address",
+       "detail": "\"171.147.250.213\"; the whole hardware tree, the OS class kept as a preference"
+      },
+      {
+       "title": "Records carrying the address",
+       "detail": "1 record: tidsxxmumdcp2 [ids_network] ip 171.147.250.213 -> exactly one, accepted; not a load balancer device; class agrees with the OS; name agrees with the scanned label \"\""
+      }
+     ],
+     "path": "ids_network / 1 rows",
+     "ci_name": "tidsxxmumdcp2",
+     "ci_class": "Intrusion Detection System",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ids_network.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "171.147.250.213"
+      ],
+      [
+       "Serial number",
+       "US32A1Y00M"
+      ],
+      [
+       "Model",
+       "Trend Micro TippingPoint TPS-Series 8400TX"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002907396",
+     "host": "crpflmiaups58.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002907396",
+     "item_facts": [
+      [
+       "DNS name",
+       "crpflmiaups58.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "10.77.57.21"
+      ],
+      [
+       "Operating system",
+       "(not reported)"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:27:51"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Address",
+       "detail": "\"10.77.57.21\"; the whole hardware tree, the OS class kept as a preference"
+      },
+      {
+       "title": "Records carrying the address",
+       "detail": "1 record: CRPFLMIAUPS58 [ups] ip 10.77.57.21 -> exactly one, accepted; not a load balancer device; class agrees with the OS; name agrees with the scanned label \"crpflmiaups58\""
+      }
+     ],
+     "path": "ups / 1 rows",
+     "ci_name": "CRPFLMIAUPS58",
+     "ci_class": "UPS",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ups.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.77.57.21"
+      ],
+      [
+       "Serial number",
+       "N12244110057"
+      ],
+      [
+       "Model",
+       "Schneider Electric Smart-UPS Smart-UPS 2200VA"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 20422
   },
   {
    "order": "730",
@@ -2254,8 +5835,234 @@
     }
    ],
    "sibling": "First rule to follow discovery records rather than the CI's own ip_address: cmdb_ci_network_adapter -> cmdb_ci. 'Exactly one' becomes a distinct-owner count over all rows, and a class disagreement skips that row instead of ending the rule, so a stale adapter owned by a different kind of machine cannot block the match.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000003647776",
+     "host": "a-vsg1d000i0442-nfs.apac.sdi.corp.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003647776",
+     "item_facts": [
+      [
+       "DNS name",
+       "a-vsg1d000i0442-nfs.apac.sdi.corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.184.159.138"
+      ],
+      [
+       "Operating system",
+       "VMware ESX Server"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 05:00:24"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Address",
+       "detail": "\"30.184.159.138\"; OS \"VMware ESX Server\" gives the class esx_server (a preference for class agreement)"
+      },
+      {
+       "title": "Adapter records on the address",
+       "detail": "1: adapter vmk3 -> a-vsg1d000i0442 [esx_server]"
+      },
+      {
+       "title": "Decision",
+       "detail": "1 distinct owning CI; not a load balancer device; name agrees with \"a-vsg1d000i0442-nfs\""
+      }
+     ],
+     "path": "1 records / 1 owners",
+     "ci_name": "a-vsg1d000i0442",
+     "ci_class": "ESX Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_esx_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "a-vsg1d000i0442.apac.sdi.corp.bankofamerica.com"
+      ],
+      [
+       "DNS domain",
+       "apac.sdi.corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.188.125.72"
+      ],
+      [
+       "Serial number",
+       "65M9NX2"
+      ],
+      [
+       "Model",
+       "Dell Inc. POWEREDGE R640"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002236735",
+     "host": "30.140.53.8",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002236735",
+     "item_facts": [
+      [
+       "DNS name",
+       "(none)"
+      ],
+      [
+       "IP address",
+       "30.140.53.8"
+      ],
+      [
+       "Operating system",
+       "VMware ESX Server"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:19:38"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Address",
+       "detail": "\"30.140.53.8\"; OS \"VMware ESX Server\" gives the class esx_server (a preference for class agreement)"
+      },
+      {
+       "title": "Adapter records on the address",
+       "detail": "2: adapter vmk1 -> vltwab01xsdi030 [esx_server] ; adapter vmk1 -> vltwab01xsdi030 [esx_server]"
+      },
+      {
+       "title": "Decision",
+       "detail": "1 distinct owning CI; not a load balancer device; name agrees with \"\""
+      }
+     ],
+     "path": "2 records / 1 owners",
+     "ci_name": "vltwab01xsdi030",
+     "ci_class": "ESX Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_esx_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "vltwab01xsdi030.sdi.corp.bankofamerica.com"
+      ],
+      [
+       "DNS domain",
+       "sdi.corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.140.38.51"
+      ],
+      [
+       "Serial number",
+       "10NFJV2"
+      ],
+      [
+       "Model",
+       "Dell Inc. POWEREDGE R640"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000003353115",
+     "host": "30.161.25.150",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003353115",
+     "item_facts": [
+      [
+       "DNS name",
+       "(none)"
+      ],
+      [
+       "IP address",
+       "30.161.25.150"
+      ],
+      [
+       "Operating system",
+       "VMware ESX Server"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:58:58"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Address",
+       "detail": "\"30.161.25.150\"; OS \"VMware ESX Server\" gives the class esx_server (a preference for class agreement)"
+      },
+      {
+       "title": "Adapter records on the address",
+       "detail": "1: adapter vmk1 -> a-vrdnd006i0100 [esx_server]"
+      },
+      {
+       "title": "Decision",
+       "detail": "1 distinct owning CI; not a load balancer device; name agrees with \"\""
+      }
+     ],
+     "path": "1 records / 1 owners",
+     "ci_name": "a-vrdnd006i0100",
+     "ci_class": "ESX Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_esx_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "a-vrdnd006i0100.sdi.corp.bankofamerica.com"
+      ],
+      [
+       "DNS domain",
+       "sdi.corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.161.24.69"
+      ],
+      [
+       "Serial number",
+       "5H49RN3"
+      ],
+      [
+       "Model",
+       "Dell Inc. POWEREDGE R640"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 46195
   },
   {
    "order": "740",
@@ -2359,8 +6166,214 @@
     }
    ],
    "sibling": "Same distinct-owner logic as USEM IP Adapter Match, one link deeper: cmdb_ci_ip_address.ip_address -> nic -> cmdb_ci, with dot-walked queries (nic.cmdb_ci, nic.cmdb_ci.sys_class_name) and an isValid() guard because the IP Address table may not exist. It is the last of the four address rules.",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000002965591",
+     "host": "10.16.37.11",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002965591",
+     "item_facts": [
+      [
+       "DNS name",
+       "(none)"
+      ],
+      [
+       "IP address",
+       "10.16.37.11"
+      ],
+      [
+       "Operating system",
+       "UNIX"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:53:02"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Address",
+       "detail": "\"10.16.37.11\"; OS \"UNIX\" gives no class (a preference for class agreement)"
+      },
+      {
+       "title": "IP Address records on the address",
+       "detail": "1: IP Address record -> adapter Netwtw10. -> k30894a794e38 [computer]"
+      },
+      {
+       "title": "Decision",
+       "detail": "1 distinct owning CI; not a load balancer device; name agrees with \"\""
+      }
+     ],
+     "path": "1 records / 1 owners",
+     "ci_name": "k30894a794e38",
+     "ci_class": "Computer",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_computer.do?sys_id=",
+     "ci_facts": [
+      [
+       "DNS domain",
+       "corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "192.168.1.176"
+      ],
+      [
+       "Serial number",
+       "5CG3112JMQ"
+      ],
+      [
+       "Model",
+       "Hewlett Packard ELITEBOOK 830 G8 ENT 512"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002968810",
+     "host": "172.16.142.249",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002968810",
+     "item_facts": [
+      [
+       "DNS name",
+       "(none)"
+      ],
+      [
+       "IP address",
+       "172.16.142.249"
+      ],
+      [
+       "Operating system",
+       "Ubuntu/Linux"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:57:20"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Address",
+       "detail": "\"172.16.142.249\"; OS \"Ubuntu/Linux\" gives the class linux_server (a preference for class agreement)"
+      },
+      {
+       "title": "IP Address records on the address",
+       "detail": "1: IP Address record -> adapter 0a:09:64:f2:2b:09 -> ip-172-16-142-249 [linux_server]"
+      },
+      {
+       "title": "Decision",
+       "detail": "1 distinct owning CI; not a load balancer device; name agrees with \"\""
+      }
+     ],
+     "path": "1 records / 1 owners",
+     "ci_name": "ip-172-16-142-249",
+     "ci_class": "Linux Server",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_facts": [
+      [
+       "FQDN",
+       "ip-172-16-142-249.us-west-2.compute.internal"
+      ],
+      [
+       "DNS domain",
+       "us-west-2.compute.internal"
+      ],
+      [
+       "Install status",
+       "Retired"
+      ],
+      [
+       "Operational status",
+       "Retired"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002929749",
+     "host": "30.240.252.187",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002929749",
+     "item_facts": [
+      [
+       "DNS name",
+       "(none)"
+      ],
+      [
+       "IP address",
+       "30.240.252.187"
+      ],
+      [
+       "Operating system",
+       "Crestron Device"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 04:37:46"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Address",
+       "detail": "\"30.240.252.187\"; OS \"Crestron Device\" gives no class (a preference for class agreement)"
+      },
+      {
+       "title": "IP Address records on the address",
+       "detail": "1: IP Address record -> adapter Netwtw10. -> wz5741wl51 [computer]"
+      },
+      {
+       "title": "Decision",
+       "detail": "1 distinct owning CI; not a load balancer device; name agrees with \"\""
+      }
+     ],
+     "path": "1 records / 1 owners",
+     "ci_name": "wz5741wl51",
+     "ci_class": "Computer",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_computer.do?sys_id=",
+     "ci_facts": [
+      [
+       "DNS domain",
+       "corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.240.252.184"
+      ],
+      [
+       "Serial number",
+       "5CG20308YX"
+      ],
+      [
+       "Model",
+       "Hewlett Packard ELITEBOOK 830 G8 GWIM"
+      ],
+      [
+       "Install status",
+       "Retired"
+      ],
+      [
+       "Operational status",
+       "Retired"
+      ]
+     ]
+    }
+   ],
+   "matched": 7967
   },
   {
    "order": "850",
@@ -2428,9 +6441,175 @@
     }
    ],
    "sibling": "Same script as USEM FQDN Name Hardware Match with cmdb_ci in place of cmdb_ci_hardware: the only one of the four that can return a non-hardware CI. Like that sibling it ignores OS and IP entirely and decides with next()/hasNext().",
-   "examples": [],
-   "matched": null
+   "examples": [
+    {
+     "number": "SDI000003577967",
+     "host": "lrchac14xsdi015.sdi.corp.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003577967",
+     "item_facts": [
+      [
+       "DNS name",
+       "lrchac14xsdi015.sdi.corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.38.244.24"
+      ],
+      [
+       "Operating system",
+       "Red Hat Enterprise Linux CoreOS 4.20"
+      ],
+      [
+       "Tracking",
+       "AGENT"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-20 21:49:24"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Name",
+       "detail": "\"lrchac14xsdi015.sdi.corp.bankofamerica.com\" searched on the name field of every CI class"
+      },
+      {
+       "title": "Records named with the whole fqdn",
+       "detail": "1 record: lrchac14xsdi015.sdi.corp.bankofamerica.com [kubernetes_node] ip 30.38.244.24 -> exactly one, accepted"
+      }
+     ],
+     "path": "kubernetes_node / 1 rows",
+     "ci_name": "lrchac14xsdi015.sdi.corp.bankofamerica.com",
+     "ci_class": "Kubernetes Node",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_kubernetes_node.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "30.38.244.24"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000003651522",
+     "host": "lrchac14xsdi003.sdi.corp.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003651522",
+     "item_facts": [
+      [
+       "DNS name",
+       "lrchac14xsdi003.sdi.corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.38.244.12"
+      ],
+      [
+       "Operating system",
+       "Red Hat Enterprise Linux CoreOS 4.20"
+      ],
+      [
+       "Tracking",
+       "AGENT"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-20 21:44:41"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Name",
+       "detail": "\"lrchac14xsdi003.sdi.corp.bankofamerica.com\" searched on the name field of every CI class"
+      },
+      {
+       "title": "Records named with the whole fqdn",
+       "detail": "1 record: lrchac14xsdi003.sdi.corp.bankofamerica.com [kubernetes_node] ip 30.38.244.12 -> exactly one, accepted"
+      }
+     ],
+     "path": "kubernetes_node / 1 rows",
+     "ci_name": "lrchac14xsdi003.sdi.corp.bankofamerica.com",
+     "ci_class": "Kubernetes Node",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_kubernetes_node.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "30.38.244.12"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000003651450",
+     "host": "lrchac15xsdi004.sdi.corp.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003651450",
+     "item_facts": [
+      [
+       "DNS name",
+       "lrchac15xsdi004.sdi.corp.bankofamerica.com"
+      ],
+      [
+       "IP address",
+       "30.38.242.13"
+      ],
+      [
+       "Operating system",
+       "Red Hat Enterprise Linux CoreOS 4.20"
+      ],
+      [
+       "Tracking",
+       "AGENT"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-20 21:43:16"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Name",
+       "detail": "\"lrchac15xsdi004.sdi.corp.bankofamerica.com\" searched on the name field of every CI class"
+      },
+      {
+       "title": "Records named with the whole fqdn",
+       "detail": "1 record: lrchac15xsdi004.sdi.corp.bankofamerica.com [kubernetes_node] ip 30.38.242.13 -> exactly one, accepted"
+      }
+     ],
+     "path": "kubernetes_node / 1 rows",
+     "ci_name": "lrchac15xsdi004.sdi.corp.bankofamerica.com",
+     "ci_class": "Kubernetes Node",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_kubernetes_node.do?sys_id=",
+     "ci_facts": [
+      [
+       "IP address",
+       "30.38.242.13"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    }
+   ],
+   "matched": 2499
   }
  ],
- "example_source": "client exports of 17 Sep (load balancer rules only)"
+ "example_source": "demo_examples_output.txt"
 }

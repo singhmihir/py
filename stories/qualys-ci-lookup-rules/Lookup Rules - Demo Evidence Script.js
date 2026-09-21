@@ -13,6 +13,9 @@ var POOL = 100;          // newest matched items replayed per rule when choosing
 var LB_POOL = 40;        // the same for the two load balancer rules, whose walk costs more
 var DAYS = 0;            // only items updated in the last DAYS days; 0 = any age
 var ROWS = 6;            // records listed per search step
+var ONLY = [];           // rule orders to run, e.g. ['450', '705', '740']; empty = every rule
+var PREFER_NAMED = true; // choose items that carry a DNS name before items that do not
+var REQUIRE_ROWS = true; // choose items whose trace found at least one record over items where it found none
 
 var started = new Date().getTime();
 var ignore = gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
@@ -398,6 +401,7 @@ for (var r = 0; r < rules.length && hasRuleField; r++) {
     var rule = rules[r], kind = rule.name.replace(/^(USEM|BOFA)\s+/, ''), custom = /^(USEM|BOFA)\s/.test(rule.name);
     var count = new GlideAggregate('sn_sec_cmn_src_ci'); count.addQuery('ci_lookup_rule', rule.id); count.addQuery('state', 'matched'); count.addAggregate('COUNT'); count.query();
     var matched = count.next() ? parseInt(count.getAggregate('COUNT')) : 0;
+    if (ONLY.length && ONLY.indexOf(rule.order) == -1) continue;
     out.push('== ' + rule.order + ' ' + rule.name + ' (' + rule.field + '): ' + matched + ' matched items on this instance' + (custom ? '' : ' (platform rule, no examples)'));
     if (!custom) continue;
     var di = new GlideRecord('sn_sec_cmn_src_ci');
@@ -415,10 +419,14 @@ for (var r = 0; r < rules.length && hasRuleField; r++) {
             item: { number: '' + di.getValue('number'), sys_id: di.getUniqueValue(), dns: '' + (p.DNS || ''), ip: '' + (p.IP || ''), os: '' + (p.OS || ''), netbios: '' + (p.NETBIOS || ''), serial: '' + (p.SERIAL_NUMBER || ''), tracking: '' + (p.TRACKING_METHOD || ''), qualys_id: '' + (p.ID || ''), updated: '' + di.getValue('sys_updated_on') },
             ci: facts, verdict: { ci: verdict, same_as_today: verdict == ciId, ci_label: verdict && verdict.indexOf('error') != 0 ? (ciFacts(verdict) || { name: '?' }).name : '' } };
         var key = t.shape + (verdict == ciId ? '' : ' / differs today');
-        if (verdict == ciId && facts.live && !shapes[key]) { shapes[key] = true; picks.push(ex); } else spare.push(ex);
+        var weak = (PREFER_NAMED && !ex.item.dns) || (REQUIRE_ROWS && t.shape.indexOf('none') == 0);
+        if (verdict == ciId && facts.live && !weak && !shapes[key]) { shapes[key] = true; picks.push(ex); } else spare.push(ex);
         if (picks.length >= PER_RULE) break;
     }
-    spare.sort(function(a, b) { return (b.verdict.same_as_today ? 1 : 0) - (a.verdict.same_as_today ? 1 : 0); });
+    spare.sort(function(a, b) {
+        function score(x) { return (x.verdict.same_as_today ? 4 : 0) + (x.item.dns ? 2 : 0) + (x.shape.indexOf('none') == 0 ? 0 : 1); }
+        return score(b) - score(a);
+    });
     while (picks.length < PER_RULE && spare.length) picks.push(spare.shift());
     for (var i = 0; i < picks.length; i++) {
         var x = picks[i];
