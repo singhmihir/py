@@ -211,10 +211,55 @@ def item_facts(item):
     return facts
 
 
+def condense(steps):
+    """Shorter walk for the slide: the clues that found nothing become one line, a member's several paths to
+    the same server become one mention, long record lists are cut to three."""
+    out, misses = [], []
+    for s in steps:
+        title, detail = s['title'], s['detail']
+        if title.startswith('Clue ') and detail.startswith('no service record'):
+            misses.append(title.split(':')[1].strip().split(' = ')[0])
+            continue
+        if misses:
+            out.append(dict(title='Clue%s %s' % ('s' if len(misses) > 1 else '', ', '.join(misses)), detail='no service record; next clue'))
+            misses = []
+        if title == 'Members':
+            parts = detail.split(': ', 1)
+            if len(parts) == 2:
+                members = []
+                for m in parts[1].split(' ; '):
+                    if ' -> ' in m:
+                        left, right = m.split(' -> ', 1)
+                        hits = [h.strip() for h in right.split(', ')]
+                        names, paths = [], []
+                        for h in hits:
+                            if ' via ' in h:
+                                n, p = h.split(' via ', 1)
+                                if n not in names: names.append(n)
+                                if p not in paths: paths.append(p)
+                        right = ', '.join(names) + (' (' + ', '.join(paths) + ')' if paths else '') if names else right
+                        members.append(left + ' -> ' + right)
+                    else:
+                        members.append(m)
+                detail = parts[0] + ': ' + ' ; '.join(members[:4]) + (' ; ...' if len(members) > 4 else '')
+        if ' ; ' in detail and title.startswith(('Clue', 'Records', 'Pools', 'Adapter', 'IP Address', 'DNS Name')):
+            head, sep, tail = detail.partition(': ')
+            if sep:
+                items = tail.split(' ; ')
+                if len(items) > 3:
+                    detail = head + ': ' + ' ; '.join(items[:3]) + ' ; ...'
+        out.append(dict(title=title, detail=detail))
+    if misses:
+        out.append(dict(title='Clue%s %s' % ('s' if len(misses) > 1 else '', ', '.join(misses)), detail='no service record'))
+    return out
+
+
 def example(order, item, ci, extra):
     steps = extra.get('steps')
     if steps:
-        walk_lines = [dict(title=s['title'], detail=s['detail']) for s in steps]
+        walk_lines = [dict(title=s['title'], detail=s['detail']) for s in condense(steps)]
+        if order == '450' and str(extra.get('shape', '')).startswith('none'):
+            walk_lines.append(dict(title='Why the item is matched anyway', detail='On the development instance this rule carries a longer script that also cuts interface names down to the device name (the walk of Network Interface Name Match); this item resolved through that extension. The delivered rule searches the whole fqdn on the name field, as the steps above show.'))
         verdict = extra.get('verdict') or {}
         if verdict and not verdict.get('same_as_today', True):
             walk_lines.append(dict(title='Replay today', detail='the rule now returns ' + (verdict.get('ci_label') or 'nothing') + '; the item still holds the CI matched earlier'))
@@ -282,7 +327,12 @@ def from_lb_exports():
 examples, counts = ({}, {})
 if os.path.exists(OUTPUT):
     examples, counts = from_script_output(OUTPUT)
-    source = 'demo_examples_output.txt'
+    source = os.path.basename(OUTPUT)
+    OVERRIDE = os.path.join(HERE, 'demo_examples_override.txt')   # a targeted re-run: its rules replace the same rules of the main output
+    if os.path.exists(OVERRIDE):
+        more, more_counts = from_script_output(OVERRIDE)
+        examples.update(more); counts.update(more_counts)
+        source += ' + demo_examples_override.txt (' + ', '.join(sorted(more)) + ')'
 else:
     examples = from_lb_exports()
     source = 'client exports of 17 Sep (load balancer rules only)'
