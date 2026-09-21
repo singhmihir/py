@@ -15,7 +15,7 @@ import json, os, re, pickle, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 STORY = os.path.dirname(HERE)
 BASE_URL = 'https://bofasecopsdev.service-now.com'
-LB_EXPORTS = '/tmp/claude-0/-home-user-py/92674a7d-a733-5fc3-a7aa-42bdf76f593b/scratchpad/inc3/data.pkl'
+LB_EXPORTS = os.environ.get('LB_EXPORTS', '')   # pickle of the 17 Sep load balancer exports (working copy only), the fallback when no script output exists
 OUTPUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, 'demo_examples_output.txt')
 CONTROLLER_SUFFIXES = ['ilo', 'ilom', 'idrac', 'drac', 'ipmi', 'bmc', 'oob', 'mgmt', 'imm', 'cimc', 'rmm', 'con']
 
