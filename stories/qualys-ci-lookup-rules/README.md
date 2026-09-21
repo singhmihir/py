@@ -527,4 +527,15 @@ notes, rerun by hand): every example page against its EX line, all 122 links (th
 builds had left it empty), 304 literal tokens of the rule pages against the delivered scripts, the chain table in short
 form, the matched counts against the run headers, no banned words, and a render of all 86 slides. The example slide
 lists the "Why this rule" clauses above the walk; long load balancer walks get a smaller clause block.
+Layout pass, 21 Sep afternoon (`deck_demo/build_demo_deck.js`; the previous renderer is kept as `build_demo_deck_v1.js`):
+each rule now spreads over three or four pages: "what it looks for" (purpose as bullets, the contract of the script,
+place in the chain with the matched count), "how the script works" (numbered steps in two columns, split over two pages
+when nine steps do not fit), "when it declines" (bullets in two columns plus the hand-over line); the concept content is
+one page per column (four pages); every example page carries the "why this rule" findings as full-width rows above the
+item, the walk and the CI. Colours follow the Bank of America palette (red E31837, blue 012169, dark grey 4D4F53 for
+body text) on a light grey page with white cards. Every text box is sized by measuring its text (`lines()`, `heightOf()`,
+`pick()`, `twoColumns()`: Arial at 0.50 em per glyph, 1.2 line height, the estimate lands about a sixth above what
+LibreOffice renders) because PowerPoint does not shrink text on its own, which is what made the single-page rule slides
+overflow; a card is drawn as tall as its content and the builder prints a warning for every box that had to go below
+9 pt. Checked on a render of all 133 slides.
 Rebuild with `python3 deck_demo/build_demo_data.py && NODE_PATH=<node_modules with pptxgenjs> node deck_demo/build_demo_deck.js`.
