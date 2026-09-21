@@ -510,10 +510,14 @@ and opens every walk with a "Why this rule" step: from the `earlier` findings wh
 item and the CI (no serial, no fqdn on the record, the name differs from the label, the class sits outside the OS class or
 outside the hardware tree, the address sits on an adapter or an IP Address record, the member rule ran first).
 
-State 21 Sep morning: the deck holds 55 examples from the client run of 20 Sep (the first version of the script). Eight
-of its 63 examples failed the dedicated test and are out: the three of rule 450 (matched on bofadev through the longer
-script that rule carries there, no record named with the whole fqdn), two of 700 and one of 705 (the record carries the
-scanned name as fqdn or label, so a name rule should have found it) and two of 740 (CI retired now). Rules 450 (0), 700
-(1), 705 (2) and 740 (1) wait for the re-run of the updated script requested on INC0010003, whose output replaces
-`demo_examples_output.txt` (or goes to the override file) and adds the `earlier` findings to every page.
+State 21 Sep, second run: `demo_examples_output.txt` is the client run of the updated script (51 proper examples, every
+one with the `earlier` findings); `demo_examples_previous.txt` is the first run (20 Sep), whose proper examples top up a
+rule the newer output leaves short. The first version of the dedicated test asked the address rules for a CI name that
+differs from the scanned label, which the address rules refuse by their name agreement, so 700, 705 and 740 came back
+with nothing; the test now takes an item without a DNS name, a hyphenated variant of the label or the exact label when
+the name search is a tie (`TIE_CHECKS` counts per rule). Every whole-fqdn candidate of rule 450 also replayed to nothing
+on bofadev, most likely CIs in a class the rules ignore now (placeholder records named with the fqdn): ignored classes are
+skipped up front and the items set aside are printed with `proper=false` and the reason (`FILL`). A run with
+`ONLY = ['450', '700', '705', '740']` is requested on INC0010003; until then 450 has no page and 700, 705 and 740 keep one
+or two pages from the first run. The example slide shows the "Why this rule" clauses as their own list above the walk.
 Rebuild with `python3 deck_demo/build_demo_data.py && NODE_PATH=<node_modules with pptxgenjs> node deck_demo/build_demo_deck.js`.

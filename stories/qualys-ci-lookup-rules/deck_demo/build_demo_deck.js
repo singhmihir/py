@@ -138,17 +138,34 @@ D.rules.forEach(r => {
     e.addText(x.number, { x: M + 0.25, y: y0 + 0.48, w: cw - 0.5, h: 0.45, fontFace: SANS, fontSize: 19, bold: true, color: INK, isTextBox: true, margin: 0 });
     facts(e, M + 0.25, y0 + 1.05, cw - 0.5, 3.0, x.item_facts, 12.5);
     link(e, M + 0.25, y0 + ch - 0.42, cw - 0.5, 'Open the discovered item', x.item_link);
-    // walk
+    // why this rule, then the walk
     const x2 = M + cw + gap;
     card(e, x2, y0, mw, ch, WHITE);
-    heading(e, x2 + 0.25, y0 + 0.18, mw - 0.5, 'What the rule did');
+    let yw = y0 + 0.18;
+    const why = x.why_lines || [];
+    if (why.length) {
+      heading(e, x2 + 0.25, yw, mw - 0.5, 'Why this rule');
+      const wh = Math.min(x.walk.length > 3 ? 2.35 : 2.9, 0.1 + 0.215 * why.length + 0.08 * why.filter(l => l.length > 95).length);
+      const runs = [];
+      why.forEach((l, i) => {
+        const k = l.indexOf(': ');
+        if (k > 0 && k < 30) { runs.push({ text: l.slice(0, k + 1) + ' ', options: { bullet: { indent: 12 }, bold: true, color: NAVY } }); runs.push({ text: l.slice(k + 2), options: { breakLine: i < why.length - 1, paraSpaceAfter: 2 } }); }
+        else runs.push({ text: l, options: { bullet: { indent: 12 }, breakLine: i < why.length - 1, paraSpaceAfter: 2 } });
+      });
+      e.addText(runs, { x: x2 + 0.25, y: yw + 0.27, w: mw - 0.5, h: wh, fontFace: SANS, fontSize: why.length > 8 ? 9 : 9.5, color: INK, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
+      yw += 0.27 + wh + 0.12;
+      e.addShape(pres.ShapeType.line, { x: x2 + 0.25, y: yw - 0.02, w: mw - 0.5, h: 0, line: { color: LINE, width: 0.75 } });
+      yw += 0.08;
+    }
+    heading(e, x2 + 0.25, yw, mw - 0.5, 'What the rule did');
     const steps = [];
     x.walk.forEach((t, i) => {
       const last = i === x.walk.length - 1;
       if (typeof t === 'string') steps.push({ text: t, options: { bullet: { type: 'number' }, breakLine: !last, paraSpaceAfter: 8 } });
       else { steps.push({ text: t.title + '  ', options: { bullet: { type: 'number' }, bold: true, color: NAVY } }); steps.push({ text: t.detail, options: { breakLine: !last, paraSpaceAfter: 7 } }); }
     });
-    e.addText(steps, { x: x2 + 0.25, y: y0 + 0.52, w: mw - 0.5, h: ch - 0.75, fontFace: SANS, fontSize: x.walk.length > 6 ? 10 : x.walk.length > 4 ? 11 : 12, color: INK, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
+    const sh = y0 + ch - 0.25 - (yw + 0.3);
+    e.addText(steps, { x: x2 + 0.25, y: yw + 0.3, w: mw - 0.5, h: sh, fontFace: SANS, fontSize: why.length ? (x.walk.length > 5 ? 9.5 : 10.5) : (x.walk.length > 6 ? 10 : x.walk.length > 4 ? 11 : 12), color: INK, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
     if (x.path) e.addText([{ text: 'PATH  ', options: { bold: true, color: RED } }, { text: x.path, options: { color: MUTED } }], { x: M, y: 1.22, w: 12.3, h: 0.24, fontFace: SANS, fontSize: 9.5, isTextBox: true, margin: 0 });
     // ci
     const x3 = x2 + mw + gap;
