@@ -1,22 +1,24 @@
 /* Qualys lookup rules, demo evidence (read-only)
    -------------------------------------------------------------------------------------------------
    For every active scripted lookup rule of the Qualys source, in chain order: counts the discovered
-   items the rule has matched on this instance, replays the rule on the newest of them, records what
-   each step of the script found (the records carrying the serial, MAC, name, fqdn or address, the
-   adapter and address records walked, the pool behind a virtual server, the flags that decided) and
-   prints a few examples chosen so that they show different paths through the rule. One readable
-   line and one EX line per example. Nothing is created or updated. Paste into Scripts - Background
-   (global scope), run, and attach the whole output as a text file.
+   items the rule has matched on this instance, then looks among the newest of them for examples
+   dedicated to the rule: items whose CI none of the earlier rules could have returned (no serial,
+   no fqdn on the record, a name that is not the scanned label, a class outside the OS class, an
+   address held only by an adapter, ...) and whose CI the rule's own defining step finds today.
+   Each example carries the replay of the rule step by step (the records carrying the serial, MAC,
+   name, fqdn or address, the adapters and address records walked, the pool behind a virtual server)
+   and, for every custom rule that runs before it, what that rule's search finds for the same item.
+   One readable line and one EX line per example. Nothing is created or updated. Paste into
+   Scripts - Background (global scope), run, and attach the whole output as a text file.
    ------------------------------------------------------------------------------------------------- */
 var PER_RULE = 3;        // examples printed per rule
-var POOL = 100;          // newest matched items replayed per rule when choosing the examples
-var LB_POOL = 40;        // the same for the two load balancer rules, whose walk costs more
+var SCAN = 4000;         // newest matched items read per rule while looking for dedicated examples
+var LB_SCAN = 300;       // the same for the two load balancer rules, whose walk costs more
+var TRACES = 9;          // dedicated candidates replayed per rule before the examples are chosen
 var DAYS = 0;            // only items updated in the last DAYS days; 0 = any age
 var ROWS = 6;            // records listed per search step
-var ONLY = [];           // rule orders to run, e.g. ['450', '705', '740']; empty = every rule
-var PREFER_NAMED = true; // choose items that carry a DNS name before items that do not
-var REQUIRE_ROWS = true; // choose items whose trace found at least one record over items where it found none
-
+var ONLY = [];           // rule orders to run, e.g. ['450', '700', '705']; empty = every rule
+var FILL = false;        // true: fewer than PER_RULE dedicated examples are topped up with the best remaining items, printed with proper=false
 var started = new Date().getTime();
 var ignore = gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
 var out = [];
@@ -391,50 +393,136 @@ function runRule(rec, field, p) {
     try { var r = ev.evaluateScript(rec, 'script', null); return r ? '' + r : ''; } catch (e) { return 'error: ' + e; }
 }
 
+// ---------------------------------------------------------------- is the item an example dedicated to the rule?
+// '' when no rule before this one could have returned the CI and the rule's own sign is present; otherwise the reason
+function under(cls, root) { return !!cls && (cls == root || parentsOf(cls).indexOf(root) != -1); }
+function junkSerial(s) {
+    var junk = ['0', 'none', 'n/a', 'na', 'unknown', 'empty', 'not specified', 'not available', 'no serial', 'default string', 'to be filled by o.e.m.', 'system serial number', 'chassis serial number', '0123456789', '1234567890'];
+    return !s || s.length < 4 || junk.indexOf(s) != -1;
+}
+function dedicated(kind, p, c) {
+    var dns = ('' + (p.DNS || '')).trim().toLowerCase(), lbl = dns.split('.')[0], domain = dns.indexOf('.') != -1 ? dns.substring(dns.indexOf('.') + 1) : '';
+    var ip = ('' + (p.IP || '')).trim(), pref = classFor('' + (p.OS || '')), serial = ('' + (p.SERIAL_NUMBER || '')).trim().toLowerCase();
+    var name = c.name.trim().toLowerCase(), fqdn = c.fqdn.trim().toLowerCase(), cdom = c.domain.trim().toLowerCase(), cserial = c.serial.trim().toLowerCase();
+    var address = kind.indexOf('IP ') == 0, lb = kind.indexOf('Load Balancer') == 0, serialRule = kind.indexOf('Serial') == 0;
+    var afterFqdn = ['Serial Number Class Match', 'Serial Number Hardware Match', 'Cisco IP Phone MAC', 'FQDN Class Match', 'FQDN Hardware Match'].indexOf(kind) == -1;
+    var afterDomain = afterFqdn && kind != 'Hostname Domain Class Match' && kind != 'Hostname Domain Hardware Match';
+    var afterHost = ['Management Interface Match', 'Network Interface Name Match', 'FQDN Name Hardware Match', 'FQDN Name Broad Match'].indexOf(kind) != -1 || address;
+    var sibling = { 'Serial Number Hardware Match': 1, 'FQDN Hardware Match': 1, 'Hostname Domain Hardware Match': 1, 'Hostname Hardware Match': 1, 'IP Hardware Match': 1 };
+    var hw = under(c.cls, 'cmdb_ci_hardware');   // the serial, fqdn, domain and host name rules search the hardware tree only
+    if (!dns && !address && !lb) return 'no DNS name';
+    if (!serialRule && hw && !junkSerial(serial) && cserial == serial) return 'the record carries the scanned serial: a serial rule should have found it';
+    if (afterFqdn && hw && fqdn && fqdn == dns) return 'the record carries the scanned name as its fqdn: an FQDN rule should have found it';
+    if (afterDomain && hw && dns && name == lbl && cdom && cdom == domain) return 'the record carries the scanned label and domain: a domain rule should have found it';
+    if (afterHost && hw && dns && name == lbl) return 'the record is named with the scanned label: a host name rule should have found it';
+    if ((kind == 'FQDN Name Hardware Match' || kind == 'FQDN Name Broad Match') && name != dns) return 'the record is not named with the whole fqdn';
+    if (kind == 'FQDN Name Broad Match' && under(c.cls, 'cmdb_ci_hardware')) return 'a hardware record named with the fqdn: FQDN Name Hardware Match should have found it';
+    if (sibling[kind] && pref && under(c.cls, pref)) return 'the record sits in the OS class ' + shortClass(pref) + ': the class rule before this one should have found it';
+    if ((kind == 'IP Adapter Match' || kind == 'IP Layered Match') && ip && c.ip.trim() == ip) return 'the record carries the scanned address itself: an address rule before this one should have found it';
+    return '';
+}
+
+// ---------------------------------------------------------------- what every earlier rule's search finds for the item
+function finding(kind, p) {
+    var dns = ('' + (p.DNS || '')).trim().toLowerCase(), lbl = dns.split('.')[0], domain = dns.indexOf('.') != -1 ? dns.substring(dns.indexOf('.') + 1) : '';
+    var ip = ('' + (p.IP || '')).trim(), os = '' + (p.OS || ''), pref = classFor(os), serial = ('' + (p.SERIAL_NUMBER || '')).trim();
+    function n(table, field, value) { var r = rowsOf(table, field, value); return r.valid ? r.n + ' record' + (r.n == 1 ? '' : 's') : 'table not on this instance'; }
+    function named(table) {
+        var r = rowsOf(table, 'name', lbl), good = 0;
+        for (var q = 0; q < r.rows.length; q++) { var f1 = r.rows[q].fqdn.toLowerCase(), d1 = r.rows[q].dns_domain.toLowerCase(); if (f1 == dns || d1 == domain || (f1.indexOf(lbl + '.') == 0 && f1.indexOf(domain) > 0)) good++; }
+        return r.n + ' record' + (r.n == 1 ? '' : 's') + ' named "' + lbl + '", ' + good + ' with the domain "' + domain + '"';
+    }
+    var noClass = 'OS "' + (os || 'not reported') + '" gives no class: not searched';
+    switch (kind) {
+        case 'Serial Number Class Match': return junkSerial(serial.toLowerCase()) ? (serial ? 'serial "' + serial + '" is a placeholder: not searched' : 'no serial reported: not searched') : !pref ? noClass : n(pref, 'serial_number', serial) + ' in ' + shortClass(pref) + ' carry the serial';
+        case 'Serial Number Hardware Match': return junkSerial(serial.toLowerCase()) ? (serial ? 'serial "' + serial + '" is a placeholder: not searched' : 'no serial reported: not searched') : n('cmdb_ci_hardware', 'serial_number', serial) + ' in the hardware tree carry the serial';
+        case 'Cisco IP Phone MAC': return /^sep[0-9a-f]{12}$/.test(lbl) ? 'label carries a MAC: searched' : 'label "' + lbl + '" is not sep plus twelve hex characters: not searched';
+        case 'FQDN Class Match': return dns.indexOf('.') == -1 ? 'no dot in the name: not searched' : !pref ? noClass : n(pref, 'fqdn', dns) + ' in ' + shortClass(pref) + ' carry the fqdn';
+        case 'FQDN Hardware Match': return dns.indexOf('.') == -1 ? 'no dot in the name: not searched' : n('cmdb_ci_hardware', 'fqdn', dns) + ' in the hardware tree carry the fqdn';
+        case 'Hostname Domain Class Match': return !domain ? 'no domain in the name: not searched' : !pref ? noClass : named(pref) + ' in ' + shortClass(pref);
+        case 'Hostname Domain Hardware Match': return !domain ? 'no domain in the name: not searched' : named('cmdb_ci_hardware') + ' in the hardware tree';
+        case 'Layered DNS Match': { var link = new GlideRecord('cmdb_ip_address_dns_name'); if (!link.isValid()) return 'table not on this instance'; link.addQuery('dns_name.name', dns); link.addNotNullQuery('ip_address.nic.cmdb_ci'); link.query(); var k = 0; while (link.next()) k++; return k + ' DNS Name record' + (k == 1 ? '' : 's') + ' for "' + dns + '" lead to a CI'; }
+        case 'Hostname Class Match': return !pref ? noClass : n(pref, 'name', lbl) + ' in ' + shortClass(pref) + ' named "' + lbl + '"';
+        case 'Hostname Hardware Match': { var r = rowsOf('cmdb_ci_hardware', 'name', lbl); return r.n + ' record' + (r.n == 1 ? '' : 's') + ' in the hardware tree named "' + lbl + '"' + (r.n == 1 ? (agrees(r.rows[0].cls, pref, true) ? ' (class agrees)' : ' (class ' + shortClass(r.rows[0].cls) + ' disagrees with the OS)') : ''); }
+        case 'Device Name Match': { var guard = pref && pref != 'cmdb_ci_linux_server' && os.toLowerCase().indexOf('phone') == -1; if (guard) return 'OS gives the class ' + shortClass(pref) + ': not searched'; var a = rowsOf('cmdb_ci_ip_phone', 'name', lbl), b = rowsOf('cmdb_ci_imaging_hardware', 'name', lbl); return (a.valid ? a.n : 0) + ' IP Phone and ' + (b.valid ? b.n : 0) + ' Imaging Hardware records named "' + lbl + '"'; }
+        case 'Management Interface Match': { var suffixes = ['ilo', 'ilom', 'idrac', 'drac', 'ipmi', 'bmc', 'oob', 'mgmt', 'imm', 'cimc', 'rmm', 'con'], markers = ['ilo', 'ilom', 'idrac', 'drac', 'remote access controller', 'imm', 'cimc', 'bmc', 'ipmi', 'lights out'];
+            var dash = lbl.lastIndexOf('-'), tail = dash > 0 ? lbl.substring(dash + 1) : '', sign = dash > 0 && suffixes.indexOf(tail) != -1 ? 'suffix "-' + tail + '"' : '';
+            if (!sign) for (var mk = 0; mk < markers.length; mk++) if (os.toLowerCase().indexOf(markers[mk]) != -1) { sign = 'OS word "' + markers[mk] + '"'; break; }
+            if (!sign) return 'no controller suffix or OS word: not searched';
+            var base = dash > 0 ? lbl.substring(0, dash) : ''; return sign + '; ' + (base ? n('cmdb_ci_hardware', 'name', base) + ' named "' + base + '"' : 'no server name before a hyphen'); }
+        case 'Network Interface Name Match': { var words = ['vlan', 'v', 'hsrp', 'vrrp', 'po', 'eth', 'gi', 'te', 'lo', 'mgmt', 'aom', 'vs', 'fab'], segs = lbl ? lbl.split('-') : [], sign2 = dns.indexOf('.network.') != -1;
+            for (var si = 1; si < segs.length && !sign2; si++) if (isMarker(segs[si], words)) sign2 = true;
+            if (!sign2) return 'no interface domain or marker: not searched';
+            var hits = 0; for (var k2 = segs.length - 1; k2 >= 1; k2--) { var base2 = segs.slice(0, k2).join('-'); hits = rowsOf('cmdb_ci_netgear', 'name', base2).n + (rowsOf('cmdb_ci_lb', 'name', base2).valid ? rowsOf('cmdb_ci_lb', 'name', base2).n : 0); if (hits) return hits + ' device' + (hits == 1 ? '' : 's') + ' at the prefix "' + base2 + '"'; }
+            return 'interface sign present; no device at any prefix'; }
+        case 'FQDN Name Hardware Match': return n('cmdb_ci_hardware', 'name', dns) + ' in the hardware tree named "' + dns + '"';
+        case 'FQDN Name Broad Match': return n('cmdb_ci', 'name', dns) + ' in any class named "' + dns + '"';
+        case 'Load Balancer Member Match': { if (!vipSign(p).length) return 'no VIP sign: not searched'; var st = [], sh = []; memberWalk(p, st, sh); return st.length ? st[st.length - 1].title + ': ' + st[st.length - 1].detail : 'no service record'; }
+        case 'Load Balancer Service Match': { if (!vipSign(p).length) return 'no VIP sign: not searched'; var st2 = [], ss = serviceSearch(p, st2); return ss.service ? 'one live virtual server record: ' + ss.service.name : ss.stopped ? 'two names, declined' : ss.twins.length > 1 ? ss.twins.length + ' live records compete, declined' : 'no service record'; }
+        case 'IP Class Match': return !pref ? noClass : n(pref, 'ip_address', ip) + ' in ' + shortClass(pref) + ' carry the address';
+        case 'IP Hardware Match': { var ri = rowsOf('cmdb_ci_hardware', 'ip_address', ip); return ri.n + ' record' + (ri.n == 1 ? '' : 's') + ' in the hardware tree carry the address' + (ri.n == 1 ? (isLB(ri.rows[0].id) ? ' (a load balancer device, refused)' : !agrees(ri.rows[0].cls, pref, false) ? ' (class disagrees with the OS)' : !nameAgrees(ri.rows[0].id, dns) ? ' (name differs from the scanned label)' : '') : ''); }
+        case 'IP Adapter Match': { var nic = new GlideRecord('cmdb_ci_network_adapter'); nic.addQuery('ip_address', ip); nic.addNotNullQuery('cmdb_ci'); nic.query(); var owners = {}, na = 0; while (nic.next()) { na++; owners['' + nic.getValue('cmdb_ci')] = true; } return na + ' adapter record' + (na == 1 ? '' : 's') + ' on the address, ' + Object.keys(owners).length + ' owning CI' + (Object.keys(owners).length == 1 ? '' : 's'); }
+        case 'IP Layered Match': { var ipr = new GlideRecord('cmdb_ci_ip_address'); if (!ipr.isValid()) return 'table not on this instance'; ipr.addQuery('ip_address', ip); ipr.addNotNullQuery('nic.cmdb_ci'); ipr.query(); var ow = {}, nb = 0; while (ipr.next()) { nb++; ow['' + ipr.nic.cmdb_ci] = true; } return nb + ' IP Address record' + (nb == 1 ? '' : 's') + ' on the address, ' + Object.keys(ow).length + ' owning CI' + (Object.keys(ow).length == 1 ? '' : 's'); }
+    }
+    return '';
+}
+
 // ---------------------------------------------------------------- rules, items, examples
 var rules = [], rl = new GlideRecord('sn_sec_cmn_ci_lookup_rule');
 rl.addQuery('source.name', 'CONTAINS', 'Qualys'); rl.addQuery('method', 'script'); rl.addActiveQuery(); rl.orderBy('order'); rl.query();
-while (rl.next()) { var rec = new GlideRecord('sn_sec_cmn_ci_lookup_rule'); rec.get(rl.getUniqueValue()); rules.push({ id: rl.getUniqueValue(), order: '' + rl.getValue('order'), name: '' + rl.getValue('name'), field: '' + rl.getValue('source_field'), rec: rec }); }
+while (rl.next()) { var rec = new GlideRecord('sn_sec_cmn_ci_lookup_rule'); rec.get(rl.getUniqueValue()); rules.push({ id: rl.getUniqueValue(), order: '' + rl.getValue('order'), name: '' + rl.getValue('name'), field: '' + rl.getValue('source_field'), rec: rec, custom: /^(USEM|BOFA)\s/.test('' + rl.getValue('name')) }); }
 var hasRuleField = new GlideRecord('sn_sec_cmn_src_ci').isValidField('ci_lookup_rule'), total = 0;
 if (!hasRuleField) out.push('sn_sec_cmn_src_ci has no ci_lookup_rule field on this instance; nothing to report.');
+function build(rule, kind, cand, before) {
+    var t = trace(kind, cand.p), verdict = runRule(rule.rec, rule.field, cand.p), facts = ciFacts(cand.c.id), p = cand.p;
+    var earlier = [];
+    for (var b = 0; b < before.length; b++) earlier.push({ order: before[b].order, rule: before[b].name, found: finding(before[b].name.replace(/^(USEM|BOFA)\s+/, ''), p) });
+    var same = verdict == cand.c.id, live = facts && facts.live;
+    return { rule: rule.order, rule_name: rule.name, shape: t.shape, steps: t.steps, proper: !!(same && live && !cand.why), why: cand.why || (!same ? 'the rule replayed today returns ' + (verdict ? (ciFacts(verdict) || { name: verdict }).name : 'nothing') : !live ? 'the CI is retired now' : ''), earlier: earlier,
+        item: { number: cand.number, sys_id: cand.sys_id, dns: '' + (p.DNS || ''), ip: '' + (p.IP || ''), os: '' + (p.OS || ''), netbios: '' + (p.NETBIOS || ''), serial: '' + (p.SERIAL_NUMBER || ''), tracking: '' + (p.TRACKING_METHOD || ''), qualys_id: '' + (p.ID || ''), updated: cand.updated },
+        ci: facts || { name: '?', cls: cand.c.cls }, verdict: { ci: verdict, same_as_today: same, ci_label: verdict && verdict.indexOf('error') != 0 ? (ciFacts(verdict) || { name: '?' }).name : '' } };
+}
 for (var r = 0; r < rules.length && hasRuleField; r++) {
-    var rule = rules[r], kind = rule.name.replace(/^(USEM|BOFA)\s+/, ''), custom = /^(USEM|BOFA)\s/.test(rule.name);
+    var rule = rules[r], kind = rule.name.replace(/^(USEM|BOFA)\s+/, ''), address = kind.indexOf('IP ') == 0;
     var count = new GlideAggregate('sn_sec_cmn_src_ci'); count.addQuery('ci_lookup_rule', rule.id); count.addQuery('state', 'matched'); count.addAggregate('COUNT'); count.query();
     var matched = count.next() ? parseInt(count.getAggregate('COUNT')) : 0;
     if (ONLY.length && ONLY.indexOf(rule.order) == -1) continue;
-    out.push('== ' + rule.order + ' ' + rule.name + ' (' + rule.field + '): ' + matched + ' matched items on this instance' + (custom ? '' : ' (platform rule, no examples)'));
-    if (!custom) continue;
+    out.push('== ' + rule.order + ' ' + rule.name + ' (' + rule.field + '): ' + matched + ' matched items on this instance' + (rule.custom ? '' : ' (platform rule, no examples)'));
+    if (!rule.custom) continue;
+    var before = [];
+    for (var b = 0; b < r; b++) if (rules[b].custom) before.push(rules[b]);
     var di = new GlideRecord('sn_sec_cmn_src_ci');
     di.addQuery('ci_lookup_rule', rule.id); di.addQuery('state', 'matched'); di.addNotNullQuery('cmdb_ci');
     if (DAYS > 0) di.addQuery('sys_updated_on', '>', gs.daysAgoStart(DAYS));
-    di.orderByDesc('sys_updated_on'); di.setLimit(kind.indexOf('Load Balancer') != -1 ? LB_POOL : POOL); di.query();
-    var picks = [], spare = [], shapes = {}, looked = 0;
+    di.orderByDesc('sys_updated_on'); di.setLimit(kind.indexOf('Load Balancer') != -1 ? LB_SCAN : SCAN); di.query();
+    var named = [], unnamed = [], weak = [], reasons = {}, scanned = 0;
     while (di.next()) {
         var p; try { p = JSON.parse('' + di.getValue('source_data')); } catch (e) { continue; }
-        looked++;
-        var ciId = '' + di.getValue('cmdb_ci'), facts = ciFacts(ciId);
-        if (!facts) continue;
-        var t = trace(kind, p), verdict = runRule(rule.rec, rule.field, p);
-        var ex = { rule: rule.order, rule_name: rule.name, shape: t.shape, steps: t.steps,
-            item: { number: '' + di.getValue('number'), sys_id: di.getUniqueValue(), dns: '' + (p.DNS || ''), ip: '' + (p.IP || ''), os: '' + (p.OS || ''), netbios: '' + (p.NETBIOS || ''), serial: '' + (p.SERIAL_NUMBER || ''), tracking: '' + (p.TRACKING_METHOD || ''), qualys_id: '' + (p.ID || ''), updated: '' + di.getValue('sys_updated_on') },
-            ci: facts, verdict: { ci: verdict, same_as_today: verdict == ciId, ci_label: verdict && verdict.indexOf('error') != 0 ? (ciFacts(verdict) || { name: '?' }).name : '' } };
-        var key = t.shape + (verdict == ciId ? '' : ' / differs today');
-        var weak = (PREFER_NAMED && !ex.item.dns) || (REQUIRE_ROWS && t.shape.indexOf('none') == 0);
-        if (verdict == ciId && facts.live && !weak && !shapes[key]) { shapes[key] = true; picks.push(ex); } else spare.push(ex);
-        if (picks.length >= PER_RULE) break;
+        scanned++;
+        var c = { id: '' + di.getValue('cmdb_ci'), name: '' + (di.cmdb_ci.name || ''), fqdn: '' + (di.cmdb_ci.fqdn || ''), domain: '' + (di.cmdb_ci.dns_domain || ''), cls: '' + di.cmdb_ci.sys_class_name, ip: '' + (di.cmdb_ci.ip_address || ''), serial: '' + (di.cmdb_ci.serial_number || '') };
+        var cand = { number: '' + di.getValue('number'), sys_id: di.getUniqueValue(), updated: '' + di.getValue('sys_updated_on'), p: p, c: c, why: dedicated(kind, p, c) };
+        if (!cand.why && kind == 'IP Layered Match') { var nicQ = new GlideRecord('cmdb_ci_network_adapter'); nicQ.addQuery('ip_address', '' + (p.IP || '')); nicQ.addNotNullQuery('cmdb_ci'); nicQ.query(); if (nicQ.hasNext()) cand.why = 'an adapter record carries the address: IP Adapter Match should have found it'; }
+        if (cand.why) { reasons[cand.why] = (reasons[cand.why] || 0) + 1; if (weak.length < 12) weak.push(cand); }
+        else if (p.DNS || !address) named.push(cand); else unnamed.push(cand);
+        if (named.length >= TRACES) break;
     }
-    spare.sort(function(a, b) {
-        function score(x) { return (x.verdict.same_as_today ? 4 : 0) + (x.item.dns ? 2 : 0) + (x.shape.indexOf('none') == 0 ? 0 : 1); }
-        return score(b) - score(a);
-    });
-    while (picks.length < PER_RULE && spare.length) picks.push(spare.shift());
-    for (var i = 0; i < picks.length; i++) {
-        var x = picks[i];
-        out.push('  ' + x.item.number + ' | ' + (x.item.dns || '(no name)') + ' | ' + x.item.ip + ' | ' + x.item.os + ' -> ' + x.ci.name + ' [' + x.ci.cls + '] | path: ' + x.shape + (x.verdict.same_as_today ? '' : ' | replay differs: ' + (x.verdict.ci ? x.verdict.ci_label || x.verdict.ci : 'declines')));
-        out.push('  EX ' + JSON.stringify(x));
+    var candidates = named.concat(unnamed).slice(0, TRACES), proper = [], other = [];
+    for (var i = 0; i < candidates.length; i++) { var ex = build(rule, kind, candidates[i], before); (ex.proper ? proper : other).push(ex); }
+    var picks = [], shapes = {};
+    for (var d = 0; d < proper.length && picks.length < PER_RULE; d++) if (!shapes[proper[d].shape]) { shapes[proper[d].shape] = true; picks.push(proper[d]); }
+    for (var d2 = 0; d2 < proper.length && picks.length < PER_RULE; d2++) if (picks.indexOf(proper[d2]) == -1) picks.push(proper[d2]);
+    if (FILL) {
+        for (var f = 0; f < other.length && picks.length < PER_RULE; f++) picks.push(other[f]);
+        for (var w = 0; w < weak.length && picks.length < PER_RULE; w++) picks.push(build(rule, kind, weak[w], before));
+    }
+    for (var x = 0; x < picks.length; x++) {
+        var pk = picks[x];
+        out.push('  ' + pk.item.number + ' | ' + (pk.item.dns || '(no name)') + ' | ' + pk.item.ip + ' | ' + pk.item.os + ' -> ' + pk.ci.name + ' [' + pk.ci.cls + '] | path: ' + pk.shape + (pk.proper ? '' : ' | not dedicated: ' + pk.why));
+        out.push('  EX ' + JSON.stringify(pk));
         total++;
     }
-    if (!picks.length) out.push('  (no matched item carries this rule)');
-    out.push('  looked at ' + looked + ' item(s)');
+    var tally = []; for (var key in reasons) tally.push(reasons[key] + ' x ' + key);
+    out.push('  scanned ' + scanned + ' item(s): ' + (named.length + unnamed.length) + ' dedicated candidate(s) (' + named.length + ' with a DNS name), ' + candidates.length + ' replayed, ' + proper.length + ' proper' + (other.length ? ', ' + other.length + ' set aside (' + other.map(function(o) { return o.item.number + ': ' + o.why; }).join('; ') + ')' : '') + (tally.length ? '; not dedicated: ' + tally.join(' | ') : ''));
+    if (!picks.length) out.push('  (no dedicated example among the scanned items)');
 }
 gs.print('=== Qualys lookup rules, demo evidence, read-only ===\nrules: ' + rules.length + ' | examples: ' + total + ' | elapsed: ' + Math.round((new Date().getTime() - started) / 1000) + ' s\n' + out.join('\n'));

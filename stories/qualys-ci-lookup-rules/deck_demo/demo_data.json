@@ -385,6 +385,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "first rule of the chain: the serial is searched inside the OS class before any name or address is read"
+      },
+      {
        "title": "Serial read",
        "detail": "\"VMware-42 0c aa d7 9e 6a 54 b0-a9 39 25 29 a3 6c 82 9c\""
       },
@@ -398,6 +402,8 @@
       }
      ],
      "path": "linux_server / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "ah-1208237-001",
      "ci_class": "Linux Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
@@ -468,6 +474,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "first rule of the chain: the serial is searched inside the OS class before any name or address is read"
+      },
+      {
        "title": "Serial read",
        "detail": "\"VMware-42 1f d0 17 8e 8d d7 41-05 c6 e9 43 38 74 4a 99\""
       },
@@ -481,6 +491,8 @@
       }
      ],
      "path": "computer / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "wva45bhnicvo0av",
      "ci_class": "Windows Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
@@ -547,6 +559,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "first rule of the chain: the serial is searched inside the OS class before any name or address is read"
+      },
+      {
        "title": "Serial read",
        "detail": "\"MXBCTBJ09N\""
       },
@@ -560,6 +576,8 @@
       }
      ],
      "path": "printer / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "md9-931-01-t02",
      "ci_class": "Printer",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
@@ -685,6 +703,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "the record does not carry the scanned serial \"MXBCS730XY\" \u00b7 OS \"Ubuntu/Linux\" gives Linux Server; the record is a Printer, outside that class"
+      },
+      {
        "title": "Serial read",
        "detail": "\"MXBCS730XY\""
       },
@@ -698,6 +720,8 @@
       }
      ],
      "path": "printer / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "npifdcd73",
      "ci_class": "Printer",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
@@ -756,6 +780,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "the record does not carry the scanned serial \"VNCCSB20Y7\" \u00b7 OS \"HP LaserJet Printer\" gives Printer; the record is a Hardware, outside that class"
+      },
+      {
        "title": "Serial read",
        "detail": "\"VNCCSB20Y7\""
       },
@@ -769,6 +797,8 @@
       }
      ],
      "path": "hardware / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "VNCCSB20Y7 - LASERJET ENT M507DN",
      "ci_class": "Hardware",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_hardware.do?sys_id=",
@@ -823,6 +853,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "the record does not carry the scanned serial \"2M214505F1\" \u00b7 OS \"Red Hat Enterprise Linux 9.6\" gives Linux Server; the record is a Out-of-Band Device, outside that class"
+      },
+      {
        "title": "Serial read",
        "detail": "\"2M214505F1\""
       },
@@ -836,6 +870,8 @@
       }
      ],
      "path": "outofband_device / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "RVPQTFVLPN14",
      "ci_class": "Out-of-Band Device",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_outofband_device.do?sys_id=",
@@ -981,6 +1017,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped"
+      },
+      {
        "title": "Phone label",
        "detail": "\"sep6c710d8adc3b\" matches sep plus twelve hex characters"
       },
@@ -1002,6 +1042,8 @@
       }
      ],
      "path": "phone mac",
+     "proper": true,
+     "why": "",
      "ci_name": "SEP6C710D8ADC3B",
      "ci_class": "IP Phone",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=",
@@ -1060,6 +1102,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped"
+      },
+      {
        "title": "Phone label",
        "detail": "\"sep6026aa8f08cd\" matches sep plus twelve hex characters"
       },
@@ -1081,6 +1127,8 @@
       }
      ],
      "path": "phone mac",
+     "proper": true,
+     "why": "",
      "ci_name": "SEP6026AA8F08CD",
      "ci_class": "IP Phone",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=",
@@ -1139,6 +1187,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped"
+      },
+      {
        "title": "Phone label",
        "detail": "\"sep3c26e4a7cb09\" matches sep plus twelve hex characters"
       },
@@ -1160,6 +1212,8 @@
       }
      ],
      "path": "phone mac",
+     "proper": true,
+     "why": "",
      "ci_name": "SEP3C26E4A7CB09",
      "ci_class": "IP Phone",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=",
@@ -1320,6 +1374,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped"
+      },
+      {
        "title": "Name",
        "detail": "\"rukev4satalnc.corp.bankofamerica.com\"; OS \"Windows Server 2019 Standard 64 bit Edition Version 1809 Build 17763\" gives the class win_server"
       },
@@ -1329,6 +1387,8 @@
       }
      ],
      "path": "win_server / one row",
+     "proper": true,
+     "why": "",
      "ci_name": "rukev4satalnc",
      "ci_class": "Windows Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
@@ -1391,6 +1451,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped"
+      },
+      {
        "title": "Name",
        "detail": "\"lvtifxluap109.sdi.corp.bankofamerica.com\"; OS \"Red Hat Enterprise Linux 9.8\" gives the class linux_server"
       },
@@ -1400,6 +1464,8 @@
       }
      ],
      "path": "linux_server / one row",
+     "proper": true,
+     "why": "",
      "ci_name": "lvtifxluap109",
      "ci_class": "Linux Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
@@ -1462,6 +1528,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped"
+      },
+      {
        "title": "Name",
        "detail": "\"ilchifr01p03.bankofamerica.com\"; OS \"HP LaserJet Printer\" gives the class printer"
       },
@@ -1471,6 +1541,8 @@
       }
      ],
      "path": "printer / one row",
+     "proper": true,
+     "why": "",
      "ci_name": "ILCHIFR01P03.BANKOFAMERICA.COM",
      "ci_class": "Printer",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
@@ -1614,6 +1686,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 OS \"not reported\" gives no class: the class rule before this one could not search"
+      },
+      {
        "title": "Name",
        "detail": "\"htuwdlmssql04.corp.bankofamerica.com\"; the whole hardware tree"
       },
@@ -1623,6 +1699,8 @@
       }
      ],
      "path": "win_server / one row",
+     "proper": true,
+     "why": "",
      "ci_name": "htuwdlmssql04",
      "ci_class": "Windows Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
@@ -1685,6 +1763,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 OS \"Red Hat Enterprise Linux Server 7.9\" gives Linux Server; the record is a Out-of-Band Device, outside that class"
+      },
+      {
        "title": "Name",
        "detail": "\"vaehs06137.ussdnve.baml.com\"; the whole hardware tree"
       },
@@ -1694,6 +1776,8 @@
       }
      ],
      "path": "outofband_device / one row",
+     "proper": true,
+     "why": "",
      "ci_name": "vaehs06137",
      "ci_class": "Out-of-Band Device",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_outofband_device.do?sys_id=",
@@ -1756,6 +1840,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 OS \"EulerOS / Ubuntu / Fedora / Tiny Core Linux / Linux 3.x / IBM / FortiSOAR / F5 Networks Big-IP / Paloalto networks Global Protect PAN-OS\" gives no class: the class rule before this one could not search"
+      },
+      {
        "title": "Name",
        "detail": "\"ljp1anhmeapp.jp.apac.bankofamerica.com\"; the whole hardware tree"
       },
@@ -1765,6 +1853,8 @@
       }
      ],
      "path": "linux_server / one row",
+     "proper": true,
+     "why": "",
      "ci_name": "ljp1anhmeapp",
      "ci_class": "Linux Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
@@ -1923,6 +2013,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it"
+      },
+      {
        "title": "Split",
        "detail": "host \"usohmohmt01p04\", domain \"bankofamerica.com\"; OS \"HP LaserJet Printer\" gives the class printer"
       },
@@ -1932,6 +2026,8 @@
       }
      ],
      "path": "printer / one row",
+     "proper": true,
+     "why": "",
      "ci_name": "usohmohmt01p04",
      "ci_class": "Printer",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
@@ -1990,6 +2086,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it"
+      },
+      {
        "title": "Split",
        "detail": "host \"ah-1261717-001\", domain \"sdi.corp.bankofamerica.com\"; OS \"Red Hat Enterprise Linux 9.8\" gives the class linux_server"
       },
@@ -1999,6 +2099,8 @@
       }
      ],
      "path": "linux_server / one row",
+     "proper": true,
+     "why": "",
      "ci_name": "AH-1261717-001",
      "ci_class": "Linux Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
@@ -2061,6 +2163,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it"
+      },
+      {
        "title": "Split",
        "detail": "host \"wrdna250xcrs1\", domain \"ssc.ext.bankofamerica.com\"; OS \"Windows Server 2022 Standard 64 bit Edition Version 21H2\" gives the class win_server"
       },
@@ -2070,6 +2176,8 @@
       }
      ],
      "path": "win_server / one row",
+     "proper": true,
+     "why": "",
      "ci_name": "WRDNA250XCRS1",
      "ci_class": "Windows Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
@@ -2215,6 +2323,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it \u00b7 OS \"Red Hat Enterprise Linux 9.8\" gives Linux Server; the record is a Server, outside that class"
+      },
+      {
        "title": "Split",
        "detail": "host \"vaetfxlwsq23\", domain \"sdi.ssc3.ext3.bankofamerica3.com\"; the whole hardware tree"
       },
@@ -2224,6 +2336,8 @@
       }
      ],
      "path": "server / one row",
+     "proper": true,
+     "why": "",
      "ci_name": "vaetfxlwsq23",
      "ci_class": "Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_server.do?sys_id=",
@@ -2282,6 +2396,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it \u00b7 OS \"Red Hat Enterprise Linux 9.8\" gives Linux Server; the record is a Server, outside that class"
+      },
+      {
        "title": "Split",
        "detail": "host \"lva61pezudws04v\", domain \"sdi.ssc3.ext3.bankofamerica3.com\"; the whole hardware tree"
       },
@@ -2291,6 +2409,8 @@
       }
      ],
      "path": "server / tie by address",
+     "proper": true,
+     "why": "",
      "ci_name": "lva61pezudws04v",
      "ci_class": "Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_server.do?sys_id=",
@@ -2349,6 +2469,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it \u00b7 OS \"BIG-IP 17.5.1.8 Build 0.27.19\" gives no class: the class rule before this one could not search"
+      },
+      {
        "title": "Split",
        "detail": "host \"rveqbt1utilb01b\", domain \"bankofamerica.com\"; the whole hardware tree"
       },
@@ -2358,6 +2482,8 @@
       }
      ],
      "path": "lb / domain separates",
+     "proper": true,
+     "why": "",
      "ci_name": "rveqbt1utilb01b",
      "ci_class": "F5 BIG-IP",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_bigip.do?sys_id=",
@@ -2531,6 +2657,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it \u00b7 named \"npi535536\", not \"txhoulp01p02\": host name rules could not find it"
+      },
+      {
        "title": "Name",
        "detail": "\"txhoulp01p02.bankofamerica.com\"; OS \"HP JetDirect\" gives the class printer (agreement includes appliances for a Linux fingerprint)"
       },
@@ -2544,6 +2674,8 @@
       }
      ],
      "path": "one owner / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "npi535536",
      "ci_class": "Printer",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
@@ -2598,6 +2730,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it \u00b7 named \"ups01mo32130101\" but no dns_domain: host name with domain rules could not confirm it"
+      },
+      {
        "title": "Name",
        "detail": "\"ups01mo32130101.bankofamerica.com\"; OS \"not reported\" gives no class (agreement includes appliances for a Linux fingerprint)"
       },
@@ -2611,6 +2747,8 @@
       }
      ],
      "path": "one owner / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "ups01mo32130101",
      "ci_class": "UPS",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ups.do?sys_id=",
@@ -2665,6 +2803,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it \u00b7 named \"ups01nv11270101\" but no dns_domain: host name with domain rules could not confirm it"
+      },
+      {
        "title": "Name",
        "detail": "\"ups01nv11270101.bankofamerica.com\"; OS \"not reported\" gives no class (agreement includes appliances for a Linux fingerprint)"
       },
@@ -2678,6 +2820,8 @@
       }
      ],
      "path": "one owner / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "ups01nv11270101",
      "ci_class": "UPS",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ups.do?sys_id=",
@@ -2824,6 +2968,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 fqdn \"wrchb013sqsesr.corp.bankofamerica.com\" differs from the scanned name: FQDN rules could not find it \u00b7 named \"wrchb013sqsesr\" but dns_domain \"SDI.CORP.BANKOFAMERICA.COM\": host name with domain rules could not confirm it"
+      },
+      {
        "title": "Host name",
        "detail": "\"wrchb013sqsesr\"; OS \"Windows Server 2019 Standard 64 bit Edition Version 1809 Build 17763\" gives the class win_server"
       },
@@ -2833,6 +2981,8 @@
       }
      ],
      "path": "win_server / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "wrchb013sqsesr",
      "ci_class": "Windows Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
@@ -2899,6 +3049,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it \u00b7 named \"ckd0ad0856d1cf\" but dns_domain \"corp.bankofamerica.com\": host name with domain rules could not confirm it"
+      },
+      {
        "title": "Host name",
        "detail": "\"ckd0ad0856d1cf\"; OS \"Windows 11 Enterprise 64 bit Edition Version 23H2\" gives the class computer"
       },
@@ -2908,6 +3062,8 @@
       }
      ],
      "path": "computer / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "ckd0ad0856d1cf",
      "ci_class": "Computer",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_computer.do?sys_id=",
@@ -2970,6 +3126,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 fqdn \"ah-1201846-001.corp.bankofamerica.com\" differs from the scanned name: FQDN rules could not find it \u00b7 named \"ah-1201846-001\" but dns_domain \"SDI.CORP.BANKOFAMERICA.COM\": host name with domain rules could not confirm it"
+      },
+      {
        "title": "Host name",
        "detail": "\"ah-1201846-001\"; OS \"Windows Server 2019 Standard 64 bit Edition Version 1809 Build 17763\" gives the class win_server"
       },
@@ -2979,6 +3139,8 @@
       }
      ],
      "path": "win_server / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "ah-1201846-001",
      "ci_class": "Windows Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
@@ -3136,6 +3298,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it \u00b7 named \"HCPINP55760-102\" but no dns_domain: host name with domain rules could not confirm it \u00b7 OS \"EulerOS / Ubuntu / Fedora / Tiny Core Linux / Linux 3.x / IBM / FortiSOAR / F5 Networks Big-IP / Paloalto networks Global Protect PAN-OS\" gives no class: the class rule before this one could not search"
+      },
+      {
        "title": "Host name",
        "detail": "\"hcpinp55760-102\"; the whole hardware tree, the OS class kept as a preference"
       },
@@ -3145,6 +3311,8 @@
       }
      ],
      "path": "msd / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "HCPINP55760-102",
      "ci_class": "Mass Storage Device",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_msd.do?sys_id=",
@@ -3199,6 +3367,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it \u00b7 named \"USVASDNTBQBZ1CCVLB01B\" but no dns_domain: host name with domain rules could not confirm it \u00b7 OS \"BIG-IP 17.5.1.8 Build 0.27.19\" gives no class: the class rule before this one could not search"
+      },
+      {
        "title": "Host name",
        "detail": "\"usvasdntbqbz1ccvlb01b\"; the whole hardware tree, the OS class kept as a preference"
       },
@@ -3208,6 +3380,8 @@
       }
      ],
      "path": "lb / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "USVASDNTBQBZ1CCVLB01B",
      "ci_class": "Load Balancer",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb.do?sys_id=",
@@ -3266,6 +3440,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it \u00b7 named \"dc93960fbaf9mac\" but dns_domain \"corp.bankofamerica.com\": host name with domain rules could not confirm it \u00b7 OS \"macOS 26.6.1\" gives no class: the class rule before this one could not search"
+      },
+      {
        "title": "Host name",
        "detail": "\"dc93960fbaf9mac\"; the whole hardware tree, the OS class kept as a preference"
       },
@@ -3275,6 +3453,8 @@
       }
      ],
      "path": "computer / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "dc93960fbaf9mac",
      "ci_class": "Computer",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_computer.do?sys_id=",
@@ -3444,6 +3624,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 Scanner sits outside the hardware tree the name rules search"
+      },
+      {
        "title": "OS guard",
        "detail": "OS \"Linux 2.6\" gives the class linux_server: no server or desktop class, the search runs"
       },
@@ -3457,6 +3641,8 @@
       }
      ],
      "path": "scanner / one row",
+     "proper": true,
+     "why": "",
      "ci_name": "SCR03GA85150101",
      "ci_class": "Scanner",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_scanner.do?sys_id=",
@@ -3511,6 +3697,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 IP Phone sits outside the hardware tree the name rules search"
+      },
+      {
        "title": "OS guard",
        "detail": "OS \"Cisco IP Phone CP-8861\" gives the class netgear: no server or desktop class, the search runs"
       },
@@ -3524,6 +3714,8 @@
       }
      ],
      "path": "ip_phone / tie by address",
+     "proper": true,
+     "why": "",
      "ci_name": "SEPCC79D79FFB43",
      "ci_class": "IP Phone",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=",
@@ -3578,6 +3770,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 Scanner sits outside the hardware tree the name rules search"
+      },
+      {
        "title": "OS guard",
        "detail": "OS \"Linux 2.6\" gives the class linux_server: no server or desktop class, the search runs"
       },
@@ -3591,6 +3787,8 @@
       }
      ],
      "path": "scanner / one row",
+     "proper": true,
+     "why": "",
      "ci_name": "SCR01GA85150101",
      "ci_class": "Scanner",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_scanner.do?sys_id=",
@@ -3733,6 +3931,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it \u00b7 named \"HCPINP55760-102\", not \"hcpinp55760-102-b\": host name rules could not find it"
+      },
+      {
        "title": "Controller sign",
        "detail": "OS word \"remote access controller\" on \"hcpinp55760-102-b\"; server name \"hcpinp55760-102\""
       },
@@ -3742,6 +3944,8 @@
       }
      ],
      "path": "os word / msd",
+     "proper": true,
+     "why": "",
      "ci_name": "HCPINP55760-102",
      "ci_class": "Mass Storage Device",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_msd.do?sys_id=",
@@ -3796,6 +4000,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 fqdn \"ltx10megbxpr10.ecomm.device.rpg\" differs from the scanned name: FQDN rules could not find it \u00b7 named \"ltx10megbxpr10\", not \"ltx10megbxpr10-r\": host name rules could not find it"
+      },
+      {
        "title": "Controller sign",
        "detail": "OS word \"ilo\" on \"ltx10megbxpr10-r\"; server name \"ltx10megbxpr10\""
       },
@@ -3805,6 +4013,8 @@
       }
      ],
      "path": "os word / linux_server",
+     "proper": true,
+     "why": "",
      "ci_name": "ltx10megbxpr10",
      "ci_class": "Linux Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
@@ -3867,6 +4077,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it \u00b7 named \"USNCCLTIJ020IS04\", not \"usnccltij020is04-rmm\": host name rules could not find it"
+      },
+      {
        "title": "Controller sign",
        "detail": "suffix \"-rmm\" on \"usnccltij020is04-rmm\"; server name \"usnccltij020is04\""
       },
@@ -3876,6 +4090,8 @@
       }
      ],
      "path": "suffix rmm / netgear",
+     "proper": true,
+     "why": "",
      "ci_name": "USNCCLTIJ020IS04",
      "ci_class": "Network Gear",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_netgear.do?sys_id=",
@@ -4033,6 +4249,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it \u00b7 named \"USWAVANOH01FIN0001\", not \"uswavanoh01fin0001-dhcpra-vlan120\": host name rules could not find it"
+      },
+      {
        "title": "Interface sign",
        "detail": "domain \".network.\", segment \"vlan120\""
       },
@@ -4042,6 +4262,8 @@
       }
      ],
      "path": "prefix depth 1 / ip_router",
+     "proper": true,
+     "why": "",
      "ci_name": "USWAVANOH01FIN0001",
      "ci_class": "IP Router",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_router.do?sys_id=",
@@ -4096,6 +4318,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it \u00b7 named \"LDGAATLSO04BDM02\", not \"ldgaatlso04bdm02-vlan618\": host name rules could not find it"
+      },
+      {
        "title": "Interface sign",
        "detail": "segment \"vlan618\""
       },
@@ -4105,6 +4331,8 @@
       }
      ],
      "path": "prefix depth 1 / ip_switch",
+     "proper": true,
+     "why": "",
      "ci_name": "LDGAATLSO04BDM02",
      "ci_class": "IP Switch",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_switch.do?sys_id=",
@@ -4159,6 +4387,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 no fqdn on the record: FQDN rules could not find it \u00b7 named \"USTXSANRP01FIN0001\", not \"ustxsanrp01fin0001-dhcpra-vlan120\": host name rules could not find it"
+      },
+      {
        "title": "Interface sign",
        "detail": "domain \".network.\", segment \"vlan120\""
       },
@@ -4168,6 +4400,8 @@
       }
      ],
      "path": "prefix depth 1 / ip_router",
+     "proper": true,
+     "why": "",
      "ci_name": "USTXSANRP01FIN0001",
      "ci_class": "IP Router",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_router.do?sys_id=",
@@ -4263,209 +4497,7 @@
     }
    ],
    "sibling": "Searches the name field, not fqdn, and only under cmdb_ci_hardware; exactly-one is decided by next()/hasNext() with no IP tie-break and no OS involvement. Identical to USEM FQDN Name Broad Match except for the table.",
-   "examples": [
-    {
-     "number": "SDI000003711486",
-     "host": "ustxhoutf01fin0001-dhcpra-vlan120.network.bankofamerica.com",
-     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003711486",
-     "item_facts": [
-      [
-       "DNS name",
-       "ustxhoutf01fin0001-dhcpra-vlan120.network.bankofamerica.com"
-      ],
-      [
-       "IP address",
-       "10.130.77.62"
-      ],
-      [
-       "Operating system",
-       "(not reported)"
-      ],
-      [
-       "Tracking",
-       "IP"
-      ],
-      [
-       "Last evaluated",
-       "2026-09-21 04:54:59"
-      ]
-     ],
-     "walk": [
-      {
-       "title": "Name",
-       "detail": "\"ustxhoutf01fin0001-dhcpra-vlan120.network.bankofamerica.com\" searched on the name field of the whole hardware tree"
-      },
-      {
-       "title": "Records named with the whole fqdn",
-       "detail": "0 records -> none"
-      },
-      {
-       "title": "Why the item is matched anyway",
-       "detail": "On the development instance this rule carries a longer script that also cuts interface names down to the device name (the walk of Network Interface Name Match); this item resolved through that extension. The delivered rule searches the whole fqdn on the name field, as the steps above show."
-      }
-     ],
-     "path": "none / 0 rows",
-     "ci_name": "USTXHOUTF01FIN0001",
-     "ci_class": "IP Router",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_router.do?sys_id=",
-     "ci_facts": [
-      [
-       "IP address",
-       "10.130.77.122"
-      ],
-      [
-       "Serial number",
-       "30-008340-7870"
-      ],
-      [
-       "Model",
-       "Palo Alto Networks Prisma SD-WAN ion 3000"
-      ],
-      [
-       "Install status",
-       "Installed"
-      ],
-      [
-       "Operational status",
-       "Operational"
-      ]
-     ]
-    },
-    {
-     "number": "SDI000003659454",
-     "host": "ustxhousm01fin0001-dhcpra-vlan120.network.bankofamerica.com",
-     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003659454",
-     "item_facts": [
-      [
-       "DNS name",
-       "ustxhousm01fin0001-dhcpra-vlan120.network.bankofamerica.com"
-      ],
-      [
-       "IP address",
-       "10.130.79.190"
-      ],
-      [
-       "Operating system",
-       "(not reported)"
-      ],
-      [
-       "Tracking",
-       "IP"
-      ],
-      [
-       "Last evaluated",
-       "2026-09-21 04:53:56"
-      ]
-     ],
-     "walk": [
-      {
-       "title": "Name",
-       "detail": "\"ustxhousm01fin0001-dhcpra-vlan120.network.bankofamerica.com\" searched on the name field of the whole hardware tree"
-      },
-      {
-       "title": "Records named with the whole fqdn",
-       "detail": "0 records -> none"
-      },
-      {
-       "title": "Why the item is matched anyway",
-       "detail": "On the development instance this rule carries a longer script that also cuts interface names down to the device name (the walk of Network Interface Name Match); this item resolved through that extension. The delivered rule searches the whole fqdn on the name field, as the steps above show."
-      }
-     ],
-     "path": "none / 0 rows",
-     "ci_name": "USTXHOUSM01FIN0001",
-     "ci_class": "IP Router",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_router.do?sys_id=",
-     "ci_facts": [
-      [
-       "IP address",
-       "10.130.79.250"
-      ],
-      [
-       "Serial number",
-       "30-008871-8722"
-      ],
-      [
-       "Model",
-       "Palo Alto Networks Prisma SD-WAN ion 3000"
-      ],
-      [
-       "Install status",
-       "Installed"
-      ],
-      [
-       "Operational status",
-       "Operational"
-      ]
-     ]
-    },
-    {
-     "number": "SDI000003659447",
-     "host": "ustxhoukd01fin0001-dhcpra-vlan120.network.bankofamerica.com",
-     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000003659447",
-     "item_facts": [
-      [
-       "DNS name",
-       "ustxhoukd01fin0001-dhcpra-vlan120.network.bankofamerica.com"
-      ],
-      [
-       "IP address",
-       "10.130.59.62"
-      ],
-      [
-       "Operating system",
-       "(not reported)"
-      ],
-      [
-       "Tracking",
-       "IP"
-      ],
-      [
-       "Last evaluated",
-       "2026-09-21 04:53:44"
-      ]
-     ],
-     "walk": [
-      {
-       "title": "Name",
-       "detail": "\"ustxhoukd01fin0001-dhcpra-vlan120.network.bankofamerica.com\" searched on the name field of the whole hardware tree"
-      },
-      {
-       "title": "Records named with the whole fqdn",
-       "detail": "0 records -> none"
-      },
-      {
-       "title": "Why the item is matched anyway",
-       "detail": "On the development instance this rule carries a longer script that also cuts interface names down to the device name (the walk of Network Interface Name Match); this item resolved through that extension. The delivered rule searches the whole fqdn on the name field, as the steps above show."
-      }
-     ],
-     "path": "none / 0 rows",
-     "ci_name": "USTXHOUKD01FIN0001",
-     "ci_class": "IP Router",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_router.do?sys_id=",
-     "ci_facts": [
-      [
-       "IP address",
-       "10.130.59.122"
-      ],
-      [
-       "Serial number",
-       "30-009566-8101"
-      ],
-      [
-       "Model",
-       "Palo Alto Networks Prisma SD-WAN ion 3000"
-      ],
-      [
-       "Install status",
-       "Installed"
-      ],
-      [
-       "Operational status",
-       "Operational"
-      ]
-     ]
-    }
-   ],
+   "examples": [],
    "matched": 29770
   },
   {
@@ -4609,6 +4641,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 fqdn \"lva62pwbolws51v.sdi.ssc3.ext3.bankofamerica3.com\" differs from the scanned name: FQDN rules could not find it \u00b7 named \"lva62pwbolws51v\", not \"boluiv4-dev2-benefits-l7-vip1\": host name rules could not find it \u00b7 the OS or the name marks a virtual server: the hardware rules hand it to the load balancer rules"
+      },
+      {
        "title": "VIP sign",
        "detail": "OS has \"f5\", OS has \"big-ip\", label segment \"vip1\""
       },
@@ -4634,6 +4670,8 @@
       }
      ],
      "path": "one service / 1 member / 1 machine",
+     "proper": true,
+     "why": "",
      "ci_name": "lva62pwbolws51v",
      "ci_class": "Linux Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
@@ -4692,6 +4730,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 fqdn \"ah-1062287-001.sdi.corp.bankofamerica.com\" differs from the scanned name: FQDN rules could not find it \u00b7 named \"ah-1062287-001\", not \"aim-xfer-dev-ltwbt1-vip\": host name rules could not find it \u00b7 the OS or the name marks a virtual server: the hardware rules hand it to the load balancer rules"
+      },
+      {
        "title": "VIP sign",
        "detail": "label segment \"vip\""
       },
@@ -4721,6 +4763,8 @@
       }
      ],
      "path": "twins / 4 members / 1 machine",
+     "proper": true,
+     "why": "",
      "ci_name": "ah-1062287-001",
      "ci_class": "Linux Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
@@ -4783,6 +4827,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 fqdn \"lva71pwbolcc01v.sdi.ssc3.ext3.bankofamerica3.com\" differs from the scanned name: FQDN rules could not find it \u00b7 named \"lva71pwbolcc01v\", not \"ccgw-l7-vip2\": host name rules could not find it \u00b7 the OS or the name marks a virtual server: the hardware rules hand it to the load balancer rules"
+      },
+      {
        "title": "VIP sign",
        "detail": "OS has \"f5\", OS has \"big-ip\", label segment \"vip2\""
       },
@@ -4808,6 +4856,8 @@
       }
      ],
      "path": "one service / 1 member / 1 machine",
+     "proper": true,
+     "why": "",
      "ci_name": "lva71pwbolcc01v",
      "ci_class": "Linux Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
@@ -4958,6 +5008,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 the member rule ran first and could not name one machine behind the virtual server"
+      },
+      {
        "title": "VIP sign",
        "detail": "OS has \"f5\", OS has \"big-ip\", label segment \"vip1\""
       },
@@ -4975,6 +5029,8 @@
       }
      ],
      "path": "ip_address / one record",
+     "proper": true,
+     "why": "",
      "ci_name": "/Common/ait74300-review1-origin_mymerrill_cdn-6001-vip",
      "ci_class": "Load Balancer Service",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=",
@@ -5025,6 +5081,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 the member rule ran first and could not name one machine behind the virtual server"
+      },
+      {
        "title": "VIP sign",
        "detail": "OS has \"f5\", OS has \"big-ip\", label segment \"vip1\""
       },
@@ -5042,6 +5102,8 @@
       }
      ],
      "path": "ip_address / one record",
+     "proper": true,
+     "why": "",
      "ci_name": "/Common/ait74300-preview1-origin_mymerrill_cdn-6001-vip",
      "ci_class": "Load Balancer Service",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=",
@@ -5092,6 +5154,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 the member rule ran first and could not name one machine behind the virtual server"
+      },
+      {
        "title": "VIP sign",
        "detail": "OS has \"f5\", OS has \"big-ip\", label segment \"vip\""
       },
@@ -5109,6 +5175,8 @@
       }
      ],
      "path": "ip_address / one record",
+     "proper": true,
+     "why": "",
      "ci_name": "/Common/ait32589-rvcpbt2-pbui-443-vip",
      "ci_class": "Load Balancer Service",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=",
@@ -5221,77 +5289,6 @@
    "sibling": "The only address rule that filters by class before searching: the query runs on the classFor table itself, so it relies on the class restriction instead of an agrees() post-check or an isLoadBalancer() refusal (neither helper exists in this script). It declines outright when the OS gives no class, where the other three carry on with no class preference.",
    "examples": [
     {
-     "number": "SDI000002111413",
-     "host": "a-vsdnd085i0018.sdi.corp.bankofamerica.com",
-     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002111413",
-     "item_facts": [
-      [
-       "DNS name",
-       "a-vsdnd085i0018.sdi.corp.bankofamerica.com"
-      ],
-      [
-       "IP address",
-       "30.129.237.14"
-      ],
-      [
-       "Operating system",
-       "VMware ESXi 8.0.3 build 25205845"
-      ],
-      [
-       "Tracking",
-       "IP"
-      ],
-      [
-       "Last evaluated",
-       "2026-09-21 04:59:59"
-      ]
-     ],
-     "walk": [
-      {
-       "title": "Address",
-       "detail": "\"30.129.237.14\"; OS \"VMware ESXi 8.0.3 build 25205845\" gives the class esx_server"
-      },
-      {
-       "title": "Records carrying the address",
-       "detail": "1 record: a-vsdnd085i0018 [esx_server] ip 30.129.237.14 -> exactly one, accepted; name agrees with the scanned label \"a-vsdnd085i0018\""
-      }
-     ],
-     "path": "esx_server / 1 rows",
-     "ci_name": "a-vsdnd085i0018",
-     "ci_class": "ESX Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_esx_server.do?sys_id=",
-     "ci_facts": [
-      [
-       "FQDN",
-       "a-vsdnd085i0018.sdi.corp.bankofamerica.com"
-      ],
-      [
-       "DNS domain",
-       "sdi.corp.bankofamerica.com"
-      ],
-      [
-       "IP address",
-       "30.129.237.14"
-      ],
-      [
-       "Serial number",
-       "84CD673"
-      ],
-      [
-       "Model",
-       "Dell Inc. POWEREDGE R640"
-      ],
-      [
-       "Install status",
-       "Installed"
-      ],
-      [
-       "Operational status",
-       "Operational"
-      ]
-     ]
-    },
-    {
      "number": "SDI000002931100",
      "host": "10.131.81.11",
      "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002931100",
@@ -5319,15 +5316,21 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no DNS name reported, only the address: no serial, phone or name rule could run"
+      },
+      {
        "title": "Address",
        "detail": "\"10.131.81.11\"; OS \"HP LaserJet Printer\" gives the class printer"
       },
       {
        "title": "Records carrying the address",
-       "detail": "1 record: txsanwz01p04 [printer] ip 10.131.81.11 -> exactly one, accepted; name agrees with the scanned label \"\""
+       "detail": "1 record: txsanwz01p04 [printer] ip 10.131.81.11 -> exactly one, accepted; no scanned label to compare"
       }
      ],
      "path": "printer / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "txsanwz01p04",
      "ci_class": "Printer",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
@@ -5351,81 +5354,6 @@
       [
        "Operational status",
        "Ready"
-      ]
-     ]
-    },
-    {
-     "number": "SDI000002935135",
-     "host": "gbvmsqssiu04",
-     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002935135",
-     "item_facts": [
-      [
-       "DNS name",
-       "gbvmsqssiu04"
-      ],
-      [
-       "IP address",
-       "30.196.237.48"
-      ],
-      [
-       "Operating system",
-       "Windows Server 2022 Standard 64 bit Edition Version 21H2"
-      ],
-      [
-       "NetBIOS name",
-       "GBVMSQSSIU04"
-      ],
-      [
-       "Tracking",
-       "AGENT"
-      ],
-      [
-       "Last evaluated",
-       "2026-09-21 04:54:13"
-      ]
-     ],
-     "walk": [
-      {
-       "title": "Address",
-       "detail": "\"30.196.237.48\"; OS \"Windows Server 2022 Standard 64 bit Edition Version 21H2\" gives the class win_server"
-      },
-      {
-       "title": "Records carrying the address",
-       "detail": "1 record: gbvmsqssiu04 [win_server] ip 30.196.237.48 -> exactly one, accepted; name agrees with the scanned label \"gbvmsqssiu04\""
-      }
-     ],
-     "path": "win_server / 1 rows",
-     "ci_name": "gbvmsqssiu04",
-     "ci_class": "Windows Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
-     "ci_facts": [
-      [
-       "FQDN",
-       "gbvmsqssiu04.corp.bankofamerica.com"
-      ],
-      [
-       "DNS domain",
-       "emea.sdi.corp.bankofamerica.com"
-      ],
-      [
-       "IP address",
-       "30.196.237.48"
-      ],
-      [
-       "Serial number",
-       "VMware-42 07 db d6 46 43 40 93-5e 0c 51 0f 20 bb 94 b7"
-      ],
-      [
-       "Model",
-       "VMware, Inc. VMware Virtual Platform"
-      ],
-      [
-       "Install status",
-       "Installed"
-      ],
-      [
-       "Operational status",
-       "Operational"
       ]
      ]
     }
@@ -5566,15 +5494,21 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no DNS name reported, only the address: no serial, phone or name rule could run \u00b7 OS \"UNIX\" gives no class: the class rule before this one could not search"
+      },
+      {
        "title": "Address",
        "detail": "\"10.16.37.6\"; the whole hardware tree, the OS class kept as a preference"
       },
       {
        "title": "Records carrying the address",
-       "detail": "1 record: sgsgsinhf04idf0003 [ip_switch] ip 10.16.37.6 -> exactly one, accepted; not a load balancer device; class agrees with the OS; name agrees with the scanned label \"\""
+       "detail": "1 record: sgsgsinhf04idf0003 [ip_switch] ip 10.16.37.6 -> exactly one, accepted; not a load balancer device; class agrees with the OS; no scanned label to compare"
       }
      ],
      "path": "ip_switch / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "sgsgsinhf04idf0003",
      "ci_class": "IP Switch",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_switch.do?sys_id=",
@@ -5633,15 +5567,21 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no DNS name reported, only the address: no serial, phone or name rule could run \u00b7 OS \"not reported\" gives no class: the class rule before this one could not search"
+      },
+      {
        "title": "Address",
        "detail": "\"171.147.250.213\"; the whole hardware tree, the OS class kept as a preference"
       },
       {
        "title": "Records carrying the address",
-       "detail": "1 record: tidsxxmumdcp2 [ids_network] ip 171.147.250.213 -> exactly one, accepted; not a load balancer device; class agrees with the OS; name agrees with the scanned label \"\""
+       "detail": "1 record: tidsxxmumdcp2 [ids_network] ip 171.147.250.213 -> exactly one, accepted; not a load balancer device; class agrees with the OS; no scanned label to compare"
       }
      ],
      "path": "ids_network / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "tidsxxmumdcp2",
      "ci_class": "Intrusion Detection System",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ids_network.do?sys_id=",
@@ -5657,69 +5597,6 @@
       [
        "Model",
        "Trend Micro TippingPoint TPS-Series 8400TX"
-      ],
-      [
-       "Install status",
-       "Installed"
-      ],
-      [
-       "Operational status",
-       "Operational"
-      ]
-     ]
-    },
-    {
-     "number": "SDI000002907396",
-     "host": "crpflmiaups58.bankofamerica.com",
-     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002907396",
-     "item_facts": [
-      [
-       "DNS name",
-       "crpflmiaups58.bankofamerica.com"
-      ],
-      [
-       "IP address",
-       "10.77.57.21"
-      ],
-      [
-       "Operating system",
-       "(not reported)"
-      ],
-      [
-       "Tracking",
-       "IP"
-      ],
-      [
-       "Last evaluated",
-       "2026-09-21 04:27:51"
-      ]
-     ],
-     "walk": [
-      {
-       "title": "Address",
-       "detail": "\"10.77.57.21\"; the whole hardware tree, the OS class kept as a preference"
-      },
-      {
-       "title": "Records carrying the address",
-       "detail": "1 record: CRPFLMIAUPS58 [ups] ip 10.77.57.21 -> exactly one, accepted; not a load balancer device; class agrees with the OS; name agrees with the scanned label \"crpflmiaups58\""
-      }
-     ],
-     "path": "ups / 1 rows",
-     "ci_name": "CRPFLMIAUPS58",
-     "ci_class": "UPS",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ups.do?sys_id=",
-     "ci_facts": [
-      [
-       "IP address",
-       "10.77.57.21"
-      ],
-      [
-       "Serial number",
-       "N12244110057"
-      ],
-      [
-       "Model",
-       "Schneider Electric Smart-UPS Smart-UPS 2200VA"
       ],
       [
        "Install status",
@@ -5864,6 +5741,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 fqdn \"a-vsg1d000i0442.apac.sdi.corp.bankofamerica.com\" differs from the scanned name: FQDN rules could not find it \u00b7 named \"a-vsg1d000i0442\", not \"a-vsg1d000i0442-nfs\": host name rules could not find it \u00b7 the CI holds \"30.188.125.72\" on ip_address; the scanned address sits on an adapter record the address rules do not read"
+      },
+      {
        "title": "Address",
        "detail": "\"30.184.159.138\"; OS \"VMware ESX Server\" gives the class esx_server (a preference for class agreement)"
       },
@@ -5877,6 +5758,8 @@
       }
      ],
      "path": "1 records / 1 owners",
+     "proper": true,
+     "why": "",
      "ci_name": "a-vsg1d000i0442",
      "ci_class": "ESX Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_esx_server.do?sys_id=",
@@ -5939,6 +5822,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no DNS name reported, only the address: no serial, phone or name rule could run \u00b7 the CI holds \"30.140.38.51\" on ip_address; the scanned address sits on an adapter record the address rules do not read"
+      },
+      {
        "title": "Address",
        "detail": "\"30.140.53.8\"; OS \"VMware ESX Server\" gives the class esx_server (a preference for class agreement)"
       },
@@ -5948,10 +5835,12 @@
       },
       {
        "title": "Decision",
-       "detail": "1 distinct owning CI; not a load balancer device; name agrees with \"\""
+       "detail": "1 distinct owning CI; not a load balancer device; no scanned label to compare"
       }
      ],
      "path": "2 records / 1 owners",
+     "proper": true,
+     "why": "",
      "ci_name": "vltwab01xsdi030",
      "ci_class": "ESX Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_esx_server.do?sys_id=",
@@ -6014,6 +5903,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no DNS name reported, only the address: no serial, phone or name rule could run \u00b7 the CI holds \"30.161.24.69\" on ip_address; the scanned address sits on an adapter record the address rules do not read"
+      },
+      {
        "title": "Address",
        "detail": "\"30.161.25.150\"; OS \"VMware ESX Server\" gives the class esx_server (a preference for class agreement)"
       },
@@ -6023,10 +5916,12 @@
       },
       {
        "title": "Decision",
-       "detail": "1 distinct owning CI; not a load balancer device; name agrees with \"\""
+       "detail": "1 distinct owning CI; not a load balancer device; no scanned label to compare"
       }
      ],
      "path": "1 records / 1 owners",
+     "proper": true,
+     "why": "",
      "ci_name": "a-vrdnd006i0100",
      "ci_class": "ESX Server",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_esx_server.do?sys_id=",
@@ -6195,6 +6090,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no DNS name reported, only the address: no serial, phone or name rule could run \u00b7 the address sits on an IP Address record, not on the CI or an adapter"
+      },
+      {
        "title": "Address",
        "detail": "\"10.16.37.11\"; OS \"UNIX\" gives no class (a preference for class agreement)"
       },
@@ -6204,10 +6103,12 @@
       },
       {
        "title": "Decision",
-       "detail": "1 distinct owning CI; not a load balancer device; name agrees with \"\""
+       "detail": "1 distinct owning CI; not a load balancer device; no scanned label to compare"
       }
      ],
      "path": "1 records / 1 owners",
+     "proper": true,
+     "why": "",
      "ci_name": "k30894a794e38",
      "ci_class": "Computer",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_computer.do?sys_id=",
@@ -6235,140 +6136,6 @@
       [
        "Operational status",
        "Operational"
-      ]
-     ]
-    },
-    {
-     "number": "SDI000002968810",
-     "host": "172.16.142.249",
-     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002968810",
-     "item_facts": [
-      [
-       "DNS name",
-       "(none)"
-      ],
-      [
-       "IP address",
-       "172.16.142.249"
-      ],
-      [
-       "Operating system",
-       "Ubuntu/Linux"
-      ],
-      [
-       "Tracking",
-       "IP"
-      ],
-      [
-       "Last evaluated",
-       "2026-09-21 04:57:20"
-      ]
-     ],
-     "walk": [
-      {
-       "title": "Address",
-       "detail": "\"172.16.142.249\"; OS \"Ubuntu/Linux\" gives the class linux_server (a preference for class agreement)"
-      },
-      {
-       "title": "IP Address records on the address",
-       "detail": "1: IP Address record -> adapter 0a:09:64:f2:2b:09 -> ip-172-16-142-249 [linux_server]"
-      },
-      {
-       "title": "Decision",
-       "detail": "1 distinct owning CI; not a load balancer device; name agrees with \"\""
-      }
-     ],
-     "path": "1 records / 1 owners",
-     "ci_name": "ip-172-16-142-249",
-     "ci_class": "Linux Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
-     "ci_facts": [
-      [
-       "FQDN",
-       "ip-172-16-142-249.us-west-2.compute.internal"
-      ],
-      [
-       "DNS domain",
-       "us-west-2.compute.internal"
-      ],
-      [
-       "Install status",
-       "Retired"
-      ],
-      [
-       "Operational status",
-       "Retired"
-      ]
-     ]
-    },
-    {
-     "number": "SDI000002929749",
-     "host": "30.240.252.187",
-     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002929749",
-     "item_facts": [
-      [
-       "DNS name",
-       "(none)"
-      ],
-      [
-       "IP address",
-       "30.240.252.187"
-      ],
-      [
-       "Operating system",
-       "Crestron Device"
-      ],
-      [
-       "Tracking",
-       "IP"
-      ],
-      [
-       "Last evaluated",
-       "2026-09-21 04:37:46"
-      ]
-     ],
-     "walk": [
-      {
-       "title": "Address",
-       "detail": "\"30.240.252.187\"; OS \"Crestron Device\" gives no class (a preference for class agreement)"
-      },
-      {
-       "title": "IP Address records on the address",
-       "detail": "1: IP Address record -> adapter Netwtw10. -> wz5741wl51 [computer]"
-      },
-      {
-       "title": "Decision",
-       "detail": "1 distinct owning CI; not a load balancer device; name agrees with \"\""
-      }
-     ],
-     "path": "1 records / 1 owners",
-     "ci_name": "wz5741wl51",
-     "ci_class": "Computer",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_computer.do?sys_id=",
-     "ci_facts": [
-      [
-       "DNS domain",
-       "corp.bankofamerica.com"
-      ],
-      [
-       "IP address",
-       "30.240.252.184"
-      ],
-      [
-       "Serial number",
-       "5CG20308YX"
-      ],
-      [
-       "Model",
-       "Hewlett Packard ELITEBOOK 830 G8 GWIM"
-      ],
-      [
-       "Install status",
-       "Retired"
-      ],
-      [
-       "Operational status",
-       "Retired"
       ]
      ]
     }
@@ -6470,6 +6237,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 Kubernetes Node sits outside the hardware tree the name rules search"
+      },
+      {
        "title": "Name",
        "detail": "\"lrchac14xsdi015.sdi.corp.bankofamerica.com\" searched on the name field of every CI class"
       },
@@ -6479,6 +6250,8 @@
       }
      ],
      "path": "kubernetes_node / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "lrchac14xsdi015.sdi.corp.bankofamerica.com",
      "ci_class": "Kubernetes Node",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_kubernetes_node.do?sys_id=",
@@ -6525,6 +6298,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 Kubernetes Node sits outside the hardware tree the name rules search"
+      },
+      {
        "title": "Name",
        "detail": "\"lrchac14xsdi003.sdi.corp.bankofamerica.com\" searched on the name field of every CI class"
       },
@@ -6534,6 +6311,8 @@
       }
      ],
      "path": "kubernetes_node / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "lrchac14xsdi003.sdi.corp.bankofamerica.com",
      "ci_class": "Kubernetes Node",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_kubernetes_node.do?sys_id=",
@@ -6580,6 +6359,10 @@
      ],
      "walk": [
       {
+       "title": "Why this rule",
+       "detail": "no serial reported: serial rules skipped \u00b7 label is not sep + twelve hex characters: phone MAC rule skipped \u00b7 Kubernetes Node sits outside the hardware tree the name rules search"
+      },
+      {
        "title": "Name",
        "detail": "\"lrchac15xsdi004.sdi.corp.bankofamerica.com\" searched on the name field of every CI class"
       },
@@ -6589,6 +6372,8 @@
       }
      ],
      "path": "kubernetes_node / 1 rows",
+     "proper": true,
+     "why": "",
      "ci_name": "lrchac15xsdi004.sdi.corp.bankofamerica.com",
      "ci_class": "Kubernetes Node",
      "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_kubernetes_node.do?sys_id=",

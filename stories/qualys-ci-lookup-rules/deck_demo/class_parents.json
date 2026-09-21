@@ -1,0 +1,136 @@
+{
+ "cmdb_ci_computer": [
+  "cmdb_ci_computer",
+  "cmdb_ci_hardware",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_esx_server": [
+  "cmdb_ci_esx_server",
+  "cmdb_ci_vcenter_server_obj",
+  "cmdb_ci_virtualization_server",
+  "cmdb_ci_server",
+  "cmdb_ci_computer",
+  "cmdb_ci_hardware",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_hardware": [
+  "cmdb_ci_hardware",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_ids_network": [
+  "cmdb_ci_ids_network",
+  "cmdb_ci_netgear",
+  "cmdb_ci_hardware",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_ip_phone": [
+  "cmdb_ci_ip_phone",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_ip_router": [
+  "cmdb_ci_ip_router",
+  "cmdb_ci_netgear",
+  "cmdb_ci_hardware",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_ip_switch": [
+  "cmdb_ci_ip_switch",
+  "cmdb_ci_netgear",
+  "cmdb_ci_hardware",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_kubernetes_node": [
+  "cmdb_ci_kubernetes_node",
+  "cmdb_ci_kubernetes_component",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_lb": [
+  "cmdb_ci_lb",
+  "cmdb_ci_server",
+  "cmdb_ci_computer",
+  "cmdb_ci_hardware",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_lb_bigip": [
+  "cmdb_ci_lb_bigip",
+  "cmdb_ci_lb",
+  "cmdb_ci_server",
+  "cmdb_ci_computer",
+  "cmdb_ci_hardware",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_lb_service": [
+  "cmdb_ci_lb_service",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_linux_server": [
+  "cmdb_ci_linux_server",
+  "cmdb_ci_server",
+  "cmdb_ci_computer",
+  "cmdb_ci_hardware",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_msd": [
+  "cmdb_ci_msd",
+  "cmdb_ci_hardware",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_netgear": [
+  "cmdb_ci_netgear",
+  "cmdb_ci_hardware",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_outofband_device": [
+  "cmdb_ci_outofband_device",
+  "cmdb_ci_hardware",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_printer": [
+  "cmdb_ci_printer",
+  "cmdb_ci_hardware",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_scanner": [
+  "cmdb_ci_scanner",
+  "cmdb_ci_imaging_hardware",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_server": [
+  "cmdb_ci_server",
+  "cmdb_ci_computer",
+  "cmdb_ci_hardware",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_ups": [
+  "cmdb_ci_ups",
+  "cmdb_ci_hardware",
+  "cmdb_ci",
+  "cmdb"
+ ],
+ "cmdb_ci_win_server": [
+  "cmdb_ci_win_server",
+  "cmdb_ci_server",
+  "cmdb_ci_computer",
+  "cmdb_ci_hardware",
+  "cmdb_ci",
+  "cmdb"
+ ]
+}

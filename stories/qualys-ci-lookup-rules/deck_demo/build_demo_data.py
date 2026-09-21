@@ -1,11 +1,14 @@
 """Content for 'Qualys CI Lookup Rules - CMDB Team Demo.pptx' (demo_data.json).
 
 Concept slides, one explanation slide per rule (purpose, what it reads and returns, the matching
-stages, its place in the chain) and three example slides per rule. Examples come from the output of
-'Lookup Rules - Demo Examples Script.js' run on the client instance, pasted into
-demo_examples_output.txt next to this file (the EX lines); until that file exists the two load
-balancer rules take their examples from the client exports of 17 Sep and every other rule shows a
-placeholder slide. Rebuild with `python3 build_demo_data.py && node build_demo_deck.js`.
+stages, its place in the chain) and up to three example slides per rule. Examples come from the
+output of 'Lookup Rules - Demo Evidence Script.js' run on the client instance, pasted into
+demo_examples_output.txt next to this file (the EX lines; demo_examples_override.txt, when present,
+replaces the rules it contains). Only examples dedicated to their rule are kept: the CI could not
+have been returned by any earlier rule (dedicated() below, the twin of the script's test) and the
+rule returns the same CI when replayed. Every example opens with a "Why this rule" step built from
+what the earlier rules' searches find for the item (the script's earlier list) or, for older output,
+from the facts of the item and the CI. Rebuild with `python3 build_demo_data.py && node build_demo_deck.js`.
 """
 import json, os, re, pickle, sys
 
@@ -129,6 +132,104 @@ def class_from_os(os_text):
     return ''
 
 
+KIND = {'175': 'Serial Number Class Match', '180': 'Serial Number Hardware Match', '200': 'Cisco IP Phone MAC', '250': 'FQDN Class Match', '260': 'FQDN Hardware Match',
+        '300': 'Hostname Domain Class Match', '310': 'Hostname Domain Hardware Match', '350': 'Layered DNS Match', '400': 'Hostname Class Match', '410': 'Hostname Hardware Match',
+        '415': 'Device Name Match', '420': 'Management Interface Match', '430': 'Network Interface Name Match', '450': 'FQDN Name Hardware Match', '455': 'Load Balancer Member Match',
+        '460': 'Load Balancer Service Match', '700': 'IP Class Match', '705': 'IP Hardware Match', '730': 'IP Adapter Match', '740': 'IP Layered Match', '850': 'FQDN Name Broad Match'}
+FAMILY = [('Serial rules', ['175', '180']), ('Phone MAC rule', ['200']), ('FQDN rules', ['250', '260']), ('Host name with domain rules', ['300', '310']), ('Layered DNS rule', ['350']),
+          ('Host name rules', ['400', '410']), ('Device name rule', ['415']), ('Controller rule', ['420']), ('Interface rule', ['430']), ('Whole fqdn name rule', ['450']),
+          ('Member rule', ['455']), ('Service rule', ['460']), ('Address rules', ['700', '705']), ('Adapter rule', ['730']), ('IP Address record rule', ['740'])]
+CLASS_OF = {'ESX Server': 'cmdb_ci_esx_server', 'Windows Server': 'cmdb_ci_win_server', 'Computer': 'cmdb_ci_computer', 'AIX Server': 'cmdb_ci_aix_server', 'Solaris Server': 'cmdb_ci_solaris_server',
+            'HP-UX Server': 'cmdb_ci_hpux_server', 'Storage Server': 'cmdb_ci_storage_server', 'Printer': 'cmdb_ci_printer', 'Linux Server': 'cmdb_ci_linux_server', 'Network Gear': 'cmdb_ci_netgear'}
+PARENTS = json.load(open(os.path.join(HERE, 'class_parents.json'))) if os.path.exists(os.path.join(HERE, 'class_parents.json')) else {}
+JUNK_SERIALS = ['0', 'none', 'n/a', 'na', 'unknown', 'empty', 'not specified', 'not available', 'no serial', 'default string', 'to be filled by o.e.m.', 'system serial number', 'chassis serial number', '0123456789', '1234567890']
+
+
+def under(cls, root):
+    if not cls: return False
+    if cls == root: return True
+    if cls not in PARENTS:
+        raise SystemExit('class hierarchy unknown for %s: add it to class_parents.json' % cls)
+    return root in PARENTS[cls]
+
+
+def junk_serial(s):
+    return not s or len(s) < 4 or s in JUNK_SERIALS
+
+
+def dedicated(order, item, ci):
+    """'' when no rule before this one could have returned the CI and the rule's own sign is present; otherwise the reason.
+    The twin of dedicated() in the evidence script, applied to output that predates it."""
+    kind = KIND[order]
+    dns = (item.get('dns') or '').strip().lower(); lbl = first_label(dns); domain = domain_of(dns)
+    ip = (item.get('ip') or '').strip(); pref = CLASS_OF.get(class_from_os(item.get('os', '')), ''); serial = (item.get('serial') or '').strip().lower()
+    name = (ci.get('name') or '').strip().lower(); fqdn = (ci.get('fqdn') or '').strip().lower(); cdom = (ci.get('dns_domain') or '').strip().lower()
+    cserial = (ci.get('serial') or '').strip().lower(); cls = ci.get('cls', ''); cip = (ci.get('ip') or '').strip()
+    address = kind.startswith('IP '); lb = kind.startswith('Load Balancer'); serial_rule = kind.startswith('Serial')
+    after_fqdn = kind not in ('Serial Number Class Match', 'Serial Number Hardware Match', 'Cisco IP Phone MAC', 'FQDN Class Match', 'FQDN Hardware Match')
+    after_domain = after_fqdn and kind not in ('Hostname Domain Class Match', 'Hostname Domain Hardware Match')
+    after_host = kind in ('Management Interface Match', 'Network Interface Name Match', 'FQDN Name Hardware Match', 'FQDN Name Broad Match') or address
+    sibling = kind in ('Serial Number Hardware Match', 'FQDN Hardware Match', 'Hostname Domain Hardware Match', 'Hostname Hardware Match', 'IP Hardware Match')
+    hw = under(cls, 'cmdb_ci_hardware')
+    if not dns and not address and not lb: return 'no DNS name'
+    if not serial_rule and hw and not junk_serial(serial) and cserial == serial: return 'the record carries the scanned serial: a serial rule should have found it'
+    if after_fqdn and hw and fqdn and fqdn == dns: return 'the record carries the scanned name as its fqdn: an FQDN rule should have found it'
+    if after_domain and hw and dns and name == lbl and cdom and cdom == domain: return 'the record carries the scanned label and domain: a domain rule should have found it'
+    if after_host and hw and dns and name == lbl: return 'the record is named with the scanned label: a host name rule should have found it'
+    if kind in ('FQDN Name Hardware Match', 'FQDN Name Broad Match') and name != dns: return 'the record is not named with the whole fqdn'
+    if kind == 'FQDN Name Broad Match' and hw: return 'a hardware record named with the fqdn: FQDN Name Hardware Match should have found it'
+    if sibling and pref and under(cls, pref): return 'the record sits in the OS class %s: the class rule before this one should have found it' % pref.replace('cmdb_ci_', '')
+    if kind in ('IP Adapter Match', 'IP Layered Match') and ip and cip == ip: return 'the record carries the scanned address itself: an address rule before this one should have found it'
+    return ''
+
+
+def why_from_earlier(order, earlier):
+    """One clause per rule family from the findings of the earlier rules (the script's earlier list), siblings merged."""
+    found = {e['order']: e['found'] for e in earlier}
+    parts = []
+    for label, orders in FAMILY:
+        hits = [found[o] for o in orders if o in found]
+        if not hits: continue
+        hits = list(dict.fromkeys(hits))
+        parts.append('%s: %s' % (label, ' / '.join(hits)))
+    return parts
+
+
+def why_from_facts(order, item, ci):
+    """The same idea for output without the earlier list: why no rule before this one could have returned this CI, from the facts of the item and the CI."""
+    kind = KIND[order]
+    dns = (item.get('dns') or '').strip().lower(); lbl = first_label(dns); domain = domain_of(dns); os_text = item.get('os', '')
+    pref_label = class_from_os(os_text); pref = CLASS_OF.get(pref_label, ''); serial = (item.get('serial') or '').strip()
+    name = (ci.get('name') or '').strip(); fqdn = (ci.get('fqdn') or '').strip(); cdom = (ci.get('dns_domain') or '').strip(); cls = ci.get('cls', ''); cls_label = ci.get('cls_label') or cls
+    hw = under(cls, 'cmdb_ci_hardware'); q = lambda v: '"%s"' % v
+    parts = []
+    if order == '175':
+        return ['first rule of the chain: the serial is searched inside the OS class before any name or address is read']
+    if kind.startswith('IP ') and not dns:
+        parts.append('no DNS name reported, only the address: no serial, phone or name rule could run')
+    else:
+        if not serial: parts.append('no serial reported: serial rules skipped')
+        elif junk_serial(serial.lower()): parts.append('serial %s is a placeholder: serial rules refuse it' % q(serial))
+        elif hw: parts.append('the record does not carry the scanned serial %s' % q(serial))
+        if order not in ('180', '200') and not re.match(r'^sep[0-9a-f]{12}$', lbl): parts.append('label is not sep + twelve hex characters: phone MAC rule skipped')
+        if order not in ('180', '200', '250', '260') and hw:
+            if not fqdn: parts.append('no fqdn on the record: FQDN rules could not find it')
+            else: parts.append('fqdn %s differs from the scanned name: FQDN rules could not find it' % q(fqdn))
+        if order in ('350', '400', '410', '415', '420', '430', '450', '455', '460', '700', '705', '730', '740', '850') and hw:
+            if name.lower() != lbl: parts.append('named %s, not %s: host name rules could not find it' % (q(name), q(lbl)))
+            elif cdom.lower() != domain: parts.append('named %s but %s: host name with domain rules could not confirm it' % (q(name), ('dns_domain ' + q(cdom)) if cdom else 'no dns_domain'))
+        if order == '415': parts.append('%s sits outside the hardware tree the name rules search' % cls_label)
+        if order == '850': parts.append('%s sits outside the hardware tree the name rules search' % cls_label)
+    if order in ('180', '260', '310', '410', '705'):
+        if not pref: parts.append('OS %s gives no class: the class rule before this one could not search' % q(os_text or 'not reported'))
+        elif not under(cls, pref): parts.append('OS %s gives %s; the record is a %s, outside that class' % (q(os_text), pref_label, cls_label))
+    if order == '455': parts.append('the OS or the name marks a virtual server: the hardware rules hand it to the load balancer rules')
+    if order == '460': parts.append('the member rule ran first and could not name one machine behind the virtual server')
+    if order == '730': parts.append('the CI holds %s on ip_address; the scanned address sits on an adapter record the address rules do not read' % (q(ci.get('ip')) if ci.get('ip') else 'no address'))
+    if order == '740': parts.append('the address sits on an IP Address record, not on the CI or an adapter')
+    return parts
+
+
 def walk(order, item, ci, extra):
     dns, ip, os_text = item.get('dns', ''), item.get('ip', ''), item.get('os', '')
     name, domain, cls = first_label(dns), domain_of(dns), class_from_os(os_text)
@@ -248,6 +349,7 @@ def condense(steps):
                 items = tail.split(' ; ')
                 if len(items) > 3:
                     detail = head + ': ' + ' ; '.join(items[:3]) + ' ; ...'
+        detail = detail.replace('name agrees with the scanned label ""', 'no scanned label to compare').replace('name agrees with ""', 'no scanned label to compare')
         out.append(dict(title=title, detail=detail))
     if misses:
         out.append(dict(title='Clue%s %s' % ('s' if len(misses) > 1 else '', ', '.join(misses)), detail='no service record'))
@@ -256,18 +358,24 @@ def condense(steps):
 
 def example(order, item, ci, extra):
     steps = extra.get('steps')
+    verdict = extra.get('verdict') or {}
+    if 'proper' in extra:
+        proper, why = bool(extra['proper']), extra.get('why', '')
+    else:
+        why = dedicated(order, item, ci) or ('' if verdict.get('same_as_today', True) else 'the rule replayed today returns something else') or ('' if ci.get('live', True) else 'the CI is retired now')
+        proper = not why
     if steps:
         walk_lines = [dict(title=s['title'], detail=s['detail']) for s in condense(steps)]
-        if order == '450' and str(extra.get('shape', '')).startswith('none'):
-            walk_lines.append(dict(title='Why the item is matched anyway', detail='On the development instance this rule carries a longer script that also cuts interface names down to the device name (the walk of Network Interface Name Match); this item resolved through that extension. The delivered rule searches the whole fqdn on the name field, as the steps above show.'))
-        verdict = extra.get('verdict') or {}
+        reasons = why_from_earlier(order, extra['earlier']) if extra.get('earlier') else why_from_facts(order, item, ci)
+        if reasons:
+            walk_lines.insert(0, dict(title='Why this rule', detail=' \u00b7 '.join(reasons)))
         if verdict and not verdict.get('same_as_today', True):
             walk_lines.append(dict(title='Replay today', detail='the rule now returns ' + (verdict.get('ci_label') or 'nothing') + '; the item still holds the CI matched earlier'))
     else:
         walk_lines = walk(order, item, ci, extra)
     return dict(number=item['number'], host=item.get('dns') or item.get('ip', ''),
                 item_link='%s/sn_sec_cmn_src_ci_list.do?sysparm_query=number=%s' % (BASE_URL, item['number']),
-                item_facts=item_facts(item), walk=walk_lines, path=extra.get('shape', ''),
+                item_facts=item_facts(item), walk=walk_lines, path=extra.get('shape', ''), proper=proper, why=why,
                 ci_name=ci.get('name', ''), ci_class=ci.get('cls_label') or ci.get('cls', ''),
                 ci_link='%s/%s.do?sys_id=%s' % (BASE_URL, ci.get('cls') or 'cmdb_ci', ci.get('sys_id', '')), ci_facts=ci_facts(ci))
 
@@ -336,8 +444,12 @@ if os.path.exists(OUTPUT):
 else:
     examples = from_lb_exports()
     source = 'client exports of 17 Sep (load balancer rules only)'
+dropped = []
 for r in RULES:
-    r['examples'] = examples.get(r['order'], [])[:3]
+    kept = []
+    for x in examples.get(r['order'], []):
+        (kept if x['proper'] else dropped).append(x if x['proper'] else (r['order'], x['number'], x['why']))
+    r['examples'] = kept[:3]
     r['matched'] = counts.get(r['order'])
 
 CHAIN = [[r['order'], r['name'].replace('USEM ', ''), r['reads'], r['returns']] for r in RULES]
@@ -345,3 +457,8 @@ data = dict(title='Qualys CI Lookup Rules', subtitle='How a scanned host finds i
 json.dump(data, open(sys.argv[2] if len(sys.argv) > 2 else os.path.join(HERE, 'demo_data.json'), 'w'), indent=1)
 have = sum(1 for r in RULES if r['examples'])
 print('rules: %d | with verified mechanics: %d | rules with examples: %d (%s) | example slides: %d' % (len(RULES), sum(1 for r in RULES if r.get('literals') is not None), have, source, sum(len(r['examples']) for r in RULES)))
+for order, number, why in dropped:
+    print('  dropped %s %s: %s' % (order, number, why))
+short = [(r['order'], len(r['examples'])) for r in RULES if len(r['examples']) < 3]
+if short:
+    print('  rules with fewer than three dedicated examples: ' + ', '.join('%s (%d)' % s for s in short))

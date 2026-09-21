@@ -480,24 +480,40 @@ numbers on the two proposals, then ask before changing anything. The 430 source-
 configuration note for the instance administrator, also to be confirmed by Mihir.
 
 
-## CMDB team demo deck (22 Sep)
+## CMDB team demo deck (21 Sep)
 `Qualys CI Lookup Rules - CMDB Team Demo.pptx`, built by `deck_demo/build_demo_deck.js` from `deck_demo/demo_data.json`
 (`deck_demo/build_demo_data.py`): title, two concept slides (what a lookup rule does, the principles the USEM rules
 share), the chain at a glance, then for each of the 21 custom rules one explanation slide (purpose, how it matches,
-reads, returns, place in the chain, items matched) and three example slides, one matched discovered item per slide with
-the scanned values, the numbered steps the rule took and the CI it returned, both with record links to the client
+reads, returns, place in the chain, items matched) and up to three example slides, one matched discovered item per slide
+with the scanned values, the numbered steps the rule took and the CI it returned, both with record links to the client
 development instance. The rule pages are written from `deck_demo/mechanics.json`, the scripting-level description of
 every rule (steps in execution order, decline conditions, literal lists, shared helpers) extracted from the delivered
 scripts by one reader per rule family and corrected by one checker per family against the same scripts.
 
-`Lookup Rules - Demo Evidence Script.js` (read-only, on INC0010003; it replaces the simpler examples script) counts, per
-active Qualys rule, the items the rule matched, replays the rule on the newest of them, records what each step found (the
-records carrying the serial, MAC, name, fqdn or address, the adapter and IP address records walked, the pool and members
-behind a virtual server, the flags that decided) and prints three examples per rule chosen to show different paths through
-the rule (one readable line and one EX line each, the EX line holding the item, the CI, the replay verdict and the steps).
-Its output saved as `deck_demo/demo_examples_output.txt` fills every rule's example pages with the steps as the walk;
-`build_demo_data.py <output> <json>` and `build_demo_deck.js <json> <pptx>` take other paths for test builds. Until the
-output exists the two load balancer rules take their examples from the 17 Sep client exports and the other rules show a
-placeholder page. Data held from earlier work covers only those two rules with matched items (640 items with services,
-pools and members), the four 15 Sep incident hosts and the exception lists of the measurement runs; the rest needs the run.
+`Lookup Rules - Demo Evidence Script.js` (read-only, on INC0010003) counts, per active Qualys rule, the items the rule
+matched, then reads up to `SCAN` (4,000) of the newest of them and keeps the ones dedicated to the rule: `dedicated()`
+declines an item whose CI an earlier rule could have returned (a hardware record carrying the scanned serial, the scanned
+name as its fqdn, the scanned label with its domain, or the scanned label at all for the rules after the host name rules;
+a record inside the OS class for a Hardware sibling; a record carrying the address itself, or an adapter on the address,
+for the adapter and layered address rules; for the two whole-fqdn rules a record not named with the whole fqdn). The
+candidates that pass (`TRACES`, 9 per rule, DNS-named items first for the address rules) are replayed: the trace records
+what each step found (the records carrying the serial, MAC, name, fqdn or address, the adapters and IP address records
+walked, the pool and members behind a virtual server), the real rule is run for the verdict, and `finding()` records what
+every earlier custom rule's own search finds for the same item (the `earlier` list of the EX line; for Load Balancer
+Service Match it holds the member rule's decision). Three examples per rule are printed, different paths first, `proper`
+only (same CI on replay, CI live, dedicated); `FILL = true` tops up with the best remaining items marked `proper=false`,
+and the summary line per rule tallies why the scanned items were not dedicated. Its output saved as
+`deck_demo/demo_examples_output.txt` (or a targeted re-run in `deck_demo/demo_examples_override.txt`, which replaces the
+rules it contains) fills the example pages. `build_demo_data.py` keeps only proper examples (the same `dedicated()` test in
+Python, with `deck_demo/class_parents.json` for the class hierarchy, judges output that predates the script's own flag)
+and opens every walk with a "Why this rule" step: from the `earlier` findings when present, else from the facts of the
+item and the CI (no serial, no fqdn on the record, the name differs from the label, the class sits outside the OS class or
+outside the hardware tree, the address sits on an adapter or an IP Address record, the member rule ran first).
+
+State 21 Sep morning: the deck holds 55 examples from the client run of 20 Sep (the first version of the script). Eight
+of its 63 examples failed the dedicated test and are out: the three of rule 450 (matched on bofadev through the longer
+script that rule carries there, no record named with the whole fqdn), two of 700 and one of 705 (the record carries the
+scanned name as fqdn or label, so a name rule should have found it) and two of 740 (CI retired now). Rules 450 (0), 700
+(1), 705 (2) and 740 (1) wait for the re-run of the updated script requested on INC0010003, whose output replaces
+`demo_examples_output.txt` (or goes to the override file) and adds the `earlier` findings to every page.
 Rebuild with `python3 deck_demo/build_demo_data.py && NODE_PATH=<node_modules with pptxgenjs> node deck_demo/build_demo_deck.js`.
