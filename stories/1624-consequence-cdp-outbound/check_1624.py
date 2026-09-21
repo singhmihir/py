@@ -39,9 +39,9 @@ if right_sides != [e['payload'] for e in ordered] or sorted(right_sides) != sort
     problems.append('payload names on the right of the property are not exactly the sheet JSON field names')
 root = ET.parse(os.path.join(HERE, 'Consequence CDP Outbound Payload - Records.xml')).getroot()
 xml_props = {r.findtext('name'): (r.findtext('value') or '') for r in root.findall('sys_properties')}
-if xml_props.get('x_boar_bofa_usem_1.usem.consequence.fields.' + CONSEQUENCE) != expected_value:
+if xml_props.get('x_boar_bofa_usem_0.usem.consequence.fields.' + CONSEQUENCE) != expected_value:
     problems.append('record XML field property differs from the resolution')
-if sorted(xml_props) != sorted('x_boar_bofa_usem_1.' + n for n in props):
+if sorted(xml_props) != sorted('x_boar_bofa_usem_0.' + n for n in props):
     problems.append('record XML property names differ from properties.json')
 sample = json.load(open(os.path.join(HERE, 'samples', 'Sample payload - consequence.json')))
 element = sample['consequences'][0]

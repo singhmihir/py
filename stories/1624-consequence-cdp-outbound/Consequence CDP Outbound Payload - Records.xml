@@ -3,7 +3,7 @@
 <sys_script_include action="INSERT_OR_UPDATE">
 <access>public</access>
 <active>true</active>
-<api_name>x_boar_bofa_usem_1.BOFASIConsequenceOutboundProcessor</api_name>
+<api_name>x_boar_bofa_usem_0.BOFASIConsequenceOutboundProcessor</api_name>
 <caller_access/>
 <client_callable>false</client_callable>
 <description>Builds the outbound CDP payload (envelope plus one consequence element) for a consequence record. The fields come from the property usem.consequence.fields.&lt;consequence table&gt;, the rule section through the u_rule reference.</description>
@@ -20,7 +20,7 @@ BOFASIConsequenceOutboundProcessor.prototype = {
         this.OUTBOUND_VERSION = '1.0.0';
         this.DATE_FORMAT = 'MM-dd-yyyy';
         this.TIME_FORMAT = 'HH:mm:ss';
-        this.FIELDS_PROPERTY_PREFIX = 'x_boar_bofa_usem_1.usem.consequence.fields.';
+        this.FIELDS_PROPERTY_PREFIX = 'x_boar_bofa_usem_0.usem.consequence.fields.';
         this.REFERENCES = {
             x_boar_bofa_usem_0_consequence_rule: 'u_rule'
         };
@@ -126,6 +126,9 @@ BOFASIConsequenceOutboundProcessor.prototype = {
                 return this._formatDate(element.getValue());
             case 'reference':
                 return String(element.getDisplayValue());
+            case 'document_id':
+                var target = element.getRefRecord();
+                return target && target.isValidRecord() ? String(target.getDisplayValue()) : '';
             default:
                 return String(element.getValue());
         }
@@ -158,15 +161,15 @@ BOFASIConsequenceOutboundProcessor.prototype = {
 <sys_class_name>sys_script_include</sys_class_name>
 <sys_id>c3813cd0932f8f90e3aef0aefaba10ab</sys_id>
 <sys_name>BOFASIConsequenceOutboundProcessor</sys_name>
-<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_package>488be1cd2b1247102b30f8e14391bf0c</sys_package>
 <sys_policy/>
-<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_scope>488be1cd2b1247102b30f8e14391bf0c</sys_scope>
 <sys_update_name>sys_script_include_c3813cd0932f8f90e3aef0aefaba10ab</sys_update_name>
 </sys_script_include>
 <sys_script_include action="INSERT_OR_UPDATE">
 <access>public</access>
 <active>true</active>
-<api_name>x_boar_bofa_usem_1.BOFASIKafkaProducerConsequence</api_name>
+<api_name>x_boar_bofa_usem_0.BOFASIKafkaProducerConsequence</api_name>
 <caller_access/>
 <client_callable>false</client_callable>
 <description>Sends a consequence payload to the Kafka topic held in usem.consequence.kafka.topic_sys_id with sn_ih_kafka.ProducerV2 (key &lt;table&gt;.&lt;sys_id&gt;).
@@ -178,7 +181,7 @@ Documentation of API used - https://www.servicenow.com/docs/r/api-reference/serv
 BOFASIKafkaProducerConsequence.prototype = {
 
     initialize: function() {
-        this.TOPIC_PROPERTY = 'x_boar_bofa_usem_1.usem.consequence.kafka.topic_sys_id';
+        this.TOPIC_PROPERTY = 'x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id';
         this.IS_SYNC = false;
         this.HEADERS = null;
         this.SCHEMA_ID = null;
@@ -201,9 +204,9 @@ BOFASIKafkaProducerConsequence.prototype = {
 <sys_class_name>sys_script_include</sys_class_name>
 <sys_id>97817cd0932f8f90e3aef0aefaba1007</sys_id>
 <sys_name>BOFASIKafkaProducerConsequence</sys_name>
-<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_package>488be1cd2b1247102b30f8e14391bf0c</sys_package>
 <sys_policy/>
-<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_scope>488be1cd2b1247102b30f8e14391bf0c</sys_scope>
 <sys_update_name>sys_script_include_97817cd0932f8f90e3aef0aefaba1007</sys_update_name>
 </sys_script_include>
 <sys_properties action="INSERT_OR_UPDATE">
@@ -211,15 +214,15 @@ BOFASIKafkaProducerConsequence.prototype = {
 <description>sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_consequence_outbound, read by BOFASIKafkaProducerConsequence.</description>
 <ignore_cache>false</ignore_cache>
 <is_private>false</is_private>
-<name>x_boar_bofa_usem_1.usem.consequence.kafka.topic_sys_id</name>
+<name>x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id</name>
 <read_roles/>
 <suffix>usem.consequence.kafka.topic_sys_id</suffix>
 <sys_class_name>sys_properties</sys_class_name>
 <sys_id>17817cd0932f8f90e3aef0aefaba100b</sys_id>
-<sys_name>x_boar_bofa_usem_1.usem.consequence.kafka.topic_sys_id</sys_name>
-<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_name>x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id</sys_name>
+<sys_package>488be1cd2b1247102b30f8e14391bf0c</sys_package>
 <sys_policy/>
-<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_scope>488be1cd2b1247102b30f8e14391bf0c</sys_scope>
 <sys_update_name>sys_properties_17817cd0932f8f90e3aef0aefaba100b</sys_update_name>
 <type>string</type>
 <value/>
@@ -230,15 +233,15 @@ BOFASIKafkaProducerConsequence.prototype = {
 <description>Consequence payload fields, one servicenow_field=payload_field pair per line in payload order: the ServiceNow field on the left (verified with the field check script), the payload name of the tab "Outbound to CDP (consequence)" on the right; the fields of the consequence first, then the fields of its rule as x_boar_bofa_usem_0_consequence_rule.&lt;field&gt;. A field missing on the table or empty is sent as "".</description>
 <ignore_cache>false</ignore_cache>
 <is_private>false</is_private>
-<name>x_boar_bofa_usem_1.usem.consequence.fields.x_boar_bofa_usem_0_consequence</name>
+<name>x_boar_bofa_usem_0.usem.consequence.fields.x_boar_bofa_usem_0_consequence</name>
 <read_roles/>
 <suffix>usem.consequence.fields.x_boar_bofa_usem_0_consequence</suffix>
 <sys_class_name>sys_properties</sys_class_name>
 <sys_id>9d91bcd0932f8f90e3aef0aefaba10e0</sys_id>
-<sys_name>x_boar_bofa_usem_1.usem.consequence.fields.x_boar_bofa_usem_0_consequence</sys_name>
-<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_name>x_boar_bofa_usem_0.usem.consequence.fields.x_boar_bofa_usem_0_consequence</sys_name>
+<sys_package>488be1cd2b1247102b30f8e14391bf0c</sys_package>
 <sys_policy/>
-<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_scope>488be1cd2b1247102b30f8e14391bf0c</sys_scope>
 <sys_update_name>sys_properties_9d91bcd0932f8f90e3aef0aefaba10e0</sys_update_name>
 <type>string</type>
 <value>state=state,
@@ -305,9 +308,9 @@ x_boar_bofa_usem_0_consequence_rule.valid_to=valid_to,</value>
 <role_conditions/>
 <script><![CDATA[(function executeRule(current, previous /*null when async*/ ) {
     try {
-        var payload = new x_boar_bofa_usem_1.BOFASIConsequenceOutboundProcessor().buildPayload(current);
+        var payload = new x_boar_bofa_usem_0.BOFASIConsequenceOutboundProcessor().buildPayload(current);
         if (payload)
-            new x_boar_bofa_usem_1.BOFASIKafkaProducerConsequence().sendPayload(payload, current);
+            new x_boar_bofa_usem_0.BOFASIKafkaProducerConsequence().sendPayload(payload, current);
     } catch (e) {
         gs.error('BOFA_BR_Consequence_CdpOutbound: outbound message failed for ' + current.getTableName() + ' ' + current.getUniqueValue() + ' - ' + (e.message || e));
     }
@@ -319,9 +322,9 @@ x_boar_bofa_usem_0_consequence_rule.valid_to=valid_to,</value>
 <sys_id>f5913014932f8f90e3aef0aefaba109e</sys_id>
 <sys_name>BOFA_BR_Consequence_CdpOutbound</sys_name>
 <sys_overrides/>
-<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_package>488be1cd2b1247102b30f8e14391bf0c</sys_package>
 <sys_policy/>
-<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_scope>488be1cd2b1247102b30f8e14391bf0c</sys_scope>
 <sys_update_name>sys_script_f5913014932f8f90e3aef0aefaba109e</sys_update_name>
 <template/>
 <when>after</when>

@@ -1,7 +1,7 @@
 {
- "set": "4b813cd0932f8f90e3aef0aefaba10a7",
- "set_name": "SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.0",
- "previous_set": null,
+ "set": "1795745093eb8f90e3aef0aefaba1048",
+ "set_name": "SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.1",
+ "previous_set": "4b813cd0932f8f90e3aef0aefaba10a7",
  "scope": "9d1e03de930b8310e3aef0aefaba10d5",
  "si": {
   "BOFASIConsequenceOutboundProcessor": "c3813cd0932f8f90e3aef0aefaba10ab",

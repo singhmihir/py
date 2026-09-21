@@ -10,7 +10,7 @@ x_boar_bofa_usem_0_consequence.sys_created_by -> created_by (Created by): sys_cr
 x_boar_bofa_usem_0_consequence.u_enforcement_status -> enforcement_status (Enforcement Status): u_enforcement_status by same name, type integer
 x_boar_bofa_usem_0_consequence.u_network_isolation_effective_date -> network_isolation_effective_date (Network Isolation Effective Date): u_network_isolation_effective_date by same name, type glide_date_time
 x_boar_bofa_usem_0_consequence.u_rule -> rule (Rule): u_rule by same name, type reference -> x_boar_bofa_usem_0_consequence_rule
-x_boar_bofa_usem_0_consequence.cmdb_ci -> cmdb_ci (Configuration item): cmdb_ci by same name, type reference -> cmdb_ci
+x_boar_bofa_usem_0_consequence.cmdb_ci -> cmdb_ci (Configuration item): cmdb_ci by same name, type document_id
 x_boar_bofa_usem_0_consequence.sys_created_on -> created_on (Created): sys_created_on by same name, type glide_date_time
 x_boar_bofa_usem_0_consequence.u_bofa_ait -> bofa_ait (AIT): u_bofa_ait by same name, type reference -> x_boar_bofa_techad_ait
 x_boar_bofa_usem_0_consequence.number -> number (Number): number by same name, type string

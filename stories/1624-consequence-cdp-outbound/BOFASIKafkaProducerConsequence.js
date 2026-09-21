@@ -2,7 +2,7 @@ var BOFASIKafkaProducerConsequence = Class.create();
 BOFASIKafkaProducerConsequence.prototype = {
 
     initialize: function() {
-        this.TOPIC_PROPERTY = 'x_boar_bofa_usem_1.usem.consequence.kafka.topic_sys_id';
+        this.TOPIC_PROPERTY = 'x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id';
         this.IS_SYNC = false;
         this.HEADERS = null;
         this.SCHEMA_ID = null;
