@@ -1,0 +1,429 @@
+[
+ {
+  "rule": "175",
+  "name": "USEM Serial Number Class Match",
+  "number": "SDI000002148411",
+  "ci": "7e63ec2a3b84e250d5062b64c3e45a11",
+  "sys_id": "fdf0ab42ebb6c714017ff4d7cad0cd9f"
+ },
+ {
+  "rule": "175",
+  "name": "USEM Serial Number Class Match",
+  "number": "SDI000002148409",
+  "ci": "b663ec2a3b84e250d5062b64c3e45a0e",
+  "sys_id": "b5f0ab42ebb6c714017ff4d7cad0cd9e"
+ },
+ {
+  "rule": "175",
+  "name": "USEM Serial Number Class Match",
+  "number": "SDI000002148406",
+  "ci": "f663ec2a3b84e250d5062b64c3e45a04",
+  "sys_id": "6df0ab42ebb6c714017ff4d7cad0cd9c"
+ },
+ {
+  "rule": "180",
+  "name": "USEM Serial Number Hardware Match",
+  "number": "SDI000002368092",
+  "ci": "694be8342bc6ae54d50dffbdbe91bf87",
+  "sys_id": "1de8581e93fa4b549110fe584dba10f7"
+ },
+ {
+  "rule": "180",
+  "name": "USEM Serial Number Hardware Match",
+  "number": "SDI000002326199",
+  "ci": "9a3819182ba72e54d28af8a4ce91bfa1",
+  "sys_id": "6d5c8c16eb3ec710577bf284dad0cde0"
+ },
+ {
+  "rule": "180",
+  "name": "USEM Serial Number Hardware Match",
+  "number": "SDI000002390879",
+  "ci": "084b28342bc6ae54d50dffbdbe91bfc9",
+  "sys_id": "a41d909a3b760f942fcecefe23e45a2d"
+ },
+ {
+  "rule": "200",
+  "name": "USEM Cisco IP Phone MAC",
+  "number": "SDI000002627752",
+  "ci": "df221eb33be96210df0f0c54c3e45adf",
+  "sys_id": "b2998da6eb7ecb14017ff4d7cad0cd60"
+ },
+ {
+  "rule": "200",
+  "name": "USEM Cisco IP Phone MAC",
+  "number": "SDI000002617321",
+  "ci": "3e7fc2bf3b696210df0f0c54c3e45abd",
+  "sys_id": "59c04526ebfe8b10577bf284dad0cdda"
+ },
+ {
+  "rule": "200",
+  "name": "USEM Cisco IP Phone MAC",
+  "number": "SDI000002619434",
+  "ci": "57a9c2b33be56210df0f0c54c3e45a65",
+  "sys_id": "75520da63bbe43180e435c8a04e45a2d"
+ },
+ {
+  "rule": "250",
+  "name": "USEM FQDN Class Match",
+  "number": "SDI000002151366",
+  "ci": "2127d1bb3bd8ea90d5062b64c3e45ab9",
+  "sys_id": "3251e706ebb6c714017ff4d7cad0cd1c"
+ },
+ {
+  "rule": "250",
+  "name": "USEM FQDN Class Match",
+  "number": "SDI000003676655",
+  "ci": "0873ca94fbf0ee502fe7f7ad5eefdc48",
+  "sys_id": "c2ece9493b1307d02fcecefe23e45aa6"
+ },
+ {
+  "rule": "250",
+  "name": "USEM FQDN Class Match",
+  "number": "SDI000003129659",
+  "ci": "b3cab1bb93d8ee5007a4f84958373cba",
+  "sys_id": "b1eccbb22b7a4758a277fab2f291bf76"
+ },
+ {
+  "rule": "260",
+  "name": "USEM FQDN Hardware Match",
+  "number": "SDI000003651953",
+  "ci": "e43c52133b146a90d5062b64c3e45a25",
+  "sys_id": "f4137e33930fcb909110fe584dba108f"
+ },
+ {
+  "rule": "260",
+  "name": "USEM FQDN Hardware Match",
+  "number": "SDI000003438418",
+  "ci": "7e20daa72bac22546d55ff5fe291bf63",
+  "sys_id": "f9548099eb8303d0577bf284dad0cd24"
+ },
+ {
+  "rule": "260",
+  "name": "USEM FQDN Hardware Match",
+  "number": "SDI000003444611",
+  "ci": "f3e5f0f09782f29834bfb65de053af5e",
+  "sys_id": "874c945d3b8747102fcecefe23e45a11"
+ },
+ {
+  "rule": "300",
+  "name": "USEM Hostname Domain Class Match",
+  "number": "SDI000003576701",
+  "ci": "30c82e632b91aa14d50dffbdbe91bfa9",
+  "sys_id": "9635d6563b47039c9289d164c3e45ad7"
+ },
+ {
+  "rule": "300",
+  "name": "USEM Hostname Domain Class Match",
+  "number": "SDI000003576699",
+  "ci": "44e8b6fd47cd3a90b5da45ac026d438f",
+  "sys_id": "9a35d6563b47039c9289d164c3e45ad0"
+ },
+ {
+  "rule": "300",
+  "name": "USEM Hostname Domain Class Match",
+  "number": "SDI000003576697",
+  "ci": "15cec45c3b742e14055e3b64c3e45a73",
+  "sys_id": "d635d6563b47039c9289d164c3e45abd"
+ },
+ {
+  "rule": "310",
+  "name": "USEM Hostname Domain Hardware Match",
+  "number": "SDI000003576283",
+  "ci": "35485a949310fe1026fbfbb4ed03d640",
+  "sys_id": "f8059a962bcf0350a277fab2f291bf8c"
+ },
+ {
+  "rule": "310",
+  "name": "USEM Hostname Domain Hardware Match",
+  "number": "SDI000003669773",
+  "ci": "502f97033b417ed04826a7ae53e45a4c",
+  "sys_id": "76912eb8935b4798cfcebc5a7bba10ab"
+ },
+ {
+  "rule": "310",
+  "name": "USEM Hostname Domain Hardware Match",
+  "number": "SDI000003669770",
+  "ci": "7a3896949310fe1026fbfbb4ed03d695",
+  "sys_id": "9a916ab8935b4798cfcebc5a7bba100a"
+ },
+ {
+  "rule": "350",
+  "name": "USEM Layered DNS Match",
+  "number": "SDI000003582887",
+  "ci": "b38a64fc2b86ae54d50dffbdbe91bf08",
+  "sys_id": "bc6c5e5a9303cb14cfcebc5a7bba10c0"
+ },
+ {
+  "rule": "350",
+  "name": "USEM Layered DNS Match",
+  "number": "SDI000003052286",
+  "ci": "e4b9ac382b86ae54d50dffbdbe91bfe3",
+  "sys_id": "f17bde363b3e4f180e435c8a04e45a33"
+ },
+ {
+  "rule": "350",
+  "name": "USEM Layered DNS Match",
+  "number": "SDI000003085182",
+  "ci": "a18a20fc2b86ae54d50dffbdbe91bf86",
+  "sys_id": "a48172b2eb7ecf14017ff4d7cad0cdf3"
+ },
+ {
+  "rule": "400",
+  "name": "USEM Hostname Class Match",
+  "number": "SDI000003129664",
+  "ci": "27e62ee33b5022d0055e3b64c3e45ae1",
+  "sys_id": "d2eccbb22b7a4758a277fab2f291bfca"
+ },
+ {
+  "rule": "400",
+  "name": "USEM Hostname Class Match",
+  "number": "SDI000003576309",
+  "ci": "a1194c903bbc2614d5062b64c3e45a71",
+  "sys_id": "0e05da962bcf0350a277fab2f291bf72"
+ },
+ {
+  "rule": "400",
+  "name": "USEM Hostname Class Match",
+  "number": "SDI000003129660",
+  "ci": "0a7265773bd062d0055e3b64c3e45a23",
+  "sys_id": "caeccbb22b7a4758a277fab2f291bf9d"
+ },
+ {
+  "rule": "410",
+  "name": "USEM Hostname Hardware Match",
+  "number": "SDI000003650853",
+  "ci": "2b66dbe59348b254b096f35e1dba1064",
+  "sys_id": "b3646affeb4b4350017ff4d7cad0cda0"
+ },
+ {
+  "rule": "410",
+  "name": "USEM Hostname Hardware Match",
+  "number": "SDI000003605570",
+  "ci": "215ec3123b046e10055e3b64c3e45af6",
+  "sys_id": "5af3a6963bc7039c9289d164c3e45aef"
+ },
+ {
+  "rule": "410",
+  "name": "USEM Hostname Hardware Match",
+  "number": "SDI000003650834",
+  "ci": "c4b557ed9388321499fa7dd548373c4d",
+  "sys_id": "5344eebfeb4b4350017ff4d7cad0cd28"
+ },
+ {
+  "rule": "415",
+  "name": "USEM Device Name Match",
+  "number": "SDI000003799341",
+  "ci": "e07817742b062694d50dffbdbe91bf38",
+  "sys_id": "6714e30c2bebc710a277fab2f291bf41"
+ },
+ {
+  "rule": "415",
+  "name": "USEM Device Name Match",
+  "number": "SDI000003799352",
+  "ci": "19b683b83b4e2254860863b693e45a0e",
+  "sys_id": "e024670c2bebc710a277fab2f291bf2a"
+ },
+ {
+  "rule": "415",
+  "name": "USEM Device Name Match",
+  "number": "SDI000003799469",
+  "ci": "50f767343bce6254860863b693e45a2b",
+  "sys_id": "39e867883b6b47102fcecefe23e45a7f"
+ },
+ {
+  "rule": "420",
+  "name": "USEM Management Interface Match",
+  "number": "SDI000002647592",
+  "ci": "a53749b02b062e54d28af8a4ce91bf65",
+  "sys_id": "918911a23bbe83180e435c8a04e45a8d"
+ },
+ {
+  "rule": "420",
+  "name": "USEM Management Interface Match",
+  "number": "SDI000002530819",
+  "ci": "a8cf49353b4e6a90be6d95c964e45a24",
+  "sys_id": "1957cc663b3ecf942fcecefe23e45aef"
+ },
+ {
+  "rule": "420",
+  "name": "USEM Management Interface Match",
+  "number": "SDI000003103867",
+  "ci": "f7300d7d3b466a90be6d95c964e45a21",
+  "sys_id": "bc3e32beebfecf14017ff4d7cad0cdc9"
+ },
+ {
+  "rule": "430",
+  "name": "USEM Network Interface Name Match",
+  "number": "SDI000003800077",
+  "ci": "aaac6f842b256610cca5f39ec891bf8d",
+  "sys_id": "8d6b274c93a747109110fe584dba104b"
+ },
+ {
+  "rule": "430",
+  "name": "USEM Network Interface Name Match",
+  "number": "SDI000003800075",
+  "ci": "28acb0423bd00754a052e71864e45a01",
+  "sys_id": "d74a274493a747109110fe584dba10f9"
+ },
+ {
+  "rule": "430",
+  "name": "USEM Network Interface Name Match",
+  "number": "SDI000003799353",
+  "ci": "fedb74f52bc6ae94d28af8a4ce91bf69",
+  "sys_id": "9b646b8c2bebc710a277fab2f291bfa0"
+ },
+ {
+  "rule": "450",
+  "name": "USEM FQDN Name Hardware Match",
+  "number": "SDI000003103157",
+  "ci": "7ed9e0b82b86ae54d50dffbdbe91bf4b",
+  "sys_id": "e8ddba3a93fec310cfcebc5a7bba10fc"
+ },
+ {
+  "rule": "455",
+  "name": "USEM Load Balancer Member Match",
+  "number": "SDI000002993687",
+  "ci": "f2130b8693966a107fb5f842ed03d653",
+  "sys_id": "deb3b97a3bfe4b189289d164c3e45a59"
+ },
+ {
+  "rule": "455",
+  "name": "USEM Load Balancer Member Match",
+  "number": "SDI000003786277",
+  "ci": "6dba925b2b1ca210e9c1f4cdce91bf42",
+  "sys_id": "eac78dafebdb47d0577bf284dad0cd8f"
+ },
+ {
+  "rule": "455",
+  "name": "USEM Load Balancer Member Match",
+  "number": "SDI000002418623",
+  "ci": "ddcdddf02b462294d50dffbdbe91bf9b",
+  "sys_id": "9f78729e3bf28f942fcecefe23e45a40"
+ },
+ {
+  "rule": "460",
+  "name": "USEM Load Balancer Service Match",
+  "number": "SDI000003055580",
+  "ci": "84466888930e0b50205fb5627cba107c",
+  "sys_id": "28ad5e36933283949110fe584dba108d"
+ },
+ {
+  "rule": "460",
+  "name": "USEM Load Balancer Service Match",
+  "number": "SDI000003036490",
+  "ci": "0a6f146b2bed4354412af1f7d891bf68",
+  "sys_id": "e8d1123e3bf647d42fcecefe23e45a89"
+ },
+ {
+  "rule": "460",
+  "name": "USEM Load Balancer Service Match",
+  "number": "SDI000003008717",
+  "ci": "3ff610aa2b8d871032e4f5cdc891bf75",
+  "sys_id": "dd4eb5ba3bb60f180e435c8a04e45a29"
+ },
+ {
+  "rule": "700",
+  "name": "USEM IP Class Match",
+  "number": "SDI000003093964",
+  "ci": "c785e52bfbddc7d0f40ef34c5eefdccf",
+  "sys_id": "ff38b63a93bec310cfcebc5a7bba10bf"
+ },
+ {
+  "rule": "700",
+  "name": "USEM IP Class Match",
+  "number": "SDI000003093886",
+  "ci": "3fb5a1633bd90754ef3892e643e45ade",
+  "sys_id": "dc38f23a93bec310cfcebc5a7bba10af"
+ },
+ {
+  "rule": "700",
+  "name": "USEM IP Class Match",
+  "number": "SDI000003070780",
+  "ci": "8bfab94747d18714b5da45ac026d434c",
+  "sys_id": "a858ea3a933ec310cfcebc5a7bba1094"
+ },
+ {
+  "rule": "705",
+  "name": "USEM IP Hardware Match",
+  "number": "SDI000003007215",
+  "ci": "f1593dbd3b74c710ef3892e643e45a81",
+  "sys_id": "614df97e3b328b189289d164c3e45a44"
+ },
+ {
+  "rule": "705",
+  "name": "USEM IP Hardware Match",
+  "number": "SDI000003054392",
+  "ci": "671eaa82935e2a107fb5f842ed03d6e0",
+  "sys_id": "81dc16f23b3a8b189289d164c3e45aeb"
+ },
+ {
+  "rule": "705",
+  "name": "USEM IP Hardware Match",
+  "number": "SDI000002907396",
+  "ci": "4966fb582ba7e614d50dffbdbe91bf76",
+  "sys_id": "f17dac323bb64b189289d164c3e45a6f"
+ },
+ {
+  "rule": "730",
+  "name": "USEM IP Adapter Match",
+  "number": "SDI000002813895",
+  "ci": "abb100a52b976e908afbf3b28191bf4f",
+  "sys_id": "c6ab93a293724750a2b4f91e1dba10a8"
+ },
+ {
+  "rule": "730",
+  "name": "USEM IP Adapter Match",
+  "number": "SDI000002578917",
+  "ci": "2e0ed1d1ebccb254986cffd6bad0cdf6",
+  "sys_id": "f17624e23b7e03180e435c8a04e45a79"
+ },
+ {
+  "rule": "730",
+  "name": "USEM IP Adapter Match",
+  "number": "SDI000002582383",
+  "ci": "c5fad55d3b8cf25cdf0f0c54c3e45ac8",
+  "sys_id": "139824a23b3287189289d164c3e45a8f"
+ },
+ {
+  "rule": "740",
+  "name": "USEM IP Layered Match",
+  "number": "SDI000002376737",
+  "ci": "c835c6e83ba822d0670e839704e45ae8",
+  "sys_id": "795ad412933a8b10a2b4f91e1dba10be"
+ },
+ {
+  "rule": "740",
+  "name": "USEM IP Layered Match",
+  "number": "SDI000002354915",
+  "ci": "04f4cae0fba82e102fe7f7ad5eefdcd3",
+  "sys_id": "a0e4dc9693ba4b549110fe584dba10bc"
+ },
+ {
+  "rule": "740",
+  "name": "USEM IP Layered Match",
+  "number": "SDI000002962461",
+  "ci": "587f01782b0eee54d50dffbdbe91bf2d",
+  "sys_id": "20f991fe93b643949110fe584dba10c6"
+ },
+ {
+  "rule": "850",
+  "name": "USEM FQDN Name Broad Match",
+  "number": "SDI000003669791",
+  "ci": "b0da27023beba690dee4bcdc73e45a10",
+  "sys_id": "4da1e6f8935b4798cfcebc5a7bba1022"
+ },
+ {
+  "rule": "850",
+  "name": "USEM FQDN Name Broad Match",
+  "number": "SDI000003670195",
+  "ci": "33e5941293c507103854f05ea903d6aa",
+  "sys_id": "b424a6bc2b9fcfd0a277fab2f291bfcc"
+ },
+ {
+  "rule": "850",
+  "name": "USEM FQDN Name Broad Match",
+  "number": "SDI000003670186",
+  "ci": "29d51c922b09071022b7fcded391bff8",
+  "sys_id": "5c2426bc2b9fcfd0a277fab2f291bfe4"
+ }
+]
