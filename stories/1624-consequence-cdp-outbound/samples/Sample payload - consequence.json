@@ -5,17 +5,17 @@
     "namespace": "com.bofa.usem",
     "core_version": "1.0.0",
     "outbound_version": "1.0.0",
-    "event_id": "a1a1f014-932f-8f90-e3ae-f0aefaba1052",
-    "event_timestamp": "2026-09-21T11:07:27Z",
+    "event_id": "39e5f4dc-932f-8f90-e3ae-f0aefaba108c",
+    "event_timestamp": "2026-09-21T11:26:02Z",
     "element_count": 1,
-    "element_activity": "INSERT"
+    "element_activity": "UPDATE"
   },
   "consequences": [
     {
       "x_boar_bofa_usem_0_consequence": {
         "state": "1",
         "accountable_party": "Digest Owner One",
-        "updated_on": "09-21-2026 11:03:00",
+        "updated_on": "09-21-2026 11:22:26",
         "comments": "Consequence outbound fixture (linked)",
         "change_freeze_effective_date": "09-15-2026 12:40:01",
         "consequence_level": "1",

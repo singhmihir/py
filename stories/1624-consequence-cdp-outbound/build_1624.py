@@ -1,8 +1,8 @@
 """Deploys the consequence outbound build into the stand-in scope on the PDI under a pinned update set:
 the two script includes, the two properties (topic and the one field property of the consequence
 table) and the after insert/update rule on that table. The repository files carry the client
-application prefixes (x_boar_bofa_usem_1 for the integration application, x_boar_bofa_usem_0_ for
-the consequence tables); the deployment swaps both for the stand-in scope. Each version is a fresh
+application prefix x_boar_bofa_usem_0 (the consequence application: its tables, the rule, the scripts
+and the properties); the deployment swaps it for the stand-in scope. Each version is a fresh
 set: properties of earlier versions that are not deployed any more are removed under the scope's
 Default set first. Re-runnable: reopens the set recorded in state.json when its name matches."""
 import os, sys, json
@@ -10,18 +10,17 @@ HERE = os.path.dirname(os.path.abspath(__file__)); BASE = os.path.dirname(os.pat
 sys.path.insert(0, os.path.join(BASE, 'tools'))
 from snui import SNUI
 SCOPE = '9d1e03de930b8310e3aef0aefaba10d5'          # stand-in scoped app on the PDI
-CLIENT_PREFIX, PDI_PREFIX = 'x_boar_bofa_usem_1', 'x_196061_bofasim'
-CLIENT_TABLE_PREFIX, PDI_TABLE_PREFIX = 'x_boar_bofa_usem_0_', 'x_196061_bofasim_'
-NAME = 'SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.0'
+CLIENT_PREFIX, PDI_PREFIX = 'x_boar_bofa_usem_0', 'x_196061_bofasim'   # the consequence application, which holds the tables, the rule and the scripts
+NAME = 'SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.1'
 DEFAULT_SET = 'a91e03de930b8310e3aef0aefaba10de'      # Default update set of the stand-in scope
 BR_NAME = 'BOFA_BR_Consequence_CdpOutbound'
 SI_NAMES = ['BOFASIConsequenceOutboundProcessor', 'BOFASIKafkaProducerConsequence']
-TABLE = PDI_TABLE_PREFIX + 'consequence'
+TABLE = PDI_PREFIX + '_consequence'
 DESC = {
     'BOFASIConsequenceOutboundProcessor': 'Builds the outbound CDP payload (envelope plus one consequence element) for a consequence record. The fields come from the property usem.consequence.fields.<consequence table>, the rule section through the u_rule reference.',
     'BOFASIKafkaProducerConsequence': 'Sends a consequence payload to the Kafka topic held in usem.consequence.kafka.topic_sys_id with sn_ih_kafka.ProducerV2 (key <table>.<sys_id>).\nDocumentation of API used - https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html',
 }
-def pdi(text): return text.replace(CLIENT_TABLE_PREFIX, PDI_TABLE_PREFIX).replace(CLIENT_PREFIX, PDI_PREFIX)
+def pdi(text): return text.replace(CLIENT_PREFIX, PDI_PREFIX)
 scripts = {n: pdi(open(os.path.join(HERE, n + '.js')).read()) for n in SI_NAMES}
 br_script = pdi(open(os.path.join(HERE, BR_NAME + '.js')).read())
 props = {pdi(k): {'value': pdi(v['value']), 'description': v['description']} for k, v in json.load(open(os.path.join(HERE, 'properties.json'))).items()}

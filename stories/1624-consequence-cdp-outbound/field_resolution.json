@@ -127,8 +127,8 @@
   "sheet_field": "cmdb_ci",
   "field": "cmdb_ci",
   "how": "same name",
-  "found_type": "reference",
-  "reference": "cmdb_ci",
+  "found_type": "document_id",
+  "reference": "",
   "candidates": []
  },
  {

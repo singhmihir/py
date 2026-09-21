@@ -8,7 +8,7 @@ BOFASIConsequenceOutboundProcessor.prototype = {
         this.OUTBOUND_VERSION = '1.0.0';
         this.DATE_FORMAT = 'MM-dd-yyyy';
         this.TIME_FORMAT = 'HH:mm:ss';
-        this.FIELDS_PROPERTY_PREFIX = 'x_boar_bofa_usem_1.usem.consequence.fields.';
+        this.FIELDS_PROPERTY_PREFIX = 'x_boar_bofa_usem_0.usem.consequence.fields.';
         this.REFERENCES = {
             x_boar_bofa_usem_0_consequence_rule: 'u_rule'
         };
@@ -114,6 +114,9 @@ BOFASIConsequenceOutboundProcessor.prototype = {
                 return this._formatDate(element.getValue());
             case 'reference':
                 return String(element.getDisplayValue());
+            case 'document_id':
+                var target = element.getRefRecord();
+                return target && target.isValidRecord() ? String(target.getDisplayValue()) : '';
             default:
                 return String(element.getValue());
         }

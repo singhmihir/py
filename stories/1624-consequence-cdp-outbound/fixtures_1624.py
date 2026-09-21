@@ -1,6 +1,6 @@
 """Prepares the PDI for the consequence outbound build with business rules switched off. The stand-in
-consequence table (scoped app BofA Sim) receives the sheet's fields it lacks and a stand-in consequence
-rule table is created, both under the global Default update set (PDI-only records, never delivered);
+consequence table (scoped app BofA Sim) receives the sheet's fields it lacks (the configuration item as a
+document id with a Class table-name field, as on the client) and a stand-in consequence rule table is created, both under the global Default update set (PDI-only records, never delivered);
 then the fixture records used by test_1624.py: one rule, one consequence linked to the rule, a CI and an
 AIT with every field filled, and one bare consequence. Re-runnable: reuses the records in fixtures.json."""
 import os, sys, json
@@ -56,13 +56,24 @@ try {
     choice(%(cons)s, 'u_enforcement_status', {1: 'Change Frozen', 2: 'Paused', 3: 'Pending Network Isolation Decision', 4: 'Network Isolated'});
     col(%(cons)s, 'u_network_isolation_effective_date', 'glide_date_time', 'Network Isolation Effective Date');
     col(%(cons)s, 'u_rule', 'reference', 'Rule', {reference: %(rule)s});
-    col(%(cons)s, 'cmdb_ci', 'reference', 'Configuration item', {reference: 'cmdb_ci'});
+    col(%(cons)s, 'u_class', 'table_name', 'Class');
+    col(%(cons)s, 'cmdb_ci', 'document_id', 'Configuration item', {dependent: 'u_class'});   // as on the client: a document id whose table is the Class field
     col(%(cons)s, 'u_bofa_ait', 'reference', 'AIT', {reference: %(ait)s});
     col(%(cons)s, 'u_rejection_reason', 'string', 'Rejection Reason', {max_length: 1000});
 } catch (e) { o.errors.push('schema: ' + e); }
 gs.print('X::' + JSON.stringify(o));''' % dict(fx=json.dumps(FX), set=json.dumps(GLOBAL_DEFAULT_SET), rule=json.dumps(RULE), cons=json.dumps(CONSEQUENCE), ait=json.dumps(AIT)))
 print('schema:', json.dumps(d))
 assert not d['errors'], d['errors']
+c = ui.js('''
+var o = {};
+new GlideUpdateSet().set(%(set)s);
+var d = new GlideRecord('sys_dictionary'); d.addQuery('name', %(cons)s); d.addQuery('element', 'cmdb_ci'); d.query(); d.next();
+if (d.getValue('internal_type') != 'document_id') { d.setValue('internal_type', 'document_id'); d.setValue('reference', ''); d.setValue('dependent', 'u_class'); d.update(); o.changed = true; }
+var d2 = new GlideRecord('sys_dictionary'); d2.addQuery('name', %(cons)s); d2.addQuery('element', 'cmdb_ci'); d2.query(); d2.next();
+o.cmdb_ci = {type: '' + d2.getValue('internal_type'), dependent: '' + d2.getValue('dependent')};
+gs.print('X::' + JSON.stringify(o));''' % dict(set=json.dumps(GLOBAL_DEFAULT_SET), cons=json.dumps(CONSEQUENCE)), scope='9d1e03de930b8310e3aef0aefaba10d5')
+print('configuration item column:', json.dumps(c))
+assert c['cmdb_ci'] == {'type': 'document_id', 'dependent': 'u_class'}, c
 f = ui.js('''
 var o = {}, fx = %(fx)s;
 new GlideUpdateSet().set(%(set)s);
@@ -78,13 +89,13 @@ function upsert(tableName, key, values) {
 }
 var r = upsert(%(rule)s, 'rule', {number: 'CQR-FIXTURE-001', name: 'Consequence outbound fixture rule', applies_to: 'New and Existing', comments: 'Consequence outbound fixture rule', conditions: 'u_state=1^EQ', global_exception: true, state: 'Approved', table: 'x_boar_bofa_usem_0_consequence', valid_from: '2026-09-01 00:00:00', valid_to: '2026-12-31 23:59:59'});
 o.rule = {sys_id: r.getUniqueValue(), number: '' + r.getValue('number'), display: '' + r.getDisplayValue(), global_exception: '' + r.getValue('global_exception')};
-var l = upsert(%(cons)s, 'linked', {number: 'CONSEQ-CDP-LINKED', state: 1, u_consequence_level: '1', u_accountable_party: 'Digest Owner One', u_comments: 'Consequence outbound fixture (linked)', u_change_freeze_effective_date: '2026-09-15 12:40:01', u_enforcement_status: 1, u_rule: r.getUniqueValue(), cmdb_ci: ciId, u_bofa_ait: aitId, u_rejection_reason: 'Not rejected'});
-o.linked = {sys_id: l.getUniqueValue(), number: '' + l.getValue('number'), rule: '' + l.getDisplayValue('u_rule'), ci: '' + l.getDisplayValue('cmdb_ci'), ait: '' + l.getDisplayValue('u_bofa_ait'), state: '' + l.getDisplayValue('state'), enforcement: '' + l.getDisplayValue('u_enforcement_status'), isolation: '' + l.getValue('u_network_isolation_effective_date')};
+var l = upsert(%(cons)s, 'linked', {number: 'CONSEQ-CDP-LINKED', state: 1, u_consequence_level: '1', u_accountable_party: 'Digest Owner One', u_comments: 'Consequence outbound fixture (linked)', u_change_freeze_effective_date: '2026-09-15 12:40:01', u_enforcement_status: 1, u_rule: r.getUniqueValue(), u_class: 'cmdb_ci_business_app', cmdb_ci: ciId, u_bofa_ait: aitId, u_rejection_reason: 'Not rejected'});
+o.linked = {sys_id: l.getUniqueValue(), number: '' + l.getValue('number'), rule: '' + l.getDisplayValue('u_rule'), ci: '' + l.cmdb_ci.getRefRecord().getDisplayValue(), ci_type: '' + l.cmdb_ci.getED().getInternalType(), ci_raw: '' + l.getValue('cmdb_ci'), ci_class: '' + l.getValue('u_class'), ait: '' + l.getDisplayValue('u_bofa_ait'), state: '' + l.getDisplayValue('state'), enforcement: '' + l.getDisplayValue('u_enforcement_status'), isolation: '' + l.getValue('u_network_isolation_effective_date')};
 var b = upsert(%(cons)s, 'bare', {number: 'CONSEQ-CDP-BARE', state: 1});
-o.bare = {sys_id: b.getUniqueValue(), number: '' + b.getValue('number'), rule: '' + b.getDisplayValue('u_rule'), ci: '' + b.getDisplayValue('cmdb_ci'), ait: '' + b.getDisplayValue('u_bofa_ait'), level: '' + (b.getValue('u_consequence_level') || '')};
+o.bare = {sys_id: b.getUniqueValue(), number: '' + b.getValue('number'), rule: '' + b.getDisplayValue('u_rule'), ci: '' + (b.getValue('cmdb_ci') || ''), ait: '' + b.getDisplayValue('u_bofa_ait'), level: '' + (b.getValue('u_consequence_level') || '')};
 gs.print('X::' + JSON.stringify(o));''' % dict(fx=json.dumps(FX), set=json.dumps(GLOBAL_DEFAULT_SET), rule=json.dumps(RULE), cons=json.dumps(CONSEQUENCE), ait=json.dumps(AIT)))
 print('fixtures:', json.dumps(f, indent=1))
-assert f['linked']['rule'] == 'CQR-FIXTURE-001' == f['rule']['display'] and f['linked']['ci'] == 'Trade Processing Portal' and f['linked']['ait'] == 'AIT57152' and f['linked']['state'] == 'Open' and f['linked']['enforcement'] == 'Change Frozen' and f['linked']['isolation'] == ''
+assert f['linked']['rule'] == 'CQR-FIXTURE-001' == f['rule']['display'] and f['linked']['ci'] == 'Trade Processing Portal' and f['linked']['ci_type'] == 'document_id' and len(f['linked']['ci_raw']) == 32 and f['linked']['ci_class'] == 'cmdb_ci_business_app' and f['linked']['ait'] == 'AIT57152' and f['linked']['state'] == 'Open' and f['linked']['enforcement'] == 'Change Frozen' and f['linked']['isolation'] == ''
 assert f['bare']['rule'] == '' and f['bare']['ci'] == '' and f['bare']['ait'] == '' and f['bare']['level'] == ''
 json.dump({'rule': f['rule']['sys_id'], 'linked': f['linked']['sys_id'], 'linked_number': f['linked']['number'], 'bare': f['bare']['sys_id'], 'bare_number': f['bare']['number']}, open(fx_path, 'w'), indent=1)
 print('FIXTURES OK')

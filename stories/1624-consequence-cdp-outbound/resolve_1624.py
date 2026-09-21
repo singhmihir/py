@@ -9,7 +9,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); BASE = os.path.dirname(os.pat
 sys.path.insert(0, os.path.join(BASE, 'tools'))
 from snui import SNUI, INST
 CONSEQUENCE = 'x_boar_bofa_usem_0_consequence'
-CLIENT_TABLE_PREFIX, PDI_TABLE_PREFIX = 'x_boar_bofa_usem_0_', 'x_196061_bofasim_'
+CLIENT_TABLE_PREFIX, PDI_TABLE_PREFIX = 'x_boar_bofa_usem_0', 'x_196061_bofasim'
 AIT_PDI, AIT_CLIENT = 'x_196061_bofasim_ait', 'x_boar_bofa_techad_ait'   # the stand-in AIT table and the client's
 script = open(os.path.join(HERE, 'Consequence Field Check - Background Script.js')).read().replace(CLIENT_TABLE_PREFIX, PDI_TABLE_PREFIX)
 ui = SNUI(); ui.app('global')
