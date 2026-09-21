@@ -102,7 +102,21 @@ def rule_entry(order):
     return entry
 
 
-RULES = [rule_entry(o) for o in ORDERS]
+WORDING = [('domain-evidence rules', 'domain rules'), ('domain evidence', 'domain agreement'), ('name evidence', 'name identifier'), ('interface evidence', 'interface sign'),
+           ('Controller evidence', 'Controller sign'), ('controller evidence', 'controller sign'), ('VIP evidence', 'VIP sign'), ('No evidence:', 'No interface sign:'),
+           ('evidence is true when', 'the sign is present when'), ('strongest evidence', 'strongest identifier'), ('need less evidence', 'need less'), ("calls the check 'evidence'", "calls the check 'sign'")]
+
+
+def reword(value):
+    if isinstance(value, str):
+        for a, b in WORDING: value = value.replace(a, b)
+        return value
+    if isinstance(value, list): return [reword(v) for v in value]
+    if isinstance(value, dict): return {k: reword(v) for k, v in value.items()}
+    return value
+
+
+RULES = [reword(rule_entry(o)) for o in ORDERS]
 for i, r in enumerate(RULES):
     r['before_names'] = RULES[i - 1]['name'].replace('USEM ', '') if i else 'none, it opens the chain'
     r['after_names'] = RULES[i + 1]['name'].replace('USEM ', '') if i + 1 < len(RULES) else "the platform's own rules (FQDN, NetBIOS, DNS)"
@@ -192,6 +206,9 @@ def shorten(found):
     """A finding of the evidence script as a short clause."""
     h = found
     if h.endswith(': not searched'): h = h[:-len(': not searched')]
+    if h == 'Service search: no clue found a service record': return 'no service record'
+    if h.startswith('Decision: '): h = h[len('Decision: '):]
+    if h.startswith('Pools: '): h = h[len('Pools: '):]
     h = re.sub(r'^label "([^"]+)" is not sep plus twelve hex characters$', r'label "\1" is not sep + 12 hex', h)
     if h.endswith(': not searched') or 'not searched' not in found and h != found: return h
     m = re.match(r'^(\d+) records? named "([^"]+)", (\d+) with the domain "([^"]+)"', h)
@@ -239,11 +256,18 @@ def earlier_unique(earlier):
 FORCE = {'SDI000003103157'}   # kept although the rule's copy on the client development instance does not return it on replay (see README)
 
 
-def why_from_earlier(order, earlier):
+NAME_FAMILIES = ('Phone MAC rule', 'FQDN rules', 'Name + domain rules', 'Layered DNS rule', 'Host name rules', 'Device name rule', 'Controller rule', 'Interface rule', 'Whole-fqdn name rule')
+
+
+def why_from_earlier(order, earlier, item=None):
     """One clause per rule family from the findings of the earlier rules (the script's earlier list), siblings merged and shortened."""
     found = {e['order']: e['found'] for e in earlier}
     parts = []
+    nameless = item is not None and not (item.get('dns') or '').strip()
+    if nameless and any(o in found for _, os_ in FAMILY for o in os_ if _ in NAME_FAMILIES):
+        parts.append('no DNS name: the scan reports only the address, so no phone or name rule could run')
     for label, orders in FAMILY:
+        if nameless and label in NAME_FAMILIES: continue
         hits = [shorten(found[o]) for o in orders if o in found]
         if not hits: continue
         hits = list(dict.fromkeys(hits))
@@ -385,10 +409,17 @@ def condense(steps):
         if misses:
             out.append(dict(title='Clue%s %s' % ('s' if len(misses) > 1 else '', ', '.join(misses)), detail='no service record; next clue'))
             misses = []
+        if title == 'Pools':
+            parts = detail.split(': ', 1)
+            if len(parts) == 2:
+                pools = [p.strip() for p in parts[1].split(' ; ')]
+                names = list(dict.fromkeys(re.sub(r' \(.*\)$', '', p) for p in pools))
+                if len(pools) > 1 and len(names) == 1:
+                    detail = '%s, all the twins point at the one pool %s' % (parts[0], names[0])
         if title == 'Members':
             parts = detail.split(': ', 1)
             if len(parts) == 2:
-                members = []
+                members, targets = [], []
                 for m in parts[1].split(' ; '):
                     if ' -> ' in m:
                         left, right = m.split(' -> ', 1)
@@ -399,11 +430,17 @@ def condense(steps):
                                 n, p = h.split(' via ', 1)
                                 if n not in names: names.append(n)
                                 if p not in paths: paths.append(p)
+                        targets.append((tuple(names), tuple(paths)))
                         right = ', '.join(names) + (' (' + ', '.join(paths) + ')' if paths else '') if names else right
                         members.append(left + ' -> ' + right)
                     else:
                         members.append(m)
-                detail = parts[0] + ': ' + ' ; '.join(members[:4]) + (' ; ...' if len(members) > 4 else '')
+                lefts = list(dict.fromkeys(m.split(' -> ')[0] for m in members))
+                if len(members) > 1 and targets and len(set(tg[0] for tg in targets)) == 1 and all(' -> ' in m for m in members):
+                    names, paths = targets[0]
+                    detail = '%s: %s%s, every one leads to %s (%s)' % (parts[0], ', '.join(lefts[:3]), ' and more' if len(lefts) > 3 else '', ', '.join(names), ', '.join(paths))
+                else:
+                    detail = parts[0] + ': ' + ' ; '.join(members[:4]) + (' ; ...' if len(members) > 4 else '')
         if ' ; ' in detail and title.startswith(('Clue', 'Records', 'Pools', 'Adapter', 'IP Address', 'DNS Name')):
             head, sep, tail = detail.partition(': ')
             if sep:
@@ -432,7 +469,7 @@ def example(order, item, ci, extra):
         proper = not why
     if steps:
         walk_lines = [dict(title=s['title'], detail=s['detail']) for s in condense(steps)]
-        reasons = why_from_earlier(order, extra['earlier']) if extra.get('earlier') else why_from_facts(order, item, ci)
+        reasons = why_from_earlier(order, extra['earlier'], item) if extra.get('earlier') else why_from_facts(order, item, ci)
         if verdict and not verdict.get('same_as_today', True):
             walk_lines.append(dict(title='Replay today', detail='the rule now returns ' + (verdict.get('ci_label') or 'nothing') + '; the item still holds the CI matched earlier'))
     else:
@@ -441,7 +478,7 @@ def example(order, item, ci, extra):
                 item_link='%s/sn_sec_cmn_src_ci_list.do?sysparm_query=number=%s' % (BASE_URL, item['number']),
                 item_facts=item_facts(item), walk=walk_lines, why_lines=[r[0].upper() + r[1:] for r in reasons], path=extra.get('shape', ''), proper=proper, why=why,
                 ci_name=ci.get('name', ''), ci_class=ci.get('cls_label') or ci.get('cls', ''),
-                ci_link='%s/%s.do?sys_id=%s' % (BASE_URL, ci.get('cls') or 'cmdb_ci', ci.get('sys_id', '')), ci_facts=ci_facts(ci))
+                ci_link='%s/%s.do?sys_id=%s' % (BASE_URL, ci.get('cls') or 'cmdb_ci', ci.get('sys_id') or ci.get('id', '')), ci_facts=ci_facts(ci))
 
 
 def from_script_output(path):
@@ -498,24 +535,30 @@ def from_lb_exports():
 
 examples, counts = ({}, {})
 if os.path.exists(OUTPUT):
+    # candidates per rule in priority order: the targeted re-run (override), the main run, the run before; proper examples
+    # only, one entry per item, at most three; the matched count of a rule comes from the newest run that holds the rule
     examples, counts = from_script_output(OUTPUT)
     source = os.path.basename(OUTPUT)
-    OVERRIDE = os.path.join(HERE, 'demo_examples_override.txt')   # a targeted re-run: its rules replace the same rules of the main output
+    OVERRIDE = os.path.join(HERE, 'demo_examples_override.txt')
+    PREVIOUS = os.path.join(HERE, 'demo_examples_previous.txt')
+    layers = []
     if os.path.exists(OVERRIDE):
         more, more_counts = from_script_output(OVERRIDE)
-        examples.update(more); counts.update(more_counts)
-        source += ' + demo_examples_override.txt (' + ', '.join(sorted(more)) + ')'
-    PREVIOUS = os.path.join(HERE, 'demo_examples_previous.txt')   # the run before: its proper examples top up a rule the newer runs leave short
+        counts.update(more_counts); layers.append(more); source += ' + demo_examples_override.txt (' + ', '.join(sorted(more)) + ')'
+    layers.append(examples)
     if os.path.exists(PREVIOUS):
-        older, _ = from_script_output(PREVIOUS)
-        topped = []
-        for order, xs in older.items():
-            have = [x['number'] for x in examples.get(order, []) if x['proper']]
-            if len(have) < 3:
-                add = [x for x in xs if x['proper'] and x['number'] not in have][:3 - len(have)]
-                if add:
-                    examples.setdefault(order, []).extend(add); topped.append(order)
-        if topped: source += ' + demo_examples_previous.txt (' + ', '.join(sorted(topped)) + ')'
+        older, _ = from_script_output(PREVIOUS); layers.append(older)
+    merged = {}
+    for layer in layers:
+        for order, xs in layer.items():
+            have = merged.setdefault(order, [])
+            for x in xs:
+                if x['proper'] and x['number'] not in [h['number'] for h in have] and len(have) < 3:
+                    have.append(x)
+    topped = sorted(o for o, xs in merged.items() if os.path.exists(PREVIOUS) and any(x['number'] in [y['number'] for y in older.get(o, [])] and x['number'] not in [y['number'] for y in examples.get(o, [])] for x in xs))
+    if topped: source += ' + demo_examples_previous.txt (' + ', '.join(topped) + ')'
+    dropped_all = [(o, x['number'], x['why']) for layer in layers for o, xs in layer.items() for x in xs if not x['proper']]
+    examples = merged
 else:
     examples = from_lb_exports()
     source = 'client exports of 17 Sep (load balancer rules only)'
@@ -526,8 +569,32 @@ for r in RULES:
         (kept if x['proper'] else dropped).append(x if x['proper'] else (r['order'], x['number'], x['why']))
     r['examples'] = kept[:3]
     r['matched'] = counts.get(r['order'])
+dropped += [d for d in globals().get('dropped_all', []) if d not in dropped]
 
-CHAIN = [[r['order'], r['name'].replace('USEM ', ''), r['reads'], r['returns']] for r in RULES]
+CHAIN_SHORT = {
+    '175': ('Serial, OS', 'the one CI of the OS class carrying the serial'),
+    '180': ('Serial', 'the one hardware CI carrying the serial'),
+    '200': ('DNS label sep + MAC', 'the one IP Phone owning that MAC'),
+    '250': ('DNS, OS, IP', 'the one CI of the OS class whose fqdn is the name; IP breaks a tie'),
+    '260': ('DNS, IP', 'the one hardware CI whose fqdn is the name; IP breaks a tie'),
+    '300': ('DNS, OS, IP', 'the one CI of the OS class named with the label and the domain'),
+    '310': ('DNS, IP', 'the one hardware CI named with the label and the domain'),
+    '350': ('DNS, OS, IP', 'the one CI reached through DNS Name, IP Address and adapter records'),
+    '400': ('DNS, OS', 'the one CI of the OS class named with the label'),
+    '410': ('DNS, OS', 'the one hardware CI named with the label whose class agrees with the OS'),
+    '415': ('DNS, OS, IP', 'the one IP Phone or Imaging Hardware CI named with the label'),
+    '420': ('DNS, OS', 'the one hardware CI named with the label minus its controller suffix'),
+    '430': ('DNS', 'the one Network Gear or Load Balancer named with the longest prefix'),
+    '450': ('DNS', 'the one hardware CI named with the whole fqdn'),
+    '455': ('IP, DNS, OS', 'the one real server behind every member of the virtual server'),
+    '460': ('IP, DNS, OS', 'the one live Load Balancer Service record of the virtual server'),
+    '700': ('IP, OS, DNS', 'the one CI of the OS class carrying the address, name agreeing'),
+    '705': ('IP, OS, DNS', 'the one hardware CI carrying the address, class and name agreeing'),
+    '730': ('IP, OS, DNS', 'the one CI owning an adapter on the address, class and name agreeing'),
+    '740': ('IP, OS, DNS', 'the one CI behind an IP Address record on the address, class and name agreeing'),
+    '850': ('DNS', 'the one CI of any class named with the whole fqdn'),
+}
+CHAIN = [[r['order'], r['name'].replace('USEM ', ''), CHAIN_SHORT[r['order']][0], CHAIN_SHORT[r['order']][1]] for r in RULES]
 data = dict(title='Qualys CI Lookup Rules', subtitle='How a scanned host finds its CI', concepts=CONCEPTS, chain=CHAIN, rules=RULES, example_source=source)
 json.dump(data, open(sys.argv[2] if len(sys.argv) > 2 else os.path.join(HERE, 'demo_data.json'), 'w'), indent=1)
 have = sum(1 for r in RULES if r['examples'])

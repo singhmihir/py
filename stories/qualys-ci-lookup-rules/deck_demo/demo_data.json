@@ -145,128 +145,128 @@
   [
    "175",
    "Serial Number Class Match",
-   "SERIAL_NUMBER (sourceValue) plus sourcePayload.OS; the IP and DNS fields are not read.",
-   "The sys_id of the single CI in the OS-implied class (sub-classes included, ignored classes excluded) whose serial_number equals the trimmed serial; null in every other case."
+   "Serial, OS",
+   "the one CI of the OS class carrying the serial"
   ],
   [
    "180",
    "Serial Number Hardware Match",
-   "SERIAL_NUMBER (sourceValue) only; the OS, IP and DNS fields of the payload are never read.",
-   "The sys_id of the single CI under cmdb_ci_hardware (any class beneath it, ignored classes excluded) whose serial_number equals the trimmed serial; null in every other case."
+   "Serial",
+   "the one hardware CI carrying the serial"
   ],
   [
    "200",
    "Cisco IP Phone MAC",
-   "DNS field as sourceValue (sample sep64f69dd5c9b0.voip.bankofamerica.com). No payload field is read: sourcePayload is received but never used. Also reads the framework variable _ignoreClass or, failing that, the property sn_sec_cmn.ignoreCIClass.",
-   "The sys_id of exactly one cmdb_ci_ip_phone record (sub-classes included): the owner of a network adapter carrying the MAC, else the phone whose mac_address holds it, else the phone named with the device name upper-cased (SEP64F69DD5C9B0). null in every other case."
+   "DNS label sep + MAC",
+   "the one IP Phone owning that MAC"
   ],
   [
    "250",
    "FQDN Class Match",
-   "Source field DNS (sourceValue). Payload fields: OS (through classFor, decides the search table) and IP (tie-break between duplicate fqdn rows only).",
-   "The sys_id of the single CI of the OS class whose fqdn equals the scanned name; when several carry it, the one whose ip_address equals the scanned IP; null in every other case."
+   "DNS, OS, IP",
+   "the one CI of the OS class whose fqdn is the name; IP breaks a tie"
   ],
   [
    "260",
    "FQDN Hardware Match",
-   "Source field DNS (sourceValue). Payload field: IP (tie-break between duplicate fqdn rows only). OS is not read.",
-   "The sys_id of the single hardware CI whose fqdn equals the scanned name; when several carry it, the one whose ip_address equals the scanned IP; null in every other case."
+   "DNS, IP",
+   "the one hardware CI whose fqdn is the name; IP breaks a tie"
   ],
   [
    "300",
    "Hostname Domain Class Match",
-   "DNS (sourceValue); payload OS (for the class) and payload IP (tie-break only); the framework variable _ignoreClass when supplied, otherwise the property sn_sec_cmn.ignoreCIClass. The rule argument is not used.",
-   "The sys_id of the one CI of the OS-implied class (subclasses included) named with the short hostname whose fqdn or dns_domain agrees with the scanned domain, or the single agreeing CI carrying the scanned IP when several agree; null otherwise."
+   "DNS, OS, IP",
+   "the one CI of the OS class named with the label and the domain"
   ],
   [
    "310",
    "Hostname Domain Hardware Match",
-   "DNS (sourceValue); payload IP (tie-break only); the framework variable _ignoreClass when supplied, otherwise the property sn_sec_cmn.ignoreCIClass. The OS is not read. The rule argument is not used.",
-   "The sys_id of the one hardware CI (any class under cmdb_ci_hardware not on the ignore list) named with the short hostname whose fqdn or dns_domain agrees with the scanned domain, or the single agreeing CI carrying the scanned IP when several agree; null otherwise."
+   "DNS, IP",
+   "the one hardware CI named with the label and the domain"
   ],
   [
    "350",
    "Layered DNS Match",
-   "Source field DNS (sourceValue); from sourcePayload only OS (class preference through classFor) and IP (tie-break between several CIs). No other payload field is read.",
-   "The sys_id of the CI at ip_address.nic.cmdb_ci of the cmdb_ip_address_dns_name row(s) whose dns_name.name equals the normalised DNS value, when exactly one such CI passes the ignore list and agrees() with the OS class; when several CIs answer to the name, the single one whose chain runs through ip_address.ip_address equal to the scanned IP; null in every other case, and null whenever the CI chosen exists on cmdb_ci_lb."
+   "DNS, OS, IP",
+   "the one CI reached through DNS Name, IP Address and adapter records"
   ],
   [
    "400",
    "Hostname Class Match",
-   "Source field DNS (sourceValue) plus payload field OS (sourcePayload.OS); no other payload field is read and the rule argument is never used.",
-   "The sys_id of the single CI of the OS-implied class (sub-classes included, ignored classes excluded) whose name equals the short hostname; null in every other case."
+   "DNS, OS",
+   "the one CI of the OS class named with the label"
   ],
   [
    "410",
    "Hostname Hardware Match",
-   "Source field DNS (sourceValue) plus payload field OS (sourcePayload.OS); sys_class_name of the CI found and the class hierarchy from sys_db_object (name, super_class.name). The rule argument is never used.",
-   "The sys_id of the single hardware CI named with the short hostname when its class agrees with the OS-implied class (same class, sub-class, ancestor, or an appliance class for a Linux fingerprint); null when nothing is found, the name is shared or the class contradicts the scan."
+   "DNS, OS",
+   "the one hardware CI named with the label whose class agrees with the OS"
   ],
   [
    "415",
    "Device Name Match",
-   "DNS field as sourceValue (sample avxdd008a.cc.bofa.com); from sourcePayload the OS (guard only) and the IP (tie-break only). Also reads _ignoreClass or the property sn_sec_cmn.ignoreCIClass.",
-   "The sys_id of the one cmdb_ci_ip_phone or cmdb_ci_imaging_hardware record (sub-classes included, ignored classes excluded) whose name equals the host label; when several carry the name, the single one whose ip_address equals the scanned IP. null otherwise, and null when the OS names a server, desktop or other classed system."
+   "DNS, OS, IP",
+   "the one IP Phone or Imaging Hardware CI named with the label"
   ],
   [
    "420",
    "Management Interface Match",
-   "Source field DNS (sourceValue). Payload field OS (sourcePayload.OS), lower-cased, empty when absent, used only for the controller marker words. IP and SERIAL_NUMBER are not read.",
-   "The sys_id of the one record of cmdb_ci_hardware or any class beneath it (outside sn_sec_cmn.ignoreCIClass and not a cmdb_ci_lb record or a class beneath cmdb_ci_lb) whose name equals the label with its last hyphen segment removed; null in every other case."
+   "DNS, OS",
+   "the one hardware CI named with the label minus its controller suffix"
   ],
   [
    "430",
    "Network Interface Name Match",
-   "Source field DNS (sourceValue) only. The header says the OS is also read from sourcePayload, but the code never references sourcePayload: no OS, IP or SERIAL_NUMBER value takes part in the match.",
-   "The sys_id of the one record of cmdb_ci_netgear or cmdb_ci_lb, or any class beneath them, outside sn_sec_cmn.ignoreCIClass, whose name equals the longest hyphen-joined prefix of the label that names anything at all; null in every other case."
+   "DNS",
+   "the one Network Gear or Load Balancer named with the longest prefix"
   ],
   [
    "450",
    "FQDN Name Hardware Match",
-   "Source field DNS (sourceValue). No payload field is read: neither IP nor OS influences the result.",
-   "The sys_id of the single hardware CI whose name equals the scanned FQDN; null when none or more than one carries it."
+   "DNS",
+   "the one hardware CI named with the whole fqdn"
   ],
   [
    "455",
    "Load Balancer Member Match",
-   "Source field IP (sourceValue); payload fields DNS and OS from sourcePayload; the framework variable _ignoreClass when it is passed, else the property sn_sec_cmn.ignoreCIClass.",
-   "The sys_id of the one cmdb_ci_hardware record behind the virtual server (the single live record when that machine is recorded more than once under one name); otherwise null."
+   "IP, DNS, OS",
+   "the one real server behind every member of the virtual server"
   ],
   [
    "460",
    "Load Balancer Service Match",
-   "Source field IP (sourceValue); payload fields DNS and OS from sourcePayload; the framework variable _ignoreClass when it is passed, else the property sn_sec_cmn.ignoreCIClass.",
-   "The sys_id of the one cmdb_ci_lb_service record left after narrowing by scanned address and then by live status; otherwise null."
+   "IP, DNS, OS",
+   "the one live Load Balancer Service record of the virtual server"
   ],
   [
    "700",
    "IP Class Match",
-   "Source field IP (sourceValue). Payload fields: OS (class choice through classFor) and DNS (host-name agreement). The rule argument is never read.",
-   "The sys_id of the single CI of the OS-implied class whose ip_address equals the trimmed scanned address and whose name agrees with the scanned DNS label; null in every other case."
+   "IP, OS, DNS",
+   "the one CI of the OS class carrying the address, name agreeing"
   ],
   [
    "705",
    "IP Hardware Match",
-   "Source field IP (sourceValue). Payload fields: OS (class preference consumed only by agrees()) and DNS (host-name agreement). The rule argument is never read.",
-   "The sys_id of the one cmdb_ci_hardware row (any sub-class outside the ignore list) whose ip_address equals the scanned address, provided it is not in cmdb_ci_lb, its name agrees with the scanned label and its class agrees with the OS-implied class; null otherwise."
+   "IP, OS, DNS",
+   "the one hardware CI carrying the address, class and name agreeing"
   ],
   [
    "730",
    "IP Adapter Match",
-   "Source field IP (sourceValue). Payload fields: OS (class preference consumed by agrees() inside the owner loop) and DNS (host-name agreement). The rule argument is never read.",
-   "The sys_id of the single CI (counted once however many of its adapters carry the address) owning an adapter with the scanned ip_address, when its class agrees with the OS, it is not a cmdb_ci_lb row and its name agrees with the scanned label; null otherwise."
+   "IP, OS, DNS",
+   "the one CI owning an adapter on the address, class and name agreeing"
   ],
   [
    "740",
    "IP Layered Match",
-   "Source field IP (sourceValue). Payload fields: OS (class preference consumed by agrees() inside the owner loop) and DNS (host-name agreement). The rule argument is never read.",
-   "The sys_id of the single CI at the end of cmdb_ci_ip_address -> nic (cmdb_ci_network_adapter) -> cmdb_ci, counted once across its address records, when its class agrees with the OS, it is not in cmdb_ci_lb and its name agrees with the scanned label; null otherwise."
+   "IP, OS, DNS",
+   "the one CI behind an IP Address record on the address, class and name agreeing"
   ],
   [
    "850",
    "FQDN Name Broad Match",
-   "Source field DNS (sourceValue). No payload field is read: neither IP nor OS influences the result.",
-   "The sys_id of the single cmdb_ci row, in any class not on the ignore list, whose name equals the scanned FQDN; null when none or the name is shared."
+   "DNS",
+   "the one CI of any class named with the whole fqdn"
   ]
  ],
  "rules": [
@@ -274,7 +274,7 @@
    "order": "175",
    "name": "USEM Serial Number Class Match",
    "group": "Serial number",
-   "purpose": "Trusts the Qualys SERIAL_NUMBER, the one identifier that stays with a machine while names and addresses get reused, but only inside the CMDB class the scanned OS text points at, so a Red Hat host can land only on a Linux Server and a Windows Server carrying the same serial is never seen. It opens the chain because a unique serial inside the right class is the strongest evidence the feed offers.",
+   "purpose": "Trusts the Qualys SERIAL_NUMBER, the one identifier that stays with a machine while names and addresses get reused, but only inside the CMDB class the scanned OS text points at, so a Red Hat host can land only on a Linux Server and a Windows Server carrying the same serial is never seen. It opens the chain because a unique serial inside the right class is the strongest identifier the feed offers.",
    "reads": "SERIAL_NUMBER (sourceValue) plus sourcePayload.OS; the IP and DNS fields are not read.",
    "returns": "The sys_id of the single CI in the OS-implied class (sub-classes included, ignored classes excluded) whose serial_number equals the trimmed serial; null in every other case.",
    "before": "Nothing custom runs before it; it is the first rule of the chain, so every host that reports a serial reaches it (in this feed the Cloud Agent hosts; unauthenticated network scans rarely carry one).",
@@ -409,7 +409,7 @@
      "why": "",
      "ci_name": "usvmapcftmrc15",
      "ci_class": "Windows Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=7e63ec2a3b84e250d5062b64c3e45a11",
      "ci_facts": [
       [
        "FQDN",
@@ -497,7 +497,7 @@
      "why": "",
      "ci_name": "usvmapcftmrc19",
      "ci_class": "Windows Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=b663ec2a3b84e250d5062b64c3e45a0e",
      "ci_facts": [
       [
        "FQDN",
@@ -585,7 +585,7 @@
      "why": "",
      "ci_name": "usvmapcftmrc16",
      "ci_class": "Windows Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=f663ec2a3b84e250d5062b64c3e45a04",
      "ci_facts": [
       [
        "FQDN",
@@ -736,7 +736,7 @@
      "why": "",
      "ci_name": "npifdcd73",
      "ci_class": "Printer",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=694be8342bc6ae54d50dffbdbe91bf87",
      "ci_facts": [
       [
        "IP address",
@@ -812,7 +812,7 @@
      "why": "",
      "ci_name": "VNCCSB20Y7 - LASERJET ENT M507DN",
      "ci_class": "Hardware",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_hardware.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_hardware.do?sys_id=9a3819182ba72e54d28af8a4ce91bfa1",
      "ci_facts": [
       [
        "Serial number",
@@ -884,7 +884,7 @@
      "why": "",
      "ci_name": "ny1-100-33-p103",
      "ci_class": "Printer",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=084b28342bc6ae54d50dffbdbe91bfc9",
      "ci_facts": [
       [
        "DNS domain",
@@ -1059,7 +1059,7 @@
      "why": "",
      "ci_name": "SEP6C710D8ADC3B",
      "ci_class": "IP Phone",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=df221eb33be96210df0f0c54c3e45adf",
      "ci_facts": [
       [
        "IP address",
@@ -1143,7 +1143,7 @@
      "why": "",
      "ci_name": "SEP6026AA8F08CD",
      "ci_class": "IP Phone",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=3e7fc2bf3b696210df0f0c54c3e45abd",
      "ci_facts": [
       [
        "IP address",
@@ -1227,7 +1227,7 @@
      "why": "",
      "ci_name": "SEP3C26E4A7CB09",
      "ci_class": "IP Phone",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=57a9c2b33be56210df0f0c54c3e45a65",
      "ci_facts": [
       [
        "IP address",
@@ -1262,7 +1262,7 @@
    "order": "250",
    "name": "USEM FQDN Class Match",
    "group": "Name",
-   "purpose": "Trusts an exact fqdn value on a CI, but only inside the CMDB class the scanned OS text implies (sub-classes included), so a Red Hat host can never land on a Windows Server that carries the same fqdn. It is the first name rule because an exact fqdn is the most precise name evidence available once the serial number and Cisco phone rules have declined.",
+   "purpose": "Trusts an exact fqdn value on a CI, but only inside the CMDB class the scanned OS text implies (sub-classes included), so a Red Hat host can never land on a Windows Server that carries the same fqdn. It is the first name rule because an exact fqdn is the most precise name identifier available once the serial number and Cisco phone rules have declined.",
    "reads": "Source field DNS (sourceValue). Payload fields: OS (through classFor, decides the search table) and IP (tie-break between duplicate fqdn rows only).",
    "returns": "The sys_id of the single CI of the OS class whose fqdn equals the scanned name; when several carry it, the one whose ip_address equals the scanned IP; null in every other case.",
    "before": "USEM Serial Number Class Match and USEM Serial Number Hardware Match found no CI for the serial, and USEM Cisco IP Phone MAC, which also reads the DNS field but only looks for the sep label, did not recognise the host as a Cisco phone; this is the first rule that compares the DNS name with a CI name field.",
@@ -1402,7 +1402,7 @@
      "why": "",
      "ci_name": "wrdne67svtsrv",
      "ci_class": "Windows Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=2127d1bb3bd8ea90d5062b64c3e45ab9",
      "ci_facts": [
       [
        "FQDN",
@@ -1479,7 +1479,7 @@
      "why": "",
      "ci_name": "lrdnab68xsdi008",
      "ci_class": "Linux Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=0873ca94fbf0ee502fe7f7ad5eefdc48",
      "ci_facts": [
       [
        "FQDN",
@@ -1560,7 +1560,7 @@
      "why": "",
      "ci_name": "usvmsqhalc01",
      "ci_class": "Windows Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=b3cab1bb93d8ee5007a4f84958373cba",
      "ci_facts": [
       [
        "FQDN",
@@ -1719,7 +1719,7 @@
      "why": "",
      "ci_name": "lclte0ln",
      "ci_class": "Linux Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=e43c52133b146a90d5062b64c3e45a25",
      "ci_facts": [
       [
        "FQDN",
@@ -1801,7 +1801,7 @@
      "why": "",
      "ci_name": "hpuwrsubsql02",
      "ci_class": "Windows Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=7e20daa72bac22546d55ff5fe291bf63",
      "ci_facts": [
       [
        "FQDN",
@@ -1883,7 +1883,7 @@
      "why": "",
      "ci_name": "usvmsrelecp20",
      "ci_class": "Windows Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=f3e5f0f09782f29834bfb65de053af5e",
      "ci_facts": [
       [
        "FQDN",
@@ -1926,7 +1926,7 @@
    "reads": "DNS (sourceValue); payload OS (for the class) and payload IP (tie-break only); the framework variable _ignoreClass when supplied, otherwise the property sn_sec_cmn.ignoreCIClass. The rule argument is not used.",
    "returns": "The sys_id of the one CI of the OS-implied class (subclasses included) named with the short hostname whose fqdn or dns_domain agrees with the scanned domain, or the single agreeing CI carrying the scanned IP when several agree; null otherwise.",
    "before": "The FQDN rules (the script names them only as 'the FQDN rules') searched the fqdn field for the exact scanned name and returned null because the CI carries no exact fqdn value; the host reaches this rule with a dotted DNS name and an OS that maps to a class.",
-   "after": "USEM Hostname Domain Hardware Match repeats the same short-name-plus-domain search across the whole hardware tree; then USEM Layered DNS Match reads the discovery DNS records; then the plain hostname rules accept a unique short name without domain evidence.",
+   "after": "USEM Hostname Domain Hardware Match repeats the same short-name-plus-domain search across the whole hardware tree; then USEM Layered DNS Match reads the discovery DNS records; then the plain hostname rules accept a unique short name without domain agreement.",
    "mechanics": [
     {
      "title": "Source guard and normalisation.",
@@ -2057,7 +2057,7 @@
      "why": "",
      "ci_name": "lsdnab00xsdi001",
      "ci_class": "Linux Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=30c82e632b91aa14d50dffbdbe91bfa9",
      "ci_facts": [
       [
        "DNS domain",
@@ -2131,7 +2131,7 @@
      "why": "",
      "ci_name": "ltx14a31xsdi001",
      "ci_class": "Linux Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=44e8b6fd47cd3a90b5da45ac026d438f",
      "ci_facts": [
       [
        "DNS domain",
@@ -2205,7 +2205,7 @@
      "why": "",
      "ci_name": "lrchac11xsdi001",
      "ci_class": "Linux Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=15cec45c3b742e14055e3b64c3e45a73",
      "ci_facts": [
       [
        "DNS domain",
@@ -2240,11 +2240,11 @@
    "order": "310",
    "name": "USEM Hostname Domain Hardware Match",
    "group": "Name",
-   "purpose": "The same short-hostname-plus-domain evidence, but across all of cmdb_ci_hardware, for CIs classed generically (Server, Computer) or differently from what the scanned OS implies. It follows the class-scoped variant so a class-consistent hit always wins first, and precedes the layered DNS and plain hostname rules, which need less evidence.",
+   "purpose": "The same short-hostname-plus-domain agreement, but across all of cmdb_ci_hardware, for CIs classed generically (Server, Computer) or differently from what the scanned OS implies. It follows the class-scoped variant so a class-consistent hit always wins first, and precedes the layered DNS and plain hostname rules, which need less.",
    "reads": "DNS (sourceValue); payload IP (tie-break only); the framework variable _ignoreClass when supplied, otherwise the property sn_sec_cmn.ignoreCIClass. The OS is not read. The rule argument is not used.",
    "returns": "The sys_id of the one hardware CI (any class under cmdb_ci_hardware not on the ignore list) named with the short hostname whose fqdn or dns_domain agrees with the scanned domain, or the single agreeing CI carrying the scanned IP when several agree; null otherwise.",
    "before": "USEM Hostname Domain Class Match ran the identical hostname-plus-domain test inside the class the OS implies (Linux Server for 'Ubuntu/Linux') and declined because the CI sits in a generic class such as Server or Computer, in a class different from the OS, or because the OS yielded no class; earlier, the FQDN rules found no exact fqdn value.",
-   "after": "USEM Layered DNS Match reads the discovery DNS records, then the plain hostname rules accept a unique short name without domain evidence.",
+   "after": "USEM Layered DNS Match reads the discovery DNS records, then the plain hostname rules accept a unique short name without domain agreement.",
    "mechanics": [
     {
      "title": "Source guard and normalisation.",
@@ -2367,7 +2367,7 @@
      "why": "",
      "ci_name": "lsdnab03xsdi009",
      "ci_class": "Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_server.do?sys_id=35485a949310fe1026fbfbb4ed03d640",
      "ci_facts": [
       [
        "DNS domain",
@@ -2442,7 +2442,7 @@
      "why": "",
      "ci_name": "lsdnab05xsdi005",
      "ci_class": "Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_server.do?sys_id=502f97033b417ed04826a7ae53e45a4c",
      "ci_facts": [
       [
        "DNS domain",
@@ -2517,7 +2517,7 @@
      "why": "",
      "ci_name": "lsdnab03xsdi004",
      "ci_class": "Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_server.do?sys_id=7a3896949310fe1026fbfbb4ed03d695",
      "ci_facts": [
       [
        "DNS domain",
@@ -2711,7 +2711,7 @@
      "why": "",
      "ci_name": "ca6-229-01-m01",
      "ci_class": "Printer",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=b38a64fc2b86ae54d50dffbdbe91bf08",
      "ci_facts": [
       [
        "IP address",
@@ -2786,7 +2786,7 @@
      "why": "",
      "ci_name": "npi443e42",
      "ci_class": "Printer",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=e4b9ac382b86ae54d50dffbdbe91bfe3",
      "ci_facts": [
       [
        "IP address",
@@ -2861,7 +2861,7 @@
      "why": "",
      "ci_name": "ca6-168-02-p200",
      "ci_class": "Printer",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=a18a20fc2b86ae54d50dffbdbe91bf86",
      "ci_facts": [
       [
        "IP address",
@@ -2892,10 +2892,10 @@
    "order": "400",
    "name": "USEM Hostname Class Match",
    "group": "Name",
-   "purpose": "Trusts the short hostname (first DNS label) only inside the CMDB class the scanned OS implies, so the OS-to-class agreement stands in for the domain evidence the CI lacks. It sits right after the domain-evidence rules because it is the first rule that accepts a CI carrying only a short name.",
+   "purpose": "Trusts the short hostname (first DNS label) only inside the CMDB class the scanned OS implies, so the OS-to-class agreement stands in for the domain agreement the CI lacks. It sits right after the domain rules because it is the first rule that accepts a CI carrying only a short name.",
    "reads": "Source field DNS (sourceValue) plus payload field OS (sourcePayload.OS); no other payload field is read and the rule argument is never used.",
    "returns": "The sys_id of the single CI of the OS-implied class (sub-classes included, ignored classes excluded) whose name equals the short hostname; null in every other case.",
-   "before": "Every rule ahead of it needed domain evidence on the CI (a match on fqdn, dns_domain or the discovery DNS records); they decline a CI that carries only a short name and no domain information, which is exactly the host this rule reaches.",
+   "before": "Every rule ahead of it needed domain agreement on the CI (a match on fqdn, dns_domain or the discovery DNS records); they decline a CI that carries only a short name and no domain information, which is exactly the host this rule reaches.",
    "after": "USEM Hostname Hardware Match (then USEM FQDN Name Hardware Match for CIs named with the full FQDN)",
    "mechanics": [
     {
@@ -3025,7 +3025,7 @@
      "why": "",
      "ci_name": "wsina1cdreapp",
      "ci_class": "Windows Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=27e62ee33b5022d0055e3b64c3e45ae1",
      "ci_facts": [
       [
        "FQDN",
@@ -3105,7 +3105,7 @@
      "why": "",
      "ci_name": "lrchab85xsdi015",
      "ci_class": "Linux Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=a1194c903bbc2614d5062b64c3e45a71",
      "ci_facts": [
       [
        "IP address",
@@ -3181,7 +3181,7 @@
      "why": "",
      "ci_name": "wva20bmcvlfs21v",
      "ci_class": "Windows Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=0a7265773bd062d0055e3b64c3e45a23",
      "ci_facts": [
       [
        "FQDN",
@@ -3357,7 +3357,7 @@
      "why": "",
      "ci_name": "lrchac09xsdi013",
      "ci_class": "Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_server.do?sys_id=2b66dbe59348b254b096f35e1dba1064",
      "ci_facts": [
       [
        "Serial number",
@@ -3430,7 +3430,7 @@
      "why": "",
      "ci_name": "d011e580110bmac",
      "ci_class": "Computer",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_computer.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_computer.do?sys_id=215ec3123b046e10055e3b64c3e45af6",
      "ci_facts": [
       [
        "DNS domain",
@@ -3511,7 +3511,7 @@
      "why": "",
      "ci_name": "lrchac09xsdi003",
      "ci_class": "Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_server.do?sys_id=c4b557ed9388321499fa7dd548373c4d",
      "ci_facts": [
       [
        "Serial number",
@@ -3691,7 +3691,7 @@
      "why": "",
      "ci_name": "AVXEF52FB",
      "ci_class": "IP Phone",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=e07817742b062694d50dffbdbe91bf38",
      "ci_facts": [
       [
        "IP address",
@@ -3772,7 +3772,7 @@
      "why": "",
      "ci_name": "AVXEF5783",
      "ci_class": "IP Phone",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=19b683b83b4e2254860863b693e45a0e",
      "ci_facts": [
       [
        "IP address",
@@ -3853,7 +3853,7 @@
      "why": "",
      "ci_name": "AVXF1EFDF",
      "ci_class": "IP Phone",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_phone.do?sys_id=50f767343bce6254860863b693e45a2b",
      "ci_facts": [
       [
        "IP address",
@@ -3907,7 +3907,7 @@
      "detail": "os is sourcePayload.OS coerced to a string (empty when absent) and lower-cased; sourcePayload itself is not guarded. ignore is _ignoreClass when the framework fills it, else gs.getProperty('sn_sec_cmn.ignoreCIClass', ''). The IP field is never read."
     },
     {
-     "title": "Controller evidence and the server name.",
+     "title": "Controller sign and the server name.",
      "detail": "tail is the segment after the last hyphen. If tail is in suffixes, base is the label up to that hyphen. Otherwise, if any markers entry is a substring of os, base is the same cut whatever the tail. Neither sign: base stays empty, null is returned."
     },
     {
@@ -3967,7 +3967,7 @@
      "values": "gr.next() false = null; gr.getUniqueValue(); gr.hasNext() true = null; no setLimit"
     }
    ],
-   "sibling": "Strips exactly one trailing segment and only on controller evidence (suffix list or OS marker word); searches the whole cmdb_ci_hardware tree with next()/hasNext() and refuses a cmdb_ci_lb record. USEM Network Interface Name Match instead walks every prefix longest-first on interface evidence, searches only cmdb_ci_netgear and cmdb_ci_lb, accepts a load balancer device and never reads the OS. 'mgmt' sits in both lists: a '-mgmt' label naming one hardware CI resolves here; when that CI is a load balancer this rule declines and the interface rule then returns it.",
+   "sibling": "Strips exactly one trailing segment and only on controller sign (suffix list or OS marker word); searches the whole cmdb_ci_hardware tree with next()/hasNext() and refuses a cmdb_ci_lb record. USEM Network Interface Name Match instead walks every prefix longest-first on interface sign, searches only cmdb_ci_netgear and cmdb_ci_lb, accepts a load balancer device and never reads the OS. 'mgmt' sits in both lists: a '-mgmt' label naming one hardware CI resolves here; when that CI is a load balancer this rule declines and the interface rule then returns it.",
    "examples": [
     {
      "number": "SDI000002647592",
@@ -4019,7 +4019,7 @@
      "why": "",
      "ci_name": "lva10regbxch0j",
      "ci_class": "Linux Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=a53749b02b062e54d28af8a4ce91bf65",
      "ci_facts": [
       [
        "FQDN",
@@ -4101,7 +4101,7 @@
      "why": "",
      "ci_name": "xvu46dbm07",
      "ci_class": "Linux Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=a8cf49353b4e6a90be6d95c964e45a24",
      "ci_facts": [
       [
        "FQDN",
@@ -4179,7 +4179,7 @@
      "why": "",
      "ci_name": "SGCPAP1MBL11",
      "ci_class": "IP Firewall",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_firewall.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_firewall.do?sys_id=f7300d7d3b466a90be6d95c964e45a21",
      "ci_facts": [
       [
        "IP address",
@@ -4229,8 +4229,8 @@
      "detail": "A segment is a marker when it equals a listed word, or starts with the word and the rest is digits only (/^[0-9]+$/, so 'vlan705', 'v201', 'po10', 'lo0'), or, for words of three letters or more, is longer than the word and ends with it ('fasteth')."
     },
     {
-     "title": "Require interface evidence.",
-     "detail": "evidence is true when the full DNS string contains a domains entry ('.network.') or any segment after the first is a marker; the first segment is never tested. Without it the rule returns null, so hyphenated hostnames like ah-1047132-001 are never cut."
+     "title": "Require interface sign.",
+     "detail": "the sign is present when the full DNS string contains a domains entry ('.network.') or any segment after the first is a marker; the first segment is never tested. Without it the rule returns null, so hyphenated hostnames like ah-1047132-001 are never cut."
     },
     {
      "title": "Walk the prefixes, longest first.",
@@ -4252,7 +4252,7 @@
    "declines": [
     "sourceValue is empty",
     "The label has no hyphen (segments.length < 2)",
-    "No evidence: the DNS contains no '.network.' and no segment after the first is a listed marker",
+    "No interface sign: the DNS contains no '.network.' and no segment after the first is a listed marker",
     "The first prefix that names anything names two or more CIs across cmdb_ci_netgear and cmdb_ci_lb together",
     "No prefix from the longest down to the first segment names any CI in either table (a table failing isValid() contributes nothing)"
    ],
@@ -4304,7 +4304,7 @@
      "values": "sourceValue = DNS; sourcePayload is not referenced in the code"
     }
    ],
-   "sibling": "Walks every hyphen prefix longest-first and needs interface evidence ('.network.' domain or a marker segment after the first), where USEM Management Interface Match strips only the last segment on controller evidence. Searches only cmdb_ci_netgear and cmdb_ci_lb and returns a load balancer device, which the controller rule refuses. Counts hits across both tables in one array, so one switch plus one balancer of the same name decline. Reads no OS despite its header.",
+   "sibling": "Walks every hyphen prefix longest-first and needs interface sign ('.network.' domain or a marker segment after the first), where USEM Management Interface Match strips only the last segment on controller sign. Searches only cmdb_ci_netgear and cmdb_ci_lb and returns a load balancer device, which the controller rule refuses. Counts hits across both tables in one array, so one switch plus one balancer of the same name decline. Reads no OS despite its header.",
    "examples": [
     {
      "number": "SDI000003800077",
@@ -4357,7 +4357,7 @@
      "why": "",
      "ci_name": "twtwtpett48bdm0002",
      "ci_class": "IP Switch",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_switch.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_switch.do?sys_id=aaac6f842b256610cca5f39ec891bf8d",
      "ci_facts": [
       [
        "IP address",
@@ -4432,7 +4432,7 @@
      "why": "",
      "ci_name": "SGSGSINGS07DRM0156-CZ01",
      "ci_class": "IP Switch",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_switch.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_switch.do?sys_id=28acb0423bd00754a052e71864e45a01",
      "ci_facts": [
       [
        "IP address",
@@ -4507,7 +4507,7 @@
      "why": "",
      "ci_name": "SGCPPZ1UTILB01A",
      "ci_class": "Load Balancer",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb.do?sys_id=fedb74f52bc6ae94d28af8a4ce91bf69",
      "ci_facts": [
       [
        "IP address",
@@ -4653,7 +4653,7 @@
      "why": "",
      "ci_name": "CA9-107-01-M02.BANKOFAMERICA.COM",
      "ci_class": "Printer",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_printer.do?sys_id=7ed9e0b82b86ae54d50dffbdbe91bf4b",
      "ci_facts": [
       [
        "Serial number",
@@ -4858,7 +4858,7 @@
      "why": "",
      "ci_name": "lva62pwbolws51v",
      "ci_class": "Linux Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=f2130b8693966a107fb5f842ed03d653",
      "ci_facts": [
       [
        "FQDN",
@@ -4931,11 +4931,11 @@
       },
       {
        "title": "Pools",
-       "detail": "4: /Common/aim-xfer-dev_t_22 (pool field) ; /Common/aim-xfer-dev_t_22 (pool field) ; /Common/aim-xfer-dev_t_22 (pool field) ; ..."
+       "detail": "4, all the twins point at the one pool /Common/aim-xfer-dev_t_22"
       },
       {
        "title": "Members",
-       "detail": "4: /Common/30.123.135.170 30.123.135.170 -> ah-1062287-001 (device record, adapter, IP Address record) ; /Common/30.123.135.170 30.123.135.170 -> ah-1062287-001 (device record, adapter, IP Address record) ; /Common/30.123.135.170 30.123.135.170 -> ah-1062287-001 (device record, adapter, IP Address record) ; /Common/30.123.135.170 30.123.135.170 -> ah-1062287-001 (device record, adapter, IP Address record)"
+       "detail": "4: /Common/30.123.135.170 30.123.135.170, every one leads to ah-1062287-001 (device record, adapter, IP Address record)"
       },
       {
        "title": "Decision",
@@ -4959,7 +4959,7 @@
      "why": "",
      "ci_name": "ah-1062287-001",
      "ci_class": "Linux Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=6dba925b2b1ca210e9c1f4cdce91bf42",
      "ci_facts": [
       [
        "FQDN",
@@ -5060,7 +5060,7 @@
      "why": "",
      "ci_name": "lva71pwbolcc01v",
      "ci_class": "Linux Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_linux_server.do?sys_id=ddcdddf02b462294d50dffbdbe91bf9b",
      "ci_facts": [
       [
        "FQDN",
@@ -5114,7 +5114,7 @@
      "detail": "The ignore classes come from the framework variable _ignoreClass when defined and non-empty, else from gs.getProperty('sn_sec_cmn.ignoreCIClass', ''); when non-empty it is added as sys_class_name NOT IN on every cmdb_ci_lb_service query."
     },
     {
-     "title": "VIP evidence.",
+     "title": "VIP sign.",
      "detail": "Goes on only when the lower-cased OS contains 'f5', 'big-ip', 'big ip' or 'netscaler', or a hyphen segment of the label equals 'vip' or 'vs', is that word plus digits only, or (words of 3+ letters, so 'vip') ends in the word. Otherwise null."
     },
     {
@@ -5132,7 +5132,7 @@
    ],
    "declines": [
     "sourceValue is empty, or the trimmed IP is empty or starts with \"127.\" or \"169.254.\"",
-    "No VIP evidence: the OS contains none of 'f5', 'big-ip', 'big ip', 'netscaler' and no hyphen segment of the DNS label is a 'vip' or 'vs' marker",
+    "No VIP sign: the OS contains none of 'f5', 'big-ip', 'big ip', 'netscaler' and no hyphen segment of the DNS label is a 'vip' or 'vs' marker",
     "cmdb_ci_lb_service is not a valid table on the instance",
     "A search step returns cmdb_ci_lb_service records with two or more distinct names (trimmed, lower-cased)",
     "More than one record of the one virtual server survives narrowing by scanned address and then by live status (both devices of a pair live)",
@@ -5178,7 +5178,7 @@
      "values": "cmdb_ci_lb_service: fqdn, name, ip_address, sys_class_name, install_status, operational_status, life_cycle_stage_status"
     }
    ],
-   "sibling": "Never reads the pool, its members or any server; returns the cmdb_ci_lb_service record itself. Declines when two records of one virtual server survive narrowing (both devices of a pair live) where the member rule keeps both and walks their pools. Its header calls the check 'evidence' and invites extending the two lists; the member rule calls it 'sign' and asks that both lists stay identical in the two rules.",
+   "sibling": "Never reads the pool, its members or any server; returns the cmdb_ci_lb_service record itself. Declines when two records of one virtual server survive narrowing (both devices of a pair live) where the member rule keeps both and walks their pools. Its header calls the check 'sign' and invites extending the two lists; the member rule calls it 'sign' and asks that both lists stay identical in the two rules.",
    "examples": [
     {
      "number": "SDI000003055580",
@@ -5242,7 +5242,7 @@
      "why": "",
      "ci_name": "/Common/ait74300-review1-origin_mymerrill_cdn-6001-vip",
      "ci_class": "Load Balancer Service",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=84466888930e0b50205fb5627cba107c",
      "ci_facts": [
       [
        "IP address",
@@ -5317,14 +5317,14 @@
       "Controller rule: no controller suffix or OS word",
       "Interface rule: no interface domain or marker",
       "Whole-fqdn name rule: no record in the hardware tree named \"olmerrillweb-preview1-l7-vip1.gwimnp.rpg\"",
-      "Member rule: Decision: 1 member(s), 2 server record(s), 2 machine(s) by name; 2 machines behind the virtual server: the member rule declines"
+      "Member rule: 1 member(s), 2 server record(s), 2 machine(s) by name; 2 machines behind the virtual server: the member rule declines"
      ],
      "path": "ip_address / one record",
      "proper": true,
      "why": "",
      "ci_name": "/Common/ait74300-preview1-origin_mymerrill_cdn-6001-vip",
      "ci_class": "Load Balancer Service",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=0a6f146b2bed4354412af1f7d891bf68",
      "ci_facts": [
       [
        "IP address",
@@ -5399,14 +5399,14 @@
       "Controller rule: no controller suffix or OS word",
       "Interface rule: no interface domain or marker",
       "Whole-fqdn name rule: no record in the hardware tree named \"pbui-va2-vip.gwim.rpg\"",
-      "Member rule: Decision: 4 member(s), 4 server record(s), 4 machine(s) by name; 4 machines behind the virtual server: the member rule declines"
+      "Member rule: 4 member(s), 4 server record(s), 4 machine(s) by name; 4 machines behind the virtual server: the member rule declines"
      ],
      "path": "ip_address / one record",
      "proper": true,
      "why": "",
      "ci_name": "/Common/ait32589-rvcpbt2-pbui-443-vip",
      "ci_class": "Load Balancer Service",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_lb_service.do?sys_id=3ff610aa2b8d871032e4f5cdc891bf75",
      "ci_facts": [
       [
        "IP address",
@@ -5574,7 +5574,7 @@
      "why": "",
      "ci_name": "wpa11bwmleas05v",
      "ci_class": "Windows Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=c785e52bfbddc7d0f40ef34c5eefdccf",
      "ci_facts": [
       [
        "FQDN",
@@ -5665,7 +5665,7 @@
      "why": "",
      "ci_name": "wpa11bwmleas06v",
      "ci_class": "Windows Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=3fb5a1633bd90754ef3892e643e45ade",
      "ci_facts": [
       [
        "FQDN",
@@ -5756,7 +5756,7 @@
      "why": "",
      "ci_name": "wva42bwtmias01v",
      "ci_class": "Windows Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_win_server.do?sys_id=8bfab94747d18714b5da45ac026d434c",
      "ci_facts": [
       [
        "FQDN",
@@ -5957,7 +5957,7 @@
      "why": "",
      "ci_name": "wva20bmsendb01v",
      "ci_class": "Computer",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_computer.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_computer.do?sys_id=f1593dbd3b74c710ef3892e643e45a81",
      "ci_facts": [
       [
        "DNS domain",
@@ -6045,7 +6045,7 @@
      "why": "",
      "ci_name": "WVA40BWOEXAD04V",
      "ci_class": "Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_server.do?sys_id=671eaa82935e2a107fb5f842ed03d6e0",
      "ci_facts": [
       [
        "IP address",
@@ -6125,7 +6125,7 @@
      "why": "",
      "ci_name": "CRPFLMIAUPS58",
      "ci_class": "UPS",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ups.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ups.do?sys_id=4966fb582ba7e614d50dffbdbe91bf76",
      "ci_facts": [
       [
        "IP address",
@@ -6314,7 +6314,7 @@
      "why": "",
      "ci_name": "a-vjp2d000i0175",
      "ci_class": "ESX Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_esx_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_esx_server.do?sys_id=abb100a52b976e908afbf3b28191bf4f",
      "ci_facts": [
       [
        "FQDN",
@@ -6406,7 +6406,7 @@
      "why": "",
      "ci_name": "a-vsg2d000i0326",
      "ci_class": "ESX Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_esx_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_esx_server.do?sys_id=2e0ed1d1ebccb254986cffd6bad0cdf6",
      "ci_facts": [
       [
        "FQDN",
@@ -6498,7 +6498,7 @@
      "why": "",
      "ci_name": "a-vsg2d000i0291",
      "ci_class": "ESX Server",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_esx_server.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_esx_server.do?sys_id=c5fad55d3b8cf25cdf0f0c54c3e45ac8",
      "ci_facts": [
       [
        "FQDN",
@@ -6637,21 +6637,21 @@
    "sibling": "Same distinct-owner logic as USEM IP Adapter Match, one link deeper: cmdb_ci_ip_address.ip_address -> nic -> cmdb_ci, with dot-walked queries (nic.cmdb_ci, nic.cmdb_ci.sys_class_name) and an isValid() guard because the IP Address table may not exist. It is the last of the four address rules.",
    "examples": [
     {
-     "number": "SDI000002965591",
-     "host": "10.16.37.11",
-     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002965591",
+     "number": "SDI000002376737",
+     "host": "ididjktnx07sdm0001-vl603.asia.bankofamerica.com",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002376737",
      "item_facts": [
       [
        "DNS name",
-       "(none)"
+       "ididjktnx07sdm0001-vl603.asia.bankofamerica.com"
       ],
       [
        "IP address",
-       "10.16.37.11"
+       "165.40.253.178"
       ],
       [
        "Operating system",
-       "UNIX"
+       "Cisco Nexus Switch"
       ],
       [
        "Tracking",
@@ -6659,17 +6659,102 @@
       ],
       [
        "Last evaluated",
-       "2026-09-21 04:53:02"
+       "2026-09-21 08:47:59"
       ]
      ],
      "walk": [
       {
        "title": "Address",
-       "detail": "\"10.16.37.11\"; OS \"UNIX\" gives no class (a preference for class agreement)"
+       "detail": "\"165.40.253.178\"; OS \"Cisco Nexus Switch\" gives the class netgear (a preference for class agreement)"
       },
       {
        "title": "IP Address records on the address",
-       "detail": "1: IP Address record -> adapter Netwtw10. -> k30894a794e38 [computer]"
+       "detail": "1: IP Address record -> adapter Vlan603 -> ididjktnx07sdm0001 [ip_switch]"
+      },
+      {
+       "title": "Decision",
+       "detail": "1 distinct owning CI; not a load balancer device; name agrees with \"ididjktnx07sdm0001-vl603\""
+      }
+     ],
+     "why_lines": [
+      "Serial rules: no serial reported",
+      "Phone MAC rule: label \"ididjktnx07sdm0001-vl603\" is not sep + 12 hex",
+      "FQDN rules: no record in the hardware tree carries the fqdn",
+      "Name + domain rules: no record named \"ididjktnx07sdm0001-vl603\"",
+      "Layered DNS rule: no DNS Name record for \"ididjktnx07sdm0001-vl603.asia.bankofamerica.com\"",
+      "Host name rules: no record in the hardware tree named \"ididjktnx07sdm0001-vl603\"",
+      "Device name rule: OS gives the class netgear",
+      "Controller rule: no controller suffix or OS word",
+      "Interface rule: no interface domain or marker",
+      "Whole-fqdn name rule: no record in the hardware tree named \"ididjktnx07sdm0001-vl603.asia.bankofamerica.com\"",
+      "Member rule: no VIP sign",
+      "Service rule: no VIP sign",
+      "Address rules: no record in the hardware tree carries the address",
+      "Adapter rule: no adapter on the address"
+     ],
+     "path": "1 records / 1 owners",
+     "proper": true,
+     "why": "",
+     "ci_name": "ididjktnx07sdm0001",
+     "ci_class": "IP Switch",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_switch.do?sys_id=c835c6e83ba822d0670e839704e45ae8",
+     "ci_facts": [
+      [
+       "IP address",
+       "10.214.35.6"
+      ],
+      [
+       "Serial number",
+       "FDO23390LQU"
+      ],
+      [
+       "Model",
+       "Cisco Systems, Inc. Nexus 9300-EX Series 93180YC-EX"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002354915",
+     "host": "171.151.214.18",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002354915",
+     "item_facts": [
+      [
+       "DNS name",
+       "(none)"
+      ],
+      [
+       "IP address",
+       "171.151.214.18"
+      ],
+      [
+       "Operating system",
+       "Cisco IOS 11-15"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 09:29:23"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Address",
+       "detail": "\"171.151.214.18\"; OS \"Cisco IOS 11-15\" gives the class netgear (a preference for class agreement)"
+      },
+      {
+       "title": "IP Address records on the address",
+       "detail": "1: IP Address record -> adapter Vlan1851 -> ththbkkt133vdm0001 [ip_switch]"
       },
       {
        "title": "Decision",
@@ -6677,15 +6762,96 @@
       }
      ],
      "why_lines": [
-      "No DNS name reported, only the address: no serial, phone or name rule could run",
-      "The address sits on an IP Address record, not on the CI or an adapter"
+      "No DNS name: the scan reports only the address, so no phone or name rule could run",
+      "Serial rules: no serial reported",
+      "Member rule: no VIP sign",
+      "Service rule: no VIP sign",
+      "Address rules: no record in the hardware tree carries the address",
+      "Adapter rule: no adapter on the address"
      ],
      "path": "1 records / 1 owners",
      "proper": true,
      "why": "",
-     "ci_name": "k30894a794e38",
+     "ci_name": "ththbkkt133vdm0001",
+     "ci_class": "IP Switch",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_ip_switch.do?sys_id=04f4cae0fba82e102fe7f7ad5eefdcd3",
+     "ci_facts": [
+      [
+       "IP address",
+       "165.46.74.3"
+      ],
+      [
+       "Serial number",
+       "FDO2313F05X"
+      ],
+      [
+       "Model",
+       "Cisco Systems cat36xxstack"
+      ],
+      [
+       "Install status",
+       "Installed"
+      ],
+      [
+       "Operational status",
+       "Operational"
+      ]
+     ]
+    },
+    {
+     "number": "SDI000002962461",
+     "host": "172.24.5.68",
+     "item_link": "https://bofasecopsdev.service-now.com/sn_sec_cmn_src_ci_list.do?sysparm_query=number=SDI000002962461",
+     "item_facts": [
+      [
+       "DNS name",
+       "(none)"
+      ],
+      [
+       "IP address",
+       "172.24.5.68"
+      ],
+      [
+       "Operating system",
+       "Linux 2.4-2.6 / Embedded Device / F5 Networks Big-IP / ArubaOS"
+      ],
+      [
+       "Tracking",
+       "IP"
+      ],
+      [
+       "Last evaluated",
+       "2026-09-21 09:18:12"
+      ]
+     ],
+     "walk": [
+      {
+       "title": "Address",
+       "detail": "\"172.24.5.68\"; OS \"Linux 2.4-2.6 / Embedded Device / F5 Networks Big-IP / ArubaOS\" gives no class (a preference for class agreement)"
+      },
+      {
+       "title": "IP Address records on the address",
+       "detail": "1: IP Address record -> adapter bc:38:98:ab:e3:f2 -> kbc3898abe3f2 [computer]"
+      },
+      {
+       "title": "Decision",
+       "detail": "1 distinct owning CI; not a load balancer device; no scanned label to compare"
+      }
+     ],
+     "why_lines": [
+      "No DNS name: the scan reports only the address, so no phone or name rule could run",
+      "Serial rules: no serial reported",
+      "Member rule: no service record",
+      "Service rule: no service record",
+      "Address rules: OS \"Linux 2.4-2.6 / Embedded Device / F5 Networks Big-IP / ArubaOS\" gives no class / no record in the hardware tree carries the address",
+      "Adapter rule: no adapter on the address"
+     ],
+     "path": "1 records / 1 owners",
+     "proper": true,
+     "why": "",
+     "ci_name": "kbc3898abe3f2",
      "ci_class": "Computer",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_computer.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_computer.do?sys_id=587f01782b0eee54d50dffbdbe91bf2d",
      "ci_facts": [
       [
        "DNS domain",
@@ -6693,15 +6859,15 @@
       ],
       [
        "IP address",
-       "192.168.1.176"
+       "30.179.235.185"
       ],
       [
        "Serial number",
-       "5CG3112JMQ"
+       "5CD451CT4T"
       ],
       [
        "Model",
-       "Hewlett Packard ELITEBOOK 830 G8 ENT 512"
+       "Hewlett Packard ELITEBOOK 630 G11 GWIM"
       ],
       [
        "Install status",
@@ -6841,7 +7007,7 @@
      "why": "",
      "ci_name": "lrchac13xsdi001.sdi.corp.bankofamerica.com",
      "ci_class": "Kubernetes Node",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_kubernetes_node.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_kubernetes_node.do?sys_id=b0da27023beba690dee4bcdc73e45a10",
      "ci_facts": [
       [
        "IP address",
@@ -6915,7 +7081,7 @@
      "why": "",
      "ci_name": "lrchac14xsdi005.sdi.corp.bankofamerica.com",
      "ci_class": "Kubernetes Node",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_kubernetes_node.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_kubernetes_node.do?sys_id=33e5941293c507103854f05ea903d6aa",
      "ci_facts": [
       [
        "IP address",
@@ -6989,7 +7155,7 @@
      "why": "",
      "ci_name": "lrchac14xsdi013.sdi.corp.bankofamerica.com",
      "ci_class": "Kubernetes Node",
-     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_kubernetes_node.do?sys_id=",
+     "ci_link": "https://bofasecopsdev.service-now.com/cmdb_ci_kubernetes_node.do?sys_id=29d51c922b09071022b7fcded391bff8",
      "ci_facts": [
       [
        "IP address",
@@ -7009,5 +7175,5 @@
    "matched": 2500
   }
  ],
- "example_source": "demo_examples_output.txt + demo_examples_previous.txt (740)"
+ "example_source": "demo_examples_output.txt + demo_examples_override.txt (450, 740)"
 }

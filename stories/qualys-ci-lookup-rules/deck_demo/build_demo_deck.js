@@ -145,14 +145,15 @@ D.rules.forEach(r => {
     const why = x.why_lines || [];
     if (why.length) {
       heading(e, x2 + 0.25, yw, mw - 0.5, 'Why this rule');
-      const wh = Math.min(x.walk.length > 3 ? 2.35 : 2.9, 0.1 + 0.215 * why.length + 0.08 * why.filter(l => l.length > 95).length);
+      const longWalk = x.walk.reduce((a, t) => a + (typeof t === 'string' ? t.length : t.title.length + t.detail.length), 0) > 700 || x.walk.length > 5;
+      const wh = Math.min(longWalk ? 1.75 : x.walk.length > 3 ? 2.35 : 2.9, 0.1 + 0.215 * why.length + 0.08 * why.filter(l => l.length > 95).length);
       const runs = [];
       why.forEach((l, i) => {
         const k = l.indexOf(': ');
         if (k > 0 && k < 30) { runs.push({ text: l.slice(0, k + 1) + ' ', options: { bullet: { indent: 12 }, bold: true, color: NAVY } }); runs.push({ text: l.slice(k + 2), options: { breakLine: i < why.length - 1, paraSpaceAfter: 2 } }); }
         else runs.push({ text: l, options: { bullet: { indent: 12 }, breakLine: i < why.length - 1, paraSpaceAfter: 2 } });
       });
-      e.addText(runs, { x: x2 + 0.25, y: yw + 0.27, w: mw - 0.5, h: wh, fontFace: SANS, fontSize: why.length > 8 ? 9 : 9.5, color: INK, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
+      e.addText(runs, { x: x2 + 0.25, y: yw + 0.27, w: mw - 0.5, h: wh, fontFace: SANS, fontSize: longWalk ? 8 : why.length > 8 ? 9 : 9.5, color: INK, isTextBox: true, margin: 0, valign: 'top', fit: 'shrink' });
       yw += 0.27 + wh + 0.12;
       e.addShape(pres.ShapeType.line, { x: x2 + 0.25, y: yw - 0.02, w: mw - 0.5, h: 0, line: { color: LINE, width: 0.75 } });
       yw += 0.08;
