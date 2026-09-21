@@ -1,0 +1,67 @@
+Outbound to CDP (consequence) field check on the instance - 32 sheet rows
+x_boar_bofa_usem_0_consequence.u_state -> state (State): state by payload name, type integer
+x_boar_bofa_usem_0_consequence.u_accountable_party -> accountable_party (Accountable Party): u_accountable_party by same name, type string
+x_boar_bofa_usem_0_consequence.sys_updated_on -> updated_on (Updated): sys_updated_on by same name, type glide_date_time
+x_boar_bofa_usem_0_consequence.u_comments -> comments (Comments): u_comments by same name, type string
+x_boar_bofa_usem_0_consequence.u_change_freeze_effective_date -> change_freeze_effective_date (Change Freeze Effective Date): u_change_freeze_effective_date by same name, type glide_date_time
+x_boar_bofa_usem_0_consequence.u_consequence_level -> consequence_level (Consequence Level): u_consequence_level by same name, type string
+x_boar_bofa_usem_0_consequence.sys_id -> sys_id (Sys ID): sys_id by same name, type GUID
+x_boar_bofa_usem_0_consequence.sys_created_by -> created_by (Created by): sys_created_by by same name, type string
+x_boar_bofa_usem_0_consequence.u_enforcement_status -> enforcement_status (Enforcement Status): u_enforcement_status by same name, type integer
+x_boar_bofa_usem_0_consequence.u_network_isolation_effective_date -> network_isolation_effective_date (Network Isolation Effective Date): u_network_isolation_effective_date by same name, type glide_date_time
+x_boar_bofa_usem_0_consequence.u_rule -> rule (Rule): u_rule by same name, type reference -> x_boar_bofa_usem_0_consequence_rule
+x_boar_bofa_usem_0_consequence.cmdb_ci -> cmdb_ci (Configuration item): cmdb_ci by same name, type reference -> cmdb_ci
+x_boar_bofa_usem_0_consequence.sys_created_on -> created_on (Created): sys_created_on by same name, type glide_date_time
+x_boar_bofa_usem_0_consequence.u_bofa_ait -> bofa_ait (AIT): u_bofa_ait by same name, type reference -> x_boar_bofa_techad_ait
+x_boar_bofa_usem_0_consequence.number -> number (Number): number by same name, type string
+x_boar_bofa_usem_0_consequence.sys_updated_by -> updated_by (Updated by): sys_updated_by by same name, type string
+x_boar_bofa_usem_0_consequence.u_rejection_reason -> rejection_reason (Rejection Reason): u_rejection_reason by same name, type string
+x_boar_bofa_usem_0_consequence_rule.x_applies_to -> applies_to (Applies to): applies_to by payload name, type string
+x_boar_bofa_usem_0_consequence_rule.x_comments -> comments (Comments): comments by payload name, type string
+x_boar_bofa_usem_0_consequence_rule.x_conditions -> conditions (Conditions): conditions by payload name, type string
+x_boar_bofa_usem_0_consequence_rule.sys_created_on -> created_on (Created): sys_created_on by same name, type glide_date_time
+x_boar_bofa_usem_0_consequence_rule.sys_created_by -> screated_by (Created by): sys_created_by by same name, type string
+x_boar_bofa_usem_0_consequence_rule.x_global_exception -> global_exception (Global Exception): global_exception by payload name, type boolean
+x_boar_bofa_usem_0_consequence_rule.x_name -> name (Name): name by payload name, type string
+x_boar_bofa_usem_0_consequence_rule.number -> number (Number): number by same name, type string
+x_boar_bofa_usem_0_consequence_rule.x_state -> state (State): state by payload name, type string
+x_boar_bofa_usem_0_consequence_rule.sys_id -> sys_id (Sys ID): sys_id by same name, type GUID
+x_boar_bofa_usem_0_consequence_rule.x_table -> table (Table): table by payload name, type string
+x_boar_bofa_usem_0_consequence_rule.sys_updated_on -> updated_on (Updated): sys_updated_on by same name, type glide_date_time
+x_boar_bofa_usem_0_consequence_rule.sys_updated_by -> updated_by (Updated by): sys_updated_by by same name, type string
+x_boar_bofa_usem_0_consequence_rule.x_valid_from -> valid_from (Valid from): valid_from by payload name, type glide_date_time
+x_boar_bofa_usem_0_consequence_rule.x_valid_to -> valid_to (Valid to): valid_to by payload name, type glide_date_time
+Property value to use for usem.consequence.fields.x_boar_bofa_usem_0_consequence (a row not found keeps the sheet name until the field is known):
+state=state,
+u_accountable_party=accountable_party,
+sys_updated_on=updated_on,
+u_comments=comments,
+u_change_freeze_effective_date=change_freeze_effective_date,
+u_consequence_level=consequence_level,
+sys_id=sys_id,
+sys_created_by=created_by,
+u_enforcement_status=enforcement_status,
+u_network_isolation_effective_date=network_isolation_effective_date,
+u_rule=rule,
+cmdb_ci=cmdb_ci,
+sys_created_on=created_on,
+u_bofa_ait=bofa_ait,
+number=number,
+sys_updated_by=updated_by,
+u_rejection_reason=rejection_reason,
+x_boar_bofa_usem_0_consequence_rule.applies_to=applies_to,
+x_boar_bofa_usem_0_consequence_rule.comments=comments,
+x_boar_bofa_usem_0_consequence_rule.conditions=conditions,
+x_boar_bofa_usem_0_consequence_rule.sys_created_on=created_on,
+x_boar_bofa_usem_0_consequence_rule.sys_created_by=screated_by,
+x_boar_bofa_usem_0_consequence_rule.global_exception=global_exception,
+x_boar_bofa_usem_0_consequence_rule.name=name,
+x_boar_bofa_usem_0_consequence_rule.number=number,
+x_boar_bofa_usem_0_consequence_rule.state=state,
+x_boar_bofa_usem_0_consequence_rule.sys_id=sys_id,
+x_boar_bofa_usem_0_consequence_rule.table=table,
+x_boar_bofa_usem_0_consequence_rule.sys_updated_on=updated_on,
+x_boar_bofa_usem_0_consequence_rule.sys_updated_by=updated_by,
+x_boar_bofa_usem_0_consequence_rule.valid_from=valid_from,
+x_boar_bofa_usem_0_consequence_rule.valid_to=valid_to,
+Every sheet row resolves to a field on this instance.

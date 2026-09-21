@@ -1,0 +1,247 @@
+{
+  "envelope": {
+    "type": "record",
+    "topic_name": "sn_usem_consequence_outbound",
+    "namespace": "com.bofa.usem",
+    "core_version": "1.0.0",
+    "outbound_version": "1.0.0",
+    "event_id": "1a6a937b-fac5-4398-8706-ee39d8981723",
+    "event_timestamp": "2026-08-27T16:25:25Z",
+    "element_count": 10,
+    "element_activity": "INSERT"
+  },
+  "consequences": [
+    {
+      "consequence": {
+        "state": "deferred",
+        "updated_on": "08-05-2026 09:00:00",
+        "comments": "test record for change freeze effective date 1",
+        "change_freeze_effective_date": "07-27-2026 12:40:01",
+        "consequence_level": "level_1",
+        "created_by": "ZKUKAGF",
+        "enforcement_status": "Change Frozen",
+        "cmdb_ci": "(com.baml.workflow.WorkflowApplication) - PROCESS_GROUP-1D3F93815C6164CB",
+        "created_on": "07-27-2026 12:39:46",
+        "bofa_ait": "73131",
+        "number": "CON0000003",
+        "updated_by": "VR.System"
+      },
+      "rule": {
+        "comments": "test record for change freeze effective date 1",
+        "created_on": "07-27-2026 12:39:46",
+        "screated_by": "ZKUKAGF",
+        "number": "CON0000003",
+        "state": "deferred",
+        "updated_on": "08-05-2026 09:00:00",
+        "updated_by": "VR.System"
+      }
+    },
+    {
+      "consequence": {
+        "state": "Closed",
+        "updated_on": "08-04-2026 09:14:58",
+        "consequence_level": "level_1",
+        "created_by": "ZKUKAGF",
+        "enforcement_status": "Change Frozen",
+        "cmdb_ci": "(com.boa.multidte.utils.SSNCorrectionsWrapper) - PROCESS_GROUP-68456D8AB730A89C",
+        "created_on": "07-27-2026 12:41:48",
+        "bofa_ait": "73131",
+        "number": "CON0000005",
+        "updated_by": "admin"
+      },
+      "rule": {
+        "created_on": "07-27-2026 12:41:48",
+        "screated_by": "ZKUKAGF",
+        "number": "CON0000005",
+        "state": "Closed",
+        "updated_on": "08-04-2026 09:14:58",
+        "updated_by": "admin"
+      }
+    },
+    {
+      "consequence": {
+        "state": "Deferred",
+        "updated_on": "08-10-2026 16:05:48",
+        "comments": "test",
+        "change_freeze_effective_date": "07-27-2026 12:44:47",
+        "consequence_level": "level_1",
+        "created_by": "ZKUKAGF",
+        "enforcement_status": "Paused",
+        "cmdb_ci": "@ltx44bdclndb56",
+        "created_on": "07-27-2026 12:44:47",
+        "bofa_ait": "73131",
+        "number": "CON0000006",
+        "updated_by": "Test Consequence user read"
+      },
+      "rule": {
+        "comments": "test",
+        "created_on": "07-27-2026 12:44:47",
+        "screated_by": "ZKUKAGF",
+        "number": "CON0000006",
+        "state": "Deferred",
+        "updated_on": "08-10-2026 16:05:48",
+        "updated_by": "Test Consequence user read"
+      }
+    },
+    {
+      "consequence": {
+        "state": "Closed",
+        "updated_on": "08-04-2026 14:54:30",
+        "comments": "Change freeze effective date test 1",
+        "change_freeze_effective_date": "07-27-2026 13:00:05",
+        "consequence_level": "level_1",
+        "created_by": "ZKUKAGF",
+        "enforcement_status": "Change Frozen",
+        "cmdb_ci": "3306@uswxapestc182",
+        "created_on": "07-27-2026 13:00:05",
+        "bofa_ait": "73131",
+        "number": "CON0000008",
+        "updated_by": "ZKZFP6A"
+      },
+      "rule": {
+        "comments": "Change freeze effective date test 1",
+        "created_on": "07-27-2026 13:00:05",
+        "screated_by": "ZKUKAGF",
+        "number": "CON0000008",
+        "state": "Closed",
+        "updated_on": "08-04-2026 14:54:30",
+        "updated_by": "ZKZFP6A"
+      }
+    },
+    {
+      "consequence": {
+        "state": "Closed",
+        "updated_on": "08-04-2026 14:54:30",
+        "change_freeze_effective_date": "07-27-2026 13:30:08",
+        "consequence_level": "level_1",
+        "created_by": "ZKUKAGF",
+        "enforcement_status": "Change Frozen",
+        "cmdb_ci": "@lva50bcidsml07",
+        "created_on": "07-27-2026 13:30:08",
+        "bofa_ait": "73131",
+        "number": "CON0000009",
+        "updated_by": "ZKZFP6A"
+      },
+      "rule": {
+        "created_on": "07-27-2026 13:30:08",
+        "screated_by": "ZKUKAGF",
+        "number": "CON0000009",
+        "state": "Closed",
+        "updated_on": "08-04-2026 14:54:30",
+        "updated_by": "ZKZFP6A"
+      }
+    },
+    {
+      "consequence": {
+        "state": "Closed",
+        "updated_on": "08-23-2026 04:00:01",
+        "change_freeze_effective_date": "07-28-2026 17:10:13",
+        "consequence_level": "level_1",
+        "created_by": "ZKRDV4M",
+        "enforcement_status": "Change Frozen",
+        "network_isolation_effective_date": "07-28-2026 17:12:17",
+        "rule": "CQR0000023",
+        "created_on": "07-28-2026 17:10:13",
+        "bofa_ait": "35941",
+        "number": "CON0000010",
+        "updated_by": "admin"
+      },
+      "rule": {
+        "created_on": "07-28-2026 17:10:13",
+        "screated_by": "ZKRDV4M",
+        "number": "CON0000010",
+        "state": "Closed",
+        "updated_on": "08-23-2026 04:00:01",
+        "updated_by": "admin"
+      }
+    },
+    {
+      "consequence": {
+        "state": "open",
+        "updated_on": "08-23-2026 04:00:01",
+        "change_freeze_effective_date": "07-28-2026 17:10:13",
+        "consequence_level": "level_1",
+        "created_by": "ZKRDV4M",
+        "enforcement_status": "Change Frozen",
+        "rule": "CQR0000023",
+        "created_on": "07-28-2026 17:11:54",
+        "bofa_ait": "35941",
+        "number": "CON0000011",
+        "updated_by": "admin"
+      },
+      "rule": {
+        "created_on": "07-28-2026 17:11:54",
+        "screated_by": "ZKRDV4M",
+        "number": "CON0000011",
+        "state": "open",
+        "updated_on": "08-23-2026 04:00:01",
+        "updated_by": "admin"
+      }
+    },
+    {
+      "consequence": {
+        "state": "Closed",
+        "updated_on": "08-04-2026 14:54:30",
+        "comments": "Testing Auto flag Consequence records for Level 2 - Network Isolation Decision",
+        "change_freeze_effective_date": "07-29-2026 11:54:47",
+        "consequence_level": "level_2",
+        "created_by": "ZKUKAGF",
+        "enforcement_status": "Pending Network Isolation Decision",
+        "cmdb_ci": "@lva50bcidsml07",
+        "created_on": "05-29-2026 11:59:18",
+        "bofa_ait": "73131",
+        "number": "CON0000013",
+        "updated_by": "ZKZFP6A"
+      },
+      "rule": {
+        "comments": "Testing Auto flag Consequence records for Level 2 - Network Isolation Decision",
+        "created_on": "05-29-2026 11:59:18",
+        "screated_by": "ZKUKAGF",
+        "number": "CON0000013",
+        "state": "Closed",
+        "updated_on": "08-04-2026 14:54:30",
+        "updated_by": "ZKZFP6A"
+      }
+    },
+    {
+      "consequence": {
+        "updated_on": "08-04-2026 06:03:07",
+        "change_freeze_effective_date": "07-30-2026 10:50:18",
+        "created_by": "ZKUKAGF",
+        "created_on": "07-30-2026 10:50:18",
+        "number": "CON0000016",
+        "updated_by": "ZKTYREC"
+      },
+      "rule": {
+        "created_on": "07-30-2026 10:50:18",
+        "screated_by": "ZKUKAGF",
+        "number": "CON0000016",
+        "updated_on": "08-04-2026 06:03:07",
+        "updated_by": "ZKTYREC"
+      }
+    },
+    {
+      "consequence": {
+        "state": "Closed",
+        "updated_on": "08-12-2026 08:16:01",
+        "change_freeze_effective_date": "07-30-2026 14:38:22",
+        "consequence_level": "level_2",
+        "created_by": "ZKRDV4M",
+        "rule": "CQR0000013",
+        "cmdb_ci": "defe15b1710e45e8940d6976c95de5e5",
+        "created_on": "05-30-2026 14:42:04",
+        "bofa_ait": "35941",
+        "number": "CON0000017",
+        "updated_by": "ZKTYREC"
+      },
+      "rule": {
+        "created_on": "05-30-2026 14:42:04",
+        "screated_by": "ZKRDV4M",
+        "number": "CON0000017",
+        "state": "Closed",
+        "updated_on": "08-12-2026 08:16:01",
+        "updated_by": "ZKTYREC"
+      }
+    }
+  ]
+}

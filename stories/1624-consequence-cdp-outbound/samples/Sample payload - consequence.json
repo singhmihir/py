@@ -1,0 +1,53 @@
+{
+  "envelope": {
+    "type": "record",
+    "topic_name": "sn_usem_consequence_outbound",
+    "namespace": "com.bofa.usem",
+    "core_version": "1.0.0",
+    "outbound_version": "1.0.0",
+    "event_id": "a1a1f014-932f-8f90-e3ae-f0aefaba1052",
+    "event_timestamp": "2026-09-21T11:07:27Z",
+    "element_count": 1,
+    "element_activity": "INSERT"
+  },
+  "consequences": [
+    {
+      "x_boar_bofa_usem_0_consequence": {
+        "state": "1",
+        "accountable_party": "Digest Owner One",
+        "updated_on": "09-21-2026 11:03:00",
+        "comments": "Consequence outbound fixture (linked)",
+        "change_freeze_effective_date": "09-15-2026 12:40:01",
+        "consequence_level": "1",
+        "sys_id": "d0a03050932f8f90e3aef0aefaba10b3",
+        "created_by": "admin",
+        "enforcement_status": "1",
+        "network_isolation_effective_date": "",
+        "rule": "CQR-FIXTURE-001",
+        "cmdb_ci": "Trade Processing Portal",
+        "created_on": "09-21-2026 11:03:00",
+        "bofa_ait": "AIT57152",
+        "number": "CONSEQ-CDP-LINKED",
+        "updated_by": "admin",
+        "rejection_reason": "Not rejected"
+      },
+      "x_boar_bofa_usem_0_consequence_rule": {
+        "applies_to": "New and Existing",
+        "comments": "Consequence outbound fixture rule",
+        "conditions": "u_state=1^EQ",
+        "created_on": "09-21-2026 11:03:00",
+        "screated_by": "admin",
+        "global_exception": "1",
+        "name": "Consequence outbound fixture rule",
+        "number": "CQR-FIXTURE-001",
+        "state": "Approved",
+        "sys_id": "14a03050932f8f90e3aef0aefaba10b2",
+        "table": "x_boar_bofa_usem_0_consequence",
+        "updated_on": "09-21-2026 11:03:00",
+        "updated_by": "admin",
+        "valid_from": "09-01-2026 00:00:00",
+        "valid_to": "12-31-2026 23:59:59"
+      }
+    }
+  ]
+}

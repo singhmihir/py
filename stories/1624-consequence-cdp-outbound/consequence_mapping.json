@@ -1,0 +1,258 @@
+[
+ {
+  "table": "x_boar_bofa_usem_0_consequence",
+  "payload": "state",
+  "label": "State",
+  "field": "u_state",
+  "type": "String",
+  "section": "Consequence"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence",
+  "payload": "accountable_party",
+  "label": "Accountable Party",
+  "field": "u_accountable_party",
+  "type": "String",
+  "section": "Consequence"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence",
+  "payload": "updated_on",
+  "label": "Updated",
+  "field": "sys_updated_on",
+  "type": "String",
+  "section": "Consequence"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence",
+  "payload": "comments",
+  "label": "Comments",
+  "field": "u_comments",
+  "type": "String",
+  "section": "Consequence"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence",
+  "payload": "change_freeze_effective_date",
+  "label": "Change Freeze Effective Date",
+  "field": "u_change_freeze_effective_date",
+  "type": "String",
+  "section": "Consequence"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence",
+  "payload": "consequence_level",
+  "label": "Consequence Level",
+  "field": "u_consequence_level",
+  "type": "String",
+  "section": "Consequence"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence",
+  "payload": "sys_id",
+  "label": "Sys ID",
+  "field": "sys_id",
+  "type": "String",
+  "section": "Consequence"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence",
+  "payload": "created_by",
+  "label": "Created by",
+  "field": "sys_created_by",
+  "type": "String",
+  "section": "Consequence"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence",
+  "payload": "enforcement_status",
+  "label": "Enforcement Status",
+  "field": "u_enforcement_status",
+  "type": "String",
+  "section": "Consequence"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence",
+  "payload": "network_isolation_effective_date",
+  "label": "Network Isolation Effective Date",
+  "field": "u_network_isolation_effective_date",
+  "type": "String",
+  "section": "Consequence"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence",
+  "payload": "rule",
+  "label": "Rule",
+  "field": "u_rule",
+  "type": "String",
+  "section": "Consequence"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence",
+  "payload": "cmdb_ci",
+  "label": "Configuration item",
+  "field": "cmdb_ci",
+  "type": "String",
+  "section": "Consequence"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence",
+  "payload": "created_on",
+  "label": "Created",
+  "field": "sys_created_on",
+  "type": "String",
+  "section": "Consequence"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence",
+  "payload": "bofa_ait",
+  "label": "AIT",
+  "field": "u_bofa_ait",
+  "type": "String",
+  "section": "Consequence"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence",
+  "payload": "number",
+  "label": "Number",
+  "field": "number",
+  "type": "String",
+  "section": "Consequence"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence",
+  "payload": "updated_by",
+  "label": "Updated by",
+  "field": "sys_updated_by",
+  "type": "String",
+  "section": "Consequence"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence",
+  "payload": "rejection_reason",
+  "label": "Rejection Reason",
+  "field": "u_rejection_reason",
+  "type": "String",
+  "section": "Consequence"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence_rule",
+  "payload": "applies_to",
+  "label": "Applies to",
+  "field": "x_applies_to",
+  "type": "String",
+  "section": "Rule"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence_rule",
+  "payload": "comments",
+  "label": "Comments",
+  "field": "x_comments",
+  "type": "String",
+  "section": "Rule"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence_rule",
+  "payload": "conditions",
+  "label": "Conditions",
+  "field": "x_conditions",
+  "type": "String",
+  "section": "Rule"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence_rule",
+  "payload": "created_on",
+  "label": "Created",
+  "field": "sys_created_on",
+  "type": "String",
+  "section": "Rule"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence_rule",
+  "payload": "screated_by",
+  "label": "Created by",
+  "field": "sys_created_by",
+  "type": "String",
+  "section": "Rule"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence_rule",
+  "payload": "global_exception",
+  "label": "Global Exception",
+  "field": "x_global_exception",
+  "type": "String",
+  "section": "Rule"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence_rule",
+  "payload": "name",
+  "label": "Name",
+  "field": "x_name",
+  "type": "String",
+  "section": "Rule"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence_rule",
+  "payload": "number",
+  "label": "Number",
+  "field": "number",
+  "type": "String",
+  "section": "Rule"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence_rule",
+  "payload": "state",
+  "label": "State",
+  "field": "x_state",
+  "type": "String",
+  "section": "Rule"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence_rule",
+  "payload": "sys_id",
+  "label": "Sys ID",
+  "field": "sys_id",
+  "type": "String",
+  "section": "Rule"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence_rule",
+  "payload": "table",
+  "label": "Table",
+  "field": "x_table",
+  "type": "String",
+  "section": "Rule"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence_rule",
+  "payload": "updated_on",
+  "label": "Updated",
+  "field": "sys_updated_on",
+  "type": "String",
+  "section": "Rule"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence_rule",
+  "payload": "updated_by",
+  "label": "Updated by",
+  "field": "sys_updated_by",
+  "type": "String",
+  "section": "Rule"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence_rule",
+  "payload": "valid_from",
+  "label": "Valid from",
+  "field": "x_valid_from",
+  "type": "String",
+  "section": "Rule"
+ },
+ {
+  "table": "x_boar_bofa_usem_0_consequence_rule",
+  "payload": "valid_to",
+  "label": "Valid to",
+  "field": "x_valid_to",
+  "type": "String",
+  "section": "Rule"
+ }
+]
