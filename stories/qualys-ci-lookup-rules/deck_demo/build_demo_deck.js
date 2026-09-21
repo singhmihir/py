@@ -105,6 +105,42 @@ function link(s, x, y, w, text, url) {
   s.addText(text, { x, y, w, h: 0.24, fontFace: SANS, fontSize: 9.5, color: NAVY, underline: { style: 'sng' }, hyperlink: { url, tooltip: url }, isTextBox: true, margin: 0 });
 }
 const warnings = [];
+const WP = require('./walk_pages.js');
+
+// ---------------------------------------------------------------- step-by-step pages with record links (one example, one or more pages)
+function walkPages(r, x, k, name) {
+  const tr = WP.T.items[x.number];
+  if (!tr) { warnings.push('example ' + x.number + ' has no trace'); return; }
+  const kind = tr.kind;
+  const rows = tr.steps.map((st, i) => ({ no: String(i + 1), what: WP.explain(kind, st.title, tr), title: st.title, runs: WP.itemRuns(st, NAVY, INK, MUTED) }));
+  const SZ = 9, COLW = [0.45, 4.15, CONTENT_W - 0.45 - 4.15], topY = 1.62, avail = H - 0.55 - topY;
+  const cpl = (w) => Math.max(20, Math.floor(w * 72 / (SZ * EM)) - 2);
+  const rowH = (row) => {
+    const whatLines = Math.ceil((row.title.length + 2 + row.what.length) / cpl(COLW[1] - 0.16));
+    const itemChars = row.runs.reduce((a, u) => a + u.text.length, 0), breaks = row.runs.filter(u => u.options && u.options.breakLine).length;
+    const itemLines = Math.ceil(itemChars / cpl(COLW[2] - 0.16)) + breaks;
+    return Math.max(whatLines, itemLines, 1) * SZ * 1.22 / 72 + 0.14;
+  };
+  const headH = 0.3;
+  const pages = []; let cur = [], used = headH;
+  rows.forEach(row => { const h = Math.min(rowH(row), avail - headH); if (used + h > avail && cur.length) { pages.push(cur); cur = []; used = headH; } cur.push(row); used += h; });
+  if (cur.length) pages.push(cur);
+  const itemUrl = WP.rec('sn_sec_cmn_src_ci', tr.item.sys_id), ruleUrl = WP.RULE_ID[r.order] ? WP.rec('sn_sec_cmn_ci_lookup_rule', WP.RULE_ID[r.order]) : x.item_link;
+  pages.forEach((pg, pi) => {
+    const s = page('Rule ' + r.order + '  ·  ' + name + '  ·  example ' + (k + 1) + ' step by step' + (pages.length > 1 ? '  ·  page ' + (pi + 1) + ' of ' + pages.length : ''), x.host, '');
+    // header line: item, rule record, property, CI
+    const hdr = [{ text: 'Discovered item ', options: { color: MUTED } }, { text: tr.item.number, options: { color: NAVY, underline: { style: 'sng' }, hyperlink: { url: itemUrl, tooltip: itemUrl } } },
+      { text: '   ·   rule record ', options: { color: MUTED } }, { text: tr.rule_name, options: { color: NAVY, underline: { style: 'sng' }, hyperlink: { url: ruleUrl, tooltip: ruleUrl } } },
+      { text: '   ·   ignored classes ', options: { color: MUTED } }, { text: 'sn_sec_cmn.ignoreCIClass', options: { color: NAVY, underline: { style: 'sng' }, hyperlink: { url: WP.PROP_URL, tooltip: WP.PROP_URL } } },
+      { text: '   ·   CI returned ', options: { color: MUTED } }, { text: x.ci_name, options: { color: NAVY, underline: { style: 'sng' }, hyperlink: { url: x.ci_link, tooltip: x.ci_link } } }];
+    s.addText(hdr, { x: M, y: 1.14, w: CONTENT_W, h: 0.3, fontFace: SANS, fontSize: 10, isTextBox: true, margin: 0, valign: 'top' });
+    const head = [{ text: 'No.', options: { bold: true, color: NAVY, fill: { color: TINT } } }, { text: 'What the script does', options: { bold: true, color: NAVY, fill: { color: TINT } } }, { text: 'For this item (every record and filter is a link)', options: { bold: true, color: NAVY, fill: { color: TINT } } }];
+    const body = pg.map(row => [{ text: row.no, options: { color: MUTED, bold: true } },
+      { text: [{ text: row.title, options: { bold: true, color: TITLE, breakLine: true } }, { text: row.what, options: { color: INK } }] },
+      { text: row.runs }]);
+    s.addTable([head].concat(body), { x: M, y: topY, w: CONTENT_W, colW: COLW, fontFace: SANS, fontSize: SZ, color: INK, border: { type: 'solid', pt: 0.5, color: LINE }, fill: { color: WHITE }, valign: 'top', margin: 0.06, autoPage: false });
+  });
+}
 
 // ---------------------------------------------------------------- title
 {
@@ -298,6 +334,7 @@ D.rules.forEach(r => {
     if (csize < 9.5) warnings.push('example ' + x.number + ' CI facts at ' + csize + 'pt (h ' + cfh.toFixed(2) + ')');
     facts(s, cx + 0.3, cfy, cw - 0.58, cfh, x.ci_facts, csize);
     link(s, cx + 0.3, ry + rh - 0.4, cw - 0.58, 'Open the CI', x.ci_link);
+    walkPages(r, x, k, name);
   });
 });
 

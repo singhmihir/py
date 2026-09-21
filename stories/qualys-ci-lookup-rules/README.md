@@ -539,3 +539,14 @@ LibreOffice renders) because PowerPoint does not shrink text on its own, which i
 overflow; a card is drawn as tall as its content and the builder prints a warning for every box that had to go below
 9 pt. Checked on a render of all 133 slides.
 Rebuild with `python3 deck_demo/build_demo_data.py && NODE_PATH=<node_modules with pptxgenjs> node deck_demo/build_demo_deck.js`.
+Step-by-step pages with record links (21 Sep, afternoon): `Lookup Rules - Demo Record Trace Script.js` (read-only, on
+INC0010003; `deck_demo/example_items.json` lists the 61 deck items it carries) replays the matching rule for every example
+and records each search the script makes, the filter and the records found with table and sys_id (the `searches` of each
+step; the earlier rules' findings carry theirs too; the load balancer walk records the service, pool, member, candidate
+and server records; the rule records and the ignore-class property come along). The client's run (`Final result.txt`)
+is `deck_demo/demo_trace_output.txt`, parsed into `deck_demo/trace_data.json`. `deck_demo/walk_pages.js` turns every step
+into "what the script does" (per family and step title) and "for this item" (the step's finding plus a link to every
+filter and record); `build_demo_deck.js` adds one or more such pages after each example page (a three-column table, rows
+split over pages by measured height; header links to the item, the rule record, the property and the CI). 201 slides,
+739 links to the development instance; 60 of 61 examples replay to the same CI today (the forced printer of rule 450 does
+not). Checked on a render of the new pages.
