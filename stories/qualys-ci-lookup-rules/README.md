@@ -510,16 +510,21 @@ and opens every walk with a "Why this rule" step: from the `earlier` findings wh
 item and the CI (no serial, no fqdn on the record, the name differs from the label, the class sits outside the OS class or
 outside the hardware tree, the address sits on an adapter or an IP Address record, the member rule ran first).
 
-State 21 Sep, third run: `demo_examples_output.txt` is the client's full run of the corrected script (63 examples, 60
-proper, every one with the `earlier` findings); `demo_examples_previous.txt` is the first run (20 Sep), whose proper
-examples top up a rule the newer output leaves short. Lessons folded into the script and the builder: the address rules
-require the CI name to agree with the scanned label, so a dedicated address example is an item without a DNS name, a
-hyphenated variant of the label (host-nfs on host) or the exact label when the name search is a tie (`TIE_CHECKS`);
-ignored classes are skipped up front; and an item that an earlier rule would match today (`uniqueHit` in the script,
-`earlier_unique` in the builder: exactly one acceptable record in that rule's own search) is set aside, which removed
-the switch interfaces (krkrselks03sdm0014-v670 ...) the layered address rule had matched while rule 430 on bofadev still
-read the IP field. Rule 450 on bofadev returns nothing on replay for the whole-fqdn-named printers it matched earlier,
-although one live hardware record carries the name: the copy of the rule there differs from the delivered script. The
-deck keeps that live printer (`FORCE` in the builder) as the rule's single page; 740 has one page (an item without a
-DNS name); the other 19 rules have three. A run with `ONLY = ['450', '740']` and `TRACES = 20` is offered on INC0010003.
+State 21 Sep, final (on INC0010003): `demo_examples_output.txt` is the client's full run of the corrected script (63
+examples, 60 proper, every one with the `earlier` findings), `demo_examples_override.txt` the targeted run for rules 450
+and 740 (`ONLY`, `TRACES = 20`) and `demo_examples_previous.txt` the first run of 20 Sep; the builder merges the three in
+that order, proper examples only, one entry per item, three per rule, and takes each rule's matched count from the newest
+run that holds the rule. Lessons folded into the script and the builder: the address rules require the CI name to agree
+with the scanned label, so a dedicated address example is an item without a DNS name, a hyphenated variant of the label
+(host-nfs on host) or the exact label when the name search is a tie (`TIE_CHECKS`); ignored classes are skipped up front;
+an item that an earlier rule would match today (`uniqueHit` in the script, `earlier_unique` in the builder: exactly one
+acceptable record in that rule's own search) is set aside, which removed the switch interfaces (krkrselks03sdm0014-v670
+...) the layered address rule had matched while rule 430 on bofadev still read the IP field. Rule 450 on bofadev returns
+nothing on replay for every whole-fqdn-named record it matched earlier (twenty tried), although one live hardware record
+carries the name: the copy of the rule there differs from the delivered script. The deck keeps that live printer (`FORCE`
+in the builder) as the rule's single page; every other rule has three. The final check (`verify` block in the session
+notes, rerun by hand): every example page against its EX line, all 122 links (the CI links carry the CI sys_id; earlier
+builds had left it empty), 304 literal tokens of the rule pages against the delivered scripts, the chain table in short
+form, the matched counts against the run headers, no banned words, and a render of all 86 slides. The example slide
+lists the "Why this rule" clauses above the walk; long load balancer walks get a smaller clause block.
 Rebuild with `python3 deck_demo/build_demo_data.py && NODE_PATH=<node_modules with pptxgenjs> node deck_demo/build_demo_deck.js`.
