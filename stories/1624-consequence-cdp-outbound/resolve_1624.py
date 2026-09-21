@@ -1,5 +1,5 @@
-"""Runs the field-check background script on the PDI (client table names swapped for the stand-in
-tables while it runs), keeps its report (field_resolution.json and the printed output in
+"""Runs the field-check background script on the PDI (which mirrors the client application and tables;
+only the AIT stand-in table is renamed to the client's in the report), keeps its report (field_resolution.json and the printed output in
 field_check_output.txt, both with the client table names) and writes properties.json: the topic
 property and the one field property of the consequence table, the ServiceNow field the check resolved
 on the left, the sheet's payload name on the right, a row not found keeping the sheet name on the left
@@ -9,7 +9,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); BASE = os.path.dirname(os.pat
 sys.path.insert(0, os.path.join(BASE, 'tools'))
 from snui import SNUI, INST
 CONSEQUENCE = 'x_boar_bofa_usem_0_consequence'
-CLIENT_TABLE_PREFIX, PDI_TABLE_PREFIX = 'x_boar_bofa_usem_0', 'x_196061_bofasim'
+CLIENT_TABLE_PREFIX, PDI_TABLE_PREFIX = 'x_boar_bofa_usem_0', 'x_boar_bofa_usem_0'   # the PDI mirrors the client application, nothing to swap
 AIT_PDI, AIT_CLIENT = 'x_196061_bofasim_ait', 'x_boar_bofa_techad_ait'   # the stand-in AIT table and the client's
 script = open(os.path.join(HERE, 'Consequence Field Check - Background Script.js')).read().replace(CLIENT_TABLE_PREFIX, PDI_TABLE_PREFIX)
 ui = SNUI(); ui.app('global')

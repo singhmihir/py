@@ -5,16 +5,18 @@ exactly the sheet payload names per table and every value, the references resolv
 values and the rule section comes through u_rule (A), a consequence with nothing linked (B), the
 rule on a real update and a real insert with the processor and producer messages (C), and rendering
 by type: references as display value, integers and choices raw, dates formatted, booleans and
-strings as stored, missing or empty as "" (D). Run twice. Run 1 writes the sample payload."""
+strings as stored, missing or empty as "" (D), and the error handling and payload validation: unusable
+records, an empty or malformed field property, a tampered payload, a missing or malformed topic property
+and unusable payloads, each logged once and none thrown (E). Run twice. Run 1 writes the sample payload."""
 import os, sys, json, re, html
 HERE = os.path.dirname(os.path.abspath(__file__)); BASE = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(BASE, 'tools'))
 from snui import SNUI
 ST = json.load(open(os.path.join(HERE, 'state.json'))); FX = json.load(open(os.path.join(HERE, 'fixtures.json')))
 SHEET = json.load(open(os.path.join(HERE, 'consequence_mapping.json'))); PROPS = json.load(open(os.path.join(HERE, 'properties.json'))); RESOLUTION = json.load(open(os.path.join(HERE, 'field_resolution.json')))
-P = 'x_196061_bofasim'
-CLIENT_TABLE_PREFIX, PDI_TABLE_PREFIX = 'x_boar_bofa_usem_0_', 'x_196061_bofasim_'
-pdi = lambda s: s.replace('x_boar_bofa_usem_0', P)
+P = 'x_boar_bofa_usem_0'   # the PDI mirrors the client application: same scope name, same table names
+CLIENT_TABLE_PREFIX, PDI_TABLE_PREFIX = 'x_boar_bofa_usem_0_', 'x_boar_bofa_usem_0_'
+pdi = lambda s: s
 CONSEQUENCE, RULE = PDI_TABLE_PREFIX + 'consequence', PDI_TABLE_PREFIX + 'consequence_rule'
 SECTIONS = [CONSEQUENCE, RULE]
 FIELDS = {pdi(t): [r['payload'] for r in SHEET if r['table'] == t] for t in ['x_boar_bofa_usem_0_consequence', 'x_boar_bofa_usem_0_consequence_rule']}
@@ -50,7 +52,7 @@ def build(sys_id):
 var o = {};
 var a = new GlideRecord(%(cons)s); a.get(%(id)s);
 var before = new GlideAggregate('syslog_app_scope'); before.addAggregate('COUNT'); before.addQuery('message', 'CONTAINS', 'BOFASIConsequenceOutboundProcessor'); before.query(); before.next(); o.errors_before = parseInt(before.getAggregate('COUNT'));
-o.text = new x_196061_bofasim.BOFASIConsequenceOutboundProcessor().buildPayload(a);
+o.text = new x_boar_bofa_usem_0.BOFASIConsequenceOutboundProcessor().buildPayload(a);
 var after = new GlideAggregate('syslog_app_scope'); after.addAggregate('COUNT'); after.addQuery('message', 'CONTAINS', 'BOFASIConsequenceOutboundProcessor'); after.query(); after.next(); o.errors_after = parseInt(after.getAggregate('COUNT'));
 function stamp(v) { if (!v) return ''; var g = new GlideDateTime(v); return g.getDate().getByFormat('MM-dd-yyyy') + ' ' + g.getTime().getByFormat('HH:mm:ss'); }
 function raw(g, f) { return '' + (g.getValue(f) || ''); }
@@ -60,7 +62,7 @@ o.expect = {sys_id: a.getUniqueValue(), number: raw(a, 'number'), state: raw(a, 
     ci: a.cmdb_ci.nil() ? '' : '' + a.cmdb_ci.getRefRecord().getDisplayValue(), ci_label: '' + a.getDisplayValue('cmdb_ci'), ci_id: raw(a, 'cmdb_ci'), ci_class: raw(a, 'u_class'), ait: '' + a.getDisplayValue('u_bofa_ait'), ait_id: raw(a, 'u_bofa_ait'), rejection: raw(a, 'u_rejection_reason'), mod: parseInt(a.getValue('sys_mod_count'))};
 var r = a.u_rule.getRefRecord(); o.expect.rule_valid = r.isValidRecord();
 if (r.isValidRecord()) o.expect.rule_fields = {applies_to: raw(r, 'applies_to'), comments: raw(r, 'comments'), conditions: raw(r, 'conditions'), created_on: stamp(r.getValue('sys_created_on')), screated_by: raw(r, 'sys_created_by'), global_exception: raw(r, 'global_exception'), name: raw(r, 'name'), number: raw(r, 'number'), state: raw(r, 'state'), sys_id: r.getUniqueValue(), table: raw(r, 'table'), updated_on: stamp(r.getValue('sys_updated_on')), updated_by: raw(r, 'sys_updated_by'), valid_from: stamp(r.getValue('valid_from')), valid_to: stamp(r.getValue('valid_to'))};
-o.props = {}; var p = new GlideRecord('sys_properties'); p.addQuery('name', 'STARTSWITH', 'x_196061_bofasim.usem.consequence.'); p.orderBy('name'); p.query(); while (p.next()) o.props['' + p.getValue('name')] = '' + p.getValue('value');
+o.props = {}; var p = new GlideRecord('sys_properties'); p.addQuery('name', 'STARTSWITH', 'x_boar_bofa_usem_0.usem.consequence.'); p.orderBy('name'); p.query(); while (p.next()) o.props['' + p.getValue('name')] = '' + p.getValue('value');
 gs.print('X::' + JSON.stringify(o));''' % dict(cons=json.dumps(CONSEQUENCE), id=json.dumps(sys_id)))
     r['messages'] = messages
     return r
@@ -141,7 +143,7 @@ var o = {};
 var a = new GlideRecord(%(cons)s); a.get(%(id)s);
 var rule = a.u_rule.getRefRecord();
 var fields = ['cmdb_ci', 'u_rule', 'state', 'u_enforcement_status', 'sys_created_on', 'u_change_freeze_effective_date', 'u_comments', 'u_network_isolation_effective_date', 'no_such_field', 'sys_id'];
-var processor = new x_196061_bofasim.BOFASIConsequenceOutboundProcessor(); o.rendered = {};
+var processor = new x_boar_bofa_usem_0.BOFASIConsequenceOutboundProcessor(); o.rendered = {};
 for (var i = 0; i < fields.length; i++) o.rendered[fields[i]] = processor._fieldValue(a, fields[i]);
 o.rendered.rule_global_exception = processor._fieldValue(rule, 'global_exception'); o.rendered.rule_valid_to = processor._fieldValue(rule, 'valid_to');
 function stamp(v) { var g = new GlideDateTime(v); return g.getDate().getByFormat('MM-dd-yyyy') + ' ' + g.getTime().getByFormat('HH:mm:ss'); }
@@ -153,6 +155,49 @@ gs.print('X::' + JSON.stringify(o));''' % dict(cons=json.dumps(CONSEQUENCE), id=
     check('D integer choices render the stored value, not the label', d['state'] == x['state'] == '1' and x['state_display'] == 'Open' and d['u_enforcement_status'] == x['enf'] == '1' and x['enf_display'] == 'Change Frozen', (d, x))
     check('D date/time MM-dd-yyyy HH:mm:ss', d['sys_created_on'] == x['created'] and d['u_change_freeze_effective_date'] == x['freeze'] == '09-15-2026 12:40:01' and d['rule_valid_to'] == x['valid_to'] == '12-31-2026 23:59:59', (d, x))
     check('D string raw, boolean as stored, sys_id, empty field "", missing field ""', d['u_comments'] == x['comments'] and d['rule_global_exception'] == x['ge'] and d['sys_id'] == x['sys_id'] and d['u_network_isolation_effective_date'] == '' and x['isolation_empty'] and d['no_such_field'] == '', (d, x))
+    print('E. error handling and payload validation')
+    r, messages = js("""
+var o = {};
+function count(text) { var c = new GlideAggregate('syslog_app_scope'); c.addAggregate('COUNT'); c.addQuery('message', 'CONTAINS', text); c.query(); c.next(); return parseInt(c.getAggregate('COUNT')); }
+function lastError(text) { var l = new GlideRecord('syslog_app_scope'); l.addQuery('message', 'CONTAINS', text); l.orderByDesc('sys_created_on'); l.setLimit(1); l.query(); return l.next() ? '' + l.getValue('message') : ''; }
+var T = %(cons)s, P = %(prefix)s, FIELDS = P + '.usem.consequence.fields.' + T, TOPIC = P + '.usem.consequence.kafka.topic_sys_id';
+new GlideUpdateSet().set(%(default_set)s);
+var processor = new %(prefix_js)s.BOFASIConsequenceOutboundProcessor(), producer = new %(prefix_js)s.BOFASIKafkaProducerConsequence();
+var a = new GlideRecord(T); a.get(%(linked)s);
+var good = processor.buildPayload(a);
+o.before = {built: count('BOFASIConsequenceOutboundProcessor: payload not built'), sent: count('BOFASIKafkaProducerConsequence: message not sent')};
+o.unfetched = processor.buildPayload(new GlideRecord(T)); o.unfetched_error = lastError('payload not built');
+o.nothing = processor.buildPayload(null); o.nothing_error = lastError('payload not built');
+var fp = new GlideRecord('sys_properties'); fp.addQuery('name', FIELDS); fp.query(); fp.next(); var saved = '' + fp.getValue('value');
+fp.setValue('value', ''); fp.update(); o.unconfigured = processor.buildPayload(a); o.unconfigured_error = lastError('payload not built');
+fp.setValue('value', saved); fp.update(); o.restored = gs.getProperty(FIELDS, '') == saved;
+fp.setValue('value', '=number,\\n' + saved); fp.update(); o.bad_line = processor.buildPayload(a); o.bad_line_error = lastError('payload not built');
+fp.setValue('value', saved); fp.update(); o.restored2 = gs.getProperty(FIELDS, '') == saved;
+var tampered = JSON.parse(good); tampered.envelope.element_count = 2; tampered.envelope.event_id = 'not-a-uuid'; delete tampered.consequences[0][T].number; tampered.consequences[0].extra = {}; tampered.consequences[0][T].stranger = 'x'; tampered.consequences[0][T].state = 1;
+try { processor._validatePayload(tampered, a, processor._fieldMapping(T)); o.tampered = 'accepted'; } catch (e) { o.tampered = '' + (e.message || e); }
+try { processor._validatePayload(JSON.parse(good), a, processor._fieldMapping(T)); o.intact = 'accepted'; } catch (e) { o.intact = '' + (e.message || e); }
+o.after_build = {built: count('BOFASIConsequenceOutboundProcessor: payload not built')};
+var tp = new GlideRecord('sys_properties'); tp.addQuery('name', TOPIC); tp.query(); tp.next(); var topic = '' + tp.getValue('value');
+tp.setValue('value', ''); tp.update(); producer.sendPayload(good, a); o.no_topic_error = lastError('message not sent');
+tp.setValue('value', 'not-a-sys-id'); tp.update(); producer.sendPayload(good, a); o.bad_topic_error = lastError('message not sent');
+tp.setValue('value', topic); tp.update(); o.topic_restored = gs.getProperty(TOPIC, '') == topic;
+producer.sendPayload('', a); o.empty_payload_error = lastError('message not sent');
+producer.sendPayload('not json', a); o.not_json_error = lastError('message not sent');
+producer.sendPayload('{"a": 1}', a); o.no_envelope_error = lastError('message not sent');
+producer.sendPayload(good, null); o.no_record_error = lastError('message not sent');
+o.after_send = {sent: count('BOFASIKafkaProducerConsequence: message not sent')};
+gs.print('X::' + JSON.stringify(o));""" % dict(cons=json.dumps(CONSEQUENCE), prefix=json.dumps(P), prefix_js=P, default_set=json.dumps(ST['default_set']), linked=json.dumps(FX['linked'])))
+    check('E a record that does not exist: empty payload, one error naming it', r['unfetched'] == '' and 'the record does not exist' in r['unfetched_error'], r['unfetched_error'])
+    check('E no record at all: empty payload, one error keyed "no record"', r['nothing'] == '' and 'no record was given' in r['nothing_error'] and 'for no record' in r['nothing_error'], r['nothing_error'])
+    check('E field property empty: empty payload, error names the property, property restored', r['unconfigured'] == '' and 'is not configured in property' in r['unconfigured_error'] and r['restored'], (r['unconfigured_error'], r['restored']))
+    check('E property line without a field name: empty payload, error quotes the line, property restored', r['bad_line'] == '' and 'line without a field name' in r['bad_line_error'] and r['restored2'], (r['bad_line_error'], r['restored2']))
+    check('E validation names every problem of a tampered payload', all(s in r['tampered'] for s in ['payload invalid', 'element_count is "2"', 'not-a-uuid', 'lacks number', 'section extra is not in the field property', 'carries stranger', 'state is not a string']), r['tampered'])
+    check('E validation accepts the intact payload', r['intact'] == 'accepted', r['intact'])
+    check('E four failed builds logged four errors, nothing else', r['after_build']['built'] == r['before']['built'] + 4, (r['before'], r['after_build']))
+    check('E producer refuses an empty topic property and a value that is not a sys_id, property restored', 'holds no topic' in r['no_topic_error'] and 'is not a sys_id' in r['bad_topic_error'] and r['topic_restored'], (r['no_topic_error'], r['bad_topic_error'], r['topic_restored']))
+    check('E producer refuses an empty payload, text that is not JSON and JSON without envelope', 'the payload is empty' in r['empty_payload_error'] and 'the payload is not JSON' in r['not_json_error'] and 'no envelope or no consequences' in r['no_envelope_error'], (r['empty_payload_error'], r['not_json_error'], r['no_envelope_error']))
+    check('E producer without a record still logs, keyed "no record"', 'message not sent for no record' in r['no_record_error'], r['no_record_error'])
+    check('E six refused sends logged six errors, nothing else', r['after_send']['sent'] == r['before']['sent'] + 6, (r['before'], r['after_send']))
 print('RESULT: %d passed, %d failed' % (passed, failed))
 ui.app('global')
 sys.exit(1 if failed else 0)
