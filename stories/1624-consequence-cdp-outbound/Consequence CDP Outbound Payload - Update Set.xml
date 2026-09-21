@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-21 11:09:17">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="BofA Sim">9d1e03de930b8310e3aef0aefaba10d5</application>
+<application_name>BofA Sim</application_name>
+<application_scope>x_196061_bofasim</application_scope>
+<application_version>1.0.0</application_version>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>Consequence outbound integration to CDP: payload processor, Kafka producer, properties and the after insert/update rule on the consequence table.</description>
+<inserted/>
+<name>SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.0</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>4b813cd0932f8f90e3aef0aefaba10a7</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-21 11:09:16</sys_created_on>
+<sys_id>00127454932f8f90e3aef0aefaba10bd</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-21 11:09:16</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BofA Sim">9d1e03de930b8310e3aef0aefaba10d5</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_c3813cd0932f8f90e3aef0aefaba10ab</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;x_196061_bofasim.BOFASIConsequenceOutboundProcessor&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;Builds the outbound CDP payload (envelope plus one consequence element) for a consequence record. The fields come from the property usem.consequence.fields.&amp;lt;consequence table&amp;gt;, the rule section through the u_rule reference.&lt;/description&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;BOFASIConsequenceOutboundProcessor&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[var BOFASIConsequenceOutboundProcessor = Class.create();
+BOFASIConsequenceOutboundProcessor.prototype = {
+
+    initialize: function() {
+        this.TOPIC_NAME = 'sn_usem_consequence_outbound';
+        this.NAMESPACE = 'com.bofa.usem';
+        this.CORE_VERSION = '1.0.0';
+        this.OUTBOUND_VERSION = '1.0.0';
+        this.DATE_FORMAT = 'MM-dd-yyyy';
+        this.TIME_FORMAT = 'HH:mm:ss';
+        this.FIELDS_PROPERTY_PREFIX = 'x_196061_bofasim.usem.consequence.fields.';
+        this.REFERENCES = {
+            x_196061_bofasim_consequence_rule: 'u_rule'
+        };
+    },
+
+    buildPayload: function(record) {
+        try {
+            var missing = [];
+            var payload = {
+                envelope: this._buildEnvelope(this._activity(record)),
+                consequences: [this._buildConsequence(record, missing)]
+            };
+            var message = JSON.stringify(payload);
+            gs.addInfoMessage('Consequence payload for ' + record.getValue('number') + ': ' + message)
+            if (missing.length)
+                gs.addInfoMessage('Consequence fields not found on this instance, sent as "": ' + missing.join(', '))
+            return message;
+        } catch (e) {
+            gs.error(this.type + ': payload not built for ' + record.getTableName() + ' ' + record.getUniqueValue() + ' - ' + (e.message || e));
+            return '';
+        }
+    },
+
+    _activity: function(record) {
+        var operation = String(record.operation() || '').toUpperCase();
+        if (operation)
+            return operation;
+        return parseInt(record.getValue('sys_mod_count')) &gt; 0 ? 'UPDATE' : 'INSERT';
+    },
+
+    _buildEnvelope: function(activity) {
+        return {
+            type: 'record',
+            topic_name: this.TOPIC_NAME,
+            namespace: this.NAMESPACE,
+            core_version: this.CORE_VERSION,
+            outbound_version: this.OUTBOUND_VERSION,
+            event_id: this._newEventId(),
+            event_timestamp: this._utcTimestamp(),
+            element_count: 1,
+            element_activity: activity
+        };
+    },
+
+    _buildConsequence: function(record, missing) {
+        var mapping = this._fieldMapping(record.getTableName());
+        var element = {};
+        var records = {};
+        for (var i = 0; i &lt; mapping.length; i++) {
+            var at = mapping[i].field.indexOf('.');
+            var table = at &lt; 0 ? record.getTableName() : mapping[i].field.substring(0, at);
+            var field = at &lt; 0 ? mapping[i].field : mapping[i].field.substring(at + 1);
+            if (!records.hasOwnProperty(table))
+                records[table] = this._sectionRecord(record, table);
+            if (!new GlideRecord(table).isValidField(field))
+                missing.push(table + '.' + field);
+            if (!element[table])
+                element[table] = {};
+            element[table][mapping[i].json] = this._fieldValue(records[table], field);
+        }
+        return element;
+    },
+
+    _sectionRecord: function(record, table) {
+        if (table == record.getTableName())
+            return record;
+        if (this.REFERENCES[table])
+            return record.getElement(this.REFERENCES[table]).getRefRecord();
+        throw new Error('table ' + table + ' in property ' + this.FIELDS_PROPERTY_PREFIX + record.getTableName() + ' is not a source of the payload');
+    },
+
+    _fieldMapping: function(table) {
+        var property = this.FIELDS_PROPERTY_PREFIX + table;
+        var value = gs.getProperty(property, '');
+        if (!value)
+            throw new Error('table ' + table + ' is not configured in property ' + property);
+        var mapping = [];
+        var entries = value.split(/\r?\n|,/);
+        for (var i = 0; i &lt; entries.length; i++) {
+            var pair = entries[i].split('=');
+            var field = pair[0].trim();
+            if (!field)
+                continue;
+            mapping.push({ field: field, json: pair.length &gt; 1 &amp;&amp; pair[1].trim() ? pair[1].trim() : field });
+        }
+        return mapping;
+    },
+
+    _fieldValue: function(record, field) {
+        if (!record || !record.isValidRecord() || !record.isValidField(field))
+            return '';
+        var element = record.getElement(field);
+        if (element === null || element.nil())
+            return '';
+        return this._renderElement(element);
+    },
+
+    _renderElement: function(element) {
+        switch (String(element.getED().getInternalType())) {
+            case 'glide_date_time':
+                return this._formatDateTime(element.getValue());
+            case 'glide_date':
+                return this._formatDate(element.getValue());
+            case 'reference':
+                return String(element.getDisplayValue());
+            default:
+                return String(element.getValue());
+        }
+    },
+
+    _formatDateTime: function(value) {
+        var gdt = new GlideDateTime(value);
+        return gdt.getDate().getByFormat(this.DATE_FORMAT) + ' ' + gdt.getTime().getByFormat(this.TIME_FORMAT);
+    },
+
+    _formatDate: function(value) {
+        var gd = new GlideDate();
+        gd.setValue(value);
+        return gd.getByFormat(this.DATE_FORMAT);
+    },
+
+    _newEventId: function() {
+        var guid = gs.generateGUID();
+        return guid.substring(0, 8) + '-' + guid.substring(8, 12) + '-' + guid.substring(12, 16) + '-' +
+            guid.substring(16, 20) + '-' + guid.substring(20, 32);
+    },
+
+    _utcTimestamp: function() {
+        return new GlideDateTime().getValue().replace(' ', 'T') + 'Z';
+    },
+
+    type: 'BOFASIConsequenceOutboundProcessor'
+};
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-21 11:07:01&lt;/sys_created_on&gt;&lt;sys_id&gt;c3813cd0932f8f90e3aef0aefaba10ab&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFASIConsequenceOutboundProcessor&lt;/sys_name&gt;&lt;sys_package display_value="BofA Sim" source="x_196061_bofasim"&gt;9d1e03de930b8310e3aef0aefaba10d5&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BofA Sim"&gt;9d1e03de930b8310e3aef0aefaba10d5&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_c3813cd0932f8f90e3aef0aefaba10ab&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-21 11:07:01&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-1249488279</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.0">00127454932f8f90e3aef0aefaba10bd</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-21 11:09:16</sys_created_on>
+<sys_id>04127454932f8f90e3aef0aefaba10d8</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0c3a615fa0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-21 11:09:16</sys_updated_on>
+<table/>
+<target_name>BOFASIConsequenceOutboundProcessor</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_guid>7a91b014592f8f9024cf2c497a4b0f47</update_guid>
+<update_guid_history>7a91b014592f8f9024cf2c497a4b0f47:-1249488279,d7817cd0262f8f909a0eb0d7f2c82b05:-1249488279</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BofA Sim">9d1e03de930b8310e3aef0aefaba10d5</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_9d91bcd0932f8f90e3aef0aefaba10e0</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>Consequence payload fields, one servicenow_field=payload_field pair per line in payload order: the ServiceNow field on the left (verified with the field check script), the payload name of the tab "Outbound to CDP (consequence)" on the right; the fields of the consequence first, then the fields of its rule as x_boar_bofa_usem_0_consequence_rule.&lt;field&gt;. A field missing on the table or empty is sent as "".</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_196061_bofasim.usem.consequence.fields.x_196061_bofasim_consequence</name><read_roles/><suffix>usem.consequence.fields.x_196061_bofasim_consequence</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-21 11:07:09</sys_created_on><sys_id>9d91bcd0932f8f90e3aef0aefaba10e0</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_196061_bofasim.usem.consequence.fields.x_196061_bofasim_consequence</sys_name><sys_package display_value="BofA Sim" source="x_196061_bofasim">9d1e03de930b8310e3aef0aefaba10d5</sys_package><sys_policy/><sys_scope display_value="BofA Sim">9d1e03de930b8310e3aef0aefaba10d5</sys_scope><sys_update_name>sys_properties_9d91bcd0932f8f90e3aef0aefaba10e0</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-21 11:07:09</sys_updated_on><type>string</type><value>state=state,
+u_accountable_party=accountable_party,
+sys_updated_on=updated_on,
+u_comments=comments,
+u_change_freeze_effective_date=change_freeze_effective_date,
+u_consequence_level=consequence_level,
+sys_id=sys_id,
+sys_created_by=created_by,
+u_enforcement_status=enforcement_status,
+u_network_isolation_effective_date=network_isolation_effective_date,
+u_rule=rule,
+cmdb_ci=cmdb_ci,
+sys_created_on=created_on,
+u_bofa_ait=bofa_ait,
+number=number,
+sys_updated_by=updated_by,
+u_rejection_reason=rejection_reason,
+x_196061_bofasim_consequence_rule.applies_to=applies_to,
+x_196061_bofasim_consequence_rule.comments=comments,
+x_196061_bofasim_consequence_rule.conditions=conditions,
+x_196061_bofasim_consequence_rule.sys_created_on=created_on,
+x_196061_bofasim_consequence_rule.sys_created_by=screated_by,
+x_196061_bofasim_consequence_rule.global_exception=global_exception,
+x_196061_bofasim_consequence_rule.name=name,
+x_196061_bofasim_consequence_rule.number=number,
+x_196061_bofasim_consequence_rule.state=state,
+x_196061_bofasim_consequence_rule.sys_id=sys_id,
+x_196061_bofasim_consequence_rule.table=table,
+x_196061_bofasim_consequence_rule.sys_updated_on=updated_on,
+x_196061_bofasim_consequence_rule.sys_updated_by=updated_by,
+x_196061_bofasim_consequence_rule.valid_from=valid_from,
+x_196061_bofasim_consequence_rule.valid_to=valid_to,</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=9d91bcd0932f8f90e3aef0aefaba10e0"/></record_update>]]></payload>
+<payload_hash>-522370299</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.0">00127454932f8f90e3aef0aefaba10bd</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-21 11:09:16</sys_created_on>
+<sys_id>44127454932f8f90e3aef0aefaba10d7</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0c3a6164b0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-21 11:09:16</sys_updated_on>
+<table/>
+<target_name>x_196061_bofasim.usem.consequence.fields.x_196061_bofasim_consequence</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>4b91b014f52f8f90bfc6d8d262c1784f</update_guid>
+<update_guid_history>4b91b014f52f8f90bfc6d8d262c1784f:-522370299,3991fcd0532f8f9047355d060b1f6370:-522370299</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BofA Sim">9d1e03de930b8310e3aef0aefaba10d5</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_f5913014932f8f90e3aef0aefaba109e</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;true&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;x_196061_bofasim_consequence&lt;/collection&gt;&lt;condition/&gt;&lt;description&gt;Builds the CDP payload for the consequence with BOFASIConsequenceOutboundProcessor and sends it with BOFASIKafkaProducerConsequence on every insert and update.&lt;/description&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition/&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;BOFA_BR_Consequence_CdpOutbound&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous /*null when async*/ ) {
+    try {
+        var payload = new x_196061_bofasim.BOFASIConsequenceOutboundProcessor().buildPayload(current);
+        if (payload)
+            new x_196061_bofasim.BOFASIKafkaProducerConsequence().sendPayload(payload, current);
+    } catch (e) {
+        gs.error('BOFA_BR_Consequence_CdpOutbound: outbound message failed for ' + current.getTableName() + ' ' + current.getUniqueValue() + ' - ' + (e.message || e));
+    }
+})(current, previous);
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-21 11:07:12&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;f5913014932f8f90e3aef0aefaba109e&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA_BR_Consequence_CdpOutbound&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="BofA Sim" source="x_196061_bofasim"&gt;9d1e03de930b8310e3aef0aefaba10d5&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BofA Sim"&gt;9d1e03de930b8310e3aef0aefaba10d5&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_f5913014932f8f90e3aef0aefaba109e&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-21 11:07:12&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=f5913014932f8f90e3aef0aefaba109e"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>966021271</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.0">00127454932f8f90e3aef0aefaba10bd</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-21 11:09:16</sys_created_on>
+<sys_id>88127454932f8f90e3aef0aefaba10d7</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0c3a6165f0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-21 11:09:16</sys_updated_on>
+<table>x_196061_bofasim_consequence</table>
+<target_name>BOFA_BR_Consequence_CdpOutbound</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>c391b014fe2f8f90ed7e775e6adaed52</update_guid>
+<update_guid_history>c391b014fe2f8f90ed7e775e6adaed52:966021271,b99130143b2f8f90757d68f99c31f7c2:966021271</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BofA Sim">9d1e03de930b8310e3aef0aefaba10d5</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_17817cd0932f8f90e3aef0aefaba100b</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_consequence_outbound, read by BOFASIKafkaProducerConsequence.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_196061_bofasim.usem.consequence.kafka.topic_sys_id</name><read_roles/><suffix>usem.consequence.kafka.topic_sys_id</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-21 11:07:02</sys_created_on><sys_id>17817cd0932f8f90e3aef0aefaba100b</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_196061_bofasim.usem.consequence.kafka.topic_sys_id</sys_name><sys_package display_value="BofA Sim" source="x_196061_bofasim">9d1e03de930b8310e3aef0aefaba10d5</sys_package><sys_policy/><sys_scope display_value="BofA Sim">9d1e03de930b8310e3aef0aefaba10d5</sys_scope><sys_update_name>sys_properties_17817cd0932f8f90e3aef0aefaba100b</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-21 11:07:02</sys_updated_on><type>string</type><value>d3817cd0932f8f90e3aef0aefaba100b</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=17817cd0932f8f90e3aef0aefaba100b"/></record_update>]]></payload>
+<payload_hash>-152861660</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.0">00127454932f8f90e3aef0aefaba10bd</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-21 11:09:16</sys_created_on>
+<sys_id>c4127454932f8f90e3aef0aefaba10bd</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0c3a616350000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-21 11:09:16</sys_updated_on>
+<table/>
+<target_name>x_196061_bofasim.usem.consequence.kafka.topic_sys_id</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>4391b014d02f8f90ea9d0d92b0d4604d</update_guid>
+<update_guid_history>4391b014d02f8f90ea9d0d92b0d4604d:-152861660,d191bcd0752f8f900b68b081bed602dd:-152861660</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BofA Sim">9d1e03de930b8310e3aef0aefaba10d5</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_97817cd0932f8f90e3aef0aefaba1007</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;x_196061_bofasim.BOFASIKafkaProducerConsequence&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;Sends a consequence payload to the Kafka topic held in usem.consequence.kafka.topic_sys_id with sn_ih_kafka.ProducerV2 (key &amp;lt;table&amp;gt;.&amp;lt;sys_id&amp;gt;).
+Documentation of API used - https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html&lt;/description&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;BOFASIKafkaProducerConsequence&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[var BOFASIKafkaProducerConsequence = Class.create();
+BOFASIKafkaProducerConsequence.prototype = {
+
+    initialize: function() {
+        this.TOPIC_PROPERTY = 'x_196061_bofasim.usem.consequence.kafka.topic_sys_id';
+        this.IS_SYNC = false;
+        this.HEADERS = null;
+        this.SCHEMA_ID = null;
+    },
+
+    sendPayload: function(payload, record) {
+        var key = record.getTableName() + '.' + record.getUniqueValue();
+        try {
+            var topicSysId = gs.getProperty(this.TOPIC_PROPERTY, '');
+            var response = new sn_ih_kafka.ProducerV2().send(topicSysId, key, payload, this.IS_SYNC, this.HEADERS, this.SCHEMA_ID);
+            gs.addInfoMessage('Consequence Kafka response for ' + key + ': ' + JSON.stringify(response))
+        } catch (e) {
+            gs.error(this.type + ': message not sent for ' + key + ' - ' + (e.message || e));
+        }
+    },
+
+    type: 'BOFASIKafkaProducerConsequence'
+};
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-21 11:07:02&lt;/sys_created_on&gt;&lt;sys_id&gt;97817cd0932f8f90e3aef0aefaba1007&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFASIKafkaProducerConsequence&lt;/sys_name&gt;&lt;sys_package display_value="BofA Sim" source="x_196061_bofasim"&gt;9d1e03de930b8310e3aef0aefaba10d5&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BofA Sim"&gt;9d1e03de930b8310e3aef0aefaba10d5&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_97817cd0932f8f90e3aef0aefaba1007&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-21 11:07:02&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<payload_hash>820434447</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.0">00127454932f8f90e3aef0aefaba10bd</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-21 11:09:16</sys_created_on>
+<sys_id>cc127454932f8f90e3aef0aefaba10d7</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0c3a6161f0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-21 11:09:16</sys_updated_on>
+<table/>
+<target_name>BOFASIKafkaProducerConsequence</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_guid>4791b0144a2f8f90d4abb69c81f3de4a</update_guid>
+<update_guid_history>4791b0144a2f8f90d4abb69c81f3de4a:820434447,d7817cd0bf2f8f90b1d5a6c2329e6a09:820434447</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>

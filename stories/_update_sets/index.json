@@ -435,5 +435,16 @@
   "scrub": [
    "stand-in scope kept: internal record only, client receives the record XML"
   ]
+ },
+ {
+  "name": "SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.0",
+  "app": "x_196061_bofasim (stand-in for the client application)",
+  "rows": 5,
+  "exported": 5,
+  "file": "SNOWUSEMTP-1624_MS_Consequence_CDP_Outbound_Payload_V1.0.xml",
+  "created": "2026-09-21 11:09:16",
+  "scrub": [
+   "stand-in scope kept: internal record only, client receives the record XML"
+  ]
  }
 ]

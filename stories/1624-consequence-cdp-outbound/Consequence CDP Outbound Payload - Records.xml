@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unload>
+<sys_script_include action="INSERT_OR_UPDATE">
+<access>public</access>
+<active>true</active>
+<api_name>x_boar_bofa_usem_1.BOFASIConsequenceOutboundProcessor</api_name>
+<caller_access/>
+<client_callable>false</client_callable>
+<description>Builds the outbound CDP payload (envelope plus one consequence element) for a consequence record. The fields come from the property usem.consequence.fields.&lt;consequence table&gt;, the rule section through the u_rule reference.</description>
+<mobile_callable>false</mobile_callable>
+<name>BOFASIConsequenceOutboundProcessor</name>
+<sandbox_callable>false</sandbox_callable>
+<script><![CDATA[var BOFASIConsequenceOutboundProcessor = Class.create();
+BOFASIConsequenceOutboundProcessor.prototype = {
+
+    initialize: function() {
+        this.TOPIC_NAME = 'sn_usem_consequence_outbound';
+        this.NAMESPACE = 'com.bofa.usem';
+        this.CORE_VERSION = '1.0.0';
+        this.OUTBOUND_VERSION = '1.0.0';
+        this.DATE_FORMAT = 'MM-dd-yyyy';
+        this.TIME_FORMAT = 'HH:mm:ss';
+        this.FIELDS_PROPERTY_PREFIX = 'x_boar_bofa_usem_1.usem.consequence.fields.';
+        this.REFERENCES = {
+            x_boar_bofa_usem_0_consequence_rule: 'u_rule'
+        };
+    },
+
+    buildPayload: function(record) {
+        try {
+            var missing = [];
+            var payload = {
+                envelope: this._buildEnvelope(this._activity(record)),
+                consequences: [this._buildConsequence(record, missing)]
+            };
+            var message = JSON.stringify(payload);
+            gs.addInfoMessage('Consequence payload for ' + record.getValue('number') + ': ' + message)
+            if (missing.length)
+                gs.addInfoMessage('Consequence fields not found on this instance, sent as "": ' + missing.join(', '))
+            return message;
+        } catch (e) {
+            gs.error(this.type + ': payload not built for ' + record.getTableName() + ' ' + record.getUniqueValue() + ' - ' + (e.message || e));
+            return '';
+        }
+    },
+
+    _activity: function(record) {
+        var operation = String(record.operation() || '').toUpperCase();
+        if (operation)
+            return operation;
+        return parseInt(record.getValue('sys_mod_count')) > 0 ? 'UPDATE' : 'INSERT';
+    },
+
+    _buildEnvelope: function(activity) {
+        return {
+            type: 'record',
+            topic_name: this.TOPIC_NAME,
+            namespace: this.NAMESPACE,
+            core_version: this.CORE_VERSION,
+            outbound_version: this.OUTBOUND_VERSION,
+            event_id: this._newEventId(),
+            event_timestamp: this._utcTimestamp(),
+            element_count: 1,
+            element_activity: activity
+        };
+    },
+
+    _buildConsequence: function(record, missing) {
+        var mapping = this._fieldMapping(record.getTableName());
+        var element = {};
+        var records = {};
+        for (var i = 0; i < mapping.length; i++) {
+            var at = mapping[i].field.indexOf('.');
+            var table = at < 0 ? record.getTableName() : mapping[i].field.substring(0, at);
+            var field = at < 0 ? mapping[i].field : mapping[i].field.substring(at + 1);
+            if (!records.hasOwnProperty(table))
+                records[table] = this._sectionRecord(record, table);
+            if (!new GlideRecord(table).isValidField(field))
+                missing.push(table + '.' + field);
+            if (!element[table])
+                element[table] = {};
+            element[table][mapping[i].json] = this._fieldValue(records[table], field);
+        }
+        return element;
+    },
+
+    _sectionRecord: function(record, table) {
+        if (table == record.getTableName())
+            return record;
+        if (this.REFERENCES[table])
+            return record.getElement(this.REFERENCES[table]).getRefRecord();
+        throw new Error('table ' + table + ' in property ' + this.FIELDS_PROPERTY_PREFIX + record.getTableName() + ' is not a source of the payload');
+    },
+
+    _fieldMapping: function(table) {
+        var property = this.FIELDS_PROPERTY_PREFIX + table;
+        var value = gs.getProperty(property, '');
+        if (!value)
+            throw new Error('table ' + table + ' is not configured in property ' + property);
+        var mapping = [];
+        var entries = value.split(/\r?\n|,/);
+        for (var i = 0; i < entries.length; i++) {
+            var pair = entries[i].split('=');
+            var field = pair[0].trim();
+            if (!field)
+                continue;
+            mapping.push({ field: field, json: pair.length > 1 && pair[1].trim() ? pair[1].trim() : field });
+        }
+        return mapping;
+    },
+
+    _fieldValue: function(record, field) {
+        if (!record || !record.isValidRecord() || !record.isValidField(field))
+            return '';
+        var element = record.getElement(field);
+        if (element === null || element.nil())
+            return '';
+        return this._renderElement(element);
+    },
+
+    _renderElement: function(element) {
+        switch (String(element.getED().getInternalType())) {
+            case 'glide_date_time':
+                return this._formatDateTime(element.getValue());
+            case 'glide_date':
+                return this._formatDate(element.getValue());
+            case 'reference':
+                return String(element.getDisplayValue());
+            default:
+                return String(element.getValue());
+        }
+    },
+
+    _formatDateTime: function(value) {
+        var gdt = new GlideDateTime(value);
+        return gdt.getDate().getByFormat(this.DATE_FORMAT) + ' ' + gdt.getTime().getByFormat(this.TIME_FORMAT);
+    },
+
+    _formatDate: function(value) {
+        var gd = new GlideDate();
+        gd.setValue(value);
+        return gd.getByFormat(this.DATE_FORMAT);
+    },
+
+    _newEventId: function() {
+        var guid = gs.generateGUID();
+        return guid.substring(0, 8) + '-' + guid.substring(8, 12) + '-' + guid.substring(12, 16) + '-' +
+            guid.substring(16, 20) + '-' + guid.substring(20, 32);
+    },
+
+    _utcTimestamp: function() {
+        return new GlideDateTime().getValue().replace(' ', 'T') + 'Z';
+    },
+
+    type: 'BOFASIConsequenceOutboundProcessor'
+};
+]]></script>
+<sys_class_name>sys_script_include</sys_class_name>
+<sys_id>c3813cd0932f8f90e3aef0aefaba10ab</sys_id>
+<sys_name>BOFASIConsequenceOutboundProcessor</sys_name>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_script_include_c3813cd0932f8f90e3aef0aefaba10ab</sys_update_name>
+</sys_script_include>
+<sys_script_include action="INSERT_OR_UPDATE">
+<access>public</access>
+<active>true</active>
+<api_name>x_boar_bofa_usem_1.BOFASIKafkaProducerConsequence</api_name>
+<caller_access/>
+<client_callable>false</client_callable>
+<description>Sends a consequence payload to the Kafka topic held in usem.consequence.kafka.topic_sys_id with sn_ih_kafka.ProducerV2 (key &lt;table&gt;.&lt;sys_id&gt;).
+Documentation of API used - https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html</description>
+<mobile_callable>false</mobile_callable>
+<name>BOFASIKafkaProducerConsequence</name>
+<sandbox_callable>false</sandbox_callable>
+<script><![CDATA[var BOFASIKafkaProducerConsequence = Class.create();
+BOFASIKafkaProducerConsequence.prototype = {
+
+    initialize: function() {
+        this.TOPIC_PROPERTY = 'x_boar_bofa_usem_1.usem.consequence.kafka.topic_sys_id';
+        this.IS_SYNC = false;
+        this.HEADERS = null;
+        this.SCHEMA_ID = null;
+    },
+
+    sendPayload: function(payload, record) {
+        var key = record.getTableName() + '.' + record.getUniqueValue();
+        try {
+            var topicSysId = gs.getProperty(this.TOPIC_PROPERTY, '');
+            var response = new sn_ih_kafka.ProducerV2().send(topicSysId, key, payload, this.IS_SYNC, this.HEADERS, this.SCHEMA_ID);
+            gs.addInfoMessage('Consequence Kafka response for ' + key + ': ' + JSON.stringify(response))
+        } catch (e) {
+            gs.error(this.type + ': message not sent for ' + key + ' - ' + (e.message || e));
+        }
+    },
+
+    type: 'BOFASIKafkaProducerConsequence'
+};
+]]></script>
+<sys_class_name>sys_script_include</sys_class_name>
+<sys_id>97817cd0932f8f90e3aef0aefaba1007</sys_id>
+<sys_name>BOFASIKafkaProducerConsequence</sys_name>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_script_include_97817cd0932f8f90e3aef0aefaba1007</sys_update_name>
+</sys_script_include>
+<sys_properties action="INSERT_OR_UPDATE">
+<choices/>
+<description>sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_consequence_outbound, read by BOFASIKafkaProducerConsequence.</description>
+<ignore_cache>false</ignore_cache>
+<is_private>false</is_private>
+<name>x_boar_bofa_usem_1.usem.consequence.kafka.topic_sys_id</name>
+<read_roles/>
+<suffix>usem.consequence.kafka.topic_sys_id</suffix>
+<sys_class_name>sys_properties</sys_class_name>
+<sys_id>17817cd0932f8f90e3aef0aefaba100b</sys_id>
+<sys_name>x_boar_bofa_usem_1.usem.consequence.kafka.topic_sys_id</sys_name>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_properties_17817cd0932f8f90e3aef0aefaba100b</sys_update_name>
+<type>string</type>
+<value/>
+<write_roles/>
+</sys_properties>
+<sys_properties action="INSERT_OR_UPDATE">
+<choices/>
+<description>Consequence payload fields, one servicenow_field=payload_field pair per line in payload order: the ServiceNow field on the left (verified with the field check script), the payload name of the tab "Outbound to CDP (consequence)" on the right; the fields of the consequence first, then the fields of its rule as x_boar_bofa_usem_0_consequence_rule.&lt;field&gt;. A field missing on the table or empty is sent as "".</description>
+<ignore_cache>false</ignore_cache>
+<is_private>false</is_private>
+<name>x_boar_bofa_usem_1.usem.consequence.fields.x_boar_bofa_usem_0_consequence</name>
+<read_roles/>
+<suffix>usem.consequence.fields.x_boar_bofa_usem_0_consequence</suffix>
+<sys_class_name>sys_properties</sys_class_name>
+<sys_id>9d91bcd0932f8f90e3aef0aefaba10e0</sys_id>
+<sys_name>x_boar_bofa_usem_1.usem.consequence.fields.x_boar_bofa_usem_0_consequence</sys_name>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_properties_9d91bcd0932f8f90e3aef0aefaba10e0</sys_update_name>
+<type>string</type>
+<value>state=state,
+u_accountable_party=accountable_party,
+sys_updated_on=updated_on,
+u_comments=comments,
+u_change_freeze_effective_date=change_freeze_effective_date,
+u_consequence_level=consequence_level,
+sys_id=sys_id,
+sys_created_by=created_by,
+u_enforcement_status=enforcement_status,
+u_network_isolation_effective_date=network_isolation_effective_date,
+u_rule=rule,
+cmdb_ci=cmdb_ci,
+sys_created_on=created_on,
+u_bofa_ait=bofa_ait,
+number=number,
+sys_updated_by=updated_by,
+u_rejection_reason=rejection_reason,
+x_boar_bofa_usem_0_consequence_rule.applies_to=applies_to,
+x_boar_bofa_usem_0_consequence_rule.comments=comments,
+x_boar_bofa_usem_0_consequence_rule.conditions=conditions,
+x_boar_bofa_usem_0_consequence_rule.sys_created_on=created_on,
+x_boar_bofa_usem_0_consequence_rule.sys_created_by=screated_by,
+x_boar_bofa_usem_0_consequence_rule.global_exception=global_exception,
+x_boar_bofa_usem_0_consequence_rule.name=name,
+x_boar_bofa_usem_0_consequence_rule.number=number,
+x_boar_bofa_usem_0_consequence_rule.state=state,
+x_boar_bofa_usem_0_consequence_rule.sys_id=sys_id,
+x_boar_bofa_usem_0_consequence_rule.table=table,
+x_boar_bofa_usem_0_consequence_rule.sys_updated_on=updated_on,
+x_boar_bofa_usem_0_consequence_rule.sys_updated_by=updated_by,
+x_boar_bofa_usem_0_consequence_rule.valid_from=valid_from,
+x_boar_bofa_usem_0_consequence_rule.valid_to=valid_to,</value>
+<write_roles/>
+</sys_properties>
+<sys_script action="INSERT_OR_UPDATE">
+<abort_action>false</abort_action>
+<access>package_private</access>
+<action_delete>false</action_delete>
+<action_insert>true</action_insert>
+<action_query>false</action_query>
+<action_update>true</action_update>
+<active>true</active>
+<add_message>false</add_message>
+<advanced>true</advanced>
+<change_fields>false</change_fields>
+<client_callable>false</client_callable>
+<collection>x_boar_bofa_usem_0_consequence</collection>
+<condition/>
+<description>Builds the CDP payload for the consequence with BOFASIConsequenceOutboundProcessor and sends it with BOFASIKafkaProducerConsequence on every insert and update.</description>
+<execute_function>false</execute_function>
+<filter_condition table="x_boar_bofa_usem_0_consequence"/>
+<is_rest>false</is_rest>
+<message/>
+<name>BOFA_BR_Consequence_CdpOutbound</name>
+<order>100</order>
+<priority>100</priority>
+<rest_method/>
+<rest_method_text/>
+<rest_service/>
+<rest_service_text/>
+<rest_variables/>
+<role_conditions/>
+<script><![CDATA[(function executeRule(current, previous /*null when async*/ ) {
+    try {
+        var payload = new x_boar_bofa_usem_1.BOFASIConsequenceOutboundProcessor().buildPayload(current);
+        if (payload)
+            new x_boar_bofa_usem_1.BOFASIKafkaProducerConsequence().sendPayload(payload, current);
+    } catch (e) {
+        gs.error('BOFA_BR_Consequence_CdpOutbound: outbound message failed for ' + current.getTableName() + ' ' + current.getUniqueValue() + ' - ' + (e.message || e));
+    }
+})(current, previous);
+]]></script>
+<sys_class_name>sys_script</sys_class_name>
+<sys_domain>global</sys_domain>
+<sys_domain_path>/</sys_domain_path>
+<sys_id>f5913014932f8f90e3aef0aefaba109e</sys_id>
+<sys_name>BOFA_BR_Consequence_CdpOutbound</sys_name>
+<sys_overrides/>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_script_f5913014932f8f90e3aef0aefaba109e</sys_update_name>
+<template/>
+<when>after</when>
+</sys_script>
+</unload>
