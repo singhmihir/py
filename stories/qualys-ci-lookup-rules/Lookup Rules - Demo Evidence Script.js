@@ -18,7 +18,8 @@ var TRACES = 9;          // dedicated candidates replayed per rule before the ex
 var DAYS = 0;            // only items updated in the last DAYS days; 0 = any age
 var ROWS = 6;            // records listed per search step
 var ONLY = [];           // rule orders to run, e.g. ['450', '700', '705']; empty = every rule
-var FILL = false;        // true: fewer than PER_RULE dedicated examples are topped up with the best remaining items, printed with proper=false
+var FILL = true;         // fewer than PER_RULE proper examples are topped up with the replayed items that were set aside, printed with proper=false and the reason (the deck builder drops them)
+var TIE_CHECKS = 300;    // address rules: items named exactly with the scanned label are dedicated only when the name is a tie; at most this many name counts per rule
 var started = new Date().getTime();
 var ignore = gs.getProperty('sn_sec_cmn.ignoreCIClass', '');
 var out = [];
@@ -400,21 +401,32 @@ function junkSerial(s) {
     var junk = ['0', 'none', 'n/a', 'na', 'unknown', 'empty', 'not specified', 'not available', 'no serial', 'default string', 'to be filled by o.e.m.', 'system serial number', 'chassis serial number', '0123456789', '1234567890'];
     return !s || s.length < 4 || junk.indexOf(s) != -1;
 }
-function dedicated(kind, p, c) {
+function dedicated(kind, p, c, budget) {
     var dns = ('' + (p.DNS || '')).trim().toLowerCase(), lbl = dns.split('.')[0], domain = dns.indexOf('.') != -1 ? dns.substring(dns.indexOf('.') + 1) : '';
     var ip = ('' + (p.IP || '')).trim(), pref = classFor('' + (p.OS || '')), serial = ('' + (p.SERIAL_NUMBER || '')).trim().toLowerCase();
-    var name = c.name.trim().toLowerCase(), fqdn = c.fqdn.trim().toLowerCase(), cdom = c.domain.trim().toLowerCase(), cserial = c.serial.trim().toLowerCase();
+    var name = c.name.trim().toLowerCase(), fqdn = c.fqdn.trim().toLowerCase(), cdom = c.domain.trim().toLowerCase(), cserial = c.serial.trim().toLowerCase(), nm = name.split('.')[0];
     var address = kind.indexOf('IP ') == 0, lb = kind.indexOf('Load Balancer') == 0, serialRule = kind.indexOf('Serial') == 0;
     var afterFqdn = ['Serial Number Class Match', 'Serial Number Hardware Match', 'Cisco IP Phone MAC', 'FQDN Class Match', 'FQDN Hardware Match'].indexOf(kind) == -1;
     var afterDomain = afterFqdn && kind != 'Hostname Domain Class Match' && kind != 'Hostname Domain Hardware Match';
-    var afterHost = ['Management Interface Match', 'Network Interface Name Match', 'FQDN Name Hardware Match', 'FQDN Name Broad Match'].indexOf(kind) != -1 || address;
+    var afterHost = ['Management Interface Match', 'Network Interface Name Match', 'FQDN Name Hardware Match', 'FQDN Name Broad Match'].indexOf(kind) != -1;
     var sibling = { 'Serial Number Hardware Match': 1, 'FQDN Hardware Match': 1, 'Hostname Domain Hardware Match': 1, 'Hostname Hardware Match': 1, 'IP Hardware Match': 1 };
     var hw = under(c.cls, 'cmdb_ci_hardware');   // the serial, fqdn, domain and host name rules search the hardware tree only
+    if (ignore && (',' + ignore + ',').indexOf(',' + c.cls + ',') != -1) return 'the CI sits in a class the rules ignore now (' + shortClass(c.cls) + ')';
     if (!dns && !address && !lb) return 'no DNS name';
     if (!serialRule && hw && !junkSerial(serial) && cserial == serial) return 'the record carries the scanned serial: a serial rule should have found it';
     if (afterFqdn && hw && fqdn && fqdn == dns) return 'the record carries the scanned name as its fqdn: an FQDN rule should have found it';
     if (afterDomain && hw && dns && name == lbl && cdom && cdom == domain) return 'the record carries the scanned label and domain: a domain rule should have found it';
     if (afterHost && hw && dns && name == lbl) return 'the record is named with the scanned label: a host name rule should have found it';
+    if (address && dns) {   // the address rules require the CI name to agree with the scanned label: a hyphenated variant, or the exact label when the name rules had a tie
+        if (nm == lbl) {
+            if (!hw) return '';
+            if (budget.tie >= TIE_CHECKS) return 'named with the scanned label: name tie not checked (TIE_CHECKS spent)';
+            budget.tie++;
+            var same = rowsOf('cmdb_ci_hardware', 'name', lbl).n;
+            return same > 1 ? '' : 'the record is named with the scanned label: a host name rule should have found it';
+        }
+        if (lbl.indexOf(nm + '-') != 0 && nm.indexOf(lbl + '-') != 0) return 'the record name "' + c.name + '" does not agree with the scanned label: the rule refuses it today';
+    }
     if ((kind == 'FQDN Name Hardware Match' || kind == 'FQDN Name Broad Match') && name != dns) return 'the record is not named with the whole fqdn';
     if (kind == 'FQDN Name Broad Match' && under(c.cls, 'cmdb_ci_hardware')) return 'a hardware record named with the fqdn: FQDN Name Hardware Match should have found it';
     if (sibling[kind] && pref && under(c.cls, pref)) return 'the record sits in the OS class ' + shortClass(pref) + ': the class rule before this one should have found it';
@@ -495,26 +507,27 @@ for (var r = 0; r < rules.length && hasRuleField; r++) {
     di.addQuery('ci_lookup_rule', rule.id); di.addQuery('state', 'matched'); di.addNotNullQuery('cmdb_ci');
     if (DAYS > 0) di.addQuery('sys_updated_on', '>', gs.daysAgoStart(DAYS));
     di.orderByDesc('sys_updated_on'); di.setLimit(kind.indexOf('Load Balancer') != -1 ? LB_SCAN : SCAN); di.query();
-    var named = [], unnamed = [], weak = [], reasons = {}, scanned = 0;
+    var proper = [], other = [], unnamed = [], reasons = {}, scanned = 0, replayed = 0, budget = { tie: 0 }, notes = [];
+    function consider(cand) {
+        var ex = build(rule, kind, cand, before); replayed++;
+        (ex.proper ? proper : other).push(ex);
+    }
     while (di.next()) {
         var p; try { p = JSON.parse('' + di.getValue('source_data')); } catch (e) { continue; }
         scanned++;
         var c = { id: '' + di.getValue('cmdb_ci'), name: '' + (di.cmdb_ci.name || ''), fqdn: '' + (di.cmdb_ci.fqdn || ''), domain: '' + (di.cmdb_ci.dns_domain || ''), cls: '' + di.cmdb_ci.sys_class_name, ip: '' + (di.cmdb_ci.ip_address || ''), serial: '' + (di.cmdb_ci.serial_number || '') };
-        var cand = { number: '' + di.getValue('number'), sys_id: di.getUniqueValue(), updated: '' + di.getValue('sys_updated_on'), p: p, c: c, why: dedicated(kind, p, c) };
+        var cand = { number: '' + di.getValue('number'), sys_id: di.getUniqueValue(), updated: '' + di.getValue('sys_updated_on'), p: p, c: c, why: dedicated(kind, p, c, budget) };
         if (!cand.why && kind == 'IP Layered Match') { var nicQ = new GlideRecord('cmdb_ci_network_adapter'); nicQ.addQuery('ip_address', '' + (p.IP || '')); nicQ.addNotNullQuery('cmdb_ci'); nicQ.query(); if (nicQ.hasNext()) cand.why = 'an adapter record carries the address: IP Adapter Match should have found it'; }
-        if (cand.why) { reasons[cand.why] = (reasons[cand.why] || 0) + 1; if (weak.length < 12) weak.push(cand); }
-        else if (p.DNS || !address) named.push(cand); else unnamed.push(cand);
-        if (named.length >= TRACES) break;
+        if (cand.why) { reasons[cand.why] = (reasons[cand.why] || 0) + 1; continue; }
+        if (address && !p.DNS) { if (unnamed.length < 30) unnamed.push(cand); continue; }   // items without a DNS name are the reserve of the address rules
+        consider(cand);
+        if (proper.length >= PER_RULE + 2 || replayed >= TRACES) break;
     }
-    var candidates = named.concat(unnamed).slice(0, TRACES), proper = [], other = [];
-    for (var i = 0; i < candidates.length; i++) { var ex = build(rule, kind, candidates[i], before); (ex.proper ? proper : other).push(ex); }
+    for (var u = 0; u < unnamed.length && proper.length < PER_RULE && replayed < TRACES + PER_RULE; u++) consider(unnamed[u]);
     var picks = [], shapes = {};
     for (var d = 0; d < proper.length && picks.length < PER_RULE; d++) if (!shapes[proper[d].shape]) { shapes[proper[d].shape] = true; picks.push(proper[d]); }
     for (var d2 = 0; d2 < proper.length && picks.length < PER_RULE; d2++) if (picks.indexOf(proper[d2]) == -1) picks.push(proper[d2]);
-    if (FILL) {
-        for (var f = 0; f < other.length && picks.length < PER_RULE; f++) picks.push(other[f]);
-        for (var w = 0; w < weak.length && picks.length < PER_RULE; w++) picks.push(build(rule, kind, weak[w], before));
-    }
+    if (FILL) for (var f = 0; f < other.length && picks.length < PER_RULE; f++) picks.push(other[f]);
     for (var x = 0; x < picks.length; x++) {
         var pk = picks[x];
         out.push('  ' + pk.item.number + ' | ' + (pk.item.dns || '(no name)') + ' | ' + pk.item.ip + ' | ' + pk.item.os + ' -> ' + pk.ci.name + ' [' + pk.ci.cls + '] | path: ' + pk.shape + (pk.proper ? '' : ' | not dedicated: ' + pk.why));
@@ -522,7 +535,7 @@ for (var r = 0; r < rules.length && hasRuleField; r++) {
         total++;
     }
     var tally = []; for (var key in reasons) tally.push(reasons[key] + ' x ' + key);
-    out.push('  scanned ' + scanned + ' item(s): ' + (named.length + unnamed.length) + ' dedicated candidate(s) (' + named.length + ' with a DNS name), ' + candidates.length + ' replayed, ' + proper.length + ' proper' + (other.length ? ', ' + other.length + ' set aside (' + other.map(function(o) { return o.item.number + ': ' + o.why; }).join('; ') + ')' : '') + (tally.length ? '; not dedicated: ' + tally.join(' | ') : ''));
-    if (!picks.length) out.push('  (no dedicated example among the scanned items)');
+    out.push('  scanned ' + scanned + ' item(s): ' + replayed + ' dedicated candidate(s) replayed, ' + proper.length + ' proper' + (other.length ? ', ' + other.length + ' set aside (' + other.map(function(o) { return o.item.number + ': ' + o.why; }).join('; ') + ')' : '') + (unnamed.length ? ', ' + unnamed.length + ' without a DNS name held in reserve' : '') + (tally.length ? '; not dedicated: ' + tally.join(' | ') : ''));
+    if (!proper.length) out.push('  (no proper example among the scanned items)');
 }
 gs.print('=== Qualys lookup rules, demo evidence, read-only ===\nrules: ' + rules.length + ' | examples: ' + total + ' | elapsed: ' + Math.round((new Date().getTime() - started) / 1000) + ' s\n' + out.join('\n'));
