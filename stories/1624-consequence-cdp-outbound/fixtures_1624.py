@@ -1,20 +1,32 @@
-"""Prepares the PDI for the consequence outbound build with business rules switched off. The stand-in
-consequence table (scoped app BofA Sim) receives the sheet's fields it lacks (the configuration item as a
-document id with a Class table-name field, as on the client) and a stand-in consequence rule table is created, both under the global Default update set (PDI-only records, never delivered);
-then the fixture records used by test_1624.py: one rule, one consequence linked to the rule, a CI and an
-AIT with every field filled, and one bare consequence. Re-runnable: reuses the records in fixtures.json."""
+"""Prepares the PDI for the consequence outbound build with business rules switched off. Ensures the mirror of
+the client application (BOFA USEM Consequence, scope x_boar_bofa_usem_0, the client's sys_id, source and vendor
+prefix) exists, creates the client's consequence and consequence rule tables in it with the sheet's fields (the
+configuration item as a document id with a Class table-name field, as on the client) under the global Default
+update set (PDI-only records, never delivered); then the fixture records used by test_1624.py: one rule, one
+consequence linked to the rule, a CI and an AIT with every field filled, and one bare consequence. Re-runnable:
+reuses the records in fixtures.json."""
 import os, sys, json
 HERE = os.path.dirname(os.path.abspath(__file__)); BASE = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(BASE, 'tools'))
 from snui import SNUI
-CONSEQUENCE, RULE, AIT = 'x_196061_bofasim_consequence', 'x_196061_bofasim_consequence_rule', 'x_196061_bofasim_ait'
+CONSEQUENCE, RULE, AIT = 'x_boar_bofa_usem_0_consequence', 'x_boar_bofa_usem_0_consequence_rule', 'x_196061_bofasim_ait'   # the client's table names in the mirror application; the AIT stand-in stays where it is
+APP = '488be1cd2b1247102b30f8e14391bf0c'   # mirror of the client application BOFA USEM Consequence (x_boar_bofa_usem_0), same sys_id
 GLOBAL_DEFAULT_SET = '7dba58ecf54403100a22c0b3dfa151af'   # global Default set: where the stand-in tables were created
 ui = SNUI(); ui.app('global')
 fx_path = os.path.join(HERE, 'fixtures.json'); FX = json.load(open(fx_path)) if os.path.exists(fx_path) else {}
 d = ui.js('''
 var o = {steps: [], errors: []}, fx = %(fx)s;
 new GlideUpdateSet().set(%(set)s);
-var app = new GlideRecord('sys_app'); app.addQuery('scope', 'x_196061_bofasim'); app.query(); app.next(); var appId = app.getUniqueValue();
+var appId = %(app)s;
+var app = new GlideRecord('sys_app');
+if (!app.get(appId)) {
+    app.initialize(); app.setNewGuidValue(appId); app.setValue('name', 'BOFA USEM Consequence'); app.setValue('scope', 'x_boar_bofa_usem_0');
+    app.setValue('source', 'x_boar_bofa_usem_0'); app.setValue('vendor_prefix', 'boar'); app.setValue('version', '1.0.0'); app.insert();
+    o.steps.push('application x_boar_bofa_usem_0');
+} else if (app.getValue('source') != 'x_boar_bofa_usem_0') {
+    app.setValue('source', 'x_boar_bofa_usem_0'); app.setWorkflow(false); app.update();   // the exporter stamps this on every sys_scope reference
+    o.steps.push('application source set to x_boar_bofa_usem_0');
+}
 function table(name, label) {
     if (new GlideRecord(name).isValid()) return;
     var t = new GlideRecord('sys_db_object'); t.initialize(); t.setValue('name', name); t.setValue('label', label); t.setValue('sys_scope', appId);
@@ -38,7 +50,12 @@ function choice(tableName, element, values) {
     }
 }
 try {
-    table(%(rule)s, 'Consequence Rule (stand-in)');
+    table(%(cons)s, 'Consequence');
+    col(%(cons)s, 'number', 'string', 'Number', {display: true});
+    col(%(cons)s, 'state', 'integer', 'State', {choice: 1});
+    choice(%(cons)s, 'state', {1: 'Open', 2: 'Deferred', 3: 'Closed', 4: 'Cancelled'});
+    col(%(cons)s, 'u_consequence_level', 'string', 'Consequence Level');
+    table(%(rule)s, 'Consequence Rule');
     col(%(rule)s, 'number', 'string', 'Number', {display: true});
     col(%(rule)s, 'name', 'string', 'Name');
     col(%(rule)s, 'applies_to', 'string', 'Applies to');
@@ -61,7 +78,7 @@ try {
     col(%(cons)s, 'u_bofa_ait', 'reference', 'AIT', {reference: %(ait)s});
     col(%(cons)s, 'u_rejection_reason', 'string', 'Rejection Reason', {max_length: 1000});
 } catch (e) { o.errors.push('schema: ' + e); }
-gs.print('X::' + JSON.stringify(o));''' % dict(fx=json.dumps(FX), set=json.dumps(GLOBAL_DEFAULT_SET), rule=json.dumps(RULE), cons=json.dumps(CONSEQUENCE), ait=json.dumps(AIT)))
+gs.print('X::' + JSON.stringify(o));''' % dict(fx=json.dumps(FX), set=json.dumps(GLOBAL_DEFAULT_SET), rule=json.dumps(RULE), cons=json.dumps(CONSEQUENCE), ait=json.dumps(AIT), app=json.dumps(APP)))
 print('schema:', json.dumps(d))
 assert not d['errors'], d['errors']
 c = ui.js('''
@@ -71,7 +88,7 @@ var d = new GlideRecord('sys_dictionary'); d.addQuery('name', %(cons)s); d.addQu
 if (d.getValue('internal_type') != 'document_id') { d.setValue('internal_type', 'document_id'); d.setValue('reference', ''); d.setValue('dependent', 'u_class'); d.update(); o.changed = true; }
 var d2 = new GlideRecord('sys_dictionary'); d2.addQuery('name', %(cons)s); d2.addQuery('element', 'cmdb_ci'); d2.query(); d2.next();
 o.cmdb_ci = {type: '' + d2.getValue('internal_type'), dependent: '' + d2.getValue('dependent')};
-gs.print('X::' + JSON.stringify(o));''' % dict(set=json.dumps(GLOBAL_DEFAULT_SET), cons=json.dumps(CONSEQUENCE)), scope='9d1e03de930b8310e3aef0aefaba10d5')
+gs.print('X::' + JSON.stringify(o));''' % dict(set=json.dumps(GLOBAL_DEFAULT_SET), cons=json.dumps(CONSEQUENCE)), scope=APP)
 print('configuration item column:', json.dumps(c))
 assert c['cmdb_ci'] == {'type': 'document_id', 'dependent': 'u_class'}, c
 f = ui.js('''

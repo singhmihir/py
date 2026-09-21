@@ -1,6 +1,6 @@
 """Builds the import-ready record XML for the client instance from the records deployed on the PDI:
-the two script includes, the two properties and the rule, re-pointed from the stand-in scope to the
-client consequence application x_boar_bofa_usem_0 (BOFA USEM Consequence), which holds the tables. User, timestamp and mod-count fields are left out so the import stamps
+the two script includes, the two properties and the rule, already in the client consequence application
+x_boar_bofa_usem_0 (BOFA USEM Consequence), which the PDI mirrors with the same scope name and sys_id. User, timestamp and mod-count fields are left out so the import stamps
 them; the topic property is delivered empty for the client to fill with the sys_id of its Kafka topic."""
 import os, sys, json, re
 HERE = os.path.dirname(os.path.abspath(__file__)); BASE = os.path.dirname(os.path.dirname(HERE))
@@ -13,9 +13,8 @@ except ImportError:
     import xml.etree.ElementTree as ET
 ST = json.load(open(os.path.join(HERE, 'state.json')))
 OUT = os.path.join(HERE, 'Consequence CDP Outbound Payload - Records.xml')
-PDI_SCOPE, CLIENT_SCOPE = '9d1e03de930b8310e3aef0aefaba10d5', '488be1cd2b1247102b30f8e14391bf0c'   # BofA Sim -> BOFA USEM Consequence
-PDI_PREFIX, CLIENT_PREFIX = 'x_196061_bofasim', 'x_boar_bofa_usem_0'
-PDI_APP, CLIENT_APP = 'BofA Sim', 'BOFA USEM Consequence'
+CLIENT_SCOPE = '488be1cd2b1247102b30f8e14391bf0c'   # BOFA USEM Consequence, the same sys_id on the PDI mirror and on the client
+CLIENT_PREFIX = 'x_boar_bofa_usem_0'
 CONSEQUENCE = CLIENT_PREFIX + '_consequence'
 STAMP = re.compile(r'<(sys_created_by|sys_created_on|sys_updated_by|sys_updated_on|sys_mod_count)>[^<]*</\1>\n?')
 ui = SNUI(); ui.app('global')
@@ -30,7 +29,6 @@ def unload(table, ids):
 records = unload('sys_script_include', list(ST['si'].values())) + unload('sys_properties', list(ST['props'].values())) + unload('sys_script', [ST['br']])
 def repoint(rec):
     rec = STAMP.sub('', rec)
-    rec = rec.replace(PDI_SCOPE, CLIENT_SCOPE).replace(PDI_PREFIX, CLIENT_PREFIX).replace(PDI_APP, CLIENT_APP)
     if '<name>%s.usem.consequence.kafka.topic_sys_id</name>' % CLIENT_PREFIX in rec:
         rec = re.sub(r'<value>[^<]*</value>', '<value/>', rec)
     return rec

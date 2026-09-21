@@ -457,5 +457,16 @@
   "scrub": [
    "stand-in scope kept: internal record only, client receives the record XML"
   ]
+ },
+ {
+  "name": "SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.2",
+  "app": "x_boar_bofa_usem_0 (mirror of the client application, same scope name and sys_id)",
+  "rows": 5,
+  "exported": 5,
+  "file": "SNOWUSEMTP-1624_MS_Consequence_CDP_Outbound_Payload_V1.2.xml",
+  "created": "2026-09-21 11:51:44",
+  "scrub": [
+   "client scope and application sys_id: importable on the client instance as is; the client receives the record XML too"
+  ]
  }
 ]
