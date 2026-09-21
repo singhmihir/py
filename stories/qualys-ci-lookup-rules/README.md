@@ -550,3 +550,6 @@ filter and record); `build_demo_deck.js` adds one or more such pages after each 
 split over pages by measured height; header links to the item, the rule record, the property and the CI). 201 slides,
 739 links to the development instance; 60 of 61 examples replay to the same CI today (the forced printer of rule 450 does
 not). Checked on a render of the new pages.
+Delivered size (21 Sep, evening): one example per rule (`deck_demo/demo_data_one.json`, the first example of each rule
+from `demo_data.json`; rebuild with `node deck_demo/build_demo_deck.js deck_demo/demo_data_one.json "<pptx>"`): 116 slides,
+222 links. The three-example data stays in `demo_data.json` for a fuller build.
