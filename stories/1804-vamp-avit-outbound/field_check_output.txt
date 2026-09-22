@@ -15,27 +15,24 @@ finding.u_avit_record_url (sn_vul_app_vulnerable_item, String): u_avit_record_ur
 ptreq.number (sn_vul_pen_test_assessment_request, Record Number, String): number by same name, type string
 ptreq.sys_created_on (sn_vul_pen_test_assessment_request, Created, Date/Time): sys_created_on by same name, type glide_date_time
 ptreq.u_assessment_id (sn_vul_pen_test_assessment_request, Assessment ID, String): u_assessment_id by same name, type string
-Property value to use for usem.vamp.sections.sn_vul_app_vulnerable_item (the JSON structure of the sheet, in sheet order):
-sn_vul_app_vul_entry=tpe,
-sn_vul_app_vulnerability=remediation_task,
-sn_vul_app_vulnerable_item=finding,
-sn_vul_pen_test_assessment_request=ptreq,
-Property value to use for usem.vamp.fields.sn_vul_app_vulnerable_item (a row not found keeps the sheet name until the field is known):
-sn_vul_app_vul_entry.number=number,
-sn_vul_app_vul_entry.u_vuln_sub_cat_id=u_vuln_sub_cat_id,
-sn_vul_app_vulnerability.number=number,
-sn_vul_app_vulnerability.u_primary_ait=primary_ait,
-sn_vul_app_vulnerability.u_avul_record_url=u_avul_record_url,
-number=number,
-sys_created_on=sys_created_on,
-sys_updated_on=sys_updated_on,
-state=state,
-cmdb_ci=configuration_item,
-u_verification_status=u_verification_status,
-source_avit_id=source_avit_id,
-u_avit_record_url=u_avit_record_url,
-sn_vul_pen_test_assessment_request.number=number,
-sn_vul_pen_test_assessment_request.sys_created_on=sys_created_on,
-sn_vul_pen_test_assessment_request.u_assessment_id=u_assessment_id,
+Property value to use for usem.vamp.fields.sn_vul_app_vulnerable_item (ServiceNow field on the left, 
+.
+ on the right, in sheet order; a row not found keeps the sheet name on the left until the field is known):
+sn_vul_app_vul_entry.number=tpe.number,
+sn_vul_app_vul_entry.u_vuln_sub_cat_id=tpe.u_vuln_sub_cat_id,
+sn_vul_app_vulnerability.number=remediation_task.number,
+sn_vul_app_vulnerability.u_primary_ait=remediation_task.primary_ait,
+sn_vul_app_vulnerability.u_avul_record_url=remediation_task.u_avul_record_url,
+number=finding.number,
+sys_created_on=finding.sys_created_on,
+sys_updated_on=finding.sys_updated_on,
+state=finding.state,
+cmdb_ci=finding.configuration_item,
+u_verification_status=finding.u_verification_status,
+source_avit_id=finding.source_avit_id,
+u_avit_record_url=finding.u_avit_record_url,
+sn_vul_pen_test_assessment_request.number=ptreq.number,
+sn_vul_pen_test_assessment_request.sys_created_on=ptreq.sys_created_on,
+sn_vul_pen_test_assessment_request.u_assessment_id=ptreq.u_assessment_id,
 To raise (1):
 - sn_vul_app_vul_entry.number (Record Number) has no field on this instance

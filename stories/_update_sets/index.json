@@ -472,10 +472,10 @@
  {
   "name": "SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.0",
   "app": "x_boar_bofa_usem_1 (mirror of the client application, same scope name and sys_id)",
-  "rows": 6,
-  "exported": 6,
+  "rows": 5,
+  "exported": 5,
   "file": "SNOWUSEMTP-1804_MS_VAMP_AVIT_Outbound_Payload_V2.0.xml",
-  "created": "2026-09-22 15:57:34",
+  "created": "2026-09-22 16:33:53",
   "scrub": [
    "client scope and application sys_id: importable on the client instance as is; the client receives the record XML too"
   ]

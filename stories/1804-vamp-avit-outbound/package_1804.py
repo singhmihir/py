@@ -1,5 +1,5 @@
 """Builds the import-ready record XML for the client instance from the records deployed on the PDI:
-the two script includes, the three properties and the rule, which already carry the client
+the two script includes, the two properties and the rule, which already carry the client
 application. User, timestamp and mod-count fields are left out so the import stamps them; the topic
 property is delivered empty for the client to fill with the sys_id of its Kafka topic."""
 import os, sys, json, re, html
@@ -53,5 +53,5 @@ for r in brs:
 low = content.lower()
 WORKING = [INST.split('//')[-1].split('.')[0], os.environ.get('SN_USER', '')]
 hits = [t for t in [w.lower() for w in WORKING if w] + ['service-now.com', 'x_196061', 'bofasim'] + TOOLING if t in low]
-assert len(sis) == 2 and len(props) == 3 and len(brs) == 1 and not hits and '<sys_updated_by>' not in content, hits
+assert len(sis) == 2 and len(props) == 2 and len(brs) == 1 and not hits and '<sys_updated_by>' not in content, hits
 print('written:', OUT, len(content), 'bytes | records', len(sis) + len(props) + len(brs), '| scrub', 'CLEAN' if not hits else hits)

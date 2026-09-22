@@ -1,6 +1,6 @@
 # SNOWUSEMTP-1804 — VAMP outbound payload for application vulnerable items
 
-One rule, two script includes and three properties: an after insert/update business rule on
+One rule, two script includes and two properties: an after insert/update business rule on
 `sn_vul_app_vulnerable_item` builds the payload and sends it to the Kafka topic
 `sn_usem_verification_outbound`. The payload is ours (agreed with the client: we build it and VAMP
 validates it) and follows the sheet "SN to VAMP" of `SN to VAMP Mapping.xlsx`: the **JSON structure**
@@ -17,6 +17,11 @@ assumed.
 - Sections in sheet order, keyed by column H (a space becomes an underscore, as the CDP remediation
   task payload does: *Remediation Task* is `remediation_task`), fields in sheet order keyed by
   column I, every value a string.
+- **One property carries the whole structure**, as the CDP payloads do: one
+  `servicenow_field=json_field` pair per line in `usem.vamp.fields.sn_vul_app_vulnerable_item`, the
+  ServiceNow field on the left (the item's own plain, another section's as `<table>.<field>`) and the
+  payload name on the right as `<column H>.<column I>`. The sections of the payload are the structures
+  in the order the property introduces them, so nothing else has to be configured.
 - **`remediation_task` is a list**: one entry per remediation task linked to the item through
   `sn_vul_app_m2m_vul_group_item`, in task number order, `[]` when the item has none. An item with
   several tasks carries all of them.
@@ -29,10 +34,11 @@ assumed.
 
 ## Versions
 V1.0 to V1.6 keyed the sections by ServiceNow table name and sent one remediation task.
-**V2.0** (current): sections named by the sheet's JSON structure; the remediation tasks sent as a
-list; the vulnerability entry read in its own class; error handling, payload validation and function
-comments; built in a PDI mirror of the client integration application, so the update set carries the
-client names and imports as it is.
+**V2.0** (current): sections named by the sheet's JSON structure and carried in the one field
+property, as for the CDP payloads; the remediation tasks sent as a list; the vulnerability entry read
+in its own class; error handling, payload validation and comments on every function; built in a PDI
+mirror of the client integration application, so the update set carries the client names and imports
+as it is.
 
 ### The two bugs fixed in V2.0
 - **Only one remediation task was sent.** `_remediationTask()` read the group item table, ordered by
@@ -51,12 +57,11 @@ client names and imports as it is.
   condition: processor → producer, one try/catch; a payload the processor refused is not sent.
 - `BOFASIVampOutboundProcessor.js` — `buildPayload(record)` returns the JSON text and shows it with
   `gs.addInfoMessage` on the item; a second message names any configured field the instance does not
-  have. The sections come from `usem.vamp.sections.sn_vul_app_vulnerable_item`
-  (`servicenow_table=json_structure` per line, in payload order) and their fields from
-  `usem.vamp.fields.sn_vul_app_vulnerable_item` (`servicenow_field=json_field`, the item's own fields
-  plain, another section's as `<table>.<field>`). The paths from the item to the other sections live
-  in `initialize()`: `vulnerability` for the entry, `assessment_request` for the pen test request and
-  the group item table for the remediation tasks; a path with `list` makes its section a list.
+  have. `_payloadMap()` reads the one property and yields the sections with their table, their shape
+  and their fields. The paths from the item to the other sections live in `initialize()`:
+  `vulnerability` for the entry, `assessment_request` for the pen test request and the group item
+  table for the remediation tasks; a path with `list` makes its section a list and a task linked more
+  than once is taken once.
 - `BOFASIKafkaProducerVamp.js` — `sendPayload(payload, record)`: topic sys_id from
   `usem.vamp.kafka.topic_sys_id`, key `<table>.<sys_id>`, `sn_ih_kafka.ProducerV2().send(...)`
   asynchronous, no headers, no schema; the response shown with `gs.addInfoMessage`.
@@ -71,8 +76,10 @@ Every function carries a JSDoc header. The rule and the two public methods are t
 blocks; the private methods throw and the entry point logs one `gs.error` in the form
 `<class>: <what failed> for <table> <sys_id> - <reason>` (`no record` as the key when no record was
 given). The processor refuses a record that was never fetched or does not exist, a property that is
-not configured, holds nothing or holds a line without a field or payload name, a configured field
-whose table is not a section, a section without a field, and a section with no path from the item.
+not configured or holds nothing, a line with more than one "=", without a field name, without a
+payload name or with a payload name that is not `<structure>.<field>`, a section that would take
+fields from two tables, the same payload name twice in a section, and a section with no path from the
+item.
 `_validatePayload` then checks the finished message before it is returned: the envelope constants, a
 UUID event id, a UTC timestamp, an activity of INSERT / UPDATE / DELETE, `element_count` equal to the
 number of findings, every configured section present (a list where the sheet is one to many), every
@@ -81,15 +88,16 @@ error. A refused build returns `''`, so the rule never calls the producer. The p
 empty topic property or one that is not a sys_id, and a payload that is empty, not JSON, without
 envelope or findings, or whose `element_count` does not match.
 
-## Tests (`test_1804.py`, 81 checks per run, run twice in one invocation)
-A the linked item: the properties equal the resolution, the envelope, the sheet's structure names in
+## Tests (`test_1804.py`, 87 checks per run, run twice in one invocation)
+A the linked item: the property equals the resolution, the envelope, the sheet's structure names in
 sheet order, the fields per section, both remediation tasks in number order with their own values,
 the entry's sub category id read through the extended class, the configuration item as a display
 value, the not-found message. B an item with nothing linked: an empty task list and `""` everywhere.
-C the rule on a real update and a real insert. D rendering by dictionary type. E the error paths and
-the validation, including every refusal above and the producer's. **F how many remediation tasks the
-item has**: two, one, none, a link whose task is gone, and the proof that the other three sections do
-not change with the count.
+C the rule on a real update and a real insert. D rendering by dictionary type, including a date, and a
+reference whose record is gone. E the error paths and the validation, including every refusal above,
+the sections the property alone yields and the producer's refusals. **F how many remediation tasks the
+item has**: two, one, none, a link whose task is gone, the two links swapped to prove the order comes
+from the task number, and the proof that the other three sections do not change with the count.
 
 ## Fixtures (`fixtures_1804.py`)
 Adds the sheet's custom fields to the vulnerability tables as stand-ins for the client's
@@ -106,13 +114,16 @@ its Default set created when missing, records captured explicitly, scope audit),
 `test_1804.py` (run 1 writes the sample), `export_1804.py` (native export, upload proof, archive),
 `package_1804.py` (`VAMP AVIT Outbound Payload - Records.xml`, topic property empty, stamps removed,
 scripts asserted equal to the repository files), `check_1804.py` (workbook against mapping, sections,
-field-check rows, resolution, properties, record XML, sample structure and keys, processor tables).
+field-check rows, resolution, the property, record XML, sample structure and keys, and the processor's
+own wiring: every section must be the item table or carry a path, and only the remediation tasks a
+list).
 
 ## Delivery
 The update set XML imports on the client instance as it is (the PDI holds a mirror of the client
 integration application `x_boar_bofa_usem_1`, same scope name and application sys_id); the record XML
 is the alternative. After import the client sets `usem.vamp.kafka.topic_sys_id` to the sys_id of its
-Kafka topic record: the update set carries a placeholder, the record XML leaves it empty.
+Kafka topic record: `export_1804.py` empties that property and captures it before exporting, so both
+files deliver it empty and nothing points at a topic of the development instance.
 
 Open points for the client:
 - The acceptance criteria say the trigger is the verification status changing to *Pending Validation*.

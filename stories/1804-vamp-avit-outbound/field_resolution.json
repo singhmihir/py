@@ -2,6 +2,7 @@
  {
   "table": "sn_vul_app_vul_entry",
   "structure": "tpe",
+  "structure_json": "tpe",
   "json": "number",
   "label": "Record Number",
   "type": "String",
@@ -15,6 +16,7 @@
  {
   "table": "sn_vul_app_vul_entry",
   "structure": "tpe",
+  "structure_json": "tpe",
   "json": "u_vuln_sub_cat_id",
   "label": "",
   "type": "String",
@@ -28,6 +30,7 @@
  {
   "table": "sn_vul_app_vulnerability",
   "structure": "remediation task",
+  "structure_json": "remediation_task",
   "json": "number",
   "label": "Record Number",
   "type": "String",
@@ -41,6 +44,7 @@
  {
   "table": "sn_vul_app_vulnerability",
   "structure": "remediation task",
+  "structure_json": "remediation_task",
   "json": "primary_ait",
   "label": "Primary AIT",
   "type": "Reference",
@@ -54,6 +58,7 @@
  {
   "table": "sn_vul_app_vulnerability",
   "structure": "remediation task",
+  "structure_json": "remediation_task",
   "json": "u_avul_record_url",
   "label": "",
   "type": "String",
@@ -67,6 +72,7 @@
  {
   "table": "sn_vul_app_vulnerable_item",
   "structure": "finding",
+  "structure_json": "finding",
   "json": "number",
   "label": "Record Number",
   "type": "String",
@@ -80,6 +86,7 @@
  {
   "table": "sn_vul_app_vulnerable_item",
   "structure": "finding",
+  "structure_json": "finding",
   "json": "sys_created_on",
   "label": "Created",
   "type": "Date/Time",
@@ -93,6 +100,7 @@
  {
   "table": "sn_vul_app_vulnerable_item",
   "structure": "finding",
+  "structure_json": "finding",
   "json": "sys_updated_on",
   "label": "Updated",
   "type": "Date/Time",
@@ -106,6 +114,7 @@
  {
   "table": "sn_vul_app_vulnerable_item",
   "structure": "finding",
+  "structure_json": "finding",
   "json": "state",
   "label": "State",
   "type": "Integer",
@@ -119,6 +128,7 @@
  {
   "table": "sn_vul_app_vulnerable_item",
   "structure": "finding",
+  "structure_json": "finding",
   "json": "configuration_item",
   "label": "Configuration Item",
   "type": "Reference",
@@ -132,6 +142,7 @@
  {
   "table": "sn_vul_app_vulnerable_item",
   "structure": "finding",
+  "structure_json": "finding",
   "json": "u_verification_status",
   "label": "Verification Status",
   "type": "String",
@@ -145,6 +156,7 @@
  {
   "table": "sn_vul_app_vulnerable_item",
   "structure": "finding",
+  "structure_json": "finding",
   "json": "source_avit_id",
   "label": "Source AVIT ID",
   "type": "String",
@@ -158,6 +170,7 @@
  {
   "table": "sn_vul_app_vulnerable_item",
   "structure": "finding",
+  "structure_json": "finding",
   "json": "u_avit_record_url",
   "label": "",
   "type": "String",
@@ -171,6 +184,7 @@
  {
   "table": "sn_vul_pen_test_assessment_request",
   "structure": "ptreq",
+  "structure_json": "ptreq",
   "json": "number",
   "label": "Record Number",
   "type": "String",
@@ -184,6 +198,7 @@
  {
   "table": "sn_vul_pen_test_assessment_request",
   "structure": "ptreq",
+  "structure_json": "ptreq",
   "json": "sys_created_on",
   "label": "Created",
   "type": "Date/Time",
@@ -197,6 +212,7 @@
  {
   "table": "sn_vul_pen_test_assessment_request",
   "structure": "ptreq",
+  "structure_json": "ptreq",
   "json": "u_assessment_id",
   "label": "Assessment ID",
   "type": "String",

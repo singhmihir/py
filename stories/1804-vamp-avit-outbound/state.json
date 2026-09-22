@@ -9,12 +9,11 @@
  },
  "props": {
   "usem.vamp.kafka.topic_sys_id": "8ea0fea4936b83d0e3aef0aefaba1037",
-  "usem.vamp.sections.sn_vul_app_vulnerable_item": "52a0fea4936b83d0e3aef0aefaba10d6",
   "usem.vamp.fields.sn_vul_app_vulnerable_item": "baa072e4936b83d0e3aef0aefaba1017"
  },
  "app_name": "BOFA USEM CDP integration",
  "default_set": "9814018d93574f10e3aef0aefaba101f",
  "topic": "4ea0fea4936b83d0e3aef0aefaba1037",
  "br": "2cb0b2e4936b83d0e3aef0aefaba1067",
- "rows": 6
+ "rows": 5
 }
