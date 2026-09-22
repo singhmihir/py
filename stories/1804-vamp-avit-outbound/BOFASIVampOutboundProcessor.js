@@ -3,13 +3,13 @@
  * finding element that holds the sections of the mapping sheet "SN to VAMP", each named by the JSON
  * structure of the sheet (tpe, remediation_task, finding, ptreq).
  *
- * Configuration lives in initialize() and in two system properties of the application:
- *   <scope>.usem.vamp.sections.<item table>
- *     one servicenow_table=json_structure pair per line, in payload order; the section of a table
- *     reached through a many to many is a list, one entry per linked record.
+ * Configuration lives in initialize() and in one system property of the application:
  *   <scope>.usem.vamp.fields.<item table>
- *     one servicenow_field=json_field pair per line, in payload order; the item's own fields plain,
- *     the fields of another section as <table>.<field>.
+ *     one servicenow_field=json_field pair per line, in payload order; on the left the ServiceNow
+ *     field, the item's own plain and another section's as <table>.<field>; on the right the payload
+ *     name as <json structure>.<json field>, the two columns of the sheet. The sections of the
+ *     payload are the structures in the order the property introduces them, and the section of a
+ *     table reached through a many to many is a list, one entry per linked record.
  * The path from the item to every other section is the RELATED map of initialize(): a reference field
  * for the vulnerability entry and the pen test request, the group item table for the remediation
  * tasks. A record reached through a reference is re-opened in its own class, so that the fields of an
@@ -19,17 +19,17 @@
  * an empty field, a reference whose record is gone or a section without a record gives "".
  *
  * Entry point: buildPayload(record). It holds the one try/catch of the feature: any failure, including
- * a configuration the two properties do not agree on and a payload that does not validate, is logged
- * once with gs.error and returns an empty string, so that nothing is sent.
+ * a line of the property that does not parse and a payload that does not validate, is logged once
+ * with gs.error and returns an empty string, so that nothing is sent.
  */
 var BOFASIVampOutboundProcessor = Class.create();
 BOFASIVampOutboundProcessor.prototype = {
 
     /**
-     * Constants of the envelope, the formats of the rendered values, the prefixes of the two
-     * properties that hold the payload structure and the path from the application vulnerable item to
-     * every other record of the payload. A path with "list" is a many to many: its section is sent as
-     * an array, one entry per related record.
+     * Constants of the envelope, the formats of the rendered values, the prefix of the property that
+     * holds the payload structure and the path from the application vulnerable item to every other
+     * record of the payload. A path with "list" is a many to many: its section is sent as an array,
+     * one entry per related record.
      */
     initialize: function() {
         this.TOPIC_NAME = 'sn_usem_verification_outbound';
@@ -40,7 +40,6 @@ BOFASIVampOutboundProcessor.prototype = {
         this.TIME_FORMAT = 'HH:mm:ss';
         this.ACTIVITIES = ['INSERT', 'UPDATE', 'DELETE'];
         this.FIELDS_PROPERTY_PREFIX = 'x_boar_bofa_usem_1.usem.vamp.fields.';
-        this.SECTIONS_PROPERTY_PREFIX = 'x_boar_bofa_usem_1.usem.vamp.sections.';
         this.RELATED = {
             sn_vul_app_vul_entry: { reference: 'vulnerability' },
             sn_vul_pen_test_assessment_request: { reference: 'assessment_request' },
@@ -60,16 +59,14 @@ BOFASIVampOutboundProcessor.prototype = {
         try {
             this._requireRecord(record);
             var table = record.getTableName();
-            var sections = this._sections(table);
-            var mapping = this._fieldMapping(table);
-            this._requireConfiguration(sections, mapping, table);
+            var sections = this._payloadMap(table);
             var missing = [];
-            var findings = [this._buildFinding(record, sections, mapping, missing)];
+            var findings = [this._buildFinding(record, sections, missing)];
             var payload = {
                 envelope: this._buildEnvelope(this._activity(record), findings.length),
                 findings: findings
             };
-            this._validatePayload(payload, sections, mapping, record);
+            this._validatePayload(payload, sections, record);
             var message = JSON.stringify(payload);
             gs.addInfoMessage('VAMP payload for ' + record.getValue('number') + ': ' + message)
             if (missing.length)
@@ -142,16 +139,14 @@ BOFASIVampOutboundProcessor.prototype = {
      * Builds one finding: every configured section in the order of the sections property, each
      * section from its own record, a section reached through a many to many as an array.
      * @param {GlideRecord} record - the application vulnerable item
-     * @param {Array} sections - the sections property, parsed
-     * @param {Array} mapping - the fields property, parsed
+     * @param {Array} sections - the property, parsed
      * @param {Array} missing - collects the configured fields this instance does not have
      * @returns {Object} the finding
      */
-    _buildFinding: function(record, sections, mapping, missing) {
+    _buildFinding: function(record, sections, missing) {
         var finding = {};
         for (var i = 0; i < sections.length; i++) {
-            var section = sections[i];
-            var fields = this._sectionFields(mapping, section.table);
+            var section = sections[i], fields = section.fields;
             this._noteMissing(section.table, fields, missing);
             var records = this._sectionRecords(record, section.table);
             if (!section.many) {
@@ -200,19 +195,24 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * Every record a many to many links to the item, in a stable order, each opened in its own class.
+     * Every record a many to many links to the item, in a stable order, each opened in its own class
+     * and taken once however many links point at it.
      * @param {GlideRecord} record - the application vulnerable item
      * @param {Object} path - the many to many configuration of the section
      * @returns {Array} the related records, empty when the item has none
      */
     _listed: function(record, path) {
-        var found = [];
+        var found = [], seen = {};
         var link = new GlideRecord(path.list);
         link.addQuery(path.item, record.getUniqueValue());
         link.addNotNullQuery(path.related);
         link.orderBy(path.related + '.' + path.order);
         link.query();
         while (link.next()) {
+            var id = '' + link.getValue(path.related);
+            if (seen[id])
+                continue;
+            seen[id] = true;
             var related = link.getElement(path.related).getRefRecord();
             if (related && related.isValidRecord())
                 found.push(this._inOwnClass(related));
@@ -265,109 +265,66 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * The sections of the payload, read from the sections property in its order.
+     * The payload structure, read from the one property in its order: every line carries the
+     * ServiceNow field on the left (the item's own plain, another section's as <table>.<field>) and
+     * the payload name on the right as <json structure>.<json field>. The sections are the structures
+     * in the order the property introduces them.
      * @param {string} table - the table the business rule runs on
-     * @returns {Array} {table, json, many} per section
-     * @throws {Error} when the property is not configured, holds no section or a line without a payload name
+     * @returns {Array} {json, table, many, fields:[{field, json}]} per section, in payload order
+     * @throws {Error} when the property is not configured, holds no field, or holds a line with more
+     *                 than one "=", without a field name, without a payload name, with a payload name
+     *                 that is not <structure>.<field>, with a section taking fields from two tables,
+     *                 or with one payload name twice in a section
      */
-    _sections: function(table) {
-        var property = this.SECTIONS_PROPERTY_PREFIX + table;
-        var value = gs.getProperty(property, '');
-        if (!value)
-            throw new Error('table ' + table + ' is not configured in property ' + property);
-        var sections = [];
-        var entries = value.split(/\r?\n|,/);
-        for (var i = 0; i < entries.length; i++) {
-            var pair = entries[i].split('=');
-            var name = pair[0].trim();
-            if (!name)
-                continue;
-            if (pair.length < 2 || !pair[1].trim())
-                throw new Error('property ' + property + ' holds a line without a payload name: "' + entries[i].trim() + '"');
-            sections.push({ table: name, json: pair[1].trim(), many: !!(this.RELATED[name] && this.RELATED[name].list) });
-        }
-        if (!sections.length)
-            throw new Error('property ' + property + ' holds no section');
-        return sections;
-    },
-
-    /**
-     * The fields of the payload, read from the fields property in its order: the fields of the item
-     * itself plain, the fields of another section as <table>.<field>.
-     * @param {string} table - the table the business rule runs on
-     * @returns {Array} {table, field, json} per field
-     * @throws {Error} when the property is not configured, holds no field or a line without a field name
-     */
-    _fieldMapping: function(table) {
+    _payloadMap: function(table) {
         var property = this.FIELDS_PROPERTY_PREFIX + table;
         var value = gs.getProperty(property, '');
         if (!value)
             throw new Error('table ' + table + ' is not configured in property ' + property);
-        var mapping = [];
-        var entries = value.split(/\r?\n|,/);
+        var sections = [], byStructure = {}, entries = value.split(/\r?\n|,/);
         for (var i = 0; i < entries.length; i++) {
-            var pair = entries[i].split('=');
-            var path = pair[0].trim();
-            if (!path && entries[i].trim())
-                throw new Error('property ' + property + ' holds a line without a field name: "' + entries[i].trim() + '"');
-            if (!path)
+            var line = entries[i].trim();
+            if (!line)
                 continue;
-            var at = path.indexOf('.');
-            mapping.push({
-                table: at < 0 ? table : path.substring(0, at),
-                field: at < 0 ? path : path.substring(at + 1),
-                json: pair.length > 1 && pair[1].trim() ? pair[1].trim() : path
-            });
+            var pair = line.split('=');
+            if (pair.length > 2)
+                throw new Error('property ' + property + ' holds a line with more than one "=": "' + line + '"');
+            var left = pair[0].trim(), right = pair.length > 1 ? pair[1].trim() : '';
+            if (!left)
+                throw new Error('property ' + property + ' holds a line without a field name: "' + line + '"');
+            if (!right)
+                throw new Error('property ' + property + ' holds a line without a payload name: "' + line + '"');
+            var dot = right.indexOf('.');
+            if (dot < 1 || dot == right.length - 1)
+                throw new Error('property ' + property + ' holds the payload name "' + right + '", which is not <structure>.<field>: "' + line + '"');
+            var structure = right.substring(0, dot), payloadField = right.substring(dot + 1);
+            var at = left.indexOf('.');
+            var sectionTable = at < 0 ? table : left.substring(0, at);
+            var section = byStructure[structure];
+            if (!section) {
+                section = byStructure[structure] = { json: structure, table: sectionTable, many: !!(this.RELATED[sectionTable] && this.RELATED[sectionTable].list), fields: [] };
+                sections.push(section);
+            }
+            if (section.table != sectionTable)
+                throw new Error('section ' + structure + ' of property ' + property + ' takes fields from ' + section.table + ' and from ' + sectionTable);
+            if (this._fieldNamed(section.fields, payloadField))
+                throw new Error('section ' + structure + ' of property ' + property + ' names ' + payloadField + ' twice');
+            section.fields.push({ field: at < 0 ? left : left.substring(at + 1), json: payloadField });
         }
-        if (!mapping.length)
+        if (!sections.length)
             throw new Error('property ' + property + ' holds no field');
-        return mapping;
-    },
-
-    /**
-     * The fields configured for one section.
-     * @param {Array} mapping - the fields property, parsed
-     * @param {string} table - the ServiceNow table of the section
-     * @returns {Array} the fields of that section in the order of the property
-     */
-    _sectionFields: function(mapping, table) {
-        var fields = [];
-        for (var i = 0; i < mapping.length; i++)
-            if (mapping[i].table == table)
-                fields.push(mapping[i]);
-        return fields;
-    },
-
-    /**
-     * Refuses a configuration the payload cannot be built from: a field of a table that is not a
-     * section, or a section without a single field.
-     * @param {Array} sections - the sections property, parsed
-     * @param {Array} mapping - the fields property, parsed
-     * @param {string} table - the table the business rule runs on
-     * @throws {Error} when the two properties do not describe the same payload
-     */
-    _requireConfiguration: function(sections, mapping, table) {
-        var known = {};
-        for (var s = 0; s < sections.length; s++) {
-            known[sections[s].table] = true;
-            if (!this._sectionFields(mapping, sections[s].table).length)
-                throw new Error('section ' + sections[s].table + ' of property ' + this.SECTIONS_PROPERTY_PREFIX + table + ' has no field in property ' + this.FIELDS_PROPERTY_PREFIX + table);
-        }
-        for (var m = 0; m < mapping.length; m++)
-            if (!known[mapping[m].table])
-                throw new Error('field ' + mapping[m].table + '.' + mapping[m].field + ' of property ' + this.FIELDS_PROPERTY_PREFIX + table + ' belongs to no section of property ' + this.SECTIONS_PROPERTY_PREFIX + table);
+        return sections;
     },
 
     /**
      * Checks the finished payload before it is handed over: the envelope, the sections and the
      * fields of the two properties, every value a string and nothing else in the message.
      * @param {Object} payload - the payload as it will be sent
-     * @param {Array} sections - the sections property, parsed
-     * @param {Array} mapping - the fields property, parsed
+     * @param {Array} sections - the property, parsed
      * @param {GlideRecord} record - the application vulnerable item
      * @throws {Error} naming every problem found
      */
-    _validatePayload: function(payload, sections, mapping, record) {
+    _validatePayload: function(payload, sections, record) {
         var problems = [];
         var envelope = payload.envelope || {};
         if (envelope.type != 'record' || envelope.topic_name != this.TOPIC_NAME || envelope.namespace != this.NAMESPACE ||
@@ -399,7 +356,7 @@ BOFASIVampOutboundProcessor.prototype = {
                     continue;
                 }
                 for (var e = 0; e < entries.length; e++)
-                    this._checkSection(problems, section, entries[e], this._sectionFields(mapping, section.table));
+                    this._checkSection(problems, section, entries[e], section.fields);
             }
             for (var key in finding)
                 if (!this._sectionNamed(sections, key))

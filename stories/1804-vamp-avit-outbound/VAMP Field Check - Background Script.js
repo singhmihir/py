@@ -1,8 +1,8 @@
 // Checks the sheet "SN to VAMP" against this instance. For every sheet row it looks for the
 // ServiceNow field behind the JSON field name: a field of that name, then a field with the sheet's
 // label, then the u_ variant of the name. It checks the type against the sheet, prints one line per
-// row, the two property values to use (the sections of the payload, and the ServiceNow field on the
-// left with the JSON field name on the right) and the rows to raise. Read only; run as a background
+// row, the one property value to use (the ServiceNow field on the left, the payload name on the
+// right as <json structure>.<json field>) and the rows to raise. Read only; run as a background
 // script in global scope.
 var SHEET = [
     {
@@ -138,7 +138,7 @@ var SECTIONS = [
 ];
 var TYPES = { 'String': ['string'], 'Reference': ['reference'], 'Date/Time': ['glide_date_time'], 'Integer': ['integer'] };
 var ITEM_TABLE = 'sn_vul_app_vulnerable_item';
-var report = [], lines = [], raise = [], fieldLines = [], sectionLines = [], cache = {};
+var report = [], lines = [], raise = [], fieldLines = [], cache = {};
 
 function fieldsOf(table) {
     if (!cache[table]) {
@@ -154,6 +154,13 @@ function fieldsOf(table) {
         cache[table] = list;
     }
     return cache[table];
+}
+
+function structureOf(table) {
+    for (var s = 0; s < SECTIONS.length; s++)
+        if (SECTIONS[s].table == table)
+            return SECTIONS[s].json;
+    return '';
 }
 
 function first(list, test) {
@@ -199,7 +206,7 @@ function candidates(row) {
 
 for (var i = 0; i < SHEET.length; i++) {
     var row = SHEET[i], head = row.structure + '.' + row.json + ' (' + row.table + (row.label ? ', ' + row.label : '') + ', ' + row.type + '): ';
-    var entry = { table: row.table, structure: row.structure, json: row.json, label: row.label, type: row.type, field: '', how: '', found_type: '', reference: '', type_ok: false, candidates: [] };
+    var entry = { table: row.table, structure: row.structure, structure_json: structureOf(row.table), json: row.json, label: row.label, type: row.type, field: '', how: '', found_type: '', reference: '', type_ok: false, candidates: [] };
     if (!new GlideRecord(row.table).isValid()) {
         lines.push(head + 'TABLE MISSING');
         raise.push(row.table + ' does not exist');
@@ -219,13 +226,10 @@ for (var i = 0; i < SHEET.length; i++) {
     }
     report.push(entry);
 }
-for (var s = 0; s < SECTIONS.length; s++)
-    sectionLines.push(SECTIONS[s].table + '=' + SECTIONS[s].json + ',');
 for (var r = 0; r < report.length; r++) {
     var e = report[r];
-    fieldLines.push((e.table == ITEM_TABLE ? '' : e.table + '.') + (e.field || e.json) + '=' + e.json + ',');
+    fieldLines.push((e.table == ITEM_TABLE ? '' : e.table + '.') + (e.field || e.json) + '=' + e.structure_json + '.' + e.json + ',');
 }
 gs.print('SN to VAMP field check on ' + gs.getProperty('instance_name') + ' - ' + SHEET.length + ' sheet rows\n' + lines.join('\n'));
-gs.print('Property value to use for usem.vamp.sections.' + ITEM_TABLE + ' (the JSON structure of the sheet, in sheet order):\n' + sectionLines.join('\n'));
-gs.print('Property value to use for usem.vamp.fields.' + ITEM_TABLE + ' (a row not found keeps the sheet name until the field is known):\n' + fieldLines.join('\n'));
+gs.print('Property value to use for usem.vamp.fields.' + ITEM_TABLE + ' (ServiceNow field on the left, <json structure>.<json field> on the right, in sheet order; a row not found keeps the sheet name on the left until the field is known):\n' + fieldLines.join('\n'));
 gs.print(raise.length ? 'To raise (' + raise.length + '):\n- ' + raise.join('\n- ') : 'Every sheet row resolves to a field of the sheet type.');

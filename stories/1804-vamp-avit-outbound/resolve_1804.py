@@ -11,7 +11,7 @@ from snui import SNUI, INST
 ITEM = 'sn_vul_app_vulnerable_item'
 script = open(os.path.join(HERE, 'VAMP Field Check - Background Script.js')).read()
 ui = SNUI(); ui.app('global')
-raw = ui.run(script + "\ngs.print('X::' + JSON.stringify({report: report, fields: fieldLines, sections: sectionLines}));")
+raw = ui.run(script + "\ngs.print('X::' + JSON.stringify({report: report, fields: fieldLines}));")
 m = re.search(r'X::(\{.*\})', raw, re.S)
 if not m:
     raise RuntimeError('NO MARKER; tail: ' + raw[-1500:])
@@ -25,18 +25,16 @@ json.dump(result['report'], open(os.path.join(HERE, 'field_resolution.json'), 'w
 sheet = json.load(open(os.path.join(HERE, 'vamp_mapping.json')))
 sections = json.load(open(os.path.join(HERE, 'vamp_sections.json')))
 assert [(e['table'], e['json']) for e in result['report']] == [(r['table'], r['json']) for r in sheet]
-assert result['sections'] == ['%s=%s,' % (s['table'], s['json']) for s in sections], result['sections']
-expected_lines = ['%s%s=%s,' % ('' if e['table'] == ITEM else e['table'] + '.', e['field'] or e['json'], e['json']) for e in result['report']]
+structure_of = {s['table']: s['json'] for s in sections}
+assert [e['structure_json'] for e in result['report']] == [structure_of[r['table']] for r in sheet]
+expected_lines = ['%s%s=%s.%s,' % ('' if e['table'] == ITEM else e['table'] + '.', e['field'] or e['json'], structure_of[e['table']], e['json']) for e in result['report']]
 assert result['fields'] == expected_lines, (result['fields'], expected_lines)
 props = {'usem.vamp.kafka.topic_sys_id': {
     'value': '',
     'description': 'sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_verification_outbound, read by BOFASIKafkaProducerVamp.'},
-    'usem.vamp.sections.' + ITEM: {
-    'value': '\n'.join(result['sections']),
-    'description': 'VAMP payload sections, one servicenow_table=json_structure pair per line in payload order: the ServiceNow table on the left, the JSON structure of the sheet "SN to VAMP" on the right. The section of a table reached through a many to many (the remediation tasks of the item) is a list, one entry per linked record.'},
     'usem.vamp.fields.' + ITEM: {
     'value': '\n'.join(result['fields']),
-    'description': 'VAMP payload fields, one servicenow_field=json_field pair per line in payload order: the ServiceNow field on the left (verified with the field check script), the JSON field name of the sheet "SN to VAMP" on the right; the fields of the application vulnerable item plain, the fields of another section as <table>.<field>. A field missing on the table or empty is sent as "".'}}
+    'description': 'VAMP payload, one servicenow_field=json_field pair per line in payload order. On the left the ServiceNow field (verified with the field check script): the fields of the application vulnerable item plain, the fields of another section as <table>.<field>. On the right the payload name of the sheet "SN to VAMP" as <json structure>.<json field>; the sections of the payload are the structures in the order this property introduces them, and the section of a table reached through a many to many (the remediation tasks of the item) is a list, one entry per linked record. A field missing on the table or empty is sent as "".'}}
 json.dump(props, open(os.path.join(HERE, 'properties.json'), 'w'), indent=1)
 print(output)
 print('\nresolved %d of %d rows; properties.json written' % (sum(1 for e in result['report'] if e['field']), len(result['report'])))

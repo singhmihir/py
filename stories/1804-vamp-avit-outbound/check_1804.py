@@ -1,8 +1,7 @@
 """Cross-checks the workbook against every delivered artifact, offline: the sheet rows against
 vamp_mapping.json and vamp_sections.json, the rows embedded in the field-check script, the field
-resolution the check produced, properties.json (the sections of column H, and the ServiceNow field on
-the left as resolved with the JSON field name of column I on the right, in sheet order), the property
-values inside the record XML, the structure and keys of the sample payload and the tables the
+resolution the check produced, properties.json (one property, the ServiceNow field as resolved on the
+left and <column H>.<column I> on the right, in sheet order), the property value inside the record XML, the structure and keys of the sample payload and the tables the
 processor names. Any difference is a transcription error."""
 import os, json, re
 import openpyxl
@@ -43,24 +42,21 @@ if [(e['table'], e['structure'], e['json'], e['label'], e['type']) for e in reso
 for e in resolution:
     if e['field'] and not e['type_ok']:
         problems.append('resolved field %s.%s has a type other than the sheet says' % (e['table'], e['field']))
-expected_fields = '\n'.join('%s%s=%s,' % ('' if e['table'] == ITEM else e['table'] + '.', e['field'] or e['json'], e['json']) for e in resolution)
-expected_sections = '\n'.join('%s=%s,' % (s['table'], s['json']) for s in sections)
+expected_fields = '\n'.join('%s%s=%s.%s,' % ('' if e['table'] == ITEM else e['table'] + '.', e['field'] or e['json'], structure_of[e['table']], e['json']) for e in resolution)
 props = json.load(open(os.path.join(HERE, 'properties.json')))
 if props.get('usem.vamp.fields.' + ITEM, {}).get('value') != expected_fields:
     problems.append('properties.json field property differs from the resolution')
-if props.get('usem.vamp.sections.' + ITEM, {}).get('value') != expected_sections:
-    problems.append('properties.json sections property differs from the sheet')
-if sorted(props) != sorted(['usem.vamp.fields.' + ITEM, 'usem.vamp.sections.' + ITEM, 'usem.vamp.kafka.topic_sys_id']):
+if sorted(props) != sorted(['usem.vamp.fields.' + ITEM, 'usem.vamp.kafka.topic_sys_id']):
     problems.append('properties.json holds other properties: ' + ', '.join(sorted(props)))
 right_sides = [line.split('=')[1].rstrip(',') for line in expected_fields.split('\n')]
-if right_sides != [e['json'] for e in resolution] or sorted(right_sides) != sorted(r[2] for r in sheet):
-    problems.append('payload names on the right of the field property are not exactly the sheet column I')
+if right_sides != ['%s.%s' % (structure_of[e['table']], e['json']) for e in resolution] or sorted(right_sides) != sorted('%s.%s' % (structure_of[r[0]], r[2]) for r in sheet):
+    problems.append('payload names on the right of the property are not exactly <column H>.<column I>')
+if list(dict.fromkeys(n.split('.')[0] for n in right_sides)) != order:
+    problems.append('the sections the property introduces are not the sheet structures in sheet order')
 root = ET.parse(os.path.join(HERE, 'VAMP AVIT Outbound Payload - Records.xml')).getroot()
 xml_props = {r.findtext('name'): (r.findtext('value') or '') for r in root.findall('sys_properties')}
 if xml_props.get('%s.usem.vamp.fields.%s' % (PREFIX, ITEM)) != expected_fields:
-    problems.append('record XML field property differs from the resolution')
-if xml_props.get('%s.usem.vamp.sections.%s' % (PREFIX, ITEM)) != expected_sections:
-    problems.append('record XML sections property differs from the sheet')
+    problems.append('record XML property differs from the resolution')
 if sorted(xml_props) != sorted(PREFIX + '.' + n for n in props):
     problems.append('record XML property names differ from properties.json')
 sample = json.load(open(os.path.join(HERE, 'samples', 'Sample payload - application vulnerable item.json')))
@@ -104,5 +100,5 @@ else:
 print('sheet rows:', len(sheet), '| sections:', ', '.join('%s -> %s' % (t, n) for t, n in structure_of.items()),
       '| resolved on the PDI:', sum(1 for e in resolution if e['field']),
       '| not found:', ', '.join('%s.%s' % (e['table'], e['json']) for e in resolution if not e['field']) or 'none')
-print('CHECK OK: sheet = mapping = sections = field-check rows = resolution -> properties = record XML = sample structure and keys = processor tables' if not problems else 'PROBLEMS:\n- ' + '\n- '.join(problems))
+print('CHECK OK: sheet = mapping = sections = field-check rows = resolution -> one property = record XML = sample structure and keys = processor wiring' if not problems else 'PROBLEMS:\n- ' + '\n- '.join(problems))
 raise SystemExit(1 if problems else 0)
