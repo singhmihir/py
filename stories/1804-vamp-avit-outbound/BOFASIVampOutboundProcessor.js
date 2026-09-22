@@ -1,11 +1,35 @@
+/**
+ * Builds the outbound VAMP payload of one application vulnerable item: the envelope and a single
+ * finding element that holds the sections of the mapping sheet "SN to VAMP", each named by the JSON
+ * structure of the sheet (tpe, remediation_task, finding, ptreq).
+ *
+ * Configuration lives in initialize() and in two system properties of the application:
+ *   <scope>.usem.vamp.sections.<item table>
+ *     one servicenow_table=json_structure pair per line, in payload order; the section of a table
+ *     reached through a many to many is a list, one entry per linked record.
+ *   <scope>.usem.vamp.fields.<item table>
+ *     one servicenow_field=json_field pair per line, in payload order; the item's own fields plain,
+ *     the fields of another section as <table>.<field>.
+ * The path from the item to every other section is the RELATED map of initialize(): a reference field
+ * for the vulnerability entry and the pen test request, the group item table for the remediation
+ * tasks. A record reached through a reference is re-opened in its own class, so that the fields of an
+ * extended table are read as well.
+ * Rendering: references as the display value of the record they point at, date/times as
+ * MM-dd-yyyy HH:mm:ss, dates as MM-dd-yyyy, everything else as stored; a field missing on the table,
+ * an empty field, a reference whose record is gone or a section without a record gives "".
+ *
+ * Entry point: buildPayload(record). It holds the one try/catch of the feature: any failure, including
+ * a configuration the two properties do not agree on and a payload that does not validate, is logged
+ * once with gs.error and returns an empty string, so that nothing is sent.
+ */
 var BOFASIVampOutboundProcessor = Class.create();
 BOFASIVampOutboundProcessor.prototype = {
 
     /**
-     * Configuration of the VAMP outbound payload: the envelope constants, the date and time formats,
-     * the two properties that hold the payload structure (the sections and their fields) and the path
-     * from the application vulnerable item to every other record of the payload. A path with "list"
-     * is a many to many: its section is sent as an array, one entry per related record.
+     * Constants of the envelope, the formats of the rendered values, the prefixes of the two
+     * properties that hold the payload structure and the path from the application vulnerable item to
+     * every other record of the payload. A path with "list" is a many to many: its section is sent as
+     * an array, one entry per related record.
      */
     initialize: function() {
         this.TOPIC_NAME = 'sn_usem_verification_outbound';
@@ -27,9 +51,10 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * Builds the VAMP message for one application vulnerable item and shows it on the record.
-     * @param {GlideRecord} record the application vulnerable item the business rule is running on
-     * @returns {string} the JSON text of the payload, or an empty string when it could not be built
+     * Builds the message of one application vulnerable item and shows it on the record, with a second
+     * message naming any configured field this instance does not have.
+     * @param {GlideRecord} record - the application vulnerable item the business rule is running on
+     * @returns {string} the payload as JSON text, or "" when it could not be built or did not validate
      */
     buildPayload: function(record) {
         try {
@@ -58,8 +83,8 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * Refuses a record the payload cannot be built from.
-     * @param {GlideRecord} record the record the business rule passed in
-     * @throws when no record was given or the record does not exist
+     * @param {GlideRecord} record - the record the business rule passed in
+     * @throws {Error} when no record was given or the record does not exist
      */
     _requireRecord: function(record) {
         if (!record || !record.getTableName)
@@ -70,7 +95,7 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * Names a record in an error message, also when the record itself is the reason for the error.
-     * @param {GlideRecord} record the record the payload was being built for
+     * @param {GlideRecord} record - the record the payload was being built for
      * @returns {string} "<table> <sys_id>", or "no record"
      */
     _recordKey: function(record) {
@@ -83,7 +108,7 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * The activity of the message, taken from the operation the business rule is running for.
-     * @param {GlideRecord} record the application vulnerable item
+     * @param {GlideRecord} record - the application vulnerable item
      * @returns {string} INSERT, UPDATE or DELETE
      */
     _activity: function(record) {
@@ -95,8 +120,8 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * The CDP envelope of the message.
-     * @param {string} activity INSERT, UPDATE or DELETE
-     * @param {number} elements the number of findings the message carries
+     * @param {string} activity - INSERT, UPDATE or DELETE
+     * @param {number} elements - the number of findings the message carries
      * @returns {Object} the envelope
      */
     _buildEnvelope: function(activity, elements) {
@@ -116,10 +141,10 @@ BOFASIVampOutboundProcessor.prototype = {
     /**
      * Builds one finding: every configured section in the order of the sections property, each
      * section from its own record, a section reached through a many to many as an array.
-     * @param {GlideRecord} record the application vulnerable item
-     * @param {Array} sections the sections property, parsed
-     * @param {Array} mapping the fields property, parsed
-     * @param {Array} missing collects the configured fields this instance does not have
+     * @param {GlideRecord} record - the application vulnerable item
+     * @param {Array} sections - the sections property, parsed
+     * @param {Array} mapping - the fields property, parsed
+     * @param {Array} missing - collects the configured fields this instance does not have
      * @returns {Object} the finding
      */
     _buildFinding: function(record, sections, mapping, missing) {
@@ -144,10 +169,10 @@ BOFASIVampOutboundProcessor.prototype = {
     /**
      * The records behind one section: the item itself, the record its reference field points at, or
      * every record the many to many links to it.
-     * @param {GlideRecord} record the application vulnerable item
-     * @param {string} table the ServiceNow table of the section
+     * @param {GlideRecord} record - the application vulnerable item
+     * @param {string} table - the ServiceNow table of the section
      * @returns {Array} the records, empty when the section has none
-     * @throws when the section has no path from the application vulnerable item
+     * @throws {Error} when the section has no path from the application vulnerable item
      */
     _sectionRecords: function(record, table) {
         if (table == record.getTableName())
@@ -160,8 +185,8 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * The record a reference field points at, opened in its own class.
-     * @param {GlideRecord} record the application vulnerable item
-     * @param {string} field the reference field
+     * @param {GlideRecord} record - the application vulnerable item
+     * @param {string} field - the reference field
      * @returns {Array} one record, or empty when the field is empty or the target is gone
      */
     _referenced: function(record, field) {
@@ -176,8 +201,8 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * Every record a many to many links to the item, in a stable order, each opened in its own class.
-     * @param {GlideRecord} record the application vulnerable item
-     * @param {Object} path the many to many configuration of the section
+     * @param {GlideRecord} record - the application vulnerable item
+     * @param {Object} path - the many to many configuration of the section
      * @returns {Array} the related records, empty when the item has none
      */
     _listed: function(record, path) {
@@ -198,7 +223,7 @@ BOFASIVampOutboundProcessor.prototype = {
     /**
      * Re-opens a record in the class it belongs to, so that the fields of an extended table are read
      * as well: a reference to a base table hands out a record of that base table only.
-     * @param {GlideRecord} referenced the record as the reference handed it over
+     * @param {GlideRecord} referenced - the record as the reference handed it over
      * @returns {GlideRecord} the record in its own class, or the record itself when it has no class
      */
     _inOwnClass: function(referenced) {
@@ -211,8 +236,8 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * The values of one section, the payload names of the fields property in its order.
-     * @param {GlideRecord} sectionRecord the record of the section, null when the item has none
-     * @param {Array} fields the fields of the section
+     * @param {GlideRecord} sectionRecord - the record of the section, null when the item has none
+     * @param {Array} fields - the fields of the section
      * @returns {Object} the payload names and their values, every value a string
      */
     _sectionValues: function(sectionRecord, fields) {
@@ -226,9 +251,9 @@ BOFASIVampOutboundProcessor.prototype = {
      * Records the configured fields of a section this instance does not have. The check is made
      * against the configured table, once per section, so that the message names the same fields
      * whether the item has one related record, several or none.
-     * @param {string} table the configured ServiceNow table of the section
-     * @param {Array} fields the fields of the section
-     * @param {Array} missing the list collected while the payload is built
+     * @param {string} table - the configured ServiceNow table of the section
+     * @param {Array} fields - the fields of the section
+     * @param {Array} missing - the list collected while the payload is built
      */
     _noteMissing: function(table, fields, missing) {
         var probe = new GlideRecord(table);
@@ -241,9 +266,9 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * The sections of the payload, read from the sections property in its order.
-     * @param {string} table the table the business rule runs on
+     * @param {string} table - the table the business rule runs on
      * @returns {Array} {table, json, many} per section
-     * @throws when the property is not configured, holds no section or a line without a payload name
+     * @throws {Error} when the property is not configured, holds no section or a line without a payload name
      */
     _sections: function(table) {
         var property = this.SECTIONS_PROPERTY_PREFIX + table;
@@ -269,9 +294,9 @@ BOFASIVampOutboundProcessor.prototype = {
     /**
      * The fields of the payload, read from the fields property in its order: the fields of the item
      * itself plain, the fields of another section as <table>.<field>.
-     * @param {string} table the table the business rule runs on
+     * @param {string} table - the table the business rule runs on
      * @returns {Array} {table, field, json} per field
-     * @throws when the property is not configured, holds no field or a line without a field name
+     * @throws {Error} when the property is not configured, holds no field or a line without a field name
      */
     _fieldMapping: function(table) {
         var property = this.FIELDS_PROPERTY_PREFIX + table;
@@ -301,8 +326,8 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * The fields configured for one section.
-     * @param {Array} mapping the fields property, parsed
-     * @param {string} table the ServiceNow table of the section
+     * @param {Array} mapping - the fields property, parsed
+     * @param {string} table - the ServiceNow table of the section
      * @returns {Array} the fields of that section in the order of the property
      */
     _sectionFields: function(mapping, table) {
@@ -316,10 +341,10 @@ BOFASIVampOutboundProcessor.prototype = {
     /**
      * Refuses a configuration the payload cannot be built from: a field of a table that is not a
      * section, or a section without a single field.
-     * @param {Array} sections the sections property, parsed
-     * @param {Array} mapping the fields property, parsed
-     * @param {string} table the table the business rule runs on
-     * @throws when the two properties do not describe the same payload
+     * @param {Array} sections - the sections property, parsed
+     * @param {Array} mapping - the fields property, parsed
+     * @param {string} table - the table the business rule runs on
+     * @throws {Error} when the two properties do not describe the same payload
      */
     _requireConfiguration: function(sections, mapping, table) {
         var known = {};
@@ -336,11 +361,11 @@ BOFASIVampOutboundProcessor.prototype = {
     /**
      * Checks the finished payload before it is handed over: the envelope, the sections and the
      * fields of the two properties, every value a string and nothing else in the message.
-     * @param {Object} payload the payload as it will be sent
-     * @param {Array} sections the sections property, parsed
-     * @param {Array} mapping the fields property, parsed
-     * @param {GlideRecord} record the application vulnerable item
-     * @throws naming every problem found
+     * @param {Object} payload - the payload as it will be sent
+     * @param {Array} sections - the sections property, parsed
+     * @param {Array} mapping - the fields property, parsed
+     * @param {GlideRecord} record - the application vulnerable item
+     * @throws {Error} naming every problem found
      */
     _validatePayload: function(payload, sections, mapping, record) {
         var problems = [];
@@ -386,10 +411,10 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * Checks one section of the payload against the fields configured for it.
-     * @param {Array} problems collects what is wrong
-     * @param {Object} section the section of the sections property
-     * @param {Object} values the section as built
-     * @param {Array} fields the fields configured for the section
+     * @param {Array} problems - collects what is wrong
+     * @param {Object} section - the section of the sections property
+     * @param {Object} values - the section as built
+     * @param {Array} fields - the fields configured for the section
      */
     _checkSection: function(problems, section, values, fields) {
         if (!values || typeof values != 'object')
@@ -408,8 +433,8 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * @param {Array} sections the sections property, parsed
-     * @param {string} name a payload key of the finding
+     * @param {Array} sections - the sections property, parsed
+     * @param {string} name - a payload key of the finding
      * @returns {boolean} true when a configured section carries that name
      */
     _sectionNamed: function(sections, name) {
@@ -420,8 +445,8 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * @param {Array} fields the fields of one section
-     * @param {string} name a payload key of the section
+     * @param {Array} fields - the fields of one section
+     * @param {string} name - a payload key of the section
      * @returns {boolean} true when a configured field carries that name
      */
     _fieldNamed: function(fields, name) {
@@ -432,7 +457,7 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * @param {*} value any value of the payload
+     * @param {*} value - any value of the payload
      * @returns {boolean} true when the value is an array
      */
     _isArray: function(value) {
@@ -441,8 +466,8 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * The value of one field, rendered for the payload.
-     * @param {GlideRecord} record the record of the section, or null when the item has none
-     * @param {string} field the ServiceNow field
+     * @param {GlideRecord} record - the record of the section, or null when the item has none
+     * @param {string} field - the ServiceNow field
      * @returns {string} the rendered value, "" when the record, the field or the value is absent
      */
     _fieldValue: function(record, field) {
@@ -458,7 +483,7 @@ BOFASIVampOutboundProcessor.prototype = {
      * Renders one field by its dictionary type: a reference as the display value of the record it
      * points at (and "" when that record is gone, never the stored sys_id), a date or date and time
      * in the configured format, everything else as stored.
-     * @param {GlideElement} element the field of the record
+     * @param {GlideElement} element - the field of the record
      * @returns {string} the rendered value
      */
     _renderElement: function(element) {
@@ -476,7 +501,7 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * @param {string} value a stored date and time
+     * @param {string} value - a stored date and time
      * @returns {string} the value as MM-dd-yyyy HH:mm:ss
      */
     _formatDateTime: function(value) {
@@ -485,7 +510,7 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * @param {string} value a stored date
+     * @param {string} value - a stored date
      * @returns {string} the value as MM-dd-yyyy
      */
     _formatDate: function(value) {

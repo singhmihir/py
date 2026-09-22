@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-22 15:44:56">
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-22 15:57:35">
 <sys_remote_update_set action="INSERT_OR_UPDATE">
 <application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
 <application_name>BOFA USEM CDP integration</application_name>
@@ -20,11 +20,11 @@
 <summary/>
 <sys_class_name>sys_remote_update_set</sys_class_name>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 15:44:55</sys_created_on>
-<sys_id>77bab2e893eb83d0e3aef0aefaba103a</sys_id>
+<sys_created_on>2026-09-22 15:57:34</sys_created_on>
+<sys_id>89adfa24932f83d0e3aef0aefaba10dc</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 15:44:55</sys_updated_on>
+<sys_updated_on>2026-09-22 15:57:34</sys_updated_on>
 <update_set display_value=""/>
 <update_source display_value=""/>
 <updated/>
@@ -34,263 +34,39 @@
 <application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
 <category>customer</category>
 <comments/>
-<name>sys_script_include_86a0bea4936b83d0e3aef0aefaba10e9</name>
-<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;x_boar_bofa_usem_1.BOFASIKafkaProducerVamp&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;Sends a VAMP payload to the Kafka topic held in usem.vamp.kafka.topic_sys_id with sn_ih_kafka.ProducerV2 (key &amp;lt;table&amp;gt;.&amp;lt;sys_id&amp;gt;).
-Documentation of API used - https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html&lt;/description&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;BOFASIKafkaProducerVamp&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[var BOFASIKafkaProducerVamp = Class.create();
-BOFASIKafkaProducerVamp.prototype = {
-
-    /**
-     * Configuration of the send: the property that holds the Kafka topic record and the arguments of
-     * the producer that never change for this integration.
-     */
-    initialize: function() {
-        this.TOPIC_PROPERTY = 'x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id';
-        this.IS_SYNC = false;
-        this.HEADERS = null;
-        this.SCHEMA_ID = null;
-        this.SYS_ID_PATTERN = /^[0-9a-f]{32}$/;
-    },
-
-    /**
-     * Sends one VAMP payload to the outbound topic, keyed by the record it was built from.
-     * @param {string} payload the JSON text the processor returned
-     * @param {GlideRecord} record the application vulnerable item the payload belongs to
-     */
-    sendPayload: function(payload, record) {
-        var key = this._messageKey(record);
-        try {
-            var topicSysId = this._topicSysId();
-            this._requirePayload(payload);
-            var response = new sn_ih_kafka.ProducerV2().send(topicSysId, key, payload, this.IS_SYNC, this.HEADERS, this.SCHEMA_ID);
-            gs.addInfoMessage('VAMP Kafka response for ' + key + ': ' + JSON.stringify(response))
-        } catch (e) {
-            gs.error(this.type + ': message not sent for ' + key + ' - ' + (e.message || e));
-        }
-    },
-
-    /**
-     * The message key of the record, also when no record was given.
-     * @param {GlideRecord} record the application vulnerable item
-     * @returns {string} "&lt;table&gt;.&lt;sys_id&gt;", or "no record"
-     */
-    _messageKey: function(record) {
-        try {
-            return record.getTableName() + '.' + record.getUniqueValue();
-        } catch (e) {
-            return 'no record';
-        }
-    },
-
-    /**
-     * The Kafka topic record to send to.
-     * @returns {string} the sys_id of the topic record
-     * @throws when the property is empty or does not hold a sys_id
-     */
-    _topicSysId: function() {
-        var topicSysId = String(gs.getProperty(this.TOPIC_PROPERTY, '')).trim();
-        if (!topicSysId)
-            throw new Error('property ' + this.TOPIC_PROPERTY + ' holds no topic');
-        if (!this.SYS_ID_PATTERN.test(topicSysId))
-            throw new Error('property ' + this.TOPIC_PROPERTY + ' is not a sys_id: "' + topicSysId + '"');
-        return topicSysId;
-    },
-
-    /**
-     * Refuses a payload the topic must not receive: nothing was built, the text is not JSON, or the
-     * message does not carry an envelope and at least one finding.
-     * @param {string} payload the JSON text the processor returned
-     * @throws naming what is wrong with the payload
-     */
-    _requirePayload: function(payload) {
-        if (!payload)
-            throw new Error('the payload is empty');
-        var message;
-        try {
-            message = JSON.parse(payload);
-        } catch (e) {
-            throw new Error('the payload is not JSON');
-        }
-        if (!message || !message.envelope || !message.findings)
-            throw new Error('the payload has no envelope or no findings');
-        if (!message.findings.length)
-            throw new Error('the payload carries no finding');
-        if (message.envelope.element_count !== message.findings.length)
-            throw new Error('the payload counts ' + message.envelope.element_count + ' element(s) and carries ' + message.findings.length);
-    },
-
-    type: 'BOFASIKafkaProducerVamp'
-};
-]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-22 15:00:50&lt;/sys_created_on&gt;&lt;sys_id&gt;86a0bea4936b83d0e3aef0aefaba10e9&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFASIKafkaProducerVamp&lt;/sys_name&gt;&lt;sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM CDP integration"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_86a0bea4936b83d0e3aef0aefaba10e9&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-22 15:00:50&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
-<payload_hash>-173027708</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.0">77bab2e893eb83d0e3aef0aefaba103a</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 15:44:55</sys_created_on>
-<sys_id>33bab2e893eb83d0e3aef0aefaba103d</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0c9bcc3440000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 15:44:55</sys_updated_on>
-<table/>
-<target_name>BOFASIKafkaProducerVamp</target_name>
-<type>Script Include</type>
-<update_domain>global</update_domain>
-<update_guid>3947f2acceab83d0c9980f6472c911e6</update_guid>
-<update_guid_history>3947f2acceab83d0c9980f6472c911e6:-173027708,c6a0bea43a6b83d0f39b6c6002ed2ceb:-173027708</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_52a0fea4936b83d0e3aef0aefaba10d6</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>VAMP payload sections, one servicenow_table=json_structure pair per line in payload order: the ServiceNow table on the left, the JSON structure of the sheet "SN to VAMP" on the right. The section of a table reached through a many to many (the remediation tasks of the item) is a list, one entry per linked record.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.sections.sn_vul_app_vulnerable_item</name><read_roles/><suffix>usem.vamp.sections.sn_vul_app_vulnerable_item</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 15:00:51</sys_created_on><sys_id>52a0fea4936b83d0e3aef0aefaba10d6</sys_id><sys_mod_count>48</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.sections.sn_vul_app_vulnerable_item</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_52a0fea4936b83d0e3aef0aefaba10d6</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 15:25:39</sys_updated_on><type>string</type><value>sn_vul_app_vul_entry=tpe,
-sn_vul_app_vulnerability=remediation_task,
-sn_vul_app_vulnerable_item=finding,
-sn_vul_pen_test_assessment_request=ptreq,</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=52a0fea4936b83d0e3aef0aefaba10d6"/></record_update>]]></payload>
-<payload_hash>1576973651</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.0">77bab2e893eb83d0e3aef0aefaba103a</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 15:44:55</sys_created_on>
-<sys_id>3fbab2e893eb83d0e3aef0aefaba103a</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0c9bcc3770000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 15:44:55</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_1.usem.vamp.sections.sn_vul_app_vulnerable_item</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>3947f2ac93ab83d0261bdcf17591faeb</update_guid>
-<update_guid_history>3947f2ac93ab83d0261bdcf17591faeb:1576973651,c256f6e8cdab83d0790dca2d380e9270:1576973651,a24636e826ab83d0bd11f5899f171424:275682198,d4367ea81eab83d02603489db7ba12db:1576973651,6b263ea863ab83d01fdbe8193ff17b5f:4577875,fc26baa8f4ab83d03cfb05833dd8b6a1:1576973651,98267aa812ab83d02c1aaacbdc2f8c80:414796649,1116f6a857ab83d0259700b70381f191:1576973651,f816b6a8ddab83d084612045bdc23d89:549412784,f295ba28f4ab83d0364c4f10fa6f5981:1576973651,3b853a28f2ab83d08765fe8320bee262:275682198,f97572288dab83d0575050d88c7830c9:1576973651,847532288dab83d06643e3606ae2b54a:4577875,ee65bee48bab83d0d4c0e80614878180:1576973651,4e65bee40eab83d01de59f9632bc6c31:414796649,24653ee451ab83d00e2f4018ad291f59:1576973651,3e557ae4b1ab83d0d7978206e181c764:549412784,18643a24d7ab83d0539b43a1d935f278:1576973651,1654b624f4ab83d033f48975fce4871e:275682198,7a4472245fab83d06d31a4dcd384b702:1576973651,9644322470ab83d04ed46b90ae53963b:4577875,34447ee0a0ab83d0b5454a12c4cc40f9:1576973651,e0447ee05bab83d05f6c6d604c144a7c:414796649,3634fae057ab83d0c5006e1654ec855a:1576973651,9a34bae04aab83d02d1938678cc7256c:549412784,00b3fa60c1ab83d0620239172dd7bba5:1576973651,49a33a6012ab83d0eb09e0d1663860af:275682198,f193f26018ab83d01a3d3c1c02287813:1576973651,ef837260e0ab83d034223125f5d2fbdc:4577875,82833260aeab83d060effdec405faf94:1576973651,bd83fe20d3ab83d0bd3df8d36dae01ee:414796649,00837e20e8ab83d0e44056f9697773ad:1576973651,bb733e200eab83d088144efdb6150d07:549412784,cae2faac146b83d071f09bbccfe76b7c:1576973651,14e2baac586b83d0b2e44793afd410d0:275682198,1bc2f2ac676b83d0518c4cc5700e47cf:1576973651,b9c2f2ac316b83d0f9fd90c78aa76085:4577875,c0c272ac336b83d03ccf20872ae66539:1576973651,afb2fe6ce86b83d00a31881dee358c6f:414796649,4ab2be6cad6b83d0893b8255a4bcd096:1576973651,6db27e6c2c6b83d02be577cb448e9081:549412784,b532b22c896b83d073f5e71c6d2b545d:1576973651,c032322c7c6b83d056a9b7e9c6f2543d:275682198,c512bae8956b83d06427c7ab588bec02:1576973651,ac123ae8526b83d09e3d12e00bb443bf:4577875,310276e84d6b83d088334f20e0c405a6:1576973651,1d0276e88c6b83d04b45835b4c55ac19:414796649,1af1b2e8c16b83d00c75a222ce3edaa9:1576973651,8ef132e86c6b83d0454a93334b0a33fc:549412784,32a072e4fb6b83d0eeba4810b102db14:1576973651</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_8ea0fea4936b83d0e3aef0aefaba1037</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_verification_outbound, read by BOFASIKafkaProducerVamp.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</name><read_roles/><suffix>usem.vamp.kafka.topic_sys_id</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 15:00:50</sys_created_on><sys_id>8ea0fea4936b83d0e3aef0aefaba1037</sys_id><sys_mod_count>24</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_8ea0fea4936b83d0e3aef0aefaba1037</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 15:26:22</sys_updated_on><type>string</type><value>4ea0fea4936b83d0e3aef0aefaba1037</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=8ea0fea4936b83d0e3aef0aefaba1037"/></record_update>]]></payload>
-<payload_hash>-951286658</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.0">77bab2e893eb83d0e3aef0aefaba103a</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 15:44:55</sys_created_on>
-<sys_id>3fbab2e893eb83d0e3aef0aefaba103b</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0c9bcc3600000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 15:44:55</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>3147f2ac87ab83d03852dbb3d348ede9</update_guid>
-<update_guid_history>3147f2ac87ab83d03852dbb3d348ede9:-951286658,a086f22c4dab83d081c2afe571ba95f1:-951286658,7e76722c67ab83d01ae6b4fa143acd94:150286265,66663ee89cab83d0e6b380c89e254fe9:-951286658,3756bae88eab83d0871becd2585c80e1:902427097,f6b5b2684aab83d0bdb917ad34519177:-951286658,80b5326870ab83d0800941a80726d593:150286265,6ba53268a6ab83d0ce7602cf2a85c31e:-951286658,42a5be2898ab83d025e8c51577bbf27e:902427097,c374726494ab83d097f4765181d34397:-951286658,ed74326437ab83d06a9fb5d62ad02c21:150286265,5d74fe2443ab83d0b3bed98115460d27:-951286658,e3643e248aab83d0d18992435c28f806:902427097,edd336a0b8ab83d0acdcb38e01b97a85:-951286658,04d3f2a024ab83d0fab4af648780476d:150286265,16c372a0d5ab83d0a7c304ab47d06529:-951286658,ebb3fe604cab83d09c9f7a08bc1dddb3:902427097,b20336ec4a6b83d062dad5951828fdb8:-951286658,9103b2ec366b83d0e807e758524db6fa:150286265,f00372ecc96b83d0c3ee48fba79cae38:-951286658,f9f2feac896b83d082e52a78ecb1f33b:902427097,46527a2c476b83d0fadfe54727bc14d1:-951286658,e4523a2cf26b83d07e94b1abd2902f32:150286265,8b42b62c096b83d01191044805d99152:-951286658,5442362c5c6b83d07abf1fa6c170cba0:902427097,96a0fea4da6b83d00b131768521047d2:-951286658</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_baa072e4936b83d0e3aef0aefaba1017</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>VAMP payload fields, one servicenow_field=json_field pair per line in payload order: the ServiceNow field on the left (verified with the field check script), the JSON field name of the sheet "SN to VAMP" on the right; the fields of the application vulnerable item plain, the fields of another section as &lt;table&gt;.&lt;field&gt;. A field missing on the table or empty is sent as "".</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</name><read_roles/><suffix>usem.vamp.fields.sn_vul_app_vulnerable_item</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 15:00:53</sys_created_on><sys_id>baa072e4936b83d0e3aef0aefaba1017</sys_id><sys_mod_count>44</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_baa072e4936b83d0e3aef0aefaba1017</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 15:25:41</sys_updated_on><type>string</type><value>sn_vul_app_vul_entry.number=number,
-sn_vul_app_vul_entry.u_vuln_sub_cat_id=u_vuln_sub_cat_id,
-sn_vul_app_vulnerability.number=number,
-sn_vul_app_vulnerability.u_primary_ait=primary_ait,
-sn_vul_app_vulnerability.u_avul_record_url=u_avul_record_url,
-number=number,
-sys_created_on=sys_created_on,
-sys_updated_on=sys_updated_on,
-state=state,
-cmdb_ci=configuration_item,
-u_verification_status=u_verification_status,
-source_avit_id=source_avit_id,
-u_avit_record_url=u_avit_record_url,
-sn_vul_pen_test_assessment_request.number=number,
-sn_vul_pen_test_assessment_request.sys_created_on=sys_created_on,
-sn_vul_pen_test_assessment_request.u_assessment_id=u_assessment_id,</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=baa072e4936b83d0e3aef0aefaba1017"/></record_update>]]></payload>
-<payload_hash>-331377674</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.0">77bab2e893eb83d0e3aef0aefaba103a</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 15:44:55</sys_created_on>
-<sys_id>73bab2e893eb83d0e3aef0aefaba103c</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0c9bcc38a0000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 15:44:55</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>3147f2ace1ab83d087f8940d203a66ee</update_guid>
-<update_guid_history>3147f2ace1ab83d087f8940d203a66ee:-331377674,1e567ae8f8ab83d04abd092f8ce1ae33:-331377674,5456b6e8c4ab83d0825fcc7b232e9f11:792780776,3046b2e8b2ab83d0b0a476b2b6cd833b:-331377674,0b3632e8ecab83d014738d7af6f82258:1610486063,5f0636a844ab83d0ce60409037175fb7:-331377674,3206f2a849ab83d0fb009045ea03308c:1914002614,a10672a883ab83d095a6015ac4b74387:-331377674,890632a8e3ab83d0d20312bf1d63461f:-33621259,97953e28dcab83d084857f72e4949b07:-331377674,80957a28caab83d00e508aa114706b71:792780776,5285b628edab83d0edaf16a1d3594d56:-331377674,28853628e4ab83d0a719fb644a16d350:1610486063,4855b6e4b4ab83d019e41e0fa622d6c6:-331377674,ef45b6e4fbab83d007d494ee8cef170b:1914002614,924536e419ab83d0a30a9a4af2e5968f:-331377674,6c45f2e4ffab83d08cefe37571d12529:-33621259,f464ba24cbab83d0a40d08a89beacb86:-331377674,a654f6240fab83d0e5a2201b6c476a49:792780776,2c543624eeab83d0d4b7bdc44f34ca27:-331377674,d854b22411ab83d00e6ad846d5ded926:1610486063,45343ae050ab83d0a9e8e56b2d386c7b:-331377674,6834f6e0b9ab83d0282eeaa0dc7c3bee:1914002614,872476e012ab83d059c80f52c1f81abb:-331377674,442472e068ab83d0838b532ed64aebc7:-33621259,39b37e6019ab83d0431a48c7ddc11a3f:-331377674,72a37a60f0ab83d0748d59b0acadd31c:792780776,2b93b660b4ab83d0aaaf60dab1a98291:-331377674,479376603fab83d0c3763784e01e6ec4:1610486063,4d733a20c9ab83d0a286454b3d34caa0:-331377674,5b63f62084ab83d01e5bf0c77baa2184:1914002614,b563762070ab83d095f6dade100ab392:-331377674,4563362020ab83d0259d5afe3b36098c:-33621259,f6d23aacb26b83d07c6f8ea580be87ed:-331377674,81d2f6ac1a6b83d03c3debd4f7a555dd:1610486063,8cb2fa6c466b83d0e0250e4f2d61f933:-331377674,6ba2ba6cf46b83d0108c5a0ba82d6d74:1914002614,06a27a6c246b83d0f3586bab6eff4418:-331377674,d1a2f66c456b83d080cc7584adef9dc7:-33621259,ae22fee8156b83d0749818eb55f7f832:-331377674,73123ee8366b83d052bb5ad692eea37b:1610486063,4be1fea87f6b83d01334bbbe978cb982:-331377674,a2e17ea84f6b83d0d44fae67daa1f7e3:1914002614,b3d1f6a83a6b83d0497ae8b066990de4:-331377674,bdd136a80d6b83d07f8b5ea9e4242d27:-33621259,1cb0b2e4746b83d01e8fa4c107cf4264:-331377674</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_script_2cb0b2e4936b83d0e3aef0aefaba1067</name>
-<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;true&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vul_app_vulnerable_item&lt;/collection&gt;&lt;condition/&gt;&lt;description&gt;Builds the VAMP payload for the application vulnerable item with BOFASIVampOutboundProcessor and sends it with BOFASIKafkaProducerVamp on every insert and update.&lt;/description&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition/&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;BOFA_BR_AVIT_VampOutbound&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[/**
- * After insert and update on the application vulnerable item: builds the VAMP outbound payload and
- * sends it to the outbound topic. A payload the processor refused to build is not sent, and neither
- * step can abort the save; whatever fails is logged once by the script include that owns it.
- */
-(function executeRule(current, previous /*null when async*/ ) {
-    try {
-        var payload = new x_boar_bofa_usem_1.BOFASIVampOutboundProcessor().buildPayload(current);
-        if (!payload)
-            return;
-        new x_boar_bofa_usem_1.BOFASIKafkaProducerVamp().sendPayload(payload, current);
-    } catch (e) {
-        gs.error('BOFA_BR_AVIT_VampOutbound: outbound message failed for ' + current.getTableName() + ' ' + current.getUniqueValue() + ' - ' + (e.message || e));
-    }
-})(current, previous);
-]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-22 15:01:00&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;2cb0b2e4936b83d0e3aef0aefaba1067&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA_BR_AVIT_VampOutbound&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM CDP integration"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_2cb0b2e4936b83d0e3aef0aefaba1067&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-22 15:01:00&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=2cb0b2e4936b83d0e3aef0aefaba1067"/&gt;&lt;/record_update&gt;</payload>
-<payload_hash>-1634440839</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.0">77bab2e893eb83d0e3aef0aefaba103a</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 15:44:55</sys_created_on>
-<sys_id>b7bab2e893eb83d0e3aef0aefaba103c</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0c9bcc3ab0000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 15:44:55</sys_updated_on>
-<table>sn_vul_app_vulnerable_item</table>
-<target_name>BOFA_BR_AVIT_VampOutbound</target_name>
-<type>Business Rule</type>
-<update_domain>global</update_domain>
-<update_guid>b947f2acb3ab83d0d9c41196d4be09f0</update_guid>
-<update_guid_history>b947f2acb3ab83d0d9c41196d4be09f0:-1634440839,68b0b2e40e6b83d0ad46046b7996d1c9:-1634440839</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
 <name>sys_script_include_7da0bea4936b83d0e3aef0aefaba10e0</name>
-<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;x_boar_bofa_usem_1.BOFASIVampOutboundProcessor&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;Builds the outbound VAMP payload (envelope plus one finding element) for an application vulnerable item. The sections come from the property usem.vamp.sections.&amp;lt;item table&amp;gt; and their fields from usem.vamp.fields.&amp;lt;item table&amp;gt;; the remediation tasks of the item are a list, one entry per linked task.&lt;/description&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;BOFASIVampOutboundProcessor&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[var BOFASIVampOutboundProcessor = Class.create();
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;x_boar_bofa_usem_1.BOFASIVampOutboundProcessor&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;Builds the outbound VAMP payload (envelope plus one finding element) for an application vulnerable item. The sections come from the property usem.vamp.sections.&amp;lt;item table&amp;gt; and their fields from usem.vamp.fields.&amp;lt;item table&amp;gt;; the remediation tasks of the item are a list, one entry per linked task.&lt;/description&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;BOFASIVampOutboundProcessor&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[/**
+ * Builds the outbound VAMP payload of one application vulnerable item: the envelope and a single
+ * finding element that holds the sections of the mapping sheet "SN to VAMP", each named by the JSON
+ * structure of the sheet (tpe, remediation_task, finding, ptreq).
+ *
+ * Configuration lives in initialize() and in two system properties of the application:
+ *   &lt;scope&gt;.usem.vamp.sections.&lt;item table&gt;
+ *     one servicenow_table=json_structure pair per line, in payload order; the section of a table
+ *     reached through a many to many is a list, one entry per linked record.
+ *   &lt;scope&gt;.usem.vamp.fields.&lt;item table&gt;
+ *     one servicenow_field=json_field pair per line, in payload order; the item's own fields plain,
+ *     the fields of another section as &lt;table&gt;.&lt;field&gt;.
+ * The path from the item to every other section is the RELATED map of initialize(): a reference field
+ * for the vulnerability entry and the pen test request, the group item table for the remediation
+ * tasks. A record reached through a reference is re-opened in its own class, so that the fields of an
+ * extended table are read as well.
+ * Rendering: references as the display value of the record they point at, date/times as
+ * MM-dd-yyyy HH:mm:ss, dates as MM-dd-yyyy, everything else as stored; a field missing on the table,
+ * an empty field, a reference whose record is gone or a section without a record gives "".
+ *
+ * Entry point: buildPayload(record). It holds the one try/catch of the feature: any failure, including
+ * a configuration the two properties do not agree on and a payload that does not validate, is logged
+ * once with gs.error and returns an empty string, so that nothing is sent.
+ */
+var BOFASIVampOutboundProcessor = Class.create();
 BOFASIVampOutboundProcessor.prototype = {
 
     /**
-     * Configuration of the VAMP outbound payload: the envelope constants, the date and time formats,
-     * the two properties that hold the payload structure (the sections and their fields) and the path
-     * from the application vulnerable item to every other record of the payload. A path with "list"
-     * is a many to many: its section is sent as an array, one entry per related record.
+     * Constants of the envelope, the formats of the rendered values, the prefixes of the two
+     * properties that hold the payload structure and the path from the application vulnerable item to
+     * every other record of the payload. A path with "list" is a many to many: its section is sent as
+     * an array, one entry per related record.
      */
     initialize: function() {
         this.TOPIC_NAME = 'sn_usem_verification_outbound';
@@ -312,9 +88,10 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * Builds the VAMP message for one application vulnerable item and shows it on the record.
-     * @param {GlideRecord} record the application vulnerable item the business rule is running on
-     * @returns {string} the JSON text of the payload, or an empty string when it could not be built
+     * Builds the message of one application vulnerable item and shows it on the record, with a second
+     * message naming any configured field this instance does not have.
+     * @param {GlideRecord} record - the application vulnerable item the business rule is running on
+     * @returns {string} the payload as JSON text, or "" when it could not be built or did not validate
      */
     buildPayload: function(record) {
         try {
@@ -343,8 +120,8 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * Refuses a record the payload cannot be built from.
-     * @param {GlideRecord} record the record the business rule passed in
-     * @throws when no record was given or the record does not exist
+     * @param {GlideRecord} record - the record the business rule passed in
+     * @throws {Error} when no record was given or the record does not exist
      */
     _requireRecord: function(record) {
         if (!record || !record.getTableName)
@@ -355,7 +132,7 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * Names a record in an error message, also when the record itself is the reason for the error.
-     * @param {GlideRecord} record the record the payload was being built for
+     * @param {GlideRecord} record - the record the payload was being built for
      * @returns {string} "&lt;table&gt; &lt;sys_id&gt;", or "no record"
      */
     _recordKey: function(record) {
@@ -368,7 +145,7 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * The activity of the message, taken from the operation the business rule is running for.
-     * @param {GlideRecord} record the application vulnerable item
+     * @param {GlideRecord} record - the application vulnerable item
      * @returns {string} INSERT, UPDATE or DELETE
      */
     _activity: function(record) {
@@ -380,8 +157,8 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * The CDP envelope of the message.
-     * @param {string} activity INSERT, UPDATE or DELETE
-     * @param {number} elements the number of findings the message carries
+     * @param {string} activity - INSERT, UPDATE or DELETE
+     * @param {number} elements - the number of findings the message carries
      * @returns {Object} the envelope
      */
     _buildEnvelope: function(activity, elements) {
@@ -401,10 +178,10 @@ BOFASIVampOutboundProcessor.prototype = {
     /**
      * Builds one finding: every configured section in the order of the sections property, each
      * section from its own record, a section reached through a many to many as an array.
-     * @param {GlideRecord} record the application vulnerable item
-     * @param {Array} sections the sections property, parsed
-     * @param {Array} mapping the fields property, parsed
-     * @param {Array} missing collects the configured fields this instance does not have
+     * @param {GlideRecord} record - the application vulnerable item
+     * @param {Array} sections - the sections property, parsed
+     * @param {Array} mapping - the fields property, parsed
+     * @param {Array} missing - collects the configured fields this instance does not have
      * @returns {Object} the finding
      */
     _buildFinding: function(record, sections, mapping, missing) {
@@ -429,10 +206,10 @@ BOFASIVampOutboundProcessor.prototype = {
     /**
      * The records behind one section: the item itself, the record its reference field points at, or
      * every record the many to many links to it.
-     * @param {GlideRecord} record the application vulnerable item
-     * @param {string} table the ServiceNow table of the section
+     * @param {GlideRecord} record - the application vulnerable item
+     * @param {string} table - the ServiceNow table of the section
      * @returns {Array} the records, empty when the section has none
-     * @throws when the section has no path from the application vulnerable item
+     * @throws {Error} when the section has no path from the application vulnerable item
      */
     _sectionRecords: function(record, table) {
         if (table == record.getTableName())
@@ -445,8 +222,8 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * The record a reference field points at, opened in its own class.
-     * @param {GlideRecord} record the application vulnerable item
-     * @param {string} field the reference field
+     * @param {GlideRecord} record - the application vulnerable item
+     * @param {string} field - the reference field
      * @returns {Array} one record, or empty when the field is empty or the target is gone
      */
     _referenced: function(record, field) {
@@ -461,8 +238,8 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * Every record a many to many links to the item, in a stable order, each opened in its own class.
-     * @param {GlideRecord} record the application vulnerable item
-     * @param {Object} path the many to many configuration of the section
+     * @param {GlideRecord} record - the application vulnerable item
+     * @param {Object} path - the many to many configuration of the section
      * @returns {Array} the related records, empty when the item has none
      */
     _listed: function(record, path) {
@@ -483,7 +260,7 @@ BOFASIVampOutboundProcessor.prototype = {
     /**
      * Re-opens a record in the class it belongs to, so that the fields of an extended table are read
      * as well: a reference to a base table hands out a record of that base table only.
-     * @param {GlideRecord} referenced the record as the reference handed it over
+     * @param {GlideRecord} referenced - the record as the reference handed it over
      * @returns {GlideRecord} the record in its own class, or the record itself when it has no class
      */
     _inOwnClass: function(referenced) {
@@ -496,8 +273,8 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * The values of one section, the payload names of the fields property in its order.
-     * @param {GlideRecord} sectionRecord the record of the section, null when the item has none
-     * @param {Array} fields the fields of the section
+     * @param {GlideRecord} sectionRecord - the record of the section, null when the item has none
+     * @param {Array} fields - the fields of the section
      * @returns {Object} the payload names and their values, every value a string
      */
     _sectionValues: function(sectionRecord, fields) {
@@ -511,9 +288,9 @@ BOFASIVampOutboundProcessor.prototype = {
      * Records the configured fields of a section this instance does not have. The check is made
      * against the configured table, once per section, so that the message names the same fields
      * whether the item has one related record, several or none.
-     * @param {string} table the configured ServiceNow table of the section
-     * @param {Array} fields the fields of the section
-     * @param {Array} missing the list collected while the payload is built
+     * @param {string} table - the configured ServiceNow table of the section
+     * @param {Array} fields - the fields of the section
+     * @param {Array} missing - the list collected while the payload is built
      */
     _noteMissing: function(table, fields, missing) {
         var probe = new GlideRecord(table);
@@ -526,9 +303,9 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * The sections of the payload, read from the sections property in its order.
-     * @param {string} table the table the business rule runs on
+     * @param {string} table - the table the business rule runs on
      * @returns {Array} {table, json, many} per section
-     * @throws when the property is not configured, holds no section or a line without a payload name
+     * @throws {Error} when the property is not configured, holds no section or a line without a payload name
      */
     _sections: function(table) {
         var property = this.SECTIONS_PROPERTY_PREFIX + table;
@@ -554,9 +331,9 @@ BOFASIVampOutboundProcessor.prototype = {
     /**
      * The fields of the payload, read from the fields property in its order: the fields of the item
      * itself plain, the fields of another section as &lt;table&gt;.&lt;field&gt;.
-     * @param {string} table the table the business rule runs on
+     * @param {string} table - the table the business rule runs on
      * @returns {Array} {table, field, json} per field
-     * @throws when the property is not configured, holds no field or a line without a field name
+     * @throws {Error} when the property is not configured, holds no field or a line without a field name
      */
     _fieldMapping: function(table) {
         var property = this.FIELDS_PROPERTY_PREFIX + table;
@@ -586,8 +363,8 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * The fields configured for one section.
-     * @param {Array} mapping the fields property, parsed
-     * @param {string} table the ServiceNow table of the section
+     * @param {Array} mapping - the fields property, parsed
+     * @param {string} table - the ServiceNow table of the section
      * @returns {Array} the fields of that section in the order of the property
      */
     _sectionFields: function(mapping, table) {
@@ -601,10 +378,10 @@ BOFASIVampOutboundProcessor.prototype = {
     /**
      * Refuses a configuration the payload cannot be built from: a field of a table that is not a
      * section, or a section without a single field.
-     * @param {Array} sections the sections property, parsed
-     * @param {Array} mapping the fields property, parsed
-     * @param {string} table the table the business rule runs on
-     * @throws when the two properties do not describe the same payload
+     * @param {Array} sections - the sections property, parsed
+     * @param {Array} mapping - the fields property, parsed
+     * @param {string} table - the table the business rule runs on
+     * @throws {Error} when the two properties do not describe the same payload
      */
     _requireConfiguration: function(sections, mapping, table) {
         var known = {};
@@ -621,11 +398,11 @@ BOFASIVampOutboundProcessor.prototype = {
     /**
      * Checks the finished payload before it is handed over: the envelope, the sections and the
      * fields of the two properties, every value a string and nothing else in the message.
-     * @param {Object} payload the payload as it will be sent
-     * @param {Array} sections the sections property, parsed
-     * @param {Array} mapping the fields property, parsed
-     * @param {GlideRecord} record the application vulnerable item
-     * @throws naming every problem found
+     * @param {Object} payload - the payload as it will be sent
+     * @param {Array} sections - the sections property, parsed
+     * @param {Array} mapping - the fields property, parsed
+     * @param {GlideRecord} record - the application vulnerable item
+     * @throws {Error} naming every problem found
      */
     _validatePayload: function(payload, sections, mapping, record) {
         var problems = [];
@@ -671,10 +448,10 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * Checks one section of the payload against the fields configured for it.
-     * @param {Array} problems collects what is wrong
-     * @param {Object} section the section of the sections property
-     * @param {Object} values the section as built
-     * @param {Array} fields the fields configured for the section
+     * @param {Array} problems - collects what is wrong
+     * @param {Object} section - the section of the sections property
+     * @param {Object} values - the section as built
+     * @param {Array} fields - the fields configured for the section
      */
     _checkSection: function(problems, section, values, fields) {
         if (!values || typeof values != 'object')
@@ -693,8 +470,8 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * @param {Array} sections the sections property, parsed
-     * @param {string} name a payload key of the finding
+     * @param {Array} sections - the sections property, parsed
+     * @param {string} name - a payload key of the finding
      * @returns {boolean} true when a configured section carries that name
      */
     _sectionNamed: function(sections, name) {
@@ -705,8 +482,8 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * @param {Array} fields the fields of one section
-     * @param {string} name a payload key of the section
+     * @param {Array} fields - the fields of one section
+     * @param {string} name - a payload key of the section
      * @returns {boolean} true when a configured field carries that name
      */
     _fieldNamed: function(fields, name) {
@@ -717,7 +494,7 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * @param {*} value any value of the payload
+     * @param {*} value - any value of the payload
      * @returns {boolean} true when the value is an array
      */
     _isArray: function(value) {
@@ -726,8 +503,8 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * The value of one field, rendered for the payload.
-     * @param {GlideRecord} record the record of the section, or null when the item has none
-     * @param {string} field the ServiceNow field
+     * @param {GlideRecord} record - the record of the section, or null when the item has none
+     * @param {string} field - the ServiceNow field
      * @returns {string} the rendered value, "" when the record, the field or the value is absent
      */
     _fieldValue: function(record, field) {
@@ -743,7 +520,7 @@ BOFASIVampOutboundProcessor.prototype = {
      * Renders one field by its dictionary type: a reference as the display value of the record it
      * points at (and "" when that record is gone, never the stored sys_id), a date or date and time
      * in the configured format, everything else as stored.
-     * @param {GlideElement} element the field of the record
+     * @param {GlideElement} element - the field of the record
      * @returns {string} the rendered value
      */
     _renderElement: function(element) {
@@ -761,7 +538,7 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * @param {string} value a stored date and time
+     * @param {string} value - a stored date and time
      * @returns {string} the value as MM-dd-yyyy HH:mm:ss
      */
     _formatDateTime: function(value) {
@@ -770,7 +547,7 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * @param {string} value a stored date
+     * @param {string} value - a stored date
      * @returns {string} the value as MM-dd-yyyy
      */
     _formatDate: function(value) {
@@ -797,23 +574,282 @@ BOFASIVampOutboundProcessor.prototype = {
 
     type: 'BOFASIVampOutboundProcessor'
 };
-]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-22 15:00:49&lt;/sys_created_on&gt;&lt;sys_id&gt;7da0bea4936b83d0e3aef0aefaba10e0&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFASIVampOutboundProcessor&lt;/sys_name&gt;&lt;sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM CDP integration"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_7da0bea4936b83d0e3aef0aefaba10e0&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-22 15:29:45&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
-<payload_hash>992093584</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.0">77bab2e893eb83d0e3aef0aefaba103a</remote_update_set>
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-22 15:00:49&lt;/sys_created_on&gt;&lt;sys_id&gt;7da0bea4936b83d0e3aef0aefaba10e0&lt;/sys_id&gt;&lt;sys_mod_count&gt;2&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFASIVampOutboundProcessor&lt;/sys_name&gt;&lt;sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM CDP integration"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_7da0bea4936b83d0e3aef0aefaba10e0&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-22 15:50:20&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<payload_hash>798991580</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.0">89adfa24932f83d0e3aef0aefaba10dc</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 15:44:55</sys_created_on>
-<sys_id>fbbab2e893eb83d0e3aef0aefaba103c</sys_id>
+<sys_created_on>2026-09-22 15:57:34</sys_created_on>
+<sys_id>01adfa24932f83d0e3aef0aefaba10df</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0c9bcc3200000001</sys_recorded_at>
+<sys_recorded_at>1a0c9cf9fc50000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 15:44:55</sys_updated_on>
+<sys_updated_on>2026-09-22 15:57:34</sys_updated_on>
 <table/>
 <target_name>BOFASIVampOutboundProcessor</target_name>
 <type>Script Include</type>
 <update_domain>global</update_domain>
-<update_guid>3d47f2ac01ab83d0d77bf60d523238e3</update_guid>
-<update_guid_history>3d47f2ac01ab83d0d77bf60d523238e3:992093584,6d47f2ac23ab83d0acd04b9c6cbd7dc3:992093584,f1a0bea4ea6b83d097c00c0b6e066ee7:-505349840</update_guid_history>
+<update_guid>23fbf6ac20eb83d0621d23b5a9cab928</update_guid>
+<update_guid_history>23fbf6ac20eb83d0621d23b5a9cab928:798991580,d7fbb6acd2eb83d0f7d3b42ea41648d0:798991580,6d47f2ac23ab83d0acd04b9c6cbd7dc3:992093584,f1a0bea4ea6b83d097c00c0b6e066ee7:-505349840</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_52a0fea4936b83d0e3aef0aefaba10d6</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>VAMP payload sections, one servicenow_table=json_structure pair per line in payload order: the ServiceNow table on the left, the JSON structure of the sheet "SN to VAMP" on the right. The section of a table reached through a many to many (the remediation tasks of the item) is a list, one entry per linked record.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.sections.sn_vul_app_vulnerable_item</name><read_roles/><suffix>usem.vamp.sections.sn_vul_app_vulnerable_item</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 15:00:51</sys_created_on><sys_id>52a0fea4936b83d0e3aef0aefaba10d6</sys_id><sys_mod_count>80</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.sections.sn_vul_app_vulnerable_item</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_52a0fea4936b83d0e3aef0aefaba10d6</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 15:43:02</sys_updated_on><type>string</type><value>sn_vul_app_vul_entry=tpe,
+sn_vul_app_vulnerability=remediation_task,
+sn_vul_app_vulnerable_item=finding,
+sn_vul_pen_test_assessment_request=ptreq,</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=52a0fea4936b83d0e3aef0aefaba10d6"/></record_update>]]></payload>
+<payload_hash>1576973651</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.0">89adfa24932f83d0e3aef0aefaba10dc</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-22 15:57:34</sys_created_on>
+<sys_id>41adfa24932f83d0e3aef0aefaba10dd</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0c9cfa04f0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-22 15:57:34</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_1.usem.vamp.sections.sn_vul_app_vulnerable_item</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>affbf6ac29eb83d02f32363915ad052f</update_guid>
+<update_guid_history>affbf6ac29eb83d02f32363915ad052f:1576973651,a05afa6864eb83d0c2ecb5103a7ba135:1576973651,c54ab6687ceb83d0872b62e6eeab269b:275682198,cf2a72685ceb83d05c283ac6b7ba7175:1576973651,e61a3e28a4eb83d0607f28ca6f55eb22:4577875,7b0aba2816eb83d0873a66c0d20f3025:1576973651,820a7a2805eb83d0eba9bc47191fb06d:414796649,6c0af628c9eb83d0461b0060383f2ee5:1576973651,4c0ab628e9eb83d0571653cc2a38ef87:549412784,c7797aa4c1eb83d0d3687133347b70f3:1576973651,8979b6a4e7eb83d02de831586284c8eb:275682198,656972a4ceeb83d04f6789128bccc587:1576973651,cd6932a46beb83d06d0a1fb8edda8cc9:4577875,2f59be6465eb83d0cea93570980501c6:1576973651,fd593e641ceb83d080882a6483a5c6d0:414796649,a459fa64a2eb83d064369fb7fb89e5f3:1576973651,0059ba6450eb83d0b42f8a9390771d0e:549412784,79a8b6e038eb83d06c9700cf688fa5b8:1576973651,c0a836e0a0eb83d0e0af9dd0df05266a:275682198,e098fea004eb83d0f30cb12d7c203caa:1576973651,8498bea02beb83d05ba6d01a71678b36:4577875,5188faa01ceb83d0feeb904a9e02011c:1576973651,8188baa023eb83d0626092e5bbc46018:414796649,9378f6a013eb83d0c242cb68bd97e09e:1576973651,ad78b6a0a6eb83d082f7e9166de888f2:549412784,c9e7f6206feb83d0d0a89456ba8ee98b:1576973651,0ed7362003eb83d0846380c9341d060e:275682198,cdc7beec5dab83d0631755d460e8cdf7:1576973651,d7b77eec7eab83d02f72a37acb2c3922:4577875,60b7faec61ab83d0a5ee55b41b281133:1576973651,03a77aec3dab83d0d1f92f3485466007:414796649,4ca7f6ec78ab83d0858cbb4ba631d5a0:1576973651,2397b6ec5cab83d0855c40d5ad202959:549412784,c256f6e8cdab83d0790dca2d380e9270:1576973651,a24636e826ab83d0bd11f5899f171424:275682198,d4367ea81eab83d02603489db7ba12db:1576973651,6b263ea863ab83d01fdbe8193ff17b5f:4577875,fc26baa8f4ab83d03cfb05833dd8b6a1:1576973651,98267aa812ab83d02c1aaacbdc2f8c80:414796649,1116f6a857ab83d0259700b70381f191:1576973651,f816b6a8ddab83d084612045bdc23d89:549412784,f295ba28f4ab83d0364c4f10fa6f5981:1576973651,3b853a28f2ab83d08765fe8320bee262:275682198,f97572288dab83d0575050d88c7830c9:1576973651,847532288dab83d06643e3606ae2b54a:4577875,ee65bee48bab83d0d4c0e80614878180:1576973651,4e65bee40eab83d01de59f9632bc6c31:414796649,24653ee451ab83d00e2f4018ad291f59:1576973651,3e557ae4b1ab83d0d7978206e181c764:549412784,18643a24d7ab83d0539b43a1d935f278:1576973651,1654b624f4ab83d033f48975fce4871e:275682198,7a4472245fab83d06d31a4dcd384b702:1576973651,9644322470ab83d04ed46b90ae53963b:4577875,34447ee0a0ab83d0b5454a12c4cc40f9:1576973651,e0447ee05bab83d05f6c6d604c144a7c:414796649,3634fae057ab83d0c5006e1654ec855a:1576973651,9a34bae04aab83d02d1938678cc7256c:549412784,00b3fa60c1ab83d0620239172dd7bba5:1576973651,49a33a6012ab83d0eb09e0d1663860af:275682198,f193f26018ab83d01a3d3c1c02287813:1576973651,ef837260e0ab83d034223125f5d2fbdc:4577875,82833260aeab83d060effdec405faf94:1576973651,bd83fe20d3ab83d0bd3df8d36dae01ee:414796649,00837e20e8ab83d0e44056f9697773ad:1576973651,bb733e200eab83d088144efdb6150d07:549412784,cae2faac146b83d071f09bbccfe76b7c:1576973651,14e2baac586b83d0b2e44793afd410d0:275682198,1bc2f2ac676b83d0518c4cc5700e47cf:1576973651,b9c2f2ac316b83d0f9fd90c78aa76085:4577875,c0c272ac336b83d03ccf20872ae66539:1576973651,afb2fe6ce86b83d00a31881dee358c6f:414796649,4ab2be6cad6b83d0893b8255a4bcd096:1576973651,6db27e6c2c6b83d02be577cb448e9081:549412784,b532b22c896b83d073f5e71c6d2b545d:1576973651,c032322c7c6b83d056a9b7e9c6f2543d:275682198,c512bae8956b83d06427c7ab588bec02:1576973651,ac123ae8526b83d09e3d12e00bb443bf:4577875,310276e84d6b83d088334f20e0c405a6:1576973651,1d0276e88c6b83d04b45835b4c55ac19:414796649,1af1b2e8c16b83d00c75a222ce3edaa9:1576973651,8ef132e86c6b83d0454a93334b0a33fc:549412784,32a072e4fb6b83d0eeba4810b102db14:1576973651</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_8ea0fea4936b83d0e3aef0aefaba1037</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_verification_outbound, read by BOFASIKafkaProducerVamp.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</name><read_roles/><suffix>usem.vamp.kafka.topic_sys_id</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 15:00:50</sys_created_on><sys_id>8ea0fea4936b83d0e3aef0aefaba1037</sys_id><sys_mod_count>40</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_8ea0fea4936b83d0e3aef0aefaba1037</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 15:43:29</sys_updated_on><type>string</type><value>4ea0fea4936b83d0e3aef0aefaba1037</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=8ea0fea4936b83d0e3aef0aefaba1037"/></record_update>]]></payload>
+<payload_hash>-951286658</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.0">89adfa24932f83d0e3aef0aefaba10dc</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-22 15:57:34</sys_created_on>
+<sys_id>41adfa24932f83d0e3aef0aefaba10de</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0c9cfa0390000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-22 15:57:34</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>a7fbf6ac14eb83d01e3f4ea3a3da052d</update_guid>
+<update_guid_history>a7fbf6ac14eb83d01e3f4ea3a3da052d:-951286658,df6a36a873eb83d03afbbfc5e5331f4e:-951286658,fd6ab2a880eb83d05dc0caf6bd790c7f:150286265,596a32a878eb83d05173ca28eeff9b8a:-951286658,ab5abe6818eb83d0fad843ae437095d0:902427097,f69972e4eceb83d043acfb9d6d7798b1:-951286658,519932e462eb83d032566fce20a05a36:150286265,b099bea4c7eb83d06960fe4031a8c468:-951286658,5f897ea402eb83d0b345dc7189e4c12c:902427097,e5d8b224f4eb83d06fc7ba2f79123174:-951286658,f2c832249aeb83d0326add5d12509ec2:150286265,dec8bee063eb83d0c7e4e0e1156ba0bf:-951286658,74b87ae0beeb83d004f4644c3bc08826:902427097,bb08b26042eb83d06e7deee098e54dfb:-951286658,a3f7be2094eb83d049cfae18ca68360f:150286265,79f73e20e2eb83d07ecf844989027b67:-951286658,87e7ba204feb83d0ba59c6489f5982e6:902427097,a086f22c4dab83d081c2afe571ba95f1:-951286658,7e76722c67ab83d01ae6b4fa143acd94:150286265,66663ee89cab83d0e6b380c89e254fe9:-951286658,3756bae88eab83d0871becd2585c80e1:902427097,f6b5b2684aab83d0bdb917ad34519177:-951286658,80b5326870ab83d0800941a80726d593:150286265,6ba53268a6ab83d0ce7602cf2a85c31e:-951286658,42a5be2898ab83d025e8c51577bbf27e:902427097,c374726494ab83d097f4765181d34397:-951286658,ed74326437ab83d06a9fb5d62ad02c21:150286265,5d74fe2443ab83d0b3bed98115460d27:-951286658,e3643e248aab83d0d18992435c28f806:902427097,edd336a0b8ab83d0acdcb38e01b97a85:-951286658,04d3f2a024ab83d0fab4af648780476d:150286265,16c372a0d5ab83d0a7c304ab47d06529:-951286658,ebb3fe604cab83d09c9f7a08bc1dddb3:902427097,b20336ec4a6b83d062dad5951828fdb8:-951286658,9103b2ec366b83d0e807e758524db6fa:150286265,f00372ecc96b83d0c3ee48fba79cae38:-951286658,f9f2feac896b83d082e52a78ecb1f33b:902427097,46527a2c476b83d0fadfe54727bc14d1:-951286658,e4523a2cf26b83d07e94b1abd2902f32:150286265,8b42b62c096b83d01191044805d99152:-951286658,5442362c5c6b83d07abf1fa6c170cba0:902427097,96a0fea4da6b83d00b131768521047d2:-951286658</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_86a0bea4936b83d0e3aef0aefaba10e9</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;x_boar_bofa_usem_1.BOFASIKafkaProducerVamp&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;Sends a VAMP payload to the Kafka topic held in usem.vamp.kafka.topic_sys_id with sn_ih_kafka.ProducerV2 (key &amp;lt;table&amp;gt;.&amp;lt;sys_id&amp;gt;).
+Documentation of API used - https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html&lt;/description&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;BOFASIKafkaProducerVamp&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[/**
+ * Sends a VAMP payload to the Kafka topic of the application through Stream Connect
+ * (sn_ih_kafka.ProducerV2). Configuration lives in initialize(): the property that holds the sys_id
+ * of the Kafka Topic record [sys_kafka_topic] and the send options.
+ *
+ * Entry point: sendPayload(payload, record). It holds the one try/catch of the feature: a missing
+ * topic, a payload the topic must not receive or a failure of the send is logged once with gs.error
+ * and never reaches the rule.
+ * Documentation of the API used: https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html
+ */
+var BOFASIKafkaProducerVamp = Class.create();
+BOFASIKafkaProducerVamp.prototype = {
+
+    /** The topic property and the options of the send: asynchronous, no headers, no schema. */
+    initialize: function() {
+        this.TOPIC_PROPERTY = 'x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id';
+        this.IS_SYNC = false;
+        this.HEADERS = null;
+        this.SCHEMA_ID = null;
+        this.SYS_ID_PATTERN = /^[0-9a-f]{32}$/;
+    },
+
+    /**
+     * Sends one payload, keyed by the record it was built from, and shows the response on the record.
+     * @param {string} payload - the JSON text built by BOFASIVampOutboundProcessor
+     * @param {GlideRecord} record - the application vulnerable item the payload belongs to
+     */
+    sendPayload: function(payload, record) {
+        var key = this._messageKey(record);
+        try {
+            var topicSysId = this._topicSysId();
+            this._requirePayload(payload);
+            var response = new sn_ih_kafka.ProducerV2().send(topicSysId, key, payload, this.IS_SYNC, this.HEADERS, this.SCHEMA_ID);
+            gs.addInfoMessage('VAMP Kafka response for ' + key + ': ' + JSON.stringify(response))
+        } catch (e) {
+            gs.error(this.type + ': message not sent for ' + key + ' - ' + (e.message || e));
+        }
+    },
+
+    /**
+     * The message key: table and sys_id of the record.
+     * @param {GlideRecord} record - the application vulnerable item, possibly absent
+     * @returns {string} "&lt;table&gt;.&lt;sys_id&gt;", or "no record" when the record cannot be read
+     */
+    _messageKey: function(record) {
+        try {
+            return record.getTableName() + '.' + record.getUniqueValue();
+        } catch (e) {
+            return 'no record';
+        }
+    },
+
+    /**
+     * Reads the topic property.
+     * @returns {string} the sys_id of the Kafka Topic record
+     * @throws {Error} when the property is empty or its value is not a sys_id
+     */
+    _topicSysId: function() {
+        var topicSysId = String(gs.getProperty(this.TOPIC_PROPERTY, '')).trim();
+        if (!topicSysId)
+            throw new Error('property ' + this.TOPIC_PROPERTY + ' holds no topic');
+        if (!this.SYS_ID_PATTERN.test(topicSysId))
+            throw new Error('property ' + this.TOPIC_PROPERTY + ' is not a sys_id: "' + topicSysId + '"');
+        return topicSysId;
+    },
+
+    /**
+     * Refuses a payload that is not the JSON text of an envelope with its findings.
+     * @param {string} payload - the payload text
+     * @throws {Error} when the payload is empty, is not JSON, lacks the envelope or the findings, or
+     *                 counts a number of elements other than the findings it carries
+     */
+    _requirePayload: function(payload) {
+        if (!payload)
+            throw new Error('the payload is empty');
+        var message;
+        try {
+            message = JSON.parse(payload);
+        } catch (e) {
+            throw new Error('the payload is not JSON');
+        }
+        if (!message || !message.envelope || !message.findings)
+            throw new Error('the payload has no envelope or no findings');
+        if (!message.findings.length)
+            throw new Error('the payload carries no finding');
+        if (message.envelope.element_count !== message.findings.length)
+            throw new Error('the payload counts ' + message.envelope.element_count + ' element(s) and carries ' + message.findings.length);
+    },
+
+    type: 'BOFASIKafkaProducerVamp'
+};
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-22 15:00:50&lt;/sys_created_on&gt;&lt;sys_id&gt;86a0bea4936b83d0e3aef0aefaba10e9&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFASIKafkaProducerVamp&lt;/sys_name&gt;&lt;sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM CDP integration"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_86a0bea4936b83d0e3aef0aefaba10e9&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-22 15:50:21&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<payload_hash>74730683</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.0">89adfa24932f83d0e3aef0aefaba10dc</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-22 15:57:34</sys_created_on>
+<sys_id>45adfa24932f83d0e3aef0aefaba10df</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0c9cfa0040000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-22 15:57:34</sys_updated_on>
+<table/>
+<target_name>BOFASIKafkaProducerVamp</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_guid>2ffbf6ac12eb83d00784fd867bda392a</update_guid>
+<update_guid_history>2ffbf6ac12eb83d00784fd867bda392a:74730683,1ffbb6acfaeb83d058512c293cc5c9d5:74730683,c6a0bea43a6b83d0f39b6c6002ed2ceb:-173027708</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_baa072e4936b83d0e3aef0aefaba1017</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>VAMP payload fields, one servicenow_field=json_field pair per line in payload order: the ServiceNow field on the left (verified with the field check script), the JSON field name of the sheet "SN to VAMP" on the right; the fields of the application vulnerable item plain, the fields of another section as &lt;table&gt;.&lt;field&gt;. A field missing on the table or empty is sent as "".</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</name><read_roles/><suffix>usem.vamp.fields.sn_vul_app_vulnerable_item</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 15:00:53</sys_created_on><sys_id>baa072e4936b83d0e3aef0aefaba1017</sys_id><sys_mod_count>76</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_baa072e4936b83d0e3aef0aefaba1017</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 15:43:03</sys_updated_on><type>string</type><value>sn_vul_app_vul_entry.number=number,
+sn_vul_app_vul_entry.u_vuln_sub_cat_id=u_vuln_sub_cat_id,
+sn_vul_app_vulnerability.number=number,
+sn_vul_app_vulnerability.u_primary_ait=primary_ait,
+sn_vul_app_vulnerability.u_avul_record_url=u_avul_record_url,
+number=number,
+sys_created_on=sys_created_on,
+sys_updated_on=sys_updated_on,
+state=state,
+cmdb_ci=configuration_item,
+u_verification_status=u_verification_status,
+source_avit_id=source_avit_id,
+u_avit_record_url=u_avit_record_url,
+sn_vul_pen_test_assessment_request.number=number,
+sn_vul_pen_test_assessment_request.sys_created_on=sys_created_on,
+sn_vul_pen_test_assessment_request.u_assessment_id=u_assessment_id,</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=baa072e4936b83d0e3aef0aefaba1017"/></record_update>]]></payload>
+<payload_hash>-331377674</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.0">89adfa24932f83d0e3aef0aefaba10dc</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-22 15:57:34</sys_created_on>
+<sys_id>85adfa24932f83d0e3aef0aefaba10de</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0c9cfa0630000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-22 15:57:34</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>23fbf6ac62eb83d025bd7adab452a67d</update_guid>
+<update_guid_history>23fbf6ac62eb83d025bd7adab452a67d:-331377674,895a3e68a1eb83d0c86e6466bc27b231:-331377674,034a7a68bdeb83d0394821237409fe1a:792780776,d63a366865eb83d0899c06317723b948:-331377674,a03ab2683beb83d05e95a1f087df318c:1610486063,19f936287beb83d01cd8f53961775b1e:-331377674,fcf9b22841eb83d00d18d409e0230c22:1914002614,fde9322818eb83d0bca1afde643d4be0:-331377674,4de9bee4b9eb83d088d2e3a7337f0bea:-33621259,fc89baa485eb83d091668f710afd9d6b:-331377674,6d79f6a46feb83d0cecfe84ad88cecbf:792780776,fb6976a401eb83d00bdd424b3fcf3328:-331377674,536936a497eb83d032c246bb7adee006:1610486063,de493a6494eb83d01779de3adb180171:-331377674,7549f66457eb83d042ce422ceb23c948:1914002614,02397664f9eb83d0234c3a1948b8f040:-331377674,1939f26422eb83d05dcdd1025262133d:-33621259,92a8f6e0f8eb83d04ffcd08313eda244:-331377674,64a876e0a9eb83d0a08419ca319b3f6e:792780776,a69872e0c8eb83d0ada523984eb162ea:-331377674,029872e099eb83d04fa935069a4558a9:1610486063,776876a009eb83d0bc5c673ecb8b9e2e:-331377674,c368f2a0e7eb83d07bb0b51f36588d6a:1914002614,a06872a053eb83d00c3b90e94c43adeb:-331377674,e25832a0dfeb83d0fce4e43ed9647941:-33621259,61e77a2016eb83d0c5d3e4723f50909f:-331377674,9ed7b620e3eb83d0c019500acd0b4f47:792780776,83c77220bfeb83d0cfb7e569618aa6d3:-331377674,fec77220b1eb83d0dd212032f41f1651:1610486063,fc97b2ec87ab83d0cab7fe77bd3bf1ab:-331377674,438772eca3ab83d023dcc2565e24e352:1914002614,bd8732ece5ab83d0767bf7183115ff1a:-331377674,8d87beac06ab83d03caf9384a68e7848:-33621259,1e567ae8f8ab83d04abd092f8ce1ae33:-331377674,5456b6e8c4ab83d0825fcc7b232e9f11:792780776,3046b2e8b2ab83d0b0a476b2b6cd833b:-331377674,0b3632e8ecab83d014738d7af6f82258:1610486063,5f0636a844ab83d0ce60409037175fb7:-331377674,3206f2a849ab83d0fb009045ea03308c:1914002614,a10672a883ab83d095a6015ac4b74387:-331377674,890632a8e3ab83d0d20312bf1d63461f:-33621259,97953e28dcab83d084857f72e4949b07:-331377674,80957a28caab83d00e508aa114706b71:792780776,5285b628edab83d0edaf16a1d3594d56:-331377674,28853628e4ab83d0a719fb644a16d350:1610486063,4855b6e4b4ab83d019e41e0fa622d6c6:-331377674,ef45b6e4fbab83d007d494ee8cef170b:1914002614,924536e419ab83d0a30a9a4af2e5968f:-331377674,6c45f2e4ffab83d08cefe37571d12529:-33621259,f464ba24cbab83d0a40d08a89beacb86:-331377674,a654f6240fab83d0e5a2201b6c476a49:792780776,2c543624eeab83d0d4b7bdc44f34ca27:-331377674,d854b22411ab83d00e6ad846d5ded926:1610486063,45343ae050ab83d0a9e8e56b2d386c7b:-331377674,6834f6e0b9ab83d0282eeaa0dc7c3bee:1914002614,872476e012ab83d059c80f52c1f81abb:-331377674,442472e068ab83d0838b532ed64aebc7:-33621259,39b37e6019ab83d0431a48c7ddc11a3f:-331377674,72a37a60f0ab83d0748d59b0acadd31c:792780776,2b93b660b4ab83d0aaaf60dab1a98291:-331377674,479376603fab83d0c3763784e01e6ec4:1610486063,4d733a20c9ab83d0a286454b3d34caa0:-331377674,5b63f62084ab83d01e5bf0c77baa2184:1914002614,b563762070ab83d095f6dade100ab392:-331377674,4563362020ab83d0259d5afe3b36098c:-33621259,f6d23aacb26b83d07c6f8ea580be87ed:-331377674,81d2f6ac1a6b83d03c3debd4f7a555dd:1610486063,8cb2fa6c466b83d0e0250e4f2d61f933:-331377674,6ba2ba6cf46b83d0108c5a0ba82d6d74:1914002614,06a27a6c246b83d0f3586bab6eff4418:-331377674,d1a2f66c456b83d080cc7584adef9dc7:-33621259,ae22fee8156b83d0749818eb55f7f832:-331377674,73123ee8366b83d052bb5ad692eea37b:1610486063,4be1fea87f6b83d01334bbbe978cb982:-331377674,a2e17ea84f6b83d0d44fae67daa1f7e3:1914002614,b3d1f6a83a6b83d0497ae8b066990de4:-331377674,bdd136a80d6b83d07f8b5ea9e4242d27:-33621259,1cb0b2e4746b83d01e8fa4c107cf4264:-331377674</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_2cb0b2e4936b83d0e3aef0aefaba1067</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;true&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vul_app_vulnerable_item&lt;/collection&gt;&lt;condition/&gt;&lt;description&gt;Builds the VAMP payload for the application vulnerable item with BOFASIVampOutboundProcessor and sends it with BOFASIKafkaProducerVamp on every insert and update.&lt;/description&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition/&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;BOFA_BR_AVIT_VampOutbound&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[/**
+ * BOFA_BR_AVIT_VampOutbound - after insert and update on the application vulnerable item table,
+ * order 100. Builds the VAMP payload of the record with BOFASIVampOutboundProcessor and hands it to
+ * BOFASIKafkaProducerVamp. An empty payload means the processor could not build or validate it and
+ * has logged why; nothing is sent then. Both steps sit in one try/catch: a failure is logged once
+ * and never blocks the record.
+ * @param {GlideRecord} current - the application vulnerable item as saved
+ * @param {GlideRecord} previous - the record before the save (null on insert), not used
+ */
+(function executeRule(current, previous /*null when async*/ ) {
+    try {
+        var payload = new x_boar_bofa_usem_1.BOFASIVampOutboundProcessor().buildPayload(current);
+        if (!payload)
+            return;
+        new x_boar_bofa_usem_1.BOFASIKafkaProducerVamp().sendPayload(payload, current);
+    } catch (e) {
+        gs.error('BOFA_BR_AVIT_VampOutbound: outbound message failed for ' + current.getTableName() + ' ' + current.getUniqueValue() + ' - ' + (e.message || e));
+    }
+})(current, previous);
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-22 15:01:00&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;2cb0b2e4936b83d0e3aef0aefaba1067&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA_BR_AVIT_VampOutbound&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM CDP integration"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_2cb0b2e4936b83d0e3aef0aefaba1067&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-22 15:50:21&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=2cb0b2e4936b83d0e3aef0aefaba1067"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>1507423295</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.0">89adfa24932f83d0e3aef0aefaba10dc</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-22 15:57:34</sys_created_on>
+<sys_id>c9adfa24932f83d0e3aef0aefaba10de</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0c9cfa0780000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-22 15:57:34</sys_updated_on>
+<table>sn_vul_app_vulnerable_item</table>
+<target_name>BOFA_BR_AVIT_VampOutbound</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>abfbf6ac0aeb83d02c40305dd1ba057f</update_guid>
+<update_guid_history>abfbf6ac0aeb83d02c40305dd1ba057f:1507423295,17fbb6ac6deb83d04cc96a436575c9de:1507423295,68b0b2e40e6b83d0ad46046b7996d1c9:-1634440839</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>

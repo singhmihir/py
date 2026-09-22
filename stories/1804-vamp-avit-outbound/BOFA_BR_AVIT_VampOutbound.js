@@ -1,7 +1,11 @@
 /**
- * After insert and update on the application vulnerable item: builds the VAMP outbound payload and
- * sends it to the outbound topic. A payload the processor refused to build is not sent, and neither
- * step can abort the save; whatever fails is logged once by the script include that owns it.
+ * BOFA_BR_AVIT_VampOutbound - after insert and update on the application vulnerable item table,
+ * order 100. Builds the VAMP payload of the record with BOFASIVampOutboundProcessor and hands it to
+ * BOFASIKafkaProducerVamp. An empty payload means the processor could not build or validate it and
+ * has logged why; nothing is sent then. Both steps sit in one try/catch: a failure is logged once
+ * and never blocks the record.
+ * @param {GlideRecord} current - the application vulnerable item as saved
+ * @param {GlideRecord} previous - the record before the save (null on insert), not used
  */
 (function executeRule(current, previous /*null when async*/ ) {
     try {

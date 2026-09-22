@@ -1,10 +1,17 @@
+/**
+ * Sends a VAMP payload to the Kafka topic of the application through Stream Connect
+ * (sn_ih_kafka.ProducerV2). Configuration lives in initialize(): the property that holds the sys_id
+ * of the Kafka Topic record [sys_kafka_topic] and the send options.
+ *
+ * Entry point: sendPayload(payload, record). It holds the one try/catch of the feature: a missing
+ * topic, a payload the topic must not receive or a failure of the send is logged once with gs.error
+ * and never reaches the rule.
+ * Documentation of the API used: https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html
+ */
 var BOFASIKafkaProducerVamp = Class.create();
 BOFASIKafkaProducerVamp.prototype = {
 
-    /**
-     * Configuration of the send: the property that holds the Kafka topic record and the arguments of
-     * the producer that never change for this integration.
-     */
+    /** The topic property and the options of the send: asynchronous, no headers, no schema. */
     initialize: function() {
         this.TOPIC_PROPERTY = 'x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id';
         this.IS_SYNC = false;
@@ -14,9 +21,9 @@ BOFASIKafkaProducerVamp.prototype = {
     },
 
     /**
-     * Sends one VAMP payload to the outbound topic, keyed by the record it was built from.
-     * @param {string} payload the JSON text the processor returned
-     * @param {GlideRecord} record the application vulnerable item the payload belongs to
+     * Sends one payload, keyed by the record it was built from, and shows the response on the record.
+     * @param {string} payload - the JSON text built by BOFASIVampOutboundProcessor
+     * @param {GlideRecord} record - the application vulnerable item the payload belongs to
      */
     sendPayload: function(payload, record) {
         var key = this._messageKey(record);
@@ -31,9 +38,9 @@ BOFASIKafkaProducerVamp.prototype = {
     },
 
     /**
-     * The message key of the record, also when no record was given.
-     * @param {GlideRecord} record the application vulnerable item
-     * @returns {string} "<table>.<sys_id>", or "no record"
+     * The message key: table and sys_id of the record.
+     * @param {GlideRecord} record - the application vulnerable item, possibly absent
+     * @returns {string} "<table>.<sys_id>", or "no record" when the record cannot be read
      */
     _messageKey: function(record) {
         try {
@@ -44,9 +51,9 @@ BOFASIKafkaProducerVamp.prototype = {
     },
 
     /**
-     * The Kafka topic record to send to.
-     * @returns {string} the sys_id of the topic record
-     * @throws when the property is empty or does not hold a sys_id
+     * Reads the topic property.
+     * @returns {string} the sys_id of the Kafka Topic record
+     * @throws {Error} when the property is empty or its value is not a sys_id
      */
     _topicSysId: function() {
         var topicSysId = String(gs.getProperty(this.TOPIC_PROPERTY, '')).trim();
@@ -58,10 +65,10 @@ BOFASIKafkaProducerVamp.prototype = {
     },
 
     /**
-     * Refuses a payload the topic must not receive: nothing was built, the text is not JSON, or the
-     * message does not carry an envelope and at least one finding.
-     * @param {string} payload the JSON text the processor returned
-     * @throws naming what is wrong with the payload
+     * Refuses a payload that is not the JSON text of an envelope with its findings.
+     * @param {string} payload - the payload text
+     * @throws {Error} when the payload is empty, is not JSON, lacks the envelope or the findings, or
+     *                 counts a number of elements other than the findings it carries
      */
     _requirePayload: function(payload) {
         if (!payload)
