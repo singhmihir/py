@@ -1,7 +1,7 @@
 {
- "set": "88e97850936f8f90e3aef0aefaba1099",
- "set_name": "SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.2",
- "previous_set": "1795745093eb8f90e3aef0aefaba1048",
+ "set": "ad7463a893e3c3d0e3aef0aefaba10f3",
+ "set_name": "SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3",
+ "previous_set": "88e97850936f8f90e3aef0aefaba1099",
  "scope": "488be1cd2b1247102b30f8e14391bf0c",
  "default_set": "85687c54936f8f90e3aef0aefaba10c4",
  "app_name": "BOFA USEM Consequence",
@@ -15,5 +15,5 @@
  },
  "topic": "d8e9f498936f8f90e3aef0aefaba10f6",
  "br": "3ae9b898936f8f90e3aef0aefaba10ad",
- "rows": 5
+ "rows": 10
 }

@@ -54,7 +54,7 @@ if right_sides != ['%s.%s' % (structure_of[e['table']], e['json']) for e in reso
 if list(dict.fromkeys(n.split('.')[0] for n in right_sides)) != order:
     problems.append('the sections the property introduces are not the sheet structures in sheet order')
 root = ET.parse(os.path.join(HERE, 'VAMP AVIT Outbound Payload - Records.xml')).getroot()
-xml_props = {r.findtext('name'): (r.findtext('value') or '') for r in root.findall('sys_properties')}
+xml_props = {r.findtext('name'): (r.findtext('value') or '') for r in root.findall('sys_properties') if r.get('action') != 'DELETE'}
 if xml_props.get('%s.usem.vamp.fields.%s' % (PREFIX, ITEM)) != expected_fields:
     problems.append('record XML property differs from the resolution')
 if sorted(xml_props) != sorted(PREFIX + '.' + n for n in props):

@@ -126,6 +126,35 @@ while (rs.next()) {
 gs.print('X::' + JSON.stringify(o));''' % json.dumps(set_name))
 
 
+    def ui_preview_test(self, xml_path, set_name):
+        """As ui_import_test, then runs the platform's preview on the retrieved set and reports its
+        problems before the retrieved copy (updates, problems and set) is deleted."""
+        import time
+        content = open(xml_path).read()
+        self.s.post(INST + '/sys_upload.do', data={
+            'sysparm_ck': self.ck(), 'sysparm_target': 'sys_remote_update_set',
+            'sysparm_referring_url': 'sys_remote_update_set_list.do', 'sysparm_encryption_context': ''},
+            files={'attachFile': (os.path.basename(xml_path), content.encode(), 'text/xml')}, allow_redirects=True)
+        time.sleep(3)
+        return self.js('''
+var o = {sets: []};
+var rs = new GlideRecord('sys_remote_update_set'); rs.addQuery('name', %s); rs.addQuery('sys_created_on', '>', gs.minutesAgoStart(3)); rs.query();
+while (rs.next()) {
+    var id = rs.getUniqueValue(), entry = {names: [], problems: [], preview: ''};
+    try { new UpdateSetPreviewer().generatePreviewRecordsWithUpdate(id); entry.preview = 'ran'; } catch (e) { entry.preview = 'failed: ' + (e.message || e); }
+    var again = new GlideRecord('sys_remote_update_set'); again.get(id); entry.state = '' + again.getValue('state'); entry.app = '' + again.application.getDisplayValue();
+    var ux = new GlideRecord('sys_update_xml'); ux.addQuery('remote_update_set', id); ux.query();
+    while (ux.next()) entry.names.push('' + ux.getValue('target_name') + ':' + ux.getValue('action'));
+    var pb = new GlideRecord('sys_update_preview_problem'); pb.addQuery('remote_update_set', id); pb.query();
+    while (pb.next()) entry.problems.push('' + pb.getValue('type') + ': ' + pb.remote_update.target_name + ' ' + pb.remote_update.action + ' - ' + pb.getValue('description'));
+    o.sets.push(entry);
+    var pp = new GlideRecord('sys_update_preview_problem'); pp.addQuery('remote_update_set', id); pp.query(); while (pp.next()) pp.deleteRecord();
+    var dd = new GlideRecord('sys_update_xml'); dd.addQuery('remote_update_set', id); dd.query(); while (dd.next()) dd.deleteRecord();
+    again.deleteRecord();
+}
+gs.print('X::' + JSON.stringify(o));''' % json.dumps(set_name))
+
+
 if __name__ == '__main__':
     ui = SNUI()
     print(ui.run(sys.stdin.read(), sys.argv[1] if len(sys.argv) > 1 else 'global'))

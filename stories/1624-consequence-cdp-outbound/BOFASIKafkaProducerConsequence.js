@@ -25,60 +25,77 @@ BOFASIKafkaProducerConsequence.prototype = {
      * @param {GlideRecord} record - the consequence record the payload belongs to
      */
     sendPayload: function(payload, record) {
-        var key = this._messageKey(record);
         try {
+            var key = this._messageKey(record);
             var topicSysId = this._topicSysId();
             this._requirePayload(payload);
             var response = new sn_ih_kafka.ProducerV2().send(topicSysId, key, payload, this.IS_SYNC, this.HEADERS, this.SCHEMA_ID);
             gs.addInfoMessage('Consequence Kafka response for ' + key + ': ' + JSON.stringify(response))
         } catch (e) {
-            gs.error(this.type + ': message not sent for ' + key + ' - ' + (e.message || e));
+            gs.error(this.type + ': message not sent for ' + this._recordKey(record) + ' - ' + (e.message || e));
         }
     },
 
     /**
      * The message key: table and sys_id of the record.
-     * @param {GlideRecord} record - the consequence record, possibly absent
-     * @returns {string} "<table>.<sys_id>", or "no record" when the record cannot be read
+     * @param {GlideRecord} record - the consequence record
+     * @returns {string} "<table>.<sys_id>"
+     * @throws {Error} when no saved record was given
      */
     _messageKey: function(record) {
+        if (!record || typeof record.getTableName != 'function' || !record.getUniqueValue())
+            throw new Error('no record was given');
+        return record.getTableName() + '.' + record.getUniqueValue();
+    },
+
+    /**
+     * Names a record for the error log without assuming it is usable.
+     * @param {GlideRecord} record - the record, possibly absent
+     * @returns {string} "<table> <sys_id>" when the record can be read, otherwise "no record"
+     */
+    _recordKey: function(record) {
         try {
-            return record.getTableName() + '.' + record.getUniqueValue();
+            return record.getTableName() + ' ' + record.getUniqueValue();
         } catch (e) {
             return 'no record';
         }
     },
 
     /**
-     * Reads the topic property.
+     * Reads the topic property, spaces around the value ignored.
      * @returns {string} the sys_id of the Kafka Topic record
      * @throws {Error} when the property is empty or its value is not a sys_id
      */
     _topicSysId: function() {
-        var value = gs.getProperty(this.TOPIC_PROPERTY, '');
-        if (!value)
+        var topicSysId = String(gs.getProperty(this.TOPIC_PROPERTY, '')).trim();
+        if (!topicSysId)
             throw new Error('property ' + this.TOPIC_PROPERTY + ' holds no topic');
-        if (!this.SYS_ID_PATTERN.test(value))
-            throw new Error('property ' + this.TOPIC_PROPERTY + ' holds "' + value + '", which is not a sys_id');
-        return value;
+        if (!this.SYS_ID_PATTERN.test(topicSysId))
+            throw new Error('property ' + this.TOPIC_PROPERTY + ' holds "' + topicSysId + '", which is not a sys_id');
+        return topicSysId;
     },
 
     /**
      * Refuses a payload that is not the JSON text of an envelope with its consequences.
      * @param {string} payload - the payload text
-     * @throws {Error} when the payload is empty, not JSON, or lacks the envelope or the consequences
+     * @throws {Error} when the payload is empty, is not JSON, lacks the envelope or the consequences, or
+     *                 counts a number of elements other than the consequences it carries
      */
     _requirePayload: function(payload) {
         if (!payload)
             throw new Error('the payload is empty');
-        var parsed;
+        var message;
         try {
-            parsed = JSON.parse(payload);
+            message = JSON.parse(payload);
         } catch (e) {
             throw new Error('the payload is not JSON');
         }
-        if (!parsed || !parsed.envelope || !parsed.consequences)
+        if (!message || !message.envelope || !message.consequences)
             throw new Error('the payload has no envelope or no consequences');
+        if (!message.consequences.length)
+            throw new Error('the payload carries no consequence');
+        if (message.envelope.element_count !== message.consequences.length)
+            throw new Error('the payload counts ' + message.envelope.element_count + ' element(s) and carries ' + message.consequences.length);
     },
 
     type: 'BOFASIKafkaProducerConsequence'

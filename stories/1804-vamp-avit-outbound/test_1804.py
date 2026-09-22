@@ -127,19 +127,19 @@ for run in (1, 2):
 var o = {};
 function count(text) { var c = new GlideAggregate('syslog_app_scope'); c.addAggregate('COUNT'); c.addQuery('message', 'CONTAINS', text); c.query(); c.next(); return parseInt(c.getAggregate('COUNT')); }
 var linked = %(linked)s;
-o.before = {producer: count('BOFASIKafkaProducerVamp: message not sent for sn_vul_app_vulnerable_item.' + linked), processor: count('BOFASIVampOutboundProcessor: payload not built'), rule: count('BOFA_BR_AVIT_VampOutbound')};
+o.before = {producer: count('BOFASIKafkaProducerVamp: message not sent for sn_vul_app_vulnerable_item ' + linked), processor: count('BOFASIVampOutboundProcessor: payload not built'), rule: count('BOFA_BR_AVIT_VampOutbound')};
 var a = new GlideRecord('sn_vul_app_vulnerable_item'); a.get(linked); a.setValue('short_description', 'VAMP outbound fixture (linked) run %(run)s at ' + new GlideDateTime().getNumericValue()); a.update();
-o.after_update = {producer: count('BOFASIKafkaProducerVamp: message not sent for sn_vul_app_vulnerable_item.' + linked), processor: count('BOFASIVampOutboundProcessor: payload not built'), rule: count('BOFA_BR_AVIT_VampOutbound')};
-var log = new GlideRecord('syslog_app_scope'); log.addQuery('message', 'CONTAINS', 'BOFASIKafkaProducerVamp: message not sent for sn_vul_app_vulnerable_item.' + linked); log.orderByDesc('sys_created_on'); log.setLimit(1); log.query(); log.next();
+o.after_update = {producer: count('BOFASIKafkaProducerVamp: message not sent for sn_vul_app_vulnerable_item ' + linked), processor: count('BOFASIVampOutboundProcessor: payload not built'), rule: count('BOFA_BR_AVIT_VampOutbound')};
+var log = new GlideRecord('syslog_app_scope'); log.addQuery('message', 'CONTAINS', 'BOFASIKafkaProducerVamp: message not sent for sn_vul_app_vulnerable_item ' + linked); log.orderByDesc('sys_created_on'); log.setLimit(1); log.query(); log.next();
 o.producer_log = {level: '' + log.getValue('level'), message: '' + log.getValue('message'), age_s: (new GlideDateTime().getNumericValue() - new GlideDateTime(log.getValue('sys_created_on')).getNumericValue()) / 1000};
 var n = new GlideRecord('sn_vul_app_vulnerable_item'); n.initialize(); n.setValue('short_description', 'VAMP outbound fixture (inserted, run %(run)s)'); n.setValue('source', 'VAMP fixture'); n.setValue('source_avit_id', 'VAMP-FIXTURE-INSERT'); var nid = n.insert();
 o.inserted = {sys_id: '' + nid, number: '' + n.getValue('number')};
-o.after_insert = {producer: count('BOFASIKafkaProducerVamp: message not sent for sn_vul_app_vulnerable_item.' + nid), processor: count('BOFASIVampOutboundProcessor: payload not built'), rule: count('BOFA_BR_AVIT_VampOutbound')};
+o.after_insert = {producer: count('BOFASIKafkaProducerVamp: message not sent for sn_vul_app_vulnerable_item ' + nid), processor: count('BOFASIVampOutboundProcessor: payload not built'), rule: count('BOFA_BR_AVIT_VampOutbound')};
 var c = new GlideRecord('sn_vul_app_vulnerable_item'); c.get(nid); c.setWorkflow(false); c.setValue('active', false); c.setValue('short_description', 'VAMP outbound fixture (inserted, retired)'); c.update(); o.retired = '' + c.getValue('active');
 gs.print('X::' + JSON.stringify(o));''' % dict(linked=json.dumps(FX['linked']), run=run))
     check('C update: producer logged one send failure for the item (rule -> processor -> producer ran)', r['after_update']['producer'] == r['before']['producer'] + 1, (r['before'], r['after_update']))
     check('C update: no processor or rule error', r['after_update']['processor'] == r['before']['processor'] and r['after_update']['rule'] == r['before']['rule'], (r['before'], r['after_update']))
-    check('C update: producer error carries the key and the missing Kafka API reason, logged just now', 'sn_vul_app_vulnerable_item.' + FX['linked'] + ' - ' in r['producer_log']['message'] and ('sn_ih_kafka' in r['producer_log']['message'] or 'undefined is not a function' in r['producer_log']['message']) and r['producer_log']['age_s'] < 180, r['producer_log'])
+    check('C update: producer error names the item and the missing Kafka API reason, logged just now', 'sn_vul_app_vulnerable_item ' + FX['linked'] + ' - ' in r['producer_log']['message'] and ('sn_ih_kafka' in r['producer_log']['message'] or 'undefined is not a function' in r['producer_log']['message']) and r['producer_log']['age_s'] < 180, r['producer_log'])
     payloads = {}
     for msg in messages:
         mm = re.match(r'VAMP payload for (\S+): (\{.*\})$', msg)
@@ -163,13 +163,14 @@ o.types = {first_found: '' + a.first_found.getED().getInternalType(), cmdb_ci: '
 var savedFound = '' + (a.getValue('first_found') || '');
 a.setWorkflow(false); a.setValue('first_found', '2026-03-31'); a.update();
 var withDate = new GlideRecord('sn_vul_app_vulnerable_item'); withDate.get(a.getUniqueValue());
-for (var i = 0; i < fields.length; i++) o.rendered[fields[i]] = processor._fieldValue(withDate, fields[i]);
-o.no_record = processor._fieldValue(null, 'number');
+var dictionary = new GlideRecord('sn_vul_app_vulnerable_item');
+for (var i = 0; i < fields.length; i++) o.rendered[fields[i]] = processor._fieldValue(withDate, dictionary, fields[i]);
+o.no_record = processor._fieldValue(null, null, 'number');
 var savedCi = '' + withDate.getValue('cmdb_ci');
 var gone = new GlideRecord('sn_vul_app_vulnerable_item'); gone.get(a.getUniqueValue());
 gone.setWorkflow(false); gone.setValue('cmdb_ci', '00000000000000000000000000000000'); gone.update();
 var broken = new GlideRecord('sn_vul_app_vulnerable_item'); broken.get(a.getUniqueValue());
-o.dangling_reference = processor._fieldValue(broken, 'cmdb_ci');
+o.dangling_reference = processor._fieldValue(broken, dictionary, 'cmdb_ci');
 o.dangling_display = '' + broken.getDisplayValue('cmdb_ci');
 var back = new GlideRecord('sn_vul_app_vulnerable_item'); back.get(a.getUniqueValue());
 back.setWorkflow(false); back.setValue('cmdb_ci', savedCi); back.setValue('first_found', savedFound); back.update();
@@ -188,84 +189,128 @@ gs.print('X::' + JSON.stringify(o));''' % json.dumps(FX['linked']))
     check('D the fixture is restored afterwards', r['restored']['ci'] == x['ci'] and len(x['ci']) == 32 and r['restored']['first_found'] == '', (r['restored'], x['ci']))
 
     print('E. error handling and payload validation')
-    r, _ = js('''
-var o = {};
-function count(text) { var c = new GlideAggregate('syslog_app_scope'); c.addAggregate('COUNT'); c.addQuery('message', 'CONTAINS', text); c.query(); c.next(); return parseInt(c.getAggregate('COUNT')); }
-function lastError(text) { var l = new GlideRecord('syslog_app_scope'); l.addQuery('message', 'CONTAINS', text); l.orderByDesc('sys_created_on'); l.setLimit(1); l.query(); return l.next() ? '' + l.getValue('message') : ''; }
-var T = 'sn_vul_app_vulnerable_item', P = 'x_boar_bofa_usem_1';
-var FIELDS = P + '.usem.vamp.fields.' + T, TOPIC = P + '.usem.vamp.kafka.topic_sys_id';
+    FIELD_PROP = P + '.usem.vamp.fields.' + ITEM; TOPIC_PROP = P + '.usem.vamp.kafka.topic_sys_id'
+    base = PROPS['usem.vamp.fields.' + ITEM]['value']
+    CASES = {
+        'no_property': '', 'separators': ' ,\n , \r\n,',
+        'no_field': '=finding.number,\n' + base, 'no_payload_name': 'number,\n' + base, 'flat_name': 'number=finding,\n' + base,
+        'empty_structure': 'number=.number,\n' + base, 'empty_field': 'number=finding.,\n' + base, 'three_parts': 'number=finding.a.b,\n' + base,
+        'two_tables': base + '\nsn_vul_pen_test_assessment_request.number=finding.number_again,', 'twice': base + '\nsys_created_by=finding.number,',
+        'no_path': base.replace('sn_vul_app_vul_entry.', 'sn_vul_app_vul_scan.'), 'dot_walk': 'cmdb_ci.name=finding.ci_name,\n' + base,
+        'left_empty_field': 'sn_vul_app_vul_entry.=tpe.extra,\n' + base, 'two_equals': 'number=finding.number=again,\n' + base,
+        'spaced': base.replace('number=finding.number,', ' number = finding . number ,'),
+    }
+    line = lambda k: CASES[k].split('\n')[0]
+    REASONS = {
+        'no_property': 'table %s is not configured in property %s' % (ITEM, FIELD_PROP), 'separators': 'property %s holds no field' % FIELD_PROP,
+        'no_field': 'property %s holds a line without a field name: "=finding.number"' % FIELD_PROP,
+        'no_payload_name': 'property %s holds a line without a payload name: "number"' % FIELD_PROP,
+        'flat_name': 'property %s holds the payload name "finding", which is not <structure>.<field>: "number=finding"' % FIELD_PROP,
+        'empty_structure': 'property %s holds the payload name ".number", which is not <structure>.<field>: "number=.number"' % FIELD_PROP,
+        'empty_field': 'property %s holds the payload name "finding.", which is not <structure>.<field>: "number=finding."' % FIELD_PROP,
+        'three_parts': 'property %s holds the payload name "finding.a.b", which is not <structure>.<field>: "number=finding.a.b"' % FIELD_PROP,
+        'two_tables': 'section finding of property %s takes fields from %s and from sn_vul_pen_test_assessment_request' % (FIELD_PROP, ITEM),
+        'twice': 'section finding of property %s names number twice' % FIELD_PROP,
+        'no_path': 'property %s names table sn_vul_app_vul_scan, which has no path from %s: "sn_vul_app_vul_scan.number=tpe.number"' % (FIELD_PROP, ITEM),
+        'dot_walk': 'property %s names table cmdb_ci, which has no path from %s: "cmdb_ci.name=finding.ci_name"' % (FIELD_PROP, ITEM),
+        'left_empty_field': 'property %s holds the field "sn_vul_app_vul_entry.", which is not <field> or <table>.<field>: "sn_vul_app_vul_entry.=tpe.extra"' % FIELD_PROP,
+        'two_equals': 'property %s holds a line with more than one "=": "number=finding.number=again"' % FIELD_PROP,
+    }
+    r, _ = js(r"""
+(function() {
+var o = {cases: {}};
+gs.sleep(1100); var t0 = new GlideDateTime().getValue();
 new GlideUpdateSet().set(%(default_set)s);
-var processor = new x_boar_bofa_usem_1.BOFASIVampOutboundProcessor(), producer = new x_boar_bofa_usem_1.BOFASIKafkaProducerVamp();
+try { new sn_ih_kafka.ProducerV2(); o.api_missing = ''; } catch (e) { o.api_missing = '' + (e.message || e); }
+var T = %(item)s, FIELDS = %(fields)s, TOPIC = %(topic)s, cases = %(cases)s;
+var C = x_boar_bofa_usem_1.BOFASIVampOutboundProcessor, K = x_boar_bofa_usem_1.BOFASIKafkaProducerVamp;
 var a = new GlideRecord(T); a.get(%(linked)s);
-var good = processor.buildPayload(a);
-o.before = {built: count('BOFASIVampOutboundProcessor: payload not built'), sent: count('BOFASIKafkaProducerVamp: message not sent')};
-o.unfetched = processor.buildPayload(new GlideRecord(T)); o.unfetched_error = lastError('payload not built');
-o.nothing = processor.buildPayload(null); o.nothing_error = lastError('payload not built');
-function withProperty(name, value, run) {
-    var p = new GlideRecord('sys_properties'); p.addQuery('name', name); p.query(); p.next();
-    var saved = '' + p.getValue('value');
-    p.setValue('value', value); p.update();
-    var out = run();
-    var back = new GlideRecord('sys_properties'); back.get(p.getUniqueValue()); back.setValue('value', saved); back.update();
-    return {out: out, restored: gs.getProperty(name, '') == saved};
+var good = new C().buildPayload(a);
+o.unfetched = new C().buildPayload(new GlideRecord(T));
+o.nothing = new C().buildPayload(null);
+var fp = new GlideRecord('sys_properties'); fp.addQuery('name', FIELDS); fp.query(); fp.next(); var saved = '' + fp.getValue('value');
+try {
+    for (var k in cases) { fp.setValue('value', cases[k]); fp.update(); o.cases[k] = new C().buildPayload(a); }
+} finally {
+    fp.setValue('value', saved); fp.update();
 }
-var fieldsValue = '' + gs.getProperty(FIELDS, '');
-function refuse(value) { return withProperty(FIELDS, value, function() { return {payload: processor.buildPayload(a), error: lastError('payload not built')}; }); }
-var r1 = refuse('');
-o.no_property = r1.out.payload; o.no_property_error = r1.out.error; o.no_property_restored = r1.restored;
-var r2 = refuse('=finding.number,\\n' + fieldsValue);
-o.no_field = r2.out.payload; o.no_field_error = r2.out.error; o.no_field_restored = r2.restored;
-var r3 = refuse('number,\\n' + fieldsValue);
-o.no_payload_name = r3.out.payload; o.no_payload_name_error = r3.out.error; o.no_payload_name_restored = r3.restored;
-var r4 = refuse('number=finding,\\n' + fieldsValue);
-o.flat_name = r4.out.payload; o.flat_name_error = r4.out.error; o.flat_name_restored = r4.restored;
-var r5 = refuse(fieldsValue + '\\nsn_vul_pen_test_assessment_request.number=finding.number_again,');
-o.two_tables = r5.out.payload; o.two_tables_error = r5.out.error; o.two_tables_restored = r5.restored;
-var r6 = refuse(fieldsValue + '\\nsys_created_by=finding.number,');
-o.twice = r6.out.payload; o.twice_error = r6.out.error; o.twice_restored = r6.restored;
-var r7 = refuse(fieldsValue.replace(/sn_vul_app_vul_entry\./g, 'sn_vul_app_vul_scan.'));
-o.no_path = r7.out.payload; o.no_path_error = r7.out.error; o.no_path_restored = r7.restored;
-var r8 = refuse('number=finding.number=again,\\n' + fieldsValue);
-o.two_equals = r8.out.payload; o.two_equals_error = r8.out.error; o.two_equals_restored = r8.restored;
-var sections = processor._payloadMap(T);
-var tampered = JSON.parse(good);
-tampered.envelope.element_count = 2; tampered.envelope.event_id = 'not-a-uuid'; tampered.envelope.element_activity = 'CHANGED';
-delete tampered.findings[0].finding.number; tampered.findings[0].finding.state = 1; tampered.findings[0].finding.stranger = 'x';
-tampered.findings[0].remediation_task = {}; tampered.findings[0].extra = {};
-try { processor._validatePayload(tampered, sections, a); o.tampered = 'accepted'; } catch (e) { o.tampered = '' + (e.message || e); }
-try { processor._validatePayload(JSON.parse(good), sections, a); o.intact = 'accepted'; } catch (e) { o.intact = '' + (e.message || e); }
-o.sections = []; for (var s = 0; s < sections.length; s++) o.sections.push(sections[s].json + ':' + sections[s].table + ':' + (sections[s].many ? 'list' : 'one') + ':' + sections[s].fields.length);
-o.after_build = {built: count('BOFASIVampOutboundProcessor: payload not built')};
-var t1 = withProperty(TOPIC, '', function() { producer.sendPayload(good, a); return lastError('message not sent'); });
-o.no_topic_error = t1.out;
-var t2 = withProperty(TOPIC, 'not-a-sys-id', function() { producer.sendPayload(good, a); return lastError('message not sent'); });
-o.bad_topic_error = t2.out; o.topic_restored = t1.restored && t2.restored;
-producer.sendPayload('', a); o.empty_payload_error = lastError('message not sent');
-producer.sendPayload('not json', a); o.not_json_error = lastError('message not sent');
-producer.sendPayload('{"a": 1}', a); o.no_envelope_error = lastError('message not sent');
-var miscount = JSON.parse(good); miscount.envelope.element_count = 5; producer.sendPayload(JSON.stringify(miscount), a); o.count_error = lastError('message not sent');
-producer.sendPayload(good, null); o.no_record_error = lastError('message not sent');
-o.after_send = {sent: count('BOFASIKafkaProducerVamp: message not sent')};
-gs.print('X::' + JSON.stringify(o));''' % dict(default_set=json.dumps(ST['default_set']), linked=json.dumps(FX['linked'])))
-    check('E a record that does not exist: empty payload, one error naming it', r['unfetched'] == '' and 'the record does not exist' in r['unfetched_error'], r['unfetched_error'])
-    check('E no record at all: empty payload, one error keyed "no record"', r['nothing'] == '' and 'no record was given' in r['nothing_error'] and 'for no record' in r['nothing_error'], r['nothing_error'])
-    check('E the property empty: empty payload, error names the property, property restored', r['no_property'] == '' and 'is not configured in property' in r['no_property_error'] and r['no_property_restored'], (r['no_property_error'], r['no_property_restored']))
-    check('E a line without a field name is refused, property restored', r['no_field'] == '' and 'line without a field name' in r['no_field_error'] and r['no_field_restored'], (r['no_field_error'], r['no_field_restored']))
-    check('E a line without a payload name is refused, property restored', r['no_payload_name'] == '' and 'line without a payload name' in r['no_payload_name_error'] and r['no_payload_name_restored'], (r['no_payload_name_error'], r['no_payload_name_restored']))
-    check('E a payload name that is not <structure>.<field> is refused', r['flat_name'] == '' and 'is not <structure>.<field>' in r['flat_name_error'] and r['flat_name_restored'], (r['flat_name_error'], r['flat_name_restored']))
-    check('E a section taking fields from two tables is refused', r['two_tables'] == '' and 'takes fields from' in r['two_tables_error'] and r['two_tables_restored'], (r['two_tables_error'], r['two_tables_restored']))
-    check('E the same payload name twice in a section is refused', r['twice'] == '' and 'twice' in r['twice_error'] and r['twice_restored'], (r['twice_error'], r['twice_restored']))
-    check('E a section with no path from the item is refused', r['no_path'] == '' and 'has no path from' in r['no_path_error'] and r['no_path_restored'], (r['no_path_error'], r['no_path_restored']))
-    check('E a line with more than one "=" is refused', r['two_equals'] == '' and 'more than one "="' in r['two_equals_error'] and r['two_equals_restored'], (r['two_equals_error'], r['two_equals_restored']))
-    check('E the property alone yields the sections, their tables, their shape and their field counts', r['sections'] == ['tpe:sn_vul_app_vul_entry:one:2', 'remediation_task:sn_vul_app_vulnerability:list:3', 'finding:sn_vul_app_vulnerable_item:one:8', 'ptreq:sn_vul_pen_test_assessment_request:one:3'], r['sections'])
-    check('E validation names every problem of a tampered payload', all(s in r['tampered'] for s in ['payload invalid', 'event_id is not a UUID', 'element_activity "CHANGED"', 'element_count 2', 'finding.number is missing', 'finding.state is not a string', 'carries "stranger"', 'section remediation_task is not a list', 'carries "extra"']), r['tampered'])
-    check('E validation accepts the intact payload', r['intact'] == 'accepted', r['intact'])
-    check('E ten refused builds logged ten errors, nothing else', r['after_build']['built'] == r['before']['built'] + 10, (r['before'], r['after_build']))
-    check('E producer refuses an empty topic property and a value that is not a sys_id, property restored', 'holds no topic' in r['no_topic_error'] and 'is not a sys_id' in r['bad_topic_error'] and r['topic_restored'], (r['no_topic_error'], r['bad_topic_error'], r['topic_restored']))
-    check('E producer refuses an empty payload, text that is not JSON and JSON without envelope', 'the payload is empty' in r['empty_payload_error'] and 'the payload is not JSON' in r['not_json_error'] and 'no envelope or no findings' in r['no_envelope_error'], (r['empty_payload_error'], r['not_json_error'], r['no_envelope_error']))
-    check('E producer refuses a payload whose element count is not the number of findings', 'counts 5 element(s) and carries 1' in r['count_error'], r['count_error'])
-    check('E producer without a record still logs, keyed "no record"', 'message not sent for no record' in r['no_record_error'], r['no_record_error'])
-    check('E seven refused sends logged seven errors, nothing else', r['after_send']['sent'] == r['before']['sent'] + 7, (r['before'], r['after_send']))
+o.fields_restored = gs.getProperty(FIELDS, '') == saved;
+// the validation runs inside buildPayload: an envelope built off its constants is refused there
+var off = new C(); var build = off._buildEnvelope; off._buildEnvelope = function(activity, count) { var e = build.call(this, activity, count); e.namespace = 'com.other'; return e; };
+o.off_constants = off.buildPayload(a);
+var proc = new C(), sections = proc._payloadMap(T);
+function refusal(p) { try { proc._validatePayload(p, sections, a); return 'accepted'; } catch (e) { return '' + (e.message || e); } }
+var t1 = JSON.parse(good);
+t1.envelope.element_count = 2; t1.envelope.event_id = 'not-a-uuid'; t1.envelope.element_activity = 'CHANGED';
+delete t1.findings[0].finding.number; t1.findings[0].finding.state = 1; t1.findings[0].finding.stranger = 'x';
+t1.findings[0].remediation_task = {}; t1.findings[0].extra = {};
+o.tampered = refusal(t1);
+var t2 = JSON.parse(good); t2.envelope.core_version = '9.9.9'; t2.envelope.event_timestamp = '2026-09-22 10:00:00'; delete t2.findings[0].tpe; t2.findings[0].ptreq = 'x'; t2.findings[0].remediation_task.push('x');
+o.tampered2 = refusal(t2);
+var t3 = JSON.parse(good); t3.findings = []; o.tampered3 = refusal(t3);
+o.intact = refusal(JSON.parse(good));
+var tp = new GlideRecord('sys_properties'); tp.addQuery('name', TOPIC); tp.query(); tp.next(); var topic = '' + tp.getValue('value');
+try {
+    tp.setValue('value', ''); tp.update(); new K().sendPayload(good, a);
+    tp.setValue('value', 'not-a-sys-id'); tp.update(); new K().sendPayload(good, a);
+    tp.setValue('value', '  ' + topic + ' \n'); tp.update(); new K().sendPayload(good, a);
+} finally {
+    tp.setValue('value', topic); tp.update();
+}
+o.topic_restored = gs.getProperty(TOPIC, '') == topic;
+new K().sendPayload('', a);
+new K().sendPayload('not json', a);
+new K().sendPayload('{"a": 1}', a);
+new K().sendPayload('{"envelope": {"element_count": 0}, "findings": []}', a);
+var miscount = JSON.parse(good); miscount.envelope.element_count = 5; new K().sendPayload(JSON.stringify(miscount), a);
+new K().sendPayload(good, null);
+o.id = a.getUniqueValue();
+o.lines = [];
+var l = new GlideRecord('syslog'); l.addQuery('sys_created_on', '>=', t0); l.addQuery('message', 'STARTSWITH', 'BOFASIVampOutboundProcessor').addOrCondition('message', 'STARTSWITH', 'BOFASIKafkaProducerVamp').addOrCondition('message', 'STARTSWITH', 'BOFA_BR_AVIT_VampOutbound'); l.query();
+while (l.next()) o.lines.push('' + l.getValue('message'));
+gs.print('X::' + JSON.stringify(o));
+})();""" % dict(default_set=json.dumps(ST['default_set']), item=json.dumps(ITEM), fields=json.dumps(FIELD_PROP), topic=json.dumps(TOPIC_PROP), cases=json.dumps(CASES), linked=json.dumps(FX['linked'])))
+    spaced = json.loads(r['cases']['spaced']) if r['cases']['spaced'] else {}
+    check('E spaces round the "=" and round the dot of a payload name are ignored: the same finding as the property as delivered', bool(spaced) and spaced['findings'][0]['finding'] == json.loads(build(FX['linked'])['text'])['findings'][0]['finding'], r['cases']['spaced'][:200])
+    check('E every refused property gives "", as do an unfetched record, no record and an envelope off its constants', all(r['cases'][k] == '' for k in REASONS) and r['unfetched'] == '' and r['nothing'] == '' and r['off_constants'] == '',
+          {k: r['cases'][k][:40] for k in REASONS if r['cases'][k]})
+    V = 'BOFASIKafkaProducerVamp: message not sent for %s %s - ' % (ITEM, r['id']); B = 'BOFASIVampOutboundProcessor: payload not built for %s %s - ' % (ITEM, r['id'])
+    want = [B + REASONS[k] for k in REASONS] + ['BOFASIVampOutboundProcessor: payload not built for no record - no record was given',
+            B + 'payload invalid for %s: the envelope does not carry the configured constants' % FX['linked_number'],
+            V + 'property %s holds no topic' % TOPIC_PROP, V + 'property %s holds "not-a-sys-id", which is not a sys_id' % TOPIC_PROP, V + r['api_missing'],
+            V + 'the payload is empty', V + 'the payload is not JSON', V + 'the payload has no envelope or no findings', V + 'the payload carries no finding',
+            V + 'the payload counts 5 element(s) and carries 1', 'BOFASIKafkaProducerVamp: message not sent for no record - no record was given']
+    unfetched = [m for m in r['lines'] if m.startswith('BOFASIVampOutboundProcessor: payload not built for %s ' % ITEM) and m.endswith(' - the record does not exist')]
+    others = [m for m in r['lines'] if m not in unfetched]
+    check('E one exact line per refusal (%d): every parser refusal, the validation inside buildPayload, the producer refusals, the padded topic trimmed (the send reached), nothing else' % (len(want) + 1),
+          len(unfetched) == 1 and sorted(others) == sorted(want) and r['api_missing'] != '', 'extra: %s | missing: %s' % ([m for m in others if m not in want], [m for m in want if m not in others]))
+    check('E validation names every problem of a tampered payload', all(x in r['tampered'] for x in ['payload invalid', 'event_id is not a UUID', 'element_activity "CHANGED"', 'element_count 2', 'finding.number is missing', 'finding.state is not a string', 'carries "stranger"', 'section remediation_task is not a list', 'carries "extra"']), r['tampered'])
+    check('E validation also names constants, timestamp, a missing section, a section that is not an object and a task entry that is not an object', all(x in r['tampered2'] for x in ['the envelope does not carry the configured constants', 'event_timestamp is not a UTC timestamp', 'section tpe is missing', 'section ptreq is not an object', 'section remediation_task is not an object']), r['tampered2'])
+    check('E validation refuses a message without a finding; accepts the intact payload; both properties restored', 'the message carries no finding' in r['tampered3'] and r['intact'] == 'accepted' and r['fields_restored'] and r['topic_restored'], (r['tampered3'], r['intact']))
+
+    print('E2. the rule stops when the processor refuses')
+    r, messages = js(r"""
+(function() {
+var o = {};
+gs.sleep(1100); var t0 = new GlideDateTime().getValue();
+new GlideUpdateSet().set(%(default_set)s);
+var fp = new GlideRecord('sys_properties'); fp.addQuery('name', %(fields)s); fp.query(); fp.next(); var saved = '' + fp.getValue('value');
+var a = new GlideRecord(%(item)s); a.get(%(linked)s); var keep = '' + a.getValue('short_description');
+try {
+    fp.setValue('value', ''); fp.update();
+    a.setValue('short_description', 'VAMP outbound fixture (linked) refused run ' + new GlideDateTime().getNumericValue()); a.update();
+} finally {
+    fp.setValue('value', saved); fp.update();
+    var back = new GlideRecord(%(item)s); back.get(%(linked)s); back.setWorkflow(false); back.setValue('short_description', keep); back.update();
+}
+o.restored = gs.getProperty(%(fields)s, '') == saved;
+o.lines = [];
+var l = new GlideRecord('syslog'); l.addQuery('sys_created_on', '>=', t0); l.addQuery('message', 'STARTSWITH', 'BOFASIVampOutboundProcessor').addOrCondition('message', 'STARTSWITH', 'BOFASIKafkaProducerVamp').addOrCondition('message', 'STARTSWITH', 'BOFA_BR_AVIT_VampOutbound'); l.query();
+while (l.next()) o.lines.push('' + l.getValue('message'));
+gs.print('X::' + JSON.stringify(o));
+})();""" % dict(default_set=json.dumps(ST['default_set']), item=json.dumps(ITEM), fields=json.dumps(FIELD_PROP), linked=json.dumps(FX['linked'])))
+    check('E2 a real update with the property empty: the processor logs its reason once, the producer is never called, nothing is shown on the page',
+          r['lines'] == ['BOFASIVampOutboundProcessor: payload not built for %s %s - %s' % (ITEM, FX['linked'], REASONS['no_property'])] and not [m for m in messages if m.startswith('VAMP payload for')] and r['restored'], (r['lines'], messages))
 
     print('F. how many remediation tasks the item has')
     r, _ = js('''
@@ -281,7 +326,16 @@ set(second, ''); o.one = payload();
 set(first, ''); o.none = payload();
 set(second, secondTask); set(first, firstTask); o.restored = payload();
 set(second, '00000000000000000000000000000000'); o.dangling = payload();
-set(second, secondTask); o.after = payload();
+set(second, firstTask); o.duplicate = payload();
+set(second, secondTask);
+var renumber = new GlideRecord('sn_vul_app_vulnerability'); renumber.get(firstTask); var number = '' + renumber.getValue('number');
+try {
+    renumber.setWorkflow(false); renumber.setValue('number', 'AVUL0000001'); renumber.update(); o.renumbered = payload();
+} finally {
+    var undo = new GlideRecord('sn_vul_app_vulnerability'); undo.get(firstTask); undo.setWorkflow(false); undo.setValue('number', number); undo.update();
+}
+o.after = payload();
+o.first_older = firstTask < secondTask;
 gs.print('X::' + JSON.stringify(o));''' % dict(linked=json.dumps(FX['linked']), first=json.dumps(FX['m2m']['first']), second=json.dumps(FX['m2m']['second']),
                                                first_task=json.dumps(FX['tasks']['first']), second_task=json.dumps(FX['tasks']['second'])))
     tasks = lambda k: [t['number'] for t in r[k]['remediation_task']]
@@ -291,8 +345,23 @@ gs.print('X::' + JSON.stringify(o));''' % dict(linked=json.dumps(FX['linked']), 
     check('F no link: an empty list, never a missing section', r['none']['remediation_task'] == [] and 'remediation_task' in r['none'], r['none'].get('remediation_task'))
     check('F links restored: both tasks again', tasks('restored') == FX['task_numbers'], tasks('restored'))
     check('F a link whose task is gone is skipped, the other task still sent', len(tasks('dangling')) == 1 and tasks('dangling')[0] in FX['task_numbers'], tasks('dangling'))
+    newer = [n for n in FX['task_numbers'] if n != FX['avul']][0]
+    check('F both links pointing at one task: that task once', tasks('duplicate') == [FX['avul']], tasks('duplicate'))
+    check('F the order follows the task number, not the sys_id or the creation order: the older task (smaller sys_id) carries the larger number and comes last; renumbered below the other, it comes first',
+          r['first_older'] and tasks('two') == [newer, FX['avul']] and tasks('renumbered') == ['AVUL0000001', newer], (tasks('two'), tasks('renumbered')))
     check('F after the restore the list is back to both tasks', tasks('after') == FX['task_numbers'], tasks('after'))
-    check('F the other three sections do not change with the number of tasks', all(r[k]['finding'] == r['two']['finding'] and r[k]['tpe'] == r['two']['tpe'] and r[k]['ptreq'] == r['two']['ptreq'] for k in ['one', 'none', 'restored', 'dangling', 'after']), {k: r[k]['finding']['number'] for k in r})
+    check('F the other three sections do not change with the number of tasks', all(r[k]['finding'] == r['two']['finding'] and r[k]['tpe'] == r['two']['tpe'] and r[k]['ptreq'] == r['two']['ptreq'] for k in ['one', 'none', 'restored', 'dangling', 'duplicate', 'renumbered', 'after']), {k: v['finding']['number'] for k, v in r.items() if isinstance(v, dict)})
+    print('G. called from inside a function of a global script and directly')
+    r, _ = js('''
+(function() {
+var o = {};
+var C = x_boar_bofa_usem_1.BOFASIVampOutboundProcessor;
+function viaFunction(g) { return new C().buildPayload(g); }
+var a = new GlideRecord('sn_vul_app_vulnerable_item'); a.get(%s);
+o.nested = viaFunction(a); o.direct = new C().buildPayload(a);
+gs.print('X::' + JSON.stringify(o));
+})();''' % json.dumps(FX['linked']))
+    check('G the same finding on both call paths', bool(r['nested']) and bool(r['direct']) and json.loads(r['nested'])['findings'] == json.loads(r['direct'])['findings'], (r['nested'][:100], r['direct'][:100]))
 print('RESULT: %d passed, %d failed' % (passed, failed))
 ui.app('global')
 sys.exit(1 if failed else 0)

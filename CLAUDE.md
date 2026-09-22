@@ -211,6 +211,26 @@ Follow it without being asked again.
   *Outbound to CDP (RemTask)* — only rows with *CDP Required? = Yes*; one property per table with one
   `servicenow_field=json_field` pair per line; a field missing on the table or empty is sent as `""`.
   One script include only (`RemediationTaskPayloadBuilder`).
+- Kafka stories, current sets (22 Sep review): 1625 `..._Remediation Task CDP Payload_V2.6` (global) plus the client copy
+  record XML, producer `INC0010003_MS_Kafka Producer V2 with Payload Validation_V1.3` (record XML), 1624 `..._V1.3`,
+  1804 `..._V2.1`. Rendering contract of the CDP payloads (1625, 1624): choices as labels, plain integers as stored
+  (display adds "1,250"), `[code]...[/code]` display markup as its visible text (`cr_count`), references `""` when the
+  record is gone, journals from the latest `sys_journal_field` entry without its header; VAMP keeps its sheet types
+  (Integer/String stored, Reference display). Each story keeps one field property + one topic property.
+- Scoped-script traps (measured): `GlideElementDescriptor.getChoice()` does not exist in a scope (`isChoiceTable()` does);
+  a record handed to a scoped include from inside a function of a global script refuses `getED()`
+  (`StatefulElementDescriptor ... not allowed in scope`) - read descriptors from a GlideRecord the scoped code opens;
+  `getRefRecord()` of a document id with an empty table field gives null or a method-less object, so test
+  `typeof x.isValidRecord == 'function'`. A journal field is `nil()` on a loaded record; in an after rule
+  `getJournalEntry(1)` already holds the comment of that save.
+- Re-deliveries with new sys_ids: `sys_properties` names are unique (a second insert fails, so the client keeps the
+  older value), script includes and rules duplicate. Keep the current sys_ids and put a DELETE for every earlier
+  sys_id in the set (create the record under the old sys_id and delete it; a current property of that name steps
+  aside meanwhile), recorded before the current rows; in record XML put `action="DELETE"` elements first (Import
+  XML honours them and skips unknown sys_ids). `SNUI.ui_preview_test` runs the platform preview on the uploaded copy.
+- Log checks: `syslog.sys_created_on` has one-second resolution, so a check block starts with `gs.sleep(1100)` before
+  taking its start time and reads only lines at or after it. ProducerV2 is absent on the PDI:
+  `new sn_ih_kafka.ProducerV2()` throws `undefined is not a function.`
 
 ## Repository layout
 - `tools/snui.py` – harness. `stories/<story>/` – scripts, build/fixture/test/export/attach drivers, README.

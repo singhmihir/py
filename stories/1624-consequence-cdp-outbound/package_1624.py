@@ -1,7 +1,9 @@
 """Builds the import-ready record XML for the client instance from the records deployed on the PDI:
 the two script includes, the two properties and the rule, already in the client consequence application
 x_boar_bofa_usem_0 (BOFA USEM Consequence), which the PDI mirrors with the same scope name and sys_id. User, timestamp and mod-count fields are left out so the import stamps
-them; the topic property is delivered empty for the client to fill with the sys_id of its Kafka topic."""
+them; the topic property is delivered empty for the client to fill with the sys_id of its Kafka topic. The records
+earlier versions delivered under other sys_ids come first, as deletions (Import XML deletes a record of an
+action="DELETE" element and ignores a sys_id it does not hold)."""
 import os, sys, json, re
 HERE = os.path.dirname(os.path.abspath(__file__)); BASE = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(BASE, 'tools'))
@@ -33,10 +35,16 @@ def repoint(rec):
         rec = re.sub(r'<value>[^<]*</value>', '<value/>', rec)
     return rec
 records = [repoint(r) for r in records]
+PRIOR = json.load(open(os.path.join(HERE, 'prior_records.json')))['records']
+deletions = ['<%s action="DELETE"><sys_id>%s</sys_id><name>%s</name></%s>' % (p['table'], p['sys_id'], p['name'], p['table']) for p in PRIOR]
+records = deletions + records
 content = '<?xml version="1.0" encoding="UTF-8"?>\n<unload>\n' + '\n'.join(records) + '\n</unload>\n'
 open(OUT, 'w').write(content)
 root = ET.parse(OUT).getroot()
-sis = root.findall('sys_script_include'); props = root.findall('sys_properties'); brs = root.findall('sys_script')
+dels = [r for r in root if r.get('action') == 'DELETE']
+assert [(r.tag, r.findtext('sys_id')) for r in dels] == [(p['table'], p['sys_id']) for p in PRIOR] and list(root)[:len(dels)] == dels
+print('  %d deletions of earlier sys_ids first in the file' % len(dels))
+sis = [r for r in root.findall('sys_script_include') if r.get('action') != 'DELETE']; props = [r for r in root.findall('sys_properties') if r.get('action') != 'DELETE']; brs = [r for r in root.findall('sys_script') if r.get('action') != 'DELETE']
 for r in sis:
     script = open(os.path.join(HERE, r.findtext('name') + '.js')).read().rstrip('\n')
     assert r.findtext('script').rstrip('\n') == script and r.findtext('api_name') == CLIENT_PREFIX + '.' + r.findtext('name') and r.findtext('sys_scope') == CLIENT_SCOPE and r.findtext('access') == 'public', r.findtext('name')

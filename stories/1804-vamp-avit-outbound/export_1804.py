@@ -12,6 +12,7 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 ST = json.load(open(os.path.join(HERE, 'state.json'))); SET = ST['set']; NAME = ST['set_name']; EXPECT = ST['rows']; APP_NAME = ST['app_name']
+PRIOR = json.load(open(os.path.join(HERE, 'prior_records.json')))['records']
 OUT = os.path.join(HERE, 'VAMP AVIT Outbound Payload - Update Set.xml')
 ui = SNUI(); ui.app('global')
 TOPIC = 'x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id'
@@ -29,7 +30,7 @@ gs.print('X::' + JSON.stringify(o));''' % (json.dumps(SET), json.dumps(TOPIC)), 
 assert blank['now'] == '' and blank['scope'] == ST['app_name'], blank
 print('topic property emptied for the export (was %d characters)' % len(blank['was']))
 d = ui.js('''var o = {rows: []};
-var ux = new GlideRecord('sys_update_xml'); ux.addQuery('update_set', %s); ux.orderBy('target_name'); ux.query();
+var ux = new GlideRecord('sys_update_xml'); ux.addQuery('update_set', %s); ux.orderBy('sys_recorded_at'); ux.query();
 while (ux.next()) o.rows.push('' + ux.getValue('target_name') + ' | ' + ux.getValue('action') + ' | ' + ux.application.getDisplayValue());
 var us = new GlideRecord('sys_update_set'); us.get(%s); o.name = '' + us.name; o.app = '' + us.application.getDisplayValue(); us.setValue('state', 'complete'); us.update();
 gs.print('X::' + JSON.stringify(o));''' % (json.dumps(SET), json.dumps(SET)))
@@ -42,14 +43,23 @@ hits = [t for t in [w.lower() for w in WORKING if w] + ['service-now.com', 'x_19
 root = ET.parse(OUT).getroot()
 print('export:', len(content), 'bytes | nodes', n, '| set in file:', root.find('sys_remote_update_set/name').text, '| user/instance scrub', 'CLEAN' if not hits else hits)
 assert not hits and n == EXPECT and root.find('sys_remote_update_set/name').text == NAME
-d3 = ui.ui_import_test(OUT, NAME)
-print('UI import test:', json.dumps(d3))
-assert len(d3['sets']) == 1 and len(d3['sets'][0]['names']) == EXPECT and d3['sets'][0]['app'] == APP_NAME
+nodes = root.findall('sys_update_xml')
+deletes = [x for x in nodes if x.findtext('action') == 'DELETE']; current = [x for x in nodes if x.findtext('action') != 'DELETE']
+assert sorted(x.findtext('name') for x in deletes) == sorted(p['table'] + '_' + p['sys_id'] for p in PRIOR), [x.findtext('name') for x in deletes]
+assert max(x.findtext('sys_recorded_at') for x in deletes) < min(x.findtext('sys_recorded_at') for x in current), 'a deletion is recorded after a current record'
+print('deletions of the %d earlier sys_ids recorded before the %d current records' % (len(deletes), len(current)))
+for script in ['BOFASIVampOutboundProcessor', 'BOFASIKafkaProducerVamp']:
+    node = [x for x in current if x.findtext('target_name') == script][0]
+    assert open(os.path.join(HERE, script + '.js')).read().rstrip('\n') in node.findtext('payload'), script
+print('scripts in the file equal the repository copies')
+d3 = ui.ui_preview_test(OUT, NAME)
+print('upload and preview:', json.dumps(d3))
+assert len(d3['sets']) == 1 and len(d3['sets'][0]['names']) == EXPECT and d3['sets'][0]['app'] == APP_NAME and d3['sets'][0]['preview'] == 'ran'
 arch = os.path.join(BASE, 'stories', '_update_sets'); fname = NAME.replace(' ', '_') + '.xml'
 shutil.copy(OUT, os.path.join(arch, fname))
 idx_path = os.path.join(arch, 'index.json'); idx = json.load(open(idx_path)); idx = [e for e in idx if e['name'] != NAME]
 created = root.find('sys_remote_update_set/sys_created_on')
-idx.append({'name': NAME, 'app': 'x_boar_bofa_usem_1 (mirror of the client application, same scope name and sys_id)', 'rows': EXPECT, 'exported': n, 'file': fname, 'created': created.text if created is not None else '', 'scrub': ['client scope and application sys_id: importable on the client instance as is; the client receives the record XML too']})
+idx.append({'name': NAME, 'app': 'x_boar_bofa_usem_1 (mirror of the client application, same scope name and sys_id)', 'rows': EXPECT, 'exported': n, 'file': fname, 'created': created.text if created is not None else '', 'scrub': ['client scope and application sys_id: importable on the client instance as is; the client receives the record XML too', 'topic property empty, for the client to fill']})
 json.dump(idx, open(idx_path, 'w'), indent=1)
 print('archived as', fname)
 restored = ui.js('''
@@ -62,7 +72,7 @@ o.value = '' + (back.getValue('value') || '');
 gs.print('X::' + JSON.stringify(o));''' % (json.dumps(ST['default_set']), json.dumps(TOPIC)), scope=ST['scope'])
 assert len(restored['value']) == 32, restored
 print('topic property given a fresh id on the development instance again, under its Default set')
-topic_payload = [ET.fromstring(node.findtext('payload')) for node in root.findall('sys_update_xml') if node.findtext('target_name') == TOPIC]
+topic_payload = [ET.fromstring(node.findtext('payload')) for node in root.findall('sys_update_xml') if node.findtext('target_name') == TOPIC and node.findtext('action') != 'DELETE']
 assert len(topic_payload) == 1, 'the exported set does not carry the topic property once: %d' % len(topic_payload)
 assert (topic_payload[0].findtext('sys_properties/value') or '') == '', 'the exported topic property is not empty: %r' % topic_payload[0].findtext('sys_properties/value')
 print('the exported topic property is empty, for the client to fill')

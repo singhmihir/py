@@ -5,23 +5,23 @@
     "namespace": "com.bofa.usem",
     "core_version": "1.0.0",
     "outbound_version": "1.0.0",
-    "event_id": "8bf97c98-936f-8f90-e3ae-f0aefaba10e0",
-    "event_timestamp": "2026-09-21T11:43:52Z",
+    "event_id": "0a7767a4-9327-c3d0-e3ae-f0aefaba102a",
+    "event_timestamp": "2026-09-22T19:00:19Z",
     "element_count": 1,
-    "element_activity": "INSERT"
+    "element_activity": "UPDATE"
   },
   "consequences": [
     {
-      "x_boar_bofa_usem_0_consequence": {
-        "state": "1",
+      "consequence": {
+        "state": "Open",
         "accountable_party": "Digest Owner One",
-        "updated_on": "09-21-2026 11:43:08",
+        "updated_on": "09-22-2026 19:00:16",
         "comments": "Consequence outbound fixture (linked)",
         "change_freeze_effective_date": "09-15-2026 12:40:01",
         "consequence_level": "1",
         "sys_id": "58d93498936f8f90e3aef0aefaba103b",
         "created_by": "admin",
-        "enforcement_status": "1",
+        "enforcement_status": "Change Frozen",
         "network_isolation_effective_date": "",
         "rule": "CQR-FIXTURE-001",
         "cmdb_ci": "Trade Processing Portal",
@@ -31,20 +31,20 @@
         "updated_by": "admin",
         "rejection_reason": "Not rejected"
       },
-      "x_boar_bofa_usem_0_consequence_rule": {
+      "rule": {
         "applies_to": "New and Existing",
         "comments": "Consequence outbound fixture rule",
         "conditions": "u_state=1^EQ",
-        "created_on": "09-21-2026 11:43:08",
-        "screated_by": "admin",
-        "global_exception": "1",
+        "created_on": "08-20-2026 10:15:00",
+        "screated_by": "rule.author",
+        "global_exception": "true",
         "name": "Consequence outbound fixture rule",
         "number": "CQR-FIXTURE-001",
         "state": "Approved",
         "sys_id": "14d93498936f8f90e3aef0aefaba103a",
         "table": "x_boar_bofa_usem_0_consequence",
-        "updated_on": "09-21-2026 11:43:08",
-        "updated_by": "admin",
+        "updated_on": "09-02-2026 08:30:45",
+        "updated_by": "rule.editor",
         "valid_from": "09-01-2026 00:00:00",
         "valid_to": "12-31-2026 23:59:59"
       }

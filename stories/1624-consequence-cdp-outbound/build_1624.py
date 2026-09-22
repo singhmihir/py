@@ -4,7 +4,10 @@ includes, the two properties (topic and the one field property of the consequenc
 insert/update rule on that table. Nothing is renamed: the repository files carry the client names and the
 PDI holds the same application, so the export imports on the client instance as is. Each version is a
 fresh set: properties of earlier versions that are not deployed any more are removed under the
-application's Default set first. Re-runnable: reopens the set recorded in state.json when its name matches."""
+application's Default set first. The records earlier versions delivered under other sys_ids (prior_records.json)
+are captured as deletions in the set: each is created under its old sys_id and deleted again, so that an instance
+holding an earlier version keeps one copy of every record. Re-runnable: reopens the set recorded in state.json
+when its name matches."""
 import os, sys, json
 HERE = os.path.dirname(os.path.abspath(__file__)); BASE = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(BASE, 'tools'))
@@ -12,18 +15,19 @@ from snui import SNUI
 SCOPE = '488be1cd2b1247102b30f8e14391bf0c'          # mirror of the client application BOFA USEM Consequence on the PDI, same sys_id and scope name
 PREFIX = 'x_boar_bofa_usem_0'                           # the consequence application, which holds the tables, the rule and the scripts
 APP_NAME = 'BOFA USEM Consequence'
-NAME = 'SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.2'
+NAME = 'SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3'
 BR_NAME = 'BOFA_BR_Consequence_CdpOutbound'
 SI_NAMES = ['BOFASIConsequenceOutboundProcessor', 'BOFASIKafkaProducerConsequence']
 TABLE = PREFIX + '_consequence'
 DESC = {
-    'BOFASIConsequenceOutboundProcessor': 'Builds the outbound CDP payload (envelope plus one consequence element) for a consequence record. The fields come from the property usem.consequence.fields.<consequence table>, the rule section through the u_rule reference.',
-    'BOFASIKafkaProducerConsequence': 'Sends a consequence payload to the Kafka topic held in usem.consequence.kafka.topic_sys_id with sn_ih_kafka.ProducerV2 (key <table>.<sys_id>).\nDocumentation of API used - https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html',
+    'BOFASIConsequenceOutboundProcessor': 'Builds the outbound CDP payload (envelope plus one consequence element with the sections consequence and rule) for a consequence record. The fields come from the property x_boar_bofa_usem_0.usem.consequence.fields.<consequence table>; the rule section is read through the u_rule reference.',
+    'BOFASIKafkaProducerConsequence': 'Sends a consequence payload with sn_ih_kafka.ProducerV2 to the Kafka topic whose sys_id is held in x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id (key <table>.<sys_id>).\nDocumentation of API used - https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html',
 }
 scripts = {n: open(os.path.join(HERE, n + '.js')).read() for n in SI_NAMES}
 br_script = open(os.path.join(HERE, BR_NAME + '.js')).read()
 props = json.load(open(os.path.join(HERE, 'properties.json')))
 TOPIC_PROP = 'usem.consequence.kafka.topic_sys_id'
+PRIOR = json.load(open(os.path.join(HERE, 'prior_records.json')))['records']
 ui = SNUI(); ui.app('global')
 st_path = os.path.join(HERE, 'state.json'); ST = json.load(open(st_path)) if os.path.exists(st_path) else {}
 reuse = ST.get('set_name') == NAME
@@ -77,6 +81,30 @@ o.br = {sys_id: br.getUniqueValue(), scope: '' + br.sys_scope.getDisplayValue(),
 gs.print('X::' + JSON.stringify(o));''' % dict(has=json.dumps(reuse), set=json.dumps(ST.get('set', '')), name=json.dumps(NAME), scope=json.dumps(SCOPE),
                                             scripts=json.dumps(scripts), desc=json.dumps(DESC), props=json.dumps(props), prefix=json.dumps(PREFIX), topic=json.dumps(TOPIC_PROP),
                                             br=json.dumps(BR_NAME), table=json.dumps(TABLE), br_script=json.dumps(br_script)), scope=SCOPE)
+g = ui.js('''
+var o = {deleted: [], refused: []};
+new GlideUpdateSet().set(%(set)s);
+var prior = %(prior)s, table = %(table)s;
+for (var i = 0; i < prior.length; i++) {
+    var p = prior[i], g = new GlideRecord(p.table), current = null;
+    if (p.table == 'sys_properties') {   // property names are unique: the current property steps aside while the earlier one exists
+        current = new GlideRecord('sys_properties'); current.addQuery('name', p.name); current.addQuery('sys_id', '!=', p.sys_id); current.query();
+        if (current.next()) { current.setValue('name', p.name + '.set_aside'); current.update(); } else current = null;
+    }
+    if (!g.get(p.sys_id)) {
+        g.initialize(); g.setNewGuidValue(p.sys_id); g.setValue('name', p.name);
+        if (p.table == 'sys_script_include') { g.setValue('active', false); g.setValue('access', 'public'); }
+        if (p.table == 'sys_script') { g.setValue('collection', table); g.setValue('when', 'after'); g.setValue('active', false); }
+        if (p.table == 'sys_properties') g.setValue('type', 'string');
+        if (!g.insert()) { o.refused.push(p.table + ' ' + p.sys_id + ': ' + g.getLastErrorMessage()); if (current) { current.setValue('name', p.name); current.update(); } continue; }
+    }
+    var d = new GlideRecord(p.table); d.get(p.sys_id);
+    if (d.deleteRecord()) o.deleted.push(p.table + '_' + p.sys_id); else o.refused.push(p.table + ' ' + p.sys_id + ': not deleted');
+    if (current) { current.setValue('name', p.name); current.update(); }
+}
+gs.print('X::' + JSON.stringify(o));''' % dict(set=json.dumps(d['set']), prior=json.dumps(PRIOR), table=json.dumps(TABLE)), scope=SCOPE)
+print('earlier sys_ids captured as deletions:', len(g['deleted']), '| refused:', g['refused'])
+assert not g['refused'] and len(g['deleted']) == len(PRIOR), g
 a = ui.js('''
 var o = {rows: [], captured: 0};
 new GlideUpdateSet().set(%s);
@@ -94,10 +122,11 @@ for s, i in d['props'].items():
     assert i['read_back'] == expect and i['scope'] == APP_NAME and (s != TOPIC_PROP or len(i['read_back']) == 32), (s, i)
 print('  rule:', BR_NAME, d['br']['sys_id'], '|', d['br'])
 print('\n'.join('  captured: ' + r for r in d['rows']))
-assert d['set_scope'] == APP_NAME and all(r.endswith('| ' + APP_NAME) for r in d['rows']) and len(d['rows']) == 2 + len(props) + 1, d['rows']
+assert d['set_scope'] == APP_NAME and all(r.endswith('| ' + APP_NAME) for r in d['rows']) and len(d['rows']) == 2 + len(props) + 1 + len(PRIOR), d['rows']
+assert sum(1 for r in d['rows'] if '| DELETE |' in r) == len(PRIOR), d['rows']
 assert all(i['scope'] == APP_NAME and i['access'] == 'public' and i['api_name'] == PREFIX + '.' + n for n, i in d['si'].items())
 assert d['br'] == dict(sys_id=d['br']['sys_id'], scope=APP_NAME, when='after', order='100', insert='1', update='1', active='1', collection=TABLE)
 json.dump({'set': d['set'], 'set_name': NAME, 'previous_set': ST.get('set') if not reuse else ST.get('previous_set'), 'scope': SCOPE, 'default_set': DEFAULT_SET, 'app_name': APP_NAME, 'si': {n: i['sys_id'] for n, i in d['si'].items()}, 'props': {s: i['sys_id'] for s, i in d['props'].items()},
            'topic': d['props'][TOPIC_PROP]['read_back'], 'br': d['br']['sys_id'], 'rows': len(d['rows'])}, open(st_path, 'w'), indent=1)
 ui.app('global')
-print('deployed: 2 script includes, %d properties, 1 rule; update set scope matches every captured row' % len(props))
+print('deployed: 2 script includes, %d properties, 1 rule, %d deletions of earlier sys_ids; update set scope matches every captured row' % (len(props), len(PRIOR)))

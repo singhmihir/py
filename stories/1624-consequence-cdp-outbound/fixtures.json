@@ -1,7 +1,12 @@
 {
  "rule": "14d93498936f8f90e3aef0aefaba103a",
+ "rule_off": "ac04af2893e3c3d0e3aef0aefaba10ae",
  "linked": "58d93498936f8f90e3aef0aefaba103b",
  "linked_number": "CONSEQ-CDP-LINKED",
  "bare": "14d93498936f8f90e3aef0aefaba103d",
- "bare_number": "CONSEQ-CDP-BARE"
+ "bare_number": "CONSEQ-CDP-BARE",
+ "dangling": "a404af2893e3c3d0e3aef0aefaba10b0",
+ "misclassed": "6c04af2893e3c3d0e3aef0aefaba10b0",
+ "ghost": "a404af2893e3c3d0e3aef0aefaba10b1",
+ "ci": "3bd3511193f2c750e3aef0aefaba10f1"
 }

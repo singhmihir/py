@@ -33,7 +33,7 @@ new GlideUpdateSet().set(__d.set);
 var si = new GlideRecord('sys_script_include'); si.addQuery('name', 'BOA_SI_USEM_RemediationTaskPayloadBuilder'); si.addQuery('sys_scope', %s); si.query();
 if (!si.next()) { si.initialize(); si.setValue('name', 'BOA_SI_USEM_RemediationTaskPayloadBuilder'); }
 si.setValue('script', %s); si.setValue('access', 'public'); si.setValue('active', true); si.setValue('client_callable', false);
-si.setValue('description', 'Builds the outbound Kafka payload for one remediation task; fields per table from the property usem.cdp.remtask.fields.<table>.');
+si.setValue('description', 'Builds the outbound Kafka payload for one remediation task; fields per table from the property x_boar_bofa_usem_1.usem.cdp.remtask.fields.<table>.');
 si.update() || si.insert(); __d.si = si.getUniqueValue(); __d.api_name = '' + si.getValue('api_name');
 var ux = new GlideRecord('sys_update_xml'); ux.addQuery('update_set', __d.set); ux.query();
 while (ux.next()) __d.rows.push('' + ux.getValue('target_name') + ' | ' + ux.getValue('action') + ' | ' + ux.application.getDisplayValue());
