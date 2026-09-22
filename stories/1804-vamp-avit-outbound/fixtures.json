@@ -5,13 +5,34 @@
  "bare_number": "AVIT0001120",
  "exception": "4e3c305b939b0790e3aef0aefaba101e",
  "exception_number": "CA0010007",
- "m2m": "823c305b939b0790e3aef0aefaba1046",
+ "m2m": {
+  "first": "823c305b939b0790e3aef0aefaba1046",
+  "second": "9030f664936b83d0e3aef0aefaba10fa"
+ },
+ "tasks": {
+  "first": "0059e2cbf9442110f877708ae9db024a",
+  "second": "d430f664936b83d0e3aef0aefaba10f6"
+ },
+ "task_numbers": [
+  "AVUL0010005",
+  "AVUL0010093"
+ ],
+ "task_urls": [
+  "https://example.invalid/avul/AVUL0010005",
+  "https://example.invalid/avul/AVUL0010093"
+ ],
+ "task_ait": "AIT57152",
+ "entry_sub_cat": "VSC-4471",
+ "entry_display": "VULNENT123451",
+ "ptreq_assessment": "ASMT-90210",
  "avul": "AVUL0010093",
  "links": {
-  "entry": "db89fb585316301031f7ddeeff7b12ac",
   "release": "78922071935b0750e3aef0aefaba10cf",
   "ptreq": "11873fd45316301031f7ddeeff7b127c",
   "consequence": "ccf527da930f8310e3aef0aefaba105e",
-  "avul": "0059e2cbf9442110f877708ae9db024a"
+  "avul": "0059e2cbf9442110f877708ae9db024a",
+  "ci": "3bd3511193f2c750e3aef0aefaba10f1",
+  "ait": "069ec712934b8310e3aef0aefaba10bb",
+  "entry": "db89fb585316301031f7ddeeff7b12ac"
  }
 }

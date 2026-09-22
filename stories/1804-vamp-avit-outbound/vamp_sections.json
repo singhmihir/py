@@ -1,0 +1,18 @@
+[
+ {
+  "table": "sn_vul_app_vul_entry",
+  "json": "tpe"
+ },
+ {
+  "table": "sn_vul_app_vulnerability",
+  "json": "remediation_task"
+ },
+ {
+  "table": "sn_vul_app_vulnerable_item",
+  "json": "finding"
+ },
+ {
+  "table": "sn_vul_pen_test_assessment_request",
+  "json": "ptreq"
+ }
+]

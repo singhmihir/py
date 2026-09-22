@@ -1,7 +1,8 @@
 [
  {
   "table": "sn_vul_app_vul_entry",
-  "payload": "number",
+  "structure": "tpe",
+  "json": "number",
   "label": "Record Number",
   "type": "String",
   "field": "",
@@ -12,8 +13,22 @@
   "candidates": []
  },
  {
+  "table": "sn_vul_app_vul_entry",
+  "structure": "tpe",
+  "json": "u_vuln_sub_cat_id",
+  "label": "",
+  "type": "String",
+  "field": "u_vuln_sub_cat_id",
+  "how": "same name",
+  "found_type": "string",
+  "reference": "",
+  "type_ok": true,
+  "candidates": []
+ },
+ {
   "table": "sn_vul_app_vulnerability",
-  "payload": "number",
+  "structure": "remediation task",
+  "json": "number",
   "label": "Record Number",
   "type": "String",
   "field": "number",
@@ -25,19 +40,34 @@
  },
  {
   "table": "sn_vul_app_vulnerability",
-  "payload": "primary_ait",
+  "structure": "remediation task",
+  "json": "primary_ait",
   "label": "Primary AIT",
   "type": "Reference",
-  "field": "",
-  "how": "",
-  "found_type": "",
+  "field": "u_primary_ait",
+  "how": "label \"Primary AIT\"",
+  "found_type": "reference",
+  "reference": "x_196061_bofasim_ait",
+  "type_ok": true,
+  "candidates": []
+ },
+ {
+  "table": "sn_vul_app_vulnerability",
+  "structure": "remediation task",
+  "json": "u_avul_record_url",
+  "label": "",
+  "type": "String",
+  "field": "u_avul_record_url",
+  "how": "same name",
+  "found_type": "string",
   "reference": "",
-  "type_ok": false,
+  "type_ok": true,
   "candidates": []
  },
  {
   "table": "sn_vul_app_vulnerable_item",
-  "payload": "number",
+  "structure": "finding",
+  "json": "number",
   "label": "Record Number",
   "type": "String",
   "field": "number",
@@ -49,7 +79,8 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
-  "payload": "sys_created_on",
+  "structure": "finding",
+  "json": "sys_created_on",
   "label": "Created",
   "type": "Date/Time",
   "field": "sys_created_on",
@@ -61,7 +92,8 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
-  "payload": "sys_updated_on",
+  "structure": "finding",
+  "json": "sys_updated_on",
   "label": "Updated",
   "type": "Date/Time",
   "field": "sys_updated_on",
@@ -73,7 +105,8 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
-  "payload": "state",
+  "structure": "finding",
+  "json": "state",
   "label": "State",
   "type": "Integer",
   "field": "state",
@@ -85,7 +118,8 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
-  "payload": "configuration_item",
+  "structure": "finding",
+  "json": "configuration_item",
   "label": "Configuration Item",
   "type": "Reference",
   "field": "cmdb_ci",
@@ -97,19 +131,21 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
-  "payload": "u_verification_status",
+  "structure": "finding",
+  "json": "u_verification_status",
   "label": "Verification Status",
   "type": "String",
-  "field": "",
-  "how": "",
-  "found_type": "",
+  "field": "u_verification_status",
+  "how": "same name",
+  "found_type": "string",
   "reference": "",
-  "type_ok": false,
+  "type_ok": true,
   "candidates": []
  },
  {
   "table": "sn_vul_app_vulnerable_item",
-  "payload": "source_avit_id",
+  "structure": "finding",
+  "json": "source_avit_id",
   "label": "Source AVIT ID",
   "type": "String",
   "field": "source_avit_id",
@@ -120,8 +156,22 @@
   "candidates": []
  },
  {
+  "table": "sn_vul_app_vulnerable_item",
+  "structure": "finding",
+  "json": "u_avit_record_url",
+  "label": "",
+  "type": "String",
+  "field": "u_avit_record_url",
+  "how": "same name",
+  "found_type": "string",
+  "reference": "",
+  "type_ok": true,
+  "candidates": []
+ },
+ {
   "table": "sn_vul_pen_test_assessment_request",
-  "payload": "number",
+  "structure": "ptreq",
+  "json": "number",
   "label": "Record Number",
   "type": "String",
   "field": "number",
@@ -133,7 +183,8 @@
  },
  {
   "table": "sn_vul_pen_test_assessment_request",
-  "payload": "sys_created_on",
+  "structure": "ptreq",
+  "json": "sys_created_on",
   "label": "Created",
   "type": "Date/Time",
   "field": "sys_created_on",
@@ -145,16 +196,15 @@
  },
  {
   "table": "sn_vul_pen_test_assessment_request",
-  "payload": "u_assessment_id",
+  "structure": "ptreq",
+  "json": "u_assessment_id",
   "label": "Assessment ID",
   "type": "String",
-  "field": "",
-  "how": "",
-  "found_type": "",
+  "field": "u_assessment_id",
+  "how": "same name",
+  "found_type": "string",
   "reference": "",
-  "type_ok": false,
-  "candidates": [
-   "risk_assessment_id (\"Risk assessment ID\")"
-  ]
+  "type_ok": true,
+  "candidates": []
  }
 ]
