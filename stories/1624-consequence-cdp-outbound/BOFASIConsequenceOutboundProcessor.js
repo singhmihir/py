@@ -1,15 +1,17 @@
 /**
  * Builds the outbound CDP payload of one consequence record: the envelope and a single element that
- * holds the consequence section and its rule section, both keyed by table name.
+ * holds the consequence section and its rule section, named by the JSON structures of the sheet
+ * "Outbound to CDP (consequence)": consequence and rule.
  *
  * Configuration lives in initialize() and in one system property of the application:
  *   <scope>.usem.consequence.fields.<consequence table>
  *     one servicenow_field=payload_field pair per line, in payload order; the consequence's own fields
- *     plain, the rule's fields as <rule table>.<field>; the rule table is reached through the reference
- *     field named in REFERENCES.
- * Rendering: references and document ids as the display value of the record they point at, date/times
- * as MM-dd-yyyy HH:mm:ss, dates as MM-dd-yyyy, everything else as stored; a field missing on the table,
- * an empty field or a section without a record gives "".
+ *     plain, the rule's fields as <rule table>.<field>. SECTIONS of initialize() names the section of
+ *     each table and the reference field through which the rule is reached.
+ * Rendering by dictionary type: references and document ids as the display value of the record they
+ * point at ("" when that record is gone), choices as their labels, counts as stored, date/times as
+ * MM-dd-yyyy HH:mm:ss, dates as MM-dd-yyyy, strings and booleans as displayed, anything else as
+ * stored; a field missing on the table, an empty field or a section without a record gives "".
  *
  * Entry point: buildPayload(record). It holds the one try/catch of the feature: any failure, including
  * a payload that does not validate, is logged once with gs.error and returns an empty string, so that
@@ -20,7 +22,9 @@ BOFASIConsequenceOutboundProcessor.prototype = {
 
     /**
      * Constants of the envelope, the formats of the rendered values, the property prefix of the field
-     * mapping and the reference fields through which the other sections are reached.
+     * mapping, the section of each table (its payload name, and for the rule the reference field of
+     * the consequence that leads to it), the table searched for a document id whose class field
+     * names no table, and the display markup the platform wraps around some values.
      */
     initialize: function() {
         this.TOPIC_NAME = 'sn_usem_consequence_outbound';
@@ -32,9 +36,12 @@ BOFASIConsequenceOutboundProcessor.prototype = {
         this.DATE_FORMAT = 'MM-dd-yyyy';
         this.TIME_FORMAT = 'HH:mm:ss';
         this.FIELDS_PROPERTY_PREFIX = 'x_boar_bofa_usem_0.usem.consequence.fields.';
-        this.REFERENCES = {
-            x_boar_bofa_usem_0_consequence_rule: 'u_rule'
+        this.SECTIONS = {
+            x_boar_bofa_usem_0_consequence: { json: 'consequence' },
+            x_boar_bofa_usem_0_consequence_rule: { json: 'rule', reference: 'u_rule' }
         };
+        this.DOCUMENT_TABLES = { cmdb_ci: 'cmdb_ci' };
+        this.MARKUP = /^\[code\]([\s\S]*)\[\/code\]$/;
         this.UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
         this.TIMESTAMP_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
     },
@@ -124,71 +131,85 @@ BOFASIConsequenceOutboundProcessor.prototype = {
     },
 
     /**
-     * The one element of the message: one section per table of the mapping, each holding the payload
-     * names of that table with the rendered values, in mapping order.
+     * The one element of the message: one section per table of the mapping, named as in SECTIONS,
+     * each holding the payload names of that table with the rendered values, in mapping order. Field
+     * types are read from a record of each table the processor opens itself: a scoped application
+     * may not read the dictionary descriptor of a record handed over by a global script.
      * @param {GlideRecord} record - the consequence record
      * @param {Object[]} mapping - the parsed field property, see _fieldMapping
      * @param {string[]} missing - receives "<table>.<field>" for every mapped field the instance lacks
-     * @returns {Object} the element keyed by table name
+     * @returns {Object} the element, its sections keyed by their payload names
      */
     _buildConsequence: function(record, mapping, missing) {
         var element = {};
-        var records = {};
+        var records = {}, dictionaries = {};
         for (var i = 0; i < mapping.length; i++) {
-            var at = mapping[i].field.indexOf('.');
-            var table = at < 0 ? record.getTableName() : mapping[i].field.substring(0, at);
-            var field = at < 0 ? mapping[i].field : mapping[i].field.substring(at + 1);
-            if (!records.hasOwnProperty(table))
+            var table = mapping[i].table, field = mapping[i].field, section = mapping[i].section;
+            if (!records.hasOwnProperty(table)) {
                 records[table] = this._sectionRecord(record, table);
-            if (!new GlideRecord(table).isValidField(field))
+                dictionaries[table] = new GlideRecord(table);
+            }
+            if (!dictionaries[table].isValidField(field))
                 missing.push(table + '.' + field);
-            if (!element[table])
-                element[table] = {};
-            element[table][mapping[i].json] = this._fieldValue(records[table], field);
+            if (!element[section])
+                element[section] = {};
+            element[section][mapping[i].json] = this._fieldValue(records[table], dictionaries[table], field);
         }
         return element;
     },
 
     /**
-     * The record a section is read from: the consequence itself, or the record behind one of the
-     * reference fields of REFERENCES.
+     * The record a section is read from: the consequence itself, or the record behind the reference
+     * field SECTIONS names for the table.
      * @param {GlideRecord} record - the consequence record
      * @param {string} table - the table name of the section
-     * @returns {GlideRecord} the record of the section; for a reference left empty, a record that
-     *   isValidRecord() rejects, which renders every field as ""
-     * @throws {Error} when the mapping names a table the processor cannot reach
+     * @returns {GlideRecord} the record of the section; for a reference left empty or pointing at a
+     *   record that is gone, a record that isValidRecord() rejects, which renders every field as ""
      */
     _sectionRecord: function(record, table) {
         if (table == record.getTableName())
             return record;
-        if (this.REFERENCES[table])
-            return record.getElement(this.REFERENCES[table]).getRefRecord();
-        throw new Error('table ' + table + ' in property ' + this.FIELDS_PROPERTY_PREFIX + record.getTableName() + ' is not a source of the payload');
+        return record.getElement(this.SECTIONS[table].reference).getRefRecord();
     },
 
     /**
      * Reads and parses the field property of the table.
      * @param {string} table - the table of the record
-     * @returns {Object[]} one {field, json} per configured pair, in property order; the payload name
-     *   defaults to the field when no "=payload_field" follows it
-     * @throws {Error} when the property is missing or empty, or a line has no field name before "="
+     * @returns {Object[]} one {table, field, section, json} per configured pair, in property order
+     * @throws {Error} when the table has no section, the property is missing or empty, holds no field,
+     *   or holds a line with more than one "=", without a field name, without a payload name, of a
+     *   table that has no section, or naming a payload field of its section twice
      */
     _fieldMapping: function(table) {
+        if (!this.SECTIONS[table])
+            throw new Error('table ' + table + ' has no section in the payload');
         var property = this.FIELDS_PROPERTY_PREFIX + table;
         var value = gs.getProperty(property, '');
         if (!value)
             throw new Error('table ' + table + ' is not configured in property ' + property);
-        var mapping = [];
+        var mapping = [], names = {};
         var entries = value.split(/\r?\n|,/);
         for (var i = 0; i < entries.length; i++) {
             var entry = entries[i].trim();
             if (!entry)
                 continue;
             var pair = entry.split('=');
-            var field = pair[0].trim();
-            if (!field)
+            if (pair.length > 2)
+                throw new Error('property ' + property + ' holds a line with more than one "=": "' + entry + '"');
+            var left = pair[0].trim(), json = pair.length > 1 ? pair[1].trim() : '';
+            if (!left)
                 throw new Error('property ' + property + ' holds a line without a field name: "' + entry + '"');
-            mapping.push({ field: field, json: pair.length > 1 && pair[1].trim() ? pair[1].trim() : field });
+            if (!json)
+                throw new Error('property ' + property + ' holds a line without a payload name: "' + entry + '"');
+            var at = left.indexOf('.');
+            var source = at < 0 ? table : left.substring(0, at);
+            if (!this.SECTIONS.hasOwnProperty(source) || (source != table && !this.SECTIONS[source].reference))
+                throw new Error('property ' + property + ' names table ' + source + ', which is not a section of the payload: "' + entry + '"');
+            var section = this.SECTIONS[source].json;
+            if (names[section + '.' + json])
+                throw new Error('property ' + property + ' names ' + json + ' twice in section ' + section);
+            names[section + '.' + json] = true;
+            mapping.push({ table: source, field: at < 0 ? left : left.substring(at + 1), section: section, json: json });
         }
         if (!mapping.length)
             throw new Error('property ' + property + ' holds no field');
@@ -224,31 +245,31 @@ BOFASIConsequenceOutboundProcessor.prototype = {
         var element = elements && elements.length ? elements[0] : {};
         var expectedNames = {};
         for (var i = 0; i < mapping.length; i++) {
-            var at = mapping[i].field.indexOf('.');
-            var table = at < 0 ? record.getTableName() : mapping[i].field.substring(0, at);
-            if (!expectedNames[table])
-                expectedNames[table] = {};
-            expectedNames[table][mapping[i].json] = true;
-            var section = element[table];
-            if (!section || !section.hasOwnProperty(mapping[i].json))
-                problems.push('section ' + table + ' lacks ' + mapping[i].json);
-            else if (typeof section[mapping[i].json] != 'string')
-                problems.push('section ' + table + '.' + mapping[i].json + ' is not a string');
-        }
-        for (var name in element) {
+            var name = mapping[i].section;
             if (!expectedNames[name])
-                problems.push('section ' + name + ' is not in the field property');
-            else
-                for (var json in element[name])
-                    if (!expectedNames[name][json])
-                        problems.push('section ' + name + ' carries ' + json + ', which is not in the field property');
+                expectedNames[name] = {};
+            expectedNames[name][mapping[i].json] = true;
+            var section = element[name];
+            if (!section || !section.hasOwnProperty(mapping[i].json))
+                problems.push('section ' + name + ' lacks ' + mapping[i].json);
+            else if (typeof section[mapping[i].json] != 'string')
+                problems.push('section ' + name + '.' + mapping[i].json + ' is not a string');
         }
-        var own = element[record.getTableName()] || {}, filled = 0;
+        for (var key in element) {
+            if (!expectedNames[key])
+                problems.push('section ' + key + ' is not in the field property');
+            else
+                for (var json in element[key])
+                    if (!expectedNames[key][json])
+                        problems.push('section ' + key + ' carries ' + json + ', which is not in the field property');
+        }
+        var ownName = this.SECTIONS[record.getTableName()].json;
+        var own = element[ownName] || {}, filled = 0;
         for (var field in own)
             if (own[field] !== '')
                 filled++;
         if (!filled)
-            problems.push('section ' + record.getTableName() + ' holds no value');
+            problems.push('section ' + ownName + ' holds no value');
         if (problems.length)
             throw new Error('payload invalid: ' + problems.join('; '));
     },
@@ -256,40 +277,100 @@ BOFASIConsequenceOutboundProcessor.prototype = {
     /**
      * Renders one field of a record.
      * @param {GlideRecord} record - the record of the section; may be absent or invalid
+     * @param {GlideRecord} dictionary - a record of the same table, opened by the processor, whose field
+     *   descriptors give the field types
      * @param {string} field - the field name
      * @returns {string} the rendered value; "" when the record is missing or invalid, the field does not
      *   exist or is empty
      */
-    _fieldValue: function(record, field) {
-        if (!record || !record.isValidRecord() || !record.isValidField(field))
+    _fieldValue: function(record, dictionary, field) {
+        if (!this._isRecord(record) || !record.isValidField(field))
             return '';
         var element = record.getElement(field);
         if (element === null || element.nil())
             return '';
-        return this._renderElement(element);
+        return this._renderElement(element, dictionary.getElement(field).getED(), field);
     },
 
     /**
      * Renders a non-empty element by its dictionary type.
      * @param {GlideElement} element - the element to render
-     * @returns {string} references and document ids as the display value of the record they point at
-     *   ("" for a document id whose record or class is missing), date/times and dates in the configured
-     *   formats, anything else as stored
+     * @param {GlideElementDescriptor} descriptor - the field's dictionary descriptor
+     * @param {string} field - the field name
+     * @returns {string} date/times and dates in the configured formats; a reference as its display
+     *   value, "" when the record it points at is gone; a document id as the display value of its
+     *   record (see _documentDisplay); an integer with choices as its label and a plain count as
+     *   stored (a display value would carry the thousands separator of the user); strings, lists,
+     *   booleans, durations, domains and classes as displayed, so choices give their labels; anything
+     *   else as stored. Display markup of the form [code]...[/code] gives its visible text.
      */
-    _renderElement: function(element) {
-        switch (String(element.getED().getInternalType())) {
+    _renderElement: function(element, descriptor, field) {
+        switch (String(descriptor.getInternalType())) {
             case 'glide_date_time':
+            case 'due_date':
                 return this._formatDateTime(element.getValue());
             case 'glide_date':
                 return this._formatDate(element.getValue());
             case 'reference':
-                return String(element.getDisplayValue());
+                return this._isRecord(element.getRefRecord()) ? String(element.getDisplayValue()) : '';
             case 'document_id':
-                var target = element.getRefRecord();
-                return target && target.isValidRecord() ? String(target.getDisplayValue()) : '';
+                return this._documentDisplay(element, field);
+            case 'integer':
+                return descriptor.isChoiceTable() ? String(element.getDisplayValue()) : String(element.getValue());
+            case 'string':
+            case 'glide_list':
+            case 'boolean':
+            case 'glide_duration':
+            case 'timer':
+            case 'domain_id':
+            case 'sys_class_name':
+            case 'choice':
+                return this._plainText(String(element.getDisplayValue()));
             default:
-                return String(element.getValue());
+                return this._plainText(String(element.getValue()));
         }
+    },
+
+    /**
+     * The display value of the record a document id points at: in the table its class field names,
+     * otherwise, for a field of DOCUMENT_TABLES, in that table by sys_id (a class field left empty or
+     * naming another class than the record's).
+     * @param {GlideElement} element - the document id field
+     * @param {string} field - the field name
+     * @returns {string} the display value, "" when no record is found
+     */
+    _documentDisplay: function(element, field) {
+        var target = element.getRefRecord();
+        if (this._isRecord(target))
+            return String(target.getDisplayValue());
+        if (!this.DOCUMENT_TABLES[field])
+            return '';
+        var found = new GlideRecord(this.DOCUMENT_TABLES[field]);
+        return found.get(String(element.getValue())) ? String(found.getDisplayValue()) : '';
+    },
+
+    /**
+     * Tells whether a value is a record that exists. getRefRecord() of a document id whose class field
+     * is empty gives null, or in a scoped script an empty object without the record methods.
+     * @param {*} value - the value to check
+     * @returns {boolean} true for a GlideRecord positioned on an existing record
+     */
+    _isRecord: function(value) {
+        return value != null && typeof value.isValidRecord == 'function' && value.isValidRecord();
+    },
+
+    /**
+     * Turns display markup ([code]<a href=...>3</a>[/code]) into its visible text; any other value is
+     * returned unchanged.
+     * @param {string} value - the value as the platform gives it
+     * @returns {string} the value without markup
+     */
+    _plainText: function(value) {
+        var markup = this.MARKUP.exec(value);
+        if (!markup)
+            return value;
+        return markup[1].replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&').trim();
     },
 
     /**

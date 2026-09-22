@@ -1,11 +1,14 @@
 """Deploys the VAMP outbound build on the PDI into the mirror of the client integration application
 (scope x_boar_bofa_usem_1, the client's application sys_id) under a pinned update set: the two script
-includes, the three properties (topic, sections and fields of the application vulnerable item table)
-and the after insert/update rule on that table. Nothing is renamed: the repository files carry the
-client names and the PDI holds the same application, so the export imports on the client instance as
-is. Each version is a fresh set: properties of earlier versions that are not deployed any more are
-removed under the application's Default set first. Re-runnable: reopens the set recorded in state.json
-when its name matches."""
+includes, the two properties (topic, and the fields of the application vulnerable item table) and the
+after insert/update rule on that table. Nothing is renamed: the repository files carry the client names
+and the PDI holds the same application, so the export imports on the client instance as is. Each
+version is a fresh set: properties of earlier versions that are not deployed any more are removed under
+the application's Default set first. The records earlier versions delivered under other sys_ids
+(prior_records.json) are captured as deletions in the set: each is created under its old sys_id and
+deleted again (a current property of the same name steps aside for the moment), so that an instance
+holding an earlier version keeps one copy of every record. Re-runnable: reopens the set recorded in
+state.json when its name matches."""
 import os, sys, json
 HERE = os.path.dirname(os.path.abspath(__file__)); BASE = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(BASE, 'tools'))
@@ -13,17 +16,18 @@ from snui import SNUI
 SCOPE = '4ba447d22b43cb10cb55fbcc6e91bf0f'          # mirror of the client application BOFA USEM CDP integration on the PDI, same sys_id and scope name
 PREFIX = 'x_boar_bofa_usem_1'
 APP_NAME = 'BOFA USEM CDP integration'
-NAME = 'SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.0'
+NAME = 'SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1'
 TOPIC_PROP = 'usem.vamp.kafka.topic_sys_id'
 BR_NAME = 'BOFA_BR_AVIT_VampOutbound'
 SI_NAMES = ['BOFASIVampOutboundProcessor', 'BOFASIKafkaProducerVamp']
 DESC = {
-    'BOFASIVampOutboundProcessor': 'Builds the outbound VAMP payload (envelope plus one finding element) for an application vulnerable item. The sections come from the property usem.vamp.sections.<item table> and their fields from usem.vamp.fields.<item table>; the remediation tasks of the item are a list, one entry per linked task.',
-    'BOFASIKafkaProducerVamp': 'Sends a VAMP payload to the Kafka topic held in usem.vamp.kafka.topic_sys_id with sn_ih_kafka.ProducerV2 (key <table>.<sys_id>).\nDocumentation of API used - https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html',
+    'BOFASIVampOutboundProcessor': 'Builds the outbound VAMP payload (envelope plus one finding element) for an application vulnerable item. The sections and their fields come from the property x_boar_bofa_usem_1.usem.vamp.fields.<item table> (servicenow_field=<json structure>.<json field> per line); the remediation tasks of the item are a list, one entry per linked task.',
+    'BOFASIKafkaProducerVamp': 'Sends a VAMP payload with sn_ih_kafka.ProducerV2 to the Kafka topic whose sys_id is held in x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id (key <table>.<sys_id>).\nDocumentation of API used - https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html',
 }
 scripts = {n: open(os.path.join(HERE, n + '.js')).read() for n in SI_NAMES}
 br_script = open(os.path.join(HERE, BR_NAME + '.js')).read()
 props = json.load(open(os.path.join(HERE, 'properties.json')))
+PRIOR = json.load(open(os.path.join(HERE, 'prior_records.json')))['records']
 ui = SNUI(); ui.app('global')
 st_path = os.path.join(HERE, 'state.json'); ST = json.load(open(st_path)) if os.path.exists(st_path) else {}
 reuse = ST.get('set_name') == NAME
@@ -88,6 +92,30 @@ o.br = {sys_id: br.getUniqueValue(), scope: '' + br.sys_scope.getDisplayValue(),
 gs.print('X::' + JSON.stringify(o));''' % dict(has=json.dumps(reuse), set=json.dumps(ST.get('set', '')), name=json.dumps(NAME), scope=json.dumps(SCOPE),
                                             scripts=json.dumps(scripts), desc=json.dumps(DESC), props=json.dumps(props), prefix=json.dumps(PREFIX),
                                             br=json.dumps(BR_NAME), br_script=json.dumps(br_script), topic=json.dumps(TOPIC_PROP)), scope=SCOPE)
+g = ui.js('''
+var o = {deleted: [], refused: []};
+new GlideUpdateSet().set(%(set)s);
+var prior = %(prior)s;
+for (var i = 0; i < prior.length; i++) {
+    var p = prior[i], g = new GlideRecord(p.table), current = null;
+    if (p.table == 'sys_properties') {   // property names are unique: the current property steps aside while the earlier one exists
+        current = new GlideRecord('sys_properties'); current.addQuery('name', p.name); current.addQuery('sys_id', '!=', p.sys_id); current.query();
+        if (current.next()) { current.setValue('name', p.name + '.set_aside'); current.update(); } else current = null;
+    }
+    if (!g.get(p.sys_id)) {
+        g.initialize(); g.setNewGuidValue(p.sys_id); g.setValue('name', p.name);
+        if (p.table == 'sys_script_include') { g.setValue('active', false); g.setValue('access', 'public'); }
+        if (p.table == 'sys_script') { g.setValue('collection', 'sn_vul_app_vulnerable_item'); g.setValue('when', 'after'); g.setValue('active', false); }
+        if (p.table == 'sys_properties') g.setValue('type', 'string');
+        if (!g.insert()) { o.refused.push(p.table + ' ' + p.sys_id + ': ' + g.getLastErrorMessage()); if (current) { current.setValue('name', p.name); current.update(); } continue; }
+    }
+    var d = new GlideRecord(p.table); d.get(p.sys_id);
+    if (d.deleteRecord()) o.deleted.push(p.table + '_' + p.sys_id); else o.refused.push(p.table + ' ' + p.sys_id + ': not deleted');
+    if (current) { current.setValue('name', p.name); current.update(); }
+}
+gs.print('X::' + JSON.stringify(o));''' % dict(set=json.dumps(d['set']), prior=json.dumps(PRIOR)), scope=SCOPE)
+print('earlier sys_ids captured as deletions:', len(g['deleted']), '| refused:', g['refused'])
+assert not g['refused'] and len(g['deleted']) == len(PRIOR), g
 a = ui.js('''
 var o = {rows: [], captured: 0};
 new GlideUpdateSet().set(%s);
@@ -105,10 +133,11 @@ for s, i in d['props'].items():
     assert i['read_back'] == expect and i['scope'] == APP_NAME and (s != TOPIC_PROP or len(i['read_back']) == 32), (s, i)
 print('  rule:', BR_NAME, d['br']['sys_id'], '|', d['br'])
 print('\n'.join('  captured: ' + r for r in d['rows']))
-assert d['set_scope'] == APP_NAME and all(r.endswith('| ' + APP_NAME) for r in d['rows']) and len(d['rows']) == 2 + len(props) + 1, d['rows']
+assert d['set_scope'] == APP_NAME and all(r.endswith('| ' + APP_NAME) for r in d['rows']) and len(d['rows']) == 2 + len(props) + 1 + len(PRIOR), d['rows']
+assert sum(1 for r in d['rows'] if '| DELETE |' in r) == len(PRIOR), d['rows']
 assert all(i['scope'] == APP_NAME and i['access'] == 'public' and i['api_name'] == PREFIX + '.' + n for n, i in d['si'].items())
 assert d['br'] == dict(sys_id=d['br']['sys_id'], scope=APP_NAME, when='after', order='100', insert='1', update='1', active='1')
 json.dump({'set': d['set'], 'set_name': NAME, 'previous_set': ST.get('set') if not reuse else ST.get('previous_set'), 'scope': SCOPE, 'si': {n: i['sys_id'] for n, i in d['si'].items()}, 'props': {s: i['sys_id'] for s, i in d['props'].items()},
            'app_name': APP_NAME, 'default_set': DEFAULT_SET, 'topic': d['props'][TOPIC_PROP]['read_back'], 'br': d['br']['sys_id'], 'rows': len(d['rows'])}, open(st_path, 'w'), indent=1)
 ui.app('global')
-print('deployed: 2 script includes, %d properties, 1 rule; update set scope matches every captured row' % len(props))
+print('deployed: 2 script includes, %d properties, 1 rule, %d deletions of earlier sys_ids; update set scope matches every captured row' % (len(props), len(PRIOR)))

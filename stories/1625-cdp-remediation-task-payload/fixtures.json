@@ -1,0 +1,278 @@
+{
+ "ids": {
+  "chg_open": "c9ab97a89363c3d0e3aef0aefaba1021",
+  "chg_closed": "5dab97a89363c3d0e3aef0aefaba1028",
+  "chg_cancelled": "1dab97a89363c3d0e3aef0aefaba1029",
+  "chg_imac": "d9ab97a89363c3d0e3aef0aefaba102a",
+  "sn_vul_vulnerability.bare": "1dab97a89363c3d0e3aef0aefaba102c",
+  "sn_vul_vulnerability.single": "5dab97a89363c3d0e3aef0aefaba102f",
+  "sn_vul_vulnerability.plural": "99ab97a89363c3d0e3aef0aefaba1030",
+  "sn_vul_vulnerability.single.open": "d5ab97a89363c3d0e3aef0aefaba1031",
+  "sn_vul_vulnerability.plural.imac": "9dab97a89363c3d0e3aef0aefaba1031",
+  "sn_vul_vulnerability.plural.closed": "51ab97a89363c3d0e3aef0aefaba1032",
+  "sn_vul_vulnerability.plural.open": "15ab97a89363c3d0e3aef0aefaba1032",
+  "sn_vul_vulnerability.plural.open_again": "d5ab97a89363c3d0e3aef0aefaba1032",
+  "sn_vul_vulnerability.plural.cancelled": "99ab97a89363c3d0e3aef0aefaba1032",
+  "sn_vul_vulnerability.plural.gone": "5dab97a89363c3d0e3aef0aefaba1032",
+  "sn_vul_vulnerability.exc.approved": "11ab97a89363c3d0e3aef0aefaba1033",
+  "sn_vul_vulnerability.exc.expired": "59ab97a89363c3d0e3aef0aefaba1033",
+  "sn_vul_vulnerability.exc.requested": "9dab97a89363c3d0e3aef0aefaba1033",
+  "sn_vul_vulnerability.exc.other": "d1ab97a89363c3d0e3aef0aefaba1034",
+  "sn_vul_vulnerability.commented": "99ab97a89363c3d0e3aef0aefaba1030",
+  "sn_vul_app_vulnerability.bare": "83bb9ba89363c3d0e3aef0aefaba1043",
+  "sn_vul_app_vulnerability.single": "cfbb9ba89363c3d0e3aef0aefaba1045",
+  "sn_vul_app_vulnerability.plural": "8fbb9ba89363c3d0e3aef0aefaba1046",
+  "sn_vul_app_vulnerability.single.open": "cfbb9ba89363c3d0e3aef0aefaba1047",
+  "sn_vul_app_vulnerability.plural.imac": "0bbb9ba89363c3d0e3aef0aefaba1048",
+  "sn_vul_app_vulnerability.plural.closed": "4fbb9ba89363c3d0e3aef0aefaba1048",
+  "sn_vul_app_vulnerability.plural.open": "83bb9ba89363c3d0e3aef0aefaba1049",
+  "sn_vul_app_vulnerability.plural.open_again": "c7bb9ba89363c3d0e3aef0aefaba1049",
+  "sn_vul_app_vulnerability.plural.cancelled": "0fbb9ba89363c3d0e3aef0aefaba1049",
+  "sn_vul_app_vulnerability.plural.gone": "43bb9ba89363c3d0e3aef0aefaba104a",
+  "sn_vul_app_vulnerability.exc.approved": "87bb9ba89363c3d0e3aef0aefaba104a",
+  "sn_vul_app_vulnerability.exc.expired": "4fbb9ba89363c3d0e3aef0aefaba104a",
+  "sn_vul_app_vulnerability.exc.requested": "07bb9ba89363c3d0e3aef0aefaba104b",
+  "sn_vul_app_vulnerability.exc.other": "cbbb9ba89363c3d0e3aef0aefaba104b",
+  "sn_vul_app_vulnerability.commented": "8fbb9ba89363c3d0e3aef0aefaba1046",
+  "sn_vul_container_vulnerability.bare": "43bb9ba89363c3d0e3aef0aefaba1071",
+  "sn_vul_container_vulnerability.single": "0fbb9ba89363c3d0e3aef0aefaba1073",
+  "sn_vul_container_vulnerability.plural": "cbbb9ba89363c3d0e3aef0aefaba1074",
+  "sn_vul_container_vulnerability.single.open": "0fbb9ba89363c3d0e3aef0aefaba1075",
+  "sn_vul_container_vulnerability.plural.imac": "47bb9ba89363c3d0e3aef0aefaba1076",
+  "sn_vul_container_vulnerability.plural.closed": "8bbb9ba89363c3d0e3aef0aefaba1076",
+  "sn_vul_container_vulnerability.plural.open": "cfbb9ba89363c3d0e3aef0aefaba1076",
+  "sn_vul_container_vulnerability.plural.open_again": "07bb9ba89363c3d0e3aef0aefaba1077",
+  "sn_vul_container_vulnerability.plural.cancelled": "4bbb9ba89363c3d0e3aef0aefaba1077",
+  "sn_vul_container_vulnerability.plural.gone": "8fbb9ba89363c3d0e3aef0aefaba1077",
+  "sn_vul_container_vulnerability.exc.approved": "c3bb9ba89363c3d0e3aef0aefaba1078",
+  "sn_vul_container_vulnerability.exc.expired": "8bbb9ba89363c3d0e3aef0aefaba1078",
+  "sn_vul_container_vulnerability.exc.requested": "43bb9ba89363c3d0e3aef0aefaba1079",
+  "sn_vul_container_vulnerability.exc.other": "0bbb9ba89363c3d0e3aef0aefaba1079",
+  "sn_vul_container_vulnerability.commented": "cbbb9ba89363c3d0e3aef0aefaba1074",
+  "sn_vulc_result_group.bare": "93bb9ba89363c3d0e3aef0aefaba1085",
+  "sn_vulc_result_group.single": "d3bb9ba89363c3d0e3aef0aefaba1087",
+  "sn_vulc_result_group.plural": "93bb9ba89363c3d0e3aef0aefaba1088",
+  "sn_vulc_result_group.single.open": "d3bb9ba89363c3d0e3aef0aefaba1089",
+  "sn_vulc_result_group.plural.imac": "1fbb9ba89363c3d0e3aef0aefaba1089",
+  "sn_vulc_result_group.plural.closed": "53bb9ba89363c3d0e3aef0aefaba108a",
+  "sn_vulc_result_group.plural.open": "97bb9ba89363c3d0e3aef0aefaba108a",
+  "sn_vulc_result_group.plural.open_again": "dbbb9ba89363c3d0e3aef0aefaba108a",
+  "sn_vulc_result_group.plural.cancelled": "13bb9ba89363c3d0e3aef0aefaba108b",
+  "sn_vulc_result_group.plural.gone": "57bb9ba89363c3d0e3aef0aefaba108b",
+  "sn_vulc_result_group.exc.approved": "9bbb9ba89363c3d0e3aef0aefaba108b",
+  "sn_vulc_result_group.exc.expired": "53bb9ba89363c3d0e3aef0aefaba108c",
+  "sn_vulc_result_group.exc.requested": "1bbb9ba89363c3d0e3aef0aefaba108c",
+  "sn_vulc_result_group.exc.other": "dfbb9ba89363c3d0e3aef0aefaba108c",
+  "sn_vulc_result_group.commented": "93bb9ba89363c3d0e3aef0aefaba1088"
+ },
+ "changes": {
+  "chg_open": {
+   "number": "CHG0030001",
+   "state": "-5",
+   "cls": "change_request"
+  },
+  "chg_closed": {
+   "number": "CHG0030002",
+   "state": "3",
+   "cls": "change_request"
+  },
+  "chg_cancelled": {
+   "number": "CHG0030003",
+   "state": "4",
+   "cls": "change_request"
+  },
+  "chg_imac": {
+   "number": "CHG0030004",
+   "state": "-5",
+   "cls": "change_request_imac"
+  }
+ },
+ "tables": {
+  "sn_vul_vulnerability": {
+   "numbers": {
+    "bare": "VUL0010042",
+    "single": "VUL0010043",
+    "plural": "VUL0010044"
+   },
+   "exceptions": {
+    "approved": {
+     "number": "CA0010008",
+     "state": "1"
+    },
+    "expired": {
+     "number": "CA0010009",
+     "state": "4"
+    },
+    "requested": {
+     "number": "CA0010010",
+     "state": "2"
+    },
+    "other": {
+     "number": "CA0010011",
+     "state": "1"
+    }
+   },
+   "plural_links": 6
+  },
+  "sn_vul_app_vulnerability": {
+   "numbers": {
+    "bare": "AVUL0010006",
+    "single": "AVUL0010007",
+    "plural": "AVUL0010008"
+   },
+   "exceptions": {
+    "approved": {
+     "number": "CA0010012",
+     "state": "1"
+    },
+    "expired": {
+     "number": "CA0010013",
+     "state": "4"
+    },
+    "requested": {
+     "number": "CA0010014",
+     "state": "2"
+    },
+    "other": {
+     "number": "CA0010015",
+     "state": "1"
+    }
+   },
+   "plural_links": 6
+  },
+  "sn_vul_container_vulnerability": {
+   "numbers": {
+    "bare": "CVUL0010002",
+    "single": "CVUL0010003",
+    "plural": "CVUL0010004"
+   },
+   "exceptions": {
+    "approved": {
+     "number": "CA0010016",
+     "state": "1"
+    },
+    "expired": {
+     "number": "CA0010017",
+     "state": "4"
+    },
+    "requested": {
+     "number": "CA0010018",
+     "state": "2"
+    },
+    "other": {
+     "number": "CA0010019",
+     "state": "1"
+    }
+   },
+   "plural_links": 6
+  },
+  "sn_vulc_result_group": {
+   "numbers": {
+    "bare": "CRG0001136",
+    "single": "CRG0001137",
+    "plural": "CRG0001138"
+   },
+   "exceptions": {
+    "approved": {
+     "number": "CA0010020",
+     "state": "1"
+    },
+    "expired": {
+     "number": "CA0010021",
+     "state": "4"
+    },
+    "requested": {
+     "number": "CA0010022",
+     "state": "2"
+    },
+    "other": {
+     "number": "CA0010023",
+     "state": "1"
+    }
+   },
+   "plural_links": 6
+  }
+ },
+ "expected_change_requests": {
+  "sn_vul_vulnerability": {
+   "bare": "",
+   "single": "CHG0030001",
+   "plural": "CHG0030001,CHG0030002,CHG0030004"
+  },
+  "sn_vul_app_vulnerability": {
+   "bare": "",
+   "single": "CHG0030001",
+   "plural": "CHG0030001,CHG0030002,CHG0030004"
+  },
+  "sn_vul_container_vulnerability": {
+   "bare": "",
+   "single": "CHG0030001",
+   "plural": "CHG0030001,CHG0030002,CHG0030004"
+  },
+  "sn_vulc_result_group": {
+   "bare": "",
+   "single": "CHG0030001",
+   "plural": "CHG0030001,CHG0030002,CHG0030004"
+  }
+ },
+ "expected_exception_requests": {
+  "sn_vul_vulnerability": {
+   "bare": "CA0010011",
+   "single": "",
+   "plural": "CA0010008,CA0010009"
+  },
+  "sn_vul_app_vulnerability": {
+   "bare": "CA0010015",
+   "single": "",
+   "plural": "CA0010012,CA0010013"
+  },
+  "sn_vul_container_vulnerability": {
+   "bare": "CA0010019",
+   "single": "",
+   "plural": "CA0010016,CA0010017"
+  },
+  "sn_vulc_result_group": {
+   "bare": "CA0010023",
+   "single": "",
+   "plural": "CA0010020,CA0010021"
+  }
+ },
+ "measure": {
+  "sn_vul_vulnerability": {
+   "comments_nil": true,
+   "comments_value": "",
+   "entry1": "2026-09-22 23:38:39 - Mihir Kumar Singh (Additional comments)\nPayload fixture comment two\n\n",
+   "journal_rows": 2,
+   "reassign_value": "1250",
+   "reassign_display": "1,250",
+   "cr_count_value": "[code]<a href=\"/nav_to.do?uri=%2Fchange_request_list.do%3Fsysparm_query%3Dsys_idINc9ab97a89363c3d0e3aef0aefaba1021%2C5dab97a89363c3d0e3aef0aefaba1028%2Cd9ab97a89363c3d0e3aef0aefaba102a\" target=\"_parent\">3</a>[/code]"
+  },
+  "sn_vul_app_vulnerability": {
+   "comments_nil": true,
+   "comments_value": "",
+   "entry1": "2026-09-22 23:39:03 - Mihir Kumar Singh (Additional comments)\nPayload fixture comment two\n\n",
+   "journal_rows": 2,
+   "reassign_value": "1250",
+   "reassign_display": "1,250",
+   "cr_count_value": "[code]<a href=\"/nav_to.do?uri=%2Fchange_request_list.do%3Fsysparm_query%3Dsys_idINc9ab97a89363c3d0e3aef0aefaba1021%2C5dab97a89363c3d0e3aef0aefaba1028%2Cd9ab97a89363c3d0e3aef0aefaba102a\" target=\"_parent\">3</a>[/code]"
+  },
+  "sn_vul_container_vulnerability": {
+   "comments_nil": true,
+   "comments_value": "",
+   "entry1": "2026-09-22 23:39:03 - Mihir Kumar Singh (Additional comments)\nPayload fixture comment two\n\n",
+   "journal_rows": 2,
+   "reassign_value": "1250",
+   "reassign_display": "1,250",
+   "cr_count_value": "[code]<a href=\"/nav_to.do?uri=%2Fchange_request_list.do%3Fsysparm_query%3Dsys_idINc9ab97a89363c3d0e3aef0aefaba1021%2C5dab97a89363c3d0e3aef0aefaba1028%2Cd9ab97a89363c3d0e3aef0aefaba102a\" target=\"_parent\">3</a>[/code]"
+  },
+  "sn_vulc_result_group": {
+   "comments_nil": true,
+   "comments_value": "",
+   "entry1": "2026-09-22 23:39:04 - Mihir Kumar Singh (Additional comments)\nPayload fixture comment two\n\n",
+   "journal_rows": 2,
+   "reassign_value": "1250",
+   "reassign_display": "1,250",
+   "cr_count_value": "no field"
+  }
+ }
+}

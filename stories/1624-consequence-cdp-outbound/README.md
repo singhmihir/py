@@ -12,35 +12,45 @@ Versions: V1.0 placed the scripts and properties in the integration application 
 (the rule would have run across scopes); V1.1 moved the five records into the consequence application
 `x_boar_bofa_usem_0` (BOFA USEM Consequence, sys_id 488be1cd2b1247102b30f8e14391bf0c) after the
 captures from the client forms, still built in the PDI's stand-in scope and re-pointed in the record
-XML; **V1.2** (current) is built in a PDI mirror of the client application itself (same scope name,
+XML; V1.2 is built in a PDI mirror of the client application itself (same scope name,
 same sys_id, tables `x_boar_bofa_usem_0_consequence` and `x_boar_bofa_usem_0_consequence_rule`), so the
 native update set export and the record XML both carry the client names and import on the client
-instance as they are, and adds error handling, payload validation and function comments.
+instance as they are, and adds error handling, payload validation and function comments. **V1.3** (current)
+names the sections as the sheet and the client sample do (`consequence`, `rule`), sends choices as labels and a
+reference whose record is gone as `""`, reads the field types in a way a scoped application may use whoever
+calls it, refuses every malformed line of the field property, and deletes the records V1.0/V1.1 delivered under
+other sys_ids (see *Earlier sys_ids*).
 
 ## Records
 - `BOFA_BR_Consequence_CdpOutbound.js` — after insert/update rule on `x_boar_bofa_usem_0_consequence`,
   order 100, no condition: processor → producer, one try/catch with one `gs.error`; an empty payload
   (a build the processor refused) stops the rule before the producer.
 - `BOFASIConsequenceOutboundProcessor.js` — `buildPayload(record)` returns the JSON text
-  `{envelope, consequences: [{x_boar_bofa_usem_0_consequence, x_boar_bofa_usem_0_consequence_rule}]}`
-  (sections keyed by table name, the array key `consequences` as in the client sample) and shows it
-  with `gs.addInfoMessage` on the record; a second message names any configured field the instance
-  does not have. Envelope as CDP (topic `sn_usem_consequence_outbound`, namespace `com.bofa.usem`,
-  versions 1.0.0, UUID event id, UTC timestamp, element_count 1, element_activity from
-  `record.operation()`). The rule section is the consequence's `u_rule` reference record. Every
-  field comes from the one property `x_boar_bofa_usem_0.usem.consequence.fields.x_boar_bofa_usem_0_consequence`
-  in the CDP line format and parser (`servicenow_field=payload_field,`): the consequence's own fields
-  plain, the rule's as `x_boar_bofa_usem_0_consequence_rule.<field>`. Values: references as the display
-  value; a document id (the client's Configuration item, whose table is its Class field) as the
-  display value of the record it points at through `getRefRecord()`, so `Trade Processing Portal`
-  rather than the platform's `Business Application: Trade Processing Portal`, and `""` when the
-  value or its class is missing; choices, integers, booleans, table names, conditions and strings as
-  stored; date/times `MM-dd-yyyy HH:mm:ss`; a field missing on the table, an empty field or a
-  consequence without a rule is sent as `""`.
+  `{envelope, consequences: [{consequence: {...}, rule: {...}}]}` (the section names of the sheet and of the
+  client sample, set in `SECTIONS` of `initialize()` with the reference field `u_rule` that leads to the rule;
+  the array key `consequences` as in the client sample) and shows it with `gs.addInfoMessage` on the record;
+  a second message names any configured field the instance does not have. Envelope as CDP (topic
+  `sn_usem_consequence_outbound`, namespace `com.bofa.usem`, versions 1.0.0, UUID event id, UTC timestamp,
+  element_count 1, element_activity from `record.operation()`). Every field comes from the one property
+  `x_boar_bofa_usem_0.usem.consequence.fields.x_boar_bofa_usem_0_consequence` in the CDP line format
+  (`servicenow_field=payload_field,`): the consequence's own fields plain, the rule's as
+  `x_boar_bofa_usem_0_consequence_rule.<field>`. Values by dictionary type: a reference as its display value
+  and `""` when its record is gone (never the sys_id); the configuration item (a document id whose table is the
+  Class field) as the display value of its record (`Trade Processing Portal`, not the platform's
+  `Business Application: Trade Processing Portal`), looked up in `cmdb_ci` by sys_id when the Class field is
+  empty or names another class than the CI's, `""` when no CI is found; an integer with choices as its label
+  and a plain count as stored (a display value carries the user's thousands separator); strings, choices,
+  booleans (`true`/`false`) and lists as displayed, so choice fields give their labels as in the client sample
+  (`Change Frozen`); table names and conditions as stored; date/times `MM-dd-yyyy HH:mm:ss`; display markup
+  `[code]...[/code]` as its visible text; a field missing on the table, an empty field or a consequence without
+  a rule gives `""`. Field types are read from a record of the table the processor opens itself: a scoped
+  application may not read the dictionary descriptor of a record handed over from inside a function of a
+  global script (measured on the PDI: `StatefulElementDescriptor ... not allowed in scope`).
 - `BOFASIKafkaProducerConsequence.js` — `sendPayload(payload, record)`: topic sys_id from
-  `x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id`, key `<table>.<sys_id>`,
-  `sn_ih_kafka.ProducerV2().send(...)` asynchronous, no headers, no schema; the response shown with
-  `gs.addInfoMessage`; one try/catch with one `gs.error`.
+  `x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id` (spaces around the value ignored), key
+  `<table>.<sys_id>`, `sn_ih_kafka.ProducerV2().send(...)` asynchronous, no headers, no schema; the response
+  shown with `gs.addInfoMessage`; one try/catch with one `gs.error` in the feature's format
+  `<class>: message not sent for <table> <sys_id> - <reason>`. Without a saved record nothing is sent.
 - `Consequence Field Check - Background Script.js` — generated from the workbook by
   `extract_mapping.py` (with `consequence_mapping.json`). Read only, global scope. For every sheet row
   it looks for the field behind the payload name: the sheet's field name, then the payload name, then
@@ -51,23 +61,36 @@ instance as they are, and adds error handling, payload validation and function c
   and `properties.json`. On the PDI every row resolves: the sheet's `u_state` resolves to `state` by
   the payload name, the rule's `x_` names to the plain names, the rest by name.
 
-## Error handling and payload validation (V1.2)
+## Error handling and payload validation
 Every function in the rule and the two script includes carries a JSDoc header (purpose, parameters,
-return, what it throws). The rule and the two public methods are the only try/catch blocks; the
-private methods throw and the entry point logs one `gs.error` in the form
-`<class>: <what failed> for <table> <sys_id> - <reason>` (`no record` as the key when no record was
-given). Processor, `buildPayload`: `_requireRecord` refuses a missing record and a record that was
-never fetched or does not exist; `_fieldMapping` refuses a property that is not configured, holds no
-field, or holds a line without a field name (the line is quoted); `_sectionRecord` refuses a table
-outside the property; `_validatePayload` checks the finished payload before it is returned (envelope
-keys and constants, UUID event id, UTC timestamp, activity in INSERT / UPDATE / DELETE, element count 1,
-one consequence element, every configured section and payload name present as a string, no extra
-sections or keys, the consequence section not empty) and lists every problem in one error
-(`payload invalid: ...; ...`). A refused build returns `''`, so the rule never calls the producer.
-Producer, `sendPayload`: `_topicSysId` refuses an empty topic property and a value that is not a
-sys_id; `_requirePayload` refuses an empty payload, text that is not JSON and JSON without `envelope`
-or `consequences`; the Kafka API's own failure is caught by the same block (`message not sent for
-<key> - <reason>`). The info messages (payload, fields not found, Kafka response) stay as in VAMP.
+return, what it throws). The rule and the two public methods are the only try/catch blocks (besides the
+helpers that name a record for the log); the private methods throw and the entry point logs one `gs.error`
+in the form `<class>: <what failed> for <table> <sys_id> - <reason>` (`no record` as the key when no record
+was given). Processor, `buildPayload`: `_requireRecord` refuses a missing record and a record that was never
+fetched or does not exist; `_fieldMapping` refuses a table without a section, a property that is not
+configured or holds no field, and a line with more than one `=`, without a field name, without a payload
+name, of a table that is no section of the payload (a dot-walk such as `u_rule.name` included), or naming a
+payload field of its section twice (the line is quoted); `_validatePayload` checks the finished payload
+before it is returned (envelope keys and constants, UUID event id, UTC timestamp, activity in INSERT /
+UPDATE / DELETE, element count 1, one consequence element, every configured section and payload name
+present as a string, no extra sections or keys, the consequence section not empty) and lists every
+problem in one error (`payload invalid: ...; ...`). A refused build returns `''`, so the rule never calls
+the producer. Producer, `sendPayload`: no saved record; `_topicSysId` refuses an empty topic property and a
+value that is not a sys_id; `_requirePayload` refuses an empty payload, text that is not JSON, JSON without
+`envelope` or `consequences`, no consequence, and an element count other than the consequences carried;
+the Kafka API's own failure is caught by the same block. The info messages (payload, fields not found,
+Kafka response) stay as in VAMP.
+
+## Earlier sys_ids
+V1.0/V1.1 were built in the PDI's stand-in scope and delivered as record XML under the stand-in's sys_ids;
+V1.2 was built in the mirror application under new ones. An instance that loaded V1.1 and then V1.2 holds
+two rules and two copies of each script include (same API names), and the V1.2 properties were refused
+there (property names are unique), leaving the V1.1 values in place. V1.3 keeps the V1.2 sys_ids and
+deletes the five earlier ones (`prior_records.json`): the update set carries a DELETE for each, recorded
+before the current records so that on commit the earlier property goes before the current one of the same
+name is written; the record XML lists them first as `action="DELETE"` elements (Import XML deletes such a
+record and ignores a sys_id it does not hold, measured on the PDI). On an instance without the earlier
+records the deletions do nothing; the platform's preview of the retrieved set shows no problem for them.
 
 ## Captured from the client forms (21 Sep)
 The consequence form shows Number, AIT (reference), Configuration item with a Class field (a document
@@ -107,20 +130,22 @@ the class is empty; a column type change on a scoped table runs inside the scope
 a cross-scope `deleteRecord()` on a dictionary row returns false.
 
 ## Drivers
-`build_1624.py` (set `SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.2` in the mirror
-application, its Default set created when missing, stale properties removed, records captured
-explicitly, scope audit), `test_1624.py` (55 checks per run, run twice in one invocation: A the linked
-fixture — property equals the resolution, envelope, sections, every value, references and the document
-id as display values, the rule section through `u_rule`; B the bare consequence; C the rule on a real
-update and a real insert with the processor and producer messages; D rendering by dictionary type; E
-the error paths — unfetched and missing record, empty property, line without a field name, a tampered
-payload named problem by problem, the intact payload accepted, empty and non-sys_id topic, empty,
-non-JSON and envelope-less payload, producer without a record, one error per refusal and nothing else;
-run 1 writes the sample), `export_1624.py` (native export, upload proof, archive; importable on the
-client as is), `package_1624.py` (`Consequence CDP Outbound Payload - Records.xml`: the five records,
-topic property empty, stamps removed, scripts asserted equal to the repository files),
-`check_1624.py` (workbook against mapping, field-check rows, resolution, property, record XML, sample
-payload keys, client sample keys and processor sections), `attach_1624.py` (files and a comment to the
+`build_1624.py` (set `SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3` in the mirror application,
+its Default set created when missing, stale properties removed, the earlier sys_ids captured as deletions
+(each created under its old sys_id and deleted again; a current property of the same name steps aside for
+the moment), records captured explicitly, scope audit), `fixtures_1624.py` (two rules with their own
+authors and times, the checkbox on and off; a linked, a bare, a dangling (rule and AIT gone, CI without
+class), a misclassed (class field naming another class) and a ghost (CI gone) consequence), `test_1624.py`
+(100 checks, two runs in one invocation, every log check reading only the lines of its own script: A every
+fixture from inside a function of a global script and directly, every value against the value worked out
+through REST plus literals; B the rule on a real update and a real insert; C every refusal of the processor
+and the producer with its exact line; D properties, deployed scripts equal to the repository, hygiene; run 1
+writes the sample), `export_1624.py` (topic property emptied, native export, deletions recorded before the
+current records, upload with the platform's preview, archive; importable on the client as is),
+`package_1624.py` (`Consequence CDP Outbound Payload - Records.xml`: the deletions, then the five records,
+topic property empty, stamps removed, scripts asserted equal to the repository files), `check_1624.py`
+(workbook against mapping, field-check rows, resolution, property, record XML, sample payload keys and
+sections, client sample sections, processor sections), `attach_1624.py` (files and a comment to the
 drop-box incident). `samples/` holds the client's sample from the story and a payload built from the
 linked fixture.
 
@@ -128,8 +153,9 @@ linked fixture.
 Attached to the drop-box incident: the update set XML (`Consequence CDP Outbound Payload - Update
 Set.xml`), the record XML, the sample payload and the field-check script. After import the client sets
 `x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id` to the sys_id of the Kafka topic record for
-`sn_usem_consequence_outbound`: the update set carries the PDI's placeholder id (as VAMP's did), the
-record XML leaves it empty.
+`sn_usem_consequence_outbound`: the update set and the record XML both carry it empty (V1.2's update set
+carried the PDI's placeholder id). Every import of a later version empties it again, so it is set after each
+import.
 
 Open point for the client: the acceptance criteria also mention a scheduled job every 15 minutes,
 which this build does not add (the rule sends on every insert and update, as VAMP does).

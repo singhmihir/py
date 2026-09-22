@@ -24,6 +24,7 @@ BOFA_SI_KafkaProducerV2.prototype = {
         this.IS_SYNC = false; // the caller does not wait for the broker acknowledgement
         this.HEADERS = null; // optional, subject to discussion
         this.SCHEMA_ID = null; // optional, no Avro schema in use
+        this.SYS_ID = /^[0-9a-f]{32}$/i;
         // Each property holds the sys_id of a Kafka Topic [sys_kafka_topic]. The remediation
         // task tables point at the finding topic until a topic of their own exists.
         this.FINDING_TOPIC_PROPERTY = 'x_boar_bofa_usem_1.x_boar_bofa.usem.kafka.topic_sys_id';
@@ -67,17 +68,21 @@ BOFA_SI_KafkaProducerV2.prototype = {
     },
 
     /**
-     * Resolves the Kafka topic of a table from its system property; throws when the table has no
-     * topic or the property is empty.
+     * Resolves the Kafka topic of a table from its system property, spaces around the value
+     * ignored; throws when the table has no topic, or the property is empty or holds something
+     * other than a sys_id (a topic name, for instance).
      * @param {String} table - the source table name
      * @returns {String} sys_id of the Kafka Topic [sys_kafka_topic]
      */
     _topicSysId: function(table) {
         if (!this.TOPIC_PROPERTIES.hasOwnProperty(table))
             throw new Error('no Kafka topic is associated with table ' + table);
-        var topicSysId = gs.getProperty(this.TOPIC_PROPERTIES[table], '');
+        var property = this.TOPIC_PROPERTIES[table];
+        var topicSysId = String(gs.getProperty(property, '')).trim();
         if (!topicSysId)
-            throw new Error('property ' + this.TOPIC_PROPERTIES[table] + ' holds no topic sys_id');
+            throw new Error('property ' + property + ' holds no topic sys_id');
+        if (!this.SYS_ID.test(topicSysId))
+            throw new Error('property ' + property + ' holds "' + topicSysId + '", which is not a topic sys_id');
         return topicSysId;
     },
 
@@ -102,7 +107,8 @@ BOFA_SI_KafkaProducerV2.prototype = {
 
     /**
      * Checks the payload against the message contract and serialises it; throws an Error naming
-     * the first problem found.
+     * the first problem found. The JSON text of an empty string or of null, which a caller passes
+     * when it serialises a payload that could not be built, counts as an empty payload.
      * @param {String|Object} payload - JSON text or the object it was built from
      * @returns {String} the message text to send
      */
@@ -110,6 +116,8 @@ BOFA_SI_KafkaProducerV2.prototype = {
         if (this._isEmpty(payload))
             throw new Error('payload is empty');
         var message = typeof payload === 'string' ? this._parse(payload) : payload;
+        if (message === null || message === '')
+            throw new Error('payload is empty');
         if (!this._isObject(message))
             throw new Error('payload is not a JSON object');
         this._checkEnvelope(message[this.ENVELOPE_KEY]);
@@ -147,7 +155,7 @@ BOFA_SI_KafkaProducerV2.prototype = {
 
     /**
      * Checks that the payload holds exactly one non-empty list of element objects whose length
-     * equals envelope.element_count; throws otherwise.
+     * equals envelope.element_count, a whole number (or its digits as text); throws otherwise.
      * @param {Object} message - the parsed payload
      * @returns {void}
      */
@@ -162,8 +170,10 @@ BOFA_SI_KafkaProducerV2.prototype = {
         var elements = message[name];
         if (!Array.isArray(elements) || elements.length === 0)
             throw new Error(name + ' is not a list of elements');
-        var count = Number(message[this.ENVELOPE_KEY].element_count);
-        if (count !== elements.length)
+        var count = message[this.ENVELOPE_KEY].element_count;
+        if (!this._isWholeNumber(count))
+            throw new Error(this.ENVELOPE_KEY + '.element_count is not a whole number: ' + JSON.stringify(count));
+        if (Number(count) !== elements.length)
             throw new Error(this.ENVELOPE_KEY + '.element_count is ' + count + ' but ' + name + ' holds ' + elements.length);
         for (var i = 0; i < elements.length; i++)
             if (!this._isObject(elements[i]) || Object.keys(elements[i]).length === 0)
@@ -177,6 +187,17 @@ BOFA_SI_KafkaProducerV2.prototype = {
      */
     _isObject: function(value) {
         return value !== null && typeof value === 'object' && !Array.isArray(value);
+    },
+
+    /**
+     * Tells whether a value is a whole number of zero or more, given as a number or as digits.
+     * @param {*} value - the value to check
+     * @returns {Boolean} true for 0, 1, 2 ... or "0", "1", "2" ...
+     */
+    _isWholeNumber: function(value) {
+        if (typeof value === 'number')
+            return value >= 0 && value % 1 === 0;
+        return typeof value === 'string' && /^[0-9]+$/.test(value);
     },
 
     /**

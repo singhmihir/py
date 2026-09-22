@@ -26,32 +26,44 @@ BOFASIKafkaProducerVamp.prototype = {
      * @param {GlideRecord} record - the application vulnerable item the payload belongs to
      */
     sendPayload: function(payload, record) {
-        var key = this._messageKey(record);
         try {
+            var key = this._messageKey(record);
             var topicSysId = this._topicSysId();
             this._requirePayload(payload);
             var response = new sn_ih_kafka.ProducerV2().send(topicSysId, key, payload, this.IS_SYNC, this.HEADERS, this.SCHEMA_ID);
             gs.addInfoMessage('VAMP Kafka response for ' + key + ': ' + JSON.stringify(response))
         } catch (e) {
-            gs.error(this.type + ': message not sent for ' + key + ' - ' + (e.message || e));
+            gs.error(this.type + ': message not sent for ' + this._recordKey(record) + ' - ' + (e.message || e));
         }
     },
 
     /**
      * The message key: table and sys_id of the record.
-     * @param {GlideRecord} record - the application vulnerable item, possibly absent
-     * @returns {string} "<table>.<sys_id>", or "no record" when the record cannot be read
+     * @param {GlideRecord} record - the application vulnerable item
+     * @returns {string} "<table>.<sys_id>"
+     * @throws {Error} when no saved record was given
      */
     _messageKey: function(record) {
+        if (!record || typeof record.getTableName != 'function' || !record.getUniqueValue())
+            throw new Error('no record was given');
+        return record.getTableName() + '.' + record.getUniqueValue();
+    },
+
+    /**
+     * Names a record for the error log without assuming it is usable.
+     * @param {GlideRecord} record - the record, possibly absent
+     * @returns {string} "<table> <sys_id>" when the record can be read, otherwise "no record"
+     */
+    _recordKey: function(record) {
         try {
-            return record.getTableName() + '.' + record.getUniqueValue();
+            return record.getTableName() + ' ' + record.getUniqueValue();
         } catch (e) {
             return 'no record';
         }
     },
 
     /**
-     * Reads the topic property.
+     * Reads the topic property, spaces around the value ignored.
      * @returns {string} the sys_id of the Kafka Topic record
      * @throws {Error} when the property is empty or its value is not a sys_id
      */
@@ -60,7 +72,7 @@ BOFASIKafkaProducerVamp.prototype = {
         if (!topicSysId)
             throw new Error('property ' + this.TOPIC_PROPERTY + ' holds no topic');
         if (!this.SYS_ID_PATTERN.test(topicSysId))
-            throw new Error('property ' + this.TOPIC_PROPERTY + ' is not a sys_id: "' + topicSysId + '"');
+            throw new Error('property ' + this.TOPIC_PROPERTY + ' holds "' + topicSysId + '", which is not a sys_id');
         return topicSysId;
     },
 

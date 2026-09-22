@@ -14,9 +14,12 @@
  * for the vulnerability entry and the pen test request, the group item table for the remediation
  * tasks. A record reached through a reference is re-opened in its own class, so that the fields of an
  * extended table are read as well.
- * Rendering: references as the display value of the record they point at, date/times as
- * MM-dd-yyyy HH:mm:ss, dates as MM-dd-yyyy, everything else as stored; a field missing on the table,
- * an empty field, a reference whose record is gone or a section without a record gives "".
+ * Rendering by dictionary type, as the sheet's types ask: references and document ids as the display
+ * value of the record they point at, lists and domains as displayed, date/times as MM-dd-yyyy HH:mm:ss,
+ * dates as MM-dd-yyyy, integers and strings as stored; a field missing on the table, an empty field, a
+ * reference whose record is gone or a section without a record gives "". Field types are read from a
+ * record of the section's table the processor opens itself: a scoped application may not read the
+ * dictionary descriptor of a record handed over from inside a function of a global script.
  *
  * Entry point: buildPayload(record). It holds the one try/catch of the feature: any failure, including
  * a line of the property that does not parse and a payload that does not validate, is logged once
@@ -136,7 +139,7 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * Builds one finding: every configured section in the order of the sections property, each
+     * Builds one finding: every configured section in the order the property introduces it, each
      * section from its own record, a section reached through a many to many as an array.
      * @param {GlideRecord} record - the application vulnerable item
      * @param {Array} sections - the property, parsed
@@ -163,18 +166,15 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * The records behind one section: the item itself, the record its reference field points at, or
-     * every record the many to many links to it.
+     * every record the many to many links to it (the property allows only tables with a path).
      * @param {GlideRecord} record - the application vulnerable item
      * @param {string} table - the ServiceNow table of the section
      * @returns {Array} the records, empty when the section has none
-     * @throws {Error} when the section has no path from the application vulnerable item
      */
     _sectionRecords: function(record, table) {
         if (table == record.getTableName())
             return [record];
         var path = this.RELATED[table];
-        if (!path)
-            throw new Error('section ' + table + ' has no path from ' + record.getTableName());
         return path.reference ? this._referenced(record, path.reference) : this._listed(record, path);
     },
 
@@ -189,7 +189,7 @@ BOFASIVampOutboundProcessor.prototype = {
         if (element === null || element.nil())
             return [];
         var referenced = element.getRefRecord();
-        if (!referenced || !referenced.isValidRecord())
+        if (!this._isRecord(referenced))
             return [];
         return [this._inOwnClass(referenced)];
     },
@@ -214,7 +214,7 @@ BOFASIVampOutboundProcessor.prototype = {
                 continue;
             seen[id] = true;
             var related = link.getElement(path.related).getRefRecord();
-            if (related && related.isValidRecord())
+            if (this._isRecord(related))
                 found.push(this._inOwnClass(related));
         }
         return found;
@@ -235,15 +235,16 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * The values of one section, the payload names of the fields property in its order.
+     * The values of one section, the payload names of the property in its order.
      * @param {GlideRecord} sectionRecord - the record of the section, null when the item has none
      * @param {Array} fields - the fields of the section
      * @returns {Object} the payload names and their values, every value a string
      */
     _sectionValues: function(sectionRecord, fields) {
         var values = {};
+        var dictionary = this._isRecord(sectionRecord) ? new GlideRecord(sectionRecord.getTableName()) : null;
         for (var i = 0; i < fields.length; i++)
-            values[fields[i].json] = this._fieldValue(sectionRecord, fields[i].field);
+            values[fields[i].json] = this._fieldValue(sectionRecord, dictionary, fields[i].field);
         return values;
     },
 
@@ -272,9 +273,10 @@ BOFASIVampOutboundProcessor.prototype = {
      * @param {string} table - the table the business rule runs on
      * @returns {Array} {json, table, many, fields:[{field, json}]} per section, in payload order
      * @throws {Error} when the property is not configured, holds no field, or holds a line with more
-     *                 than one "=", without a field name, without a payload name, with a payload name
-     *                 that is not <structure>.<field>, with a section taking fields from two tables,
-     *                 or with one payload name twice in a section
+     *                 than one "=", without a field name, with a field that is not <field> or
+     *                 <table>.<field>, of a table with no path from the item, without a payload name,
+     *                 with a payload name that is not <structure>.<field>, with a section taking fields
+     *                 from two tables, or with one payload name twice in a section
      */
     _payloadMap: function(table) {
         var property = this.FIELDS_PROPERTY_PREFIX + table;
@@ -294,12 +296,16 @@ BOFASIVampOutboundProcessor.prototype = {
                 throw new Error('property ' + property + ' holds a line without a field name: "' + line + '"');
             if (!right)
                 throw new Error('property ' + property + ' holds a line without a payload name: "' + line + '"');
-            var dot = right.indexOf('.');
-            if (dot < 1 || dot == right.length - 1)
+            var names = right.split('.');
+            var structure = names[0].trim(), payloadField = names.length == 2 ? names[1].trim() : '';
+            if (!structure || !payloadField)
                 throw new Error('property ' + property + ' holds the payload name "' + right + '", which is not <structure>.<field>: "' + line + '"');
-            var structure = right.substring(0, dot), payloadField = right.substring(dot + 1);
-            var at = left.indexOf('.');
-            var sectionTable = at < 0 ? table : left.substring(0, at);
+            var parts = left.split('.');
+            var sectionTable = parts.length == 2 ? parts[0].trim() : table, field = parts[parts.length - 1].trim();
+            if (parts.length > 2 || !sectionTable || !field)
+                throw new Error('property ' + property + ' holds the field "' + left + '", which is not <field> or <table>.<field>: "' + line + '"');
+            if (sectionTable != table && !this.RELATED.hasOwnProperty(sectionTable))
+                throw new Error('property ' + property + ' names table ' + sectionTable + ', which has no path from ' + table + ': "' + line + '"');
             var section = byStructure[structure];
             if (!section) {
                 section = byStructure[structure] = { json: structure, table: sectionTable, many: !!(this.RELATED[sectionTable] && this.RELATED[sectionTable].list), fields: [] };
@@ -309,7 +315,7 @@ BOFASIVampOutboundProcessor.prototype = {
                 throw new Error('section ' + structure + ' of property ' + property + ' takes fields from ' + section.table + ' and from ' + sectionTable);
             if (this._fieldNamed(section.fields, payloadField))
                 throw new Error('section ' + structure + ' of property ' + property + ' names ' + payloadField + ' twice');
-            section.fields.push({ field: at < 0 ? left : left.substring(at + 1), json: payloadField });
+            section.fields.push({ field: field, json: payloadField });
         }
         if (!sections.length)
             throw new Error('property ' + property + ' holds no field');
@@ -318,7 +324,7 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * Checks the finished payload before it is handed over: the envelope, the sections and the
-     * fields of the two properties, every value a string and nothing else in the message.
+     * fields of the property, every value a string and nothing else in the message.
      * @param {Object} payload - the payload as it will be sent
      * @param {Array} sections - the property, parsed
      * @param {GlideRecord} record - the application vulnerable item
@@ -369,7 +375,7 @@ BOFASIVampOutboundProcessor.prototype = {
     /**
      * Checks one section of the payload against the fields configured for it.
      * @param {Array} problems - collects what is wrong
-     * @param {Object} section - the section of the sections property
+     * @param {Object} section - the section, as parsed from the property
      * @param {Object} values - the section as built
      * @param {Array} fields - the fields configured for the section
      */
@@ -390,7 +396,7 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * @param {Array} sections - the sections property, parsed
+     * @param {Array} sections - the property, parsed
      * @param {string} name - a payload key of the finding
      * @returns {boolean} true when a configured section carries that name
      */
@@ -424,37 +430,57 @@ BOFASIVampOutboundProcessor.prototype = {
     /**
      * The value of one field, rendered for the payload.
      * @param {GlideRecord} record - the record of the section, or null when the item has none
+     * @param {GlideRecord} dictionary - a record of the same table, opened by the processor, whose field
+     *                                   descriptors give the field types; null with the record
      * @param {string} field - the ServiceNow field
      * @returns {string} the rendered value, "" when the record, the field or the value is absent
      */
-    _fieldValue: function(record, field) {
-        if (!record || !record.isValidRecord() || !record.isValidField(field))
+    _fieldValue: function(record, dictionary, field) {
+        if (!this._isRecord(record) || !record.isValidField(field))
             return '';
         var element = record.getElement(field);
         if (element === null || element.nil())
             return '';
-        return this._renderElement(element);
+        return this._renderElement(element, dictionary.getElement(field).getED());
     },
 
     /**
-     * Renders one field by its dictionary type: a reference as the display value of the record it
-     * points at (and "" when that record is gone, never the stored sys_id), a date or date and time
-     * in the configured format, everything else as stored.
+     * Renders one field by its dictionary type: a reference or a document id as the display value of
+     * the record it points at (and "" when that record is gone, never the stored sys_id), a list or a
+     * domain as displayed (names, not sys_ids), a date or date and time in the configured format,
+     * everything else as stored.
      * @param {GlideElement} element - the field of the record
+     * @param {GlideElementDescriptor} descriptor - the field's dictionary descriptor
      * @returns {string} the rendered value
      */
-    _renderElement: function(element) {
-        switch (String(element.getED().getInternalType())) {
+    _renderElement: function(element, descriptor) {
+        switch (String(descriptor.getInternalType())) {
             case 'glide_date_time':
+            case 'due_date':
                 return this._formatDateTime(element.getValue());
             case 'glide_date':
                 return this._formatDate(element.getValue());
             case 'reference':
-                var referenced = element.getRefRecord();
-                return referenced && referenced.isValidRecord() ? String(element.getDisplayValue()) : '';
+                return this._isRecord(element.getRefRecord()) ? String(element.getDisplayValue()) : '';
+            case 'document_id':
+                var target = element.getRefRecord();
+                return this._isRecord(target) ? String(target.getDisplayValue()) : '';
+            case 'glide_list':
+            case 'domain_id':
+                return String(element.getDisplayValue());
             default:
                 return String(element.getValue());
         }
+    },
+
+    /**
+     * Tells whether a value is a record that exists. getRefRecord() of a document id whose table
+     * field is empty gives null, or in a scoped script an empty object without the record methods.
+     * @param {*} value - the value to check
+     * @returns {boolean} true for a GlideRecord positioned on an existing record
+     */
+    _isRecord: function(value) {
+        return value != null && typeof value.isValidRecord == 'function' && value.isValidRecord();
     },
 
     /**

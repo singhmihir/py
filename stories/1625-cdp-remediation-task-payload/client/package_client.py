@@ -14,7 +14,7 @@ rec = re.sub(r'<(sys_created_by|sys_created_on|sys_updated_by|sys_updated_on|sys
 script = open(os.path.join(HERE, 'BOA_SI_USEM_RemediationTaskPayloadBuilder.js')).read().rstrip('\n')
 rec = re.sub(r'<script><!\[CDATA\[.*?\]\]></script>', lambda m: '<script><![CDATA[' + script + ']]></script>', rec, flags=re.S)
 desc = ('Builds the outbound Kafka payload for one remediation task. The fields per table come from the system property '
-        'usem.cdp.remtask.fields.<table>, one servicenow_field=json_field pair per line in payload order; '
+        'x_boar_bofa_usem_1.usem.cdp.remtask.fields.<table>, one servicenow_field=json_field pair per line in payload order; '
         'change_requests and exception_requests are derived.')
 rec = re.sub(r'<description>.*?</description>|<description/>', '<description>' + html.escape(desc, quote=False) + '</description>', rec, flags=re.S)
 content = '<?xml version="1.0" encoding="UTF-8"?>\n<unload>\n' + rec + '\n</unload>\n'

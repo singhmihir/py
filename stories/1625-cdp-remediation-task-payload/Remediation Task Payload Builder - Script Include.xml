@@ -6,7 +6,7 @@
 <api_name>x_boar_bofa_usem_1.BOA_SI_USEM_RemediationTaskPayloadBuilder</api_name>
 <caller_access/>
 <client_callable>false</client_callable>
-<description>Builds the outbound Kafka payload for one remediation task. The fields per table come from the system property usem.cdp.remtask.fields.&lt;table&gt;, one servicenow_field=json_field pair per line in payload order; change_requests and exception_requests are derived.</description>
+<description>Builds the outbound Kafka payload for one remediation task. The fields per table come from the system property x_boar_bofa_usem_1.usem.cdp.remtask.fields.&lt;table&gt;, one servicenow_field=json_field pair per line in payload order; change_requests and exception_requests are derived.</description>
 <mobile_callable>false</mobile_callable>
 <name>BOA_SI_USEM_RemediationTaskPayloadBuilder</name>
 <sandbox_callable>false</sandbox_callable>
@@ -15,8 +15,10 @@ BOA_SI_USEM_RemediationTaskPayloadBuilder.prototype = {
 
     /**
      * Configuration: envelope constants, date formats, the prefix of the field mapping property per
-     * table, the exception approval states counted and the change request association table per
-     * remediation task table.
+     * table, the exception approval states counted, the change request state left out (Canceled), the
+     * two keys the payload derives itself, the journal field types, the display markup the platform
+     * wraps around some calculated values, and the change request association table per remediation
+     * task table.
      * @returns {void}
      */
     initialize: function() {
@@ -30,6 +32,9 @@ BOA_SI_USEM_RemediationTaskPayloadBuilder.prototype = {
         this.EXCEPTION_TABLE = 'sn_sec_exception_change_approval';
         this.EXCEPTION_STATES = '1,4';
         this.CHANGE_CANCELED = '4';
+        this.DERIVED_KEYS = ['change_requests', 'exception_requests'];
+        this.JOURNAL_TYPES = ['journal_input', 'journal', 'journal_list'];
+        this.MARKUP = /^\[code\]([\s\S]*)\[\/code\]$/;
         this.CHANGE_LINKS = {
             sn_vul_vulnerability: {
                 table: 'sn_vul_m2m_vg_change_request',
@@ -52,8 +57,9 @@ BOA_SI_USEM_RemediationTaskPayloadBuilder.prototype = {
 
     /**
      * Builds the outbound Kafka payload (envelope plus one remediation task) for a record. Fields
-     * come from the property usem.cdp.remtask.fields.<table>, one servicenow_field=json_field pair per
-     * line, a field missing on the table or empty being sent as ""; on failure logs once and returns "".
+     * come from the property x_boar_bofa_usem_1.usem.cdp.remtask.fields.<table>, one
+     * servicenow_field=json_field pair per line, a field missing on the table or empty being sent as
+     * ""; on failure logs once and returns "".
      * @param {GlideRecord} record - the remediation task record
      * @param {String} normalizedOperation - the operation to report in the envelope, if known
      * @returns {Object} the payload object, or "" when it cannot be built
@@ -76,7 +82,9 @@ BOA_SI_USEM_RemediationTaskPayloadBuilder.prototype = {
     },
 
     /**
-     * Tells whether the value is a GlideRecord positioned on an existing record.
+     * Tells whether the value is a GlideRecord positioned on an existing record. getRefRecord() of a
+     * document id whose table field is empty gives null, or in a scoped script an empty object
+     * without the record methods; neither passes.
      * @param {*} record - the value to check
      * @returns {Boolean} true for a valid GlideRecord
      */
@@ -96,14 +104,17 @@ BOA_SI_USEM_RemediationTaskPayloadBuilder.prototype = {
     },
 
     /**
-     * Resolves the envelope activity: the given operation, otherwise the operation in progress on
-     * the record.
+     * Resolves the envelope activity: the given operation, otherwise the operation in progress in a
+     * business rule, otherwise INSERT for a record never updated and UPDATE for any other.
      * @param {GlideRecord} record - the remediation task record
      * @param {String} normalizedOperation - the operation to report, if known
-     * @returns {String} the operation in upper case, "" when none is known
+     * @returns {String} the operation in upper case
      */
     _activity: function(record, normalizedOperation) {
-        return String(normalizedOperation || record.operation() || '').toUpperCase();
+        var operation = String(normalizedOperation || record.operation() || '').toUpperCase();
+        if (operation)
+            return operation;
+        return parseInt(record.getValue('sys_mod_count')) > 0 ? 'UPDATE' : 'INSERT';
     },
 
     /**
@@ -128,16 +139,19 @@ BOA_SI_USEM_RemediationTaskPayloadBuilder.prototype = {
 
     /**
      * Renders the mapped fields of the record in property order, then adds the derived
-     * change_requests and exception_requests.
+     * change_requests and exception_requests. Field types are read from a record of the table the
+     * builder opens itself: a scoped application may not read the dictionary descriptor of a record
+     * handed over by a global script.
      * @param {GlideRecord} record - the remediation task record
      * @returns {Object} json_field to value, every value a string
      */
     _buildRemediationTask: function(record) {
         var table = record.getTableName();
         var mapping = this._fieldMapping(table);
+        var dictionary = new GlideRecord(table);
         var task = {};
         for (var i = 0; i < mapping.length; i++)
-            task[mapping[i].json] = this._fieldValue(record, mapping[i].field);
+            task[mapping[i].json] = this._fieldValue(record, dictionary, mapping[i].field);
         task.change_requests = this._changeRequests(record, this.CHANGE_LINKS[table]);
         task.exception_requests = this._exceptionRequests(record);
         return task;
@@ -145,74 +159,143 @@ BOA_SI_USEM_RemediationTaskPayloadBuilder.prototype = {
 
     /**
      * Reads the table's field mapping property: one servicenow_field=json_field pair per line, a bare
-     * field name keeping its own name; throws when the table has no property.
+     * field name keeping its own name.
      * @param {String} table - the remediation task table name
      * @returns {Array} [{field, json}] in property order
+     * @throws {Error} when the table has no property, or the property holds no field, a line with more
+     *                 than one "=", a line without a field name, a line with "=" but no payload name,
+     *                 the same payload name twice, or a payload name the payload derives itself
      */
     _fieldMapping: function(table) {
         var property = this.FIELDS_PROPERTY_PREFIX + table;
         var value = gs.getProperty(property, '');
         if (!value)
             throw new Error('table ' + table + ' is not configured in property ' + property);
-        var mapping = [];
+        var mapping = [], names = {};
         var entries = value.split(/\r?\n|,/);
         for (var i = 0; i < entries.length; i++) {
-            var pair = entries[i].split('=');
+            var line = entries[i].trim();
+            if (!line)
+                continue;
+            var pair = line.split('=');
+            if (pair.length > 2)
+                throw new Error('property ' + property + ' holds a line with more than one "=": "' + line + '"');
             var field = pair[0].trim();
             if (!field)
-                continue;
-            mapping.push({
-                field: field,
-                json: pair.length > 1 && pair[1].trim() ? pair[1].trim() : field
-            });
+                throw new Error('property ' + property + ' holds a line without a field name: "' + line + '"');
+            if (pair.length == 2 && !pair[1].trim())
+                throw new Error('property ' + property + ' holds a line without a payload name: "' + line + '"');
+            var json = pair.length == 2 ? pair[1].trim() : field;
+            if (names[json])
+                throw new Error('property ' + property + ' names ' + json + ' twice');
+            if (this.DERIVED_KEYS.indexOf(json) >= 0)
+                throw new Error('property ' + property + ' names ' + json + ', which the payload derives itself');
+            names[json] = true;
+            mapping.push({ field: field, json: json });
         }
+        if (!mapping.length)
+            throw new Error('property ' + property + ' holds no field');
         return mapping;
     },
 
     /**
      * Reads one field of the record as the string to send; "" when the field does not exist on the
-     * table or is empty.
+     * table or is empty. A journal field is read from its latest entry.
      * @param {GlideRecord} record - the remediation task record
+     * @param {GlideRecord} dictionary - a record of the same table, opened by the builder, whose
+     *                                   field descriptors give the field types
      * @param {String} field - the field name
      * @returns {String} the rendered value
      */
-    _fieldValue: function(record, field) {
+    _fieldValue: function(record, dictionary, field) {
         if (!record.isValidField(field))
             return '';
         var element = record.getElement(field);
-        if (element === null || element.nil())
+        if (element === null)
             return '';
-        return this._renderElement(element);
+        var descriptor = dictionary.getElement(field).getED();
+        if (this.JOURNAL_TYPES.indexOf(String(descriptor.getInternalType())) >= 0)
+            return this._latestEntry(element);
+        if (element.nil())
+            return '';
+        return this._renderElement(element, descriptor);
     },
 
     /**
-     * Renders one populated field by its dictionary type: dates formatted, journals as their latest
-     * entry, key-type fields (reference, choice, list, boolean, duration) as their display value,
-     * everything else as the stored value.
+     * The text of the latest entry of a journal field, without the header line the platform adds
+     * (date and time in the saving user's zone, and the author). A journal keeps its entries apart
+     * from the record, so the field itself is empty on every save that adds no entry.
+     * @param {GlideElement} element - the journal field
+     * @returns {String} the latest entry's text, "" when the journal has none
+     */
+    _latestEntry: function(element) {
+        var entry = String(element.getJournalEntry(1) || '');
+        var header = entry.indexOf('\n');
+        return header < 0 ? '' : entry.substring(header + 1).trim();
+    },
+
+    /**
+     * Renders one populated field by its dictionary type: dates formatted; a reference as its display
+     * value, "" when the record it points at is gone; a document id as the display value of its
+     * record; an integer with choices as its label and a plain count as its stored number (a display
+     * value would carry the user's thousands separator); strings, lists, booleans, durations, domains
+     * and classes as their display value; everything else as stored. Display markup of the form
+     * [code]...[/code] is sent as its visible text, never as HTML.
      * @param {GlideElement} element - the field element
+     * @param {GlideElementDescriptor} descriptor - the field's dictionary descriptor
      * @returns {String} the rendered value
      */
-    _renderElement: function(element) {
-        switch (String(element.getED().getInternalType())) {
+    _renderElement: function(element, descriptor) {
+        switch (String(descriptor.getInternalType())) {
             case 'glide_date_time':
+            case 'due_date':
                 return this._formatDateTime(element.getValue());
             case 'glide_date':
                 return this._formatDate(element.getValue());
-            case 'journal_input':
-                return String(element.getJournalEntry(1)).trim();
             case 'reference':
+                return this._referenceDisplay(element);
+            case 'document_id':
+                var target = element.getRefRecord();
+                return this._isRecord(target) ? String(target.getDisplayValue()) : '';
+            case 'integer':
+                return descriptor.isChoiceTable() ? String(element.getDisplayValue()) : String(element.getValue());
+            case 'string':
             case 'glide_list':
             case 'boolean':
             case 'glide_duration':
             case 'timer':
             case 'domain_id':
             case 'sys_class_name':
-            case 'integer':
-            case 'string':
-                return String(element.getDisplayValue());
+            case 'choice':
+                return this._plainText(String(element.getDisplayValue()));
             default:
-                return String(element.getValue());
+                return this._plainText(String(element.getValue()));
         }
+    },
+
+    /**
+     * The display value of a reference, "" when the record it points at no longer exists (some
+     * releases then show the stored sys_id instead of a name).
+     * @param {GlideElement} element - the reference field
+     * @returns {String} the display value, or ""
+     */
+    _referenceDisplay: function(element) {
+        var shown = String(element.getDisplayValue());
+        return shown == String(element.getValue()) ? '' : shown;
+    },
+
+    /**
+     * Turns display markup ([code]<a href=...>3</a>[/code]) into its visible text; any other value
+     * is returned unchanged.
+     * @param {String} value - the value as the platform gives it
+     * @returns {String} the value without markup
+     */
+    _plainText: function(value) {
+        var markup = this.MARKUP.exec(value);
+        if (!markup)
+            return value;
+        return markup[1].replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&').trim();
     },
 
     /**
@@ -238,23 +321,32 @@ BOA_SI_USEM_RemediationTaskPayloadBuilder.prototype = {
 
     /**
      * Collects the numbers of the change requests associated with the record through its table's
-     * association table, excluding cancelled change requests, in number order.
+     * association table, in number order: each change once however many links point at it, a link
+     * whose change no longer exists left out, and cancelled change requests left out.
      * @param {GlideRecord} record - the remediation task record
      * @param {Object} link - {table, field} of the association table, undefined when the table has none
      * @returns {String} comma-separated change request numbers, "" when none
      */
     _changeRequests: function(record, link) {
-        var numbers = [];
         if (!link)
             return '';
+        var numbers = [], seen = {};
         var m2m = new GlideRecord(link.table);
         m2m.addQuery(link.field, record.getUniqueValue());
-        m2m.addQuery("change_request.state", "!=", this.CHANGE_CANCELED);
+        m2m.addQuery('change_request.state', '!=', this.CHANGE_CANCELED);
         m2m.addNotNullQuery('change_request');
         m2m.orderBy('change_request.number');
         m2m.query();
-        while (m2m.next())
-            numbers.push(m2m.getDisplayValue('change_request'));
+        while (m2m.next()) {
+            var id = String(m2m.getValue('change_request'));
+            if (seen[id])
+                continue;
+            seen[id] = true;
+            var change = m2m.getElement('change_request').getRefRecord();
+            if (!this._isRecord(change))
+                continue;
+            numbers.push(String(change.getValue('number')));
+        }
         return numbers.join(',');
     },
 
