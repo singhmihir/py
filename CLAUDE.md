@@ -17,6 +17,45 @@ Follow it without being asked again.
   Simulated BofA tables on the PDI live in scoped app `x_196061_bofasim` (`_ait` with `app_mgr_netid`,
   `_consequence` with `state` and `u_consequence_level`); Global custom columns get auto-prefixed
   `u_`, so unprefixed stand-in columns need a scoped table.
+- An app created on the PDI carries the PDI's vendor prefix `x_196061_`, which every scoped property and
+  API name inherits. To build a scoped story with the client's own names, insert a `sys_app` with the
+  client's scope name and sys_id (`setNewGuidValue`) and set its `source` to that same scope name (the
+  exporter stamps `source` on every `sys_scope` reference; rows captured before such a correction must be
+  captured again), create the client's tables in it and build there — the native export then imports on
+  the client instance as it is.
+
+## How Mihir works
+- **Drop-box incidents on the PDI** carry every file he passes to BofA: **INC0010003**
+  (`b657ee9093064710e3aef0aefaba10c8`) for the Qualys CI lookup rules with their decks, walkthroughs and
+  run scripts, **INC0010004** (`5689744193864f10e3aef0aefaba109e`) for the outbound integration stories
+  (story zips in, deliverables out). Attach with a driver that deletes an attachment of the same name
+  first (`stories/primary-ait-no-fields/attach.py`, `stories/1624-consequence-cdp-outbound/attach_1624.py`)
+  and always add a comment saying what changed and what he or the client has to do next.
+- **He runs read-only scripts on the client dev instance himself** and attaches the output back. When he
+  is short of time he can run **exactly one**, so put everything needed into a single background script,
+  say in the comment that it creates and updates nothing, and name the file to attach back.
+- **He is often minutes from a meeting.** Deliver first and explain in a few lines afterwards; never ask
+  permission mid-task and never hand back a plan in place of the artifact.
+- He reads deliverables closely and asks about details (a stray scope prefix in a property name, an empty
+  record link, a slide that overflows). Everything inside a deliverable carries the client's own names.
+- **Size is part of the deliverable**: a deck he cannot open or show has not been delivered. One worked
+  example per rule unless he asks for more; keep the fuller data in the repository for a later build.
+- No unrequested work alongside a change (no diagrams or documents he did not ask for).
+
+## Explanation artifacts (decks, walkthrough documents)
+- Shape he approved: per rule, pages for *what it looks for*, *how the script works* (numbered steps in
+  two columns) and *when it declines*; then the worked example, and after it **step-by-step pages** — the
+  step, what the script does at that point, what it found for this item, and a **link to every record and
+  every filter** on the client dev instance (item, rule record, properties, the records walked, the CI).
+  The links come from a read-only trace script he runs there, which records each search with its table,
+  filter and the rows found with their sys_ids.
+- Examples must be **dedicated to the rule** (no CI an earlier rule could have returned) and carry real
+  values; vague matches get questioned by the client.
+- Bank of America palette: red `E31837`, navy `012169`, dark grey `4D4F53` for body text, light grey page,
+  white cards. PowerPoint does not shrink text to fit, so **measure every text box** and split content
+  over more pages instead of crowding one.
+- Check a build by rendering it (`soffice --headless --convert-to pdf`, then `pdftoppm`) and looking at
+  the pages, not only at the data behind them.
 
 ## Deliverables — what Mihir hands to BofA
 - Default deliverable is an **update set XML** plus a short summary in chat. Word documents only when
@@ -70,7 +109,11 @@ Follow it without being asked again.
 - One error message format per feature (`<class>: <what failed> for <table> <sys_id> - <reason>`);
   derive facts from the record (e.g. `current.operation()` for insert/update) instead of parameters.
 - Comments only where genuinely needed (a config block header, a JSDoc on the public method). Clean,
-  thorough, precise; no chatty comments.
+  thorough, precise; no chatty comments. **Exception, the CDP outbound payload builders** (VAMP,
+  consequence): he asked for a JSDoc header on every function, input checks (record fetched and existing,
+  property configured, every line well formed) and a validation of the finished payload before it leaves
+  the processor — each failure one `gs.error` in the standard format, and an empty payload that stops the
+  caller before anything is sent.
 - Business rules: prefer **one rule** with the whole lifecycle; condition selector limited to exactly the
   transitions the script acts on (e.g. `State changes to/from Resolved, to/from Closed, Reason changes
   to/from Pending Approval`); run last among before-rules (order 1000) and return early on
@@ -170,7 +213,7 @@ Follow it without being asked again.
   One script include only (`RemediationTaskPayloadBuilder`).
 
 ## Repository layout
-- `tools/snui.py` – harness. `stories/<story>/` – scripts, build/fixture/test/export drivers, README.
+- `tools/snui.py` – harness. `stories/<story>/` – scripts, build/fixture/test/export/attach drivers, README.
   `stories/_update_sets/` – native exports of every delivered update set (index.json).
 - Git: the PDI is the system of record. Do **not** push to GitHub, open or update pull requests, or
   watch PRs on your own; Mihir says explicitly when to push. When asked, use branch
