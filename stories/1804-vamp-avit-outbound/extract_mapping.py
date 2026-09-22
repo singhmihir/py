@@ -1,33 +1,55 @@
 """Reads the sheet "SN to VAMP" of the client workbook and generates, without hand transcription:
-vamp_mapping.json (the rows in sheet order) and "VAMP Field Check - Background Script.js", the
-read-only background script that resolves every sheet row to the ServiceNow field behind it on the
-instance it runs on (same name, then same label, then the u_ variant), checks the type and prints
-the property value to use. resolve_1804.py runs that script on the PDI and writes properties.json."""
+vamp_mapping.json (the rows in sheet order, with the JSON structure of column H and the JSON field
+name of column I) and "VAMP Field Check - Background Script.js", the read-only background script that
+resolves every sheet row to the ServiceNow field behind it on the instance it runs on (same name,
+then same label, then the u_ variant), checks the type and prints the two property values to use: the
+sections (ServiceNow table on the left, the JSON structure of column H on the right, in sheet order)
+and the fields (ServiceNow field on the left, the JSON field name of column I on the right).
+resolve_1804.py runs that script on the PDI and writes properties.json."""
 import os, json
 import openpyxl
 HERE = os.path.dirname(os.path.abspath(__file__))
+ITEM_TABLE = 'sn_vul_app_vulnerable_item'
 wb = openpyxl.load_workbook(os.path.join(HERE, 'SN to VAMP Mapping.xlsx'), data_only=True)
 ws = wb['SN to VAMP']
 header = [c for c in next(ws.iter_rows(min_row=1, max_row=1, values_only=True))]
 assert header[:5] == ['SN Fields', 'SN Payload ID', 'VAMPRequired?', 'SN Data Type', 'Table'], header
+assert header[7:9] == ['JSON structure', 'JSON field name'], header
 rows = []
 for r in ws.iter_rows(min_row=2, values_only=True):
     if not any(c is not None for c in r):
         continue
-    label, payload, required, dtype, table = (str(c).strip() if c is not None else '' for c in r[:5])
-    notes = str(r[5]).strip() if len(r) > 5 and r[5] is not None else ''
-    rows.append({'table': table, 'payload': payload, 'label': label, 'type': dtype, 'required': required, 'notes': notes})
+    cells = [str(c).strip() if c is not None else '' for c in list(r) + [''] * (9 - len(r))]
+    label, payload, required, dtype, table, notes, _carmack, structure, json_name = cells[:9]
+    assert structure and json_name, cells
+    rows.append({'table': table, 'structure': structure, 'json': json_name, 'payload': payload, 'label': label,
+                 'type': dtype, 'required': required, 'notes': notes})
 assert all(r['required'].lower() == 'yes' for r in rows), 'the generator assumes every sheet row is required'
+# the sections of the payload, in the order the sheet introduces them; the JSON structure of column H
+# is the payload name, lower case with underscores in place of spaces
+sections, seen = [], set()
+for r in rows:
+    if r['table'] in seen:
+        continue
+    seen.add(r['table'])
+    sections.append({'table': r['table'], 'json': r['structure'].strip().lower().replace(' ', '_')})
+assert len({s['json'] for s in sections}) == len(sections), sections
+for r in rows:
+    same = [s for s in sections if s['table'] == r['table']]
+    assert len(same) == 1 and same[0]['json'] == r['structure'].strip().lower().replace(' ', '_'), r
 json.dump(rows, open(os.path.join(HERE, 'vamp_mapping.json'), 'w'), indent=1)
+json.dump(sections, open(os.path.join(HERE, 'vamp_sections.json'), 'w'), indent=1)
 check = '''// Checks the sheet "SN to VAMP" against this instance. For every sheet row it looks for the
-// ServiceNow field behind the payload name: a field of that name, then a field with the sheet's
+// ServiceNow field behind the JSON field name: a field of that name, then a field with the sheet's
 // label, then the u_ variant of the name. It checks the type against the sheet, prints one line per
-// row, the property value to use (ServiceNow field on the left, payload name on the right) and the
-// rows to raise. Read only; run as a background script in global scope.
+// row, the two property values to use (the sections of the payload, and the ServiceNow field on the
+// left with the JSON field name on the right) and the rows to raise. Read only; run as a background
+// script in global scope.
 var SHEET = %s;
+var SECTIONS = %s;
 var TYPES = { 'String': ['string'], 'Reference': ['reference'], 'Date/Time': ['glide_date_time'], 'Integer': ['integer'] };
-var ITEM_TABLE = 'sn_vul_app_vulnerable_item';
-var report = [], lines = [], raise = [], propertyLines = [], cache = {};
+var ITEM_TABLE = '%s';
+var report = [], lines = [], raise = [], fieldLines = [], sectionLines = [], cache = {};
 
 function fieldsOf(table) {
     if (!cache[table]) {
@@ -55,11 +77,12 @@ function first(list, test) {
 function resolve(row) {
     var fields = fieldsOf(row.table);
     var label = row.label.toLowerCase().replace('record number', 'number');
-    var alt = row.payload.indexOf('u_') == 0 ? row.payload.substring(2) : 'u_' + row.payload;
-    var found = first(fields, function(f) { return f.name == row.payload; });
+    var alt = row.json.indexOf('u_') == 0 ? row.json.substring(2) : 'u_' + row.json;
+    var found = first(fields, function(f) { return f.name == row.json; });
     if (found)
         return { field: found, how: 'same name' };
-    found = first(fields, function(f) { return f.label.toLowerCase() == label || f.label.toLowerCase() == row.label.toLowerCase(); });
+    if (label)
+        found = first(fields, function(f) { return f.label.toLowerCase() == label || f.label.toLowerCase() == row.label.toLowerCase(); });
     if (found)
         return { field: found, how: 'label "' + found.label + '"' };
     found = first(fields, function(f) { return f.name == alt; });
@@ -71,6 +94,8 @@ function resolve(row) {
 function candidates(row) {
     var words = row.label.toLowerCase().replace('record number', 'number').split(/\\s+/);
     var names = [];
+    if (!row.label)
+        return names;
     var fields = fieldsOf(row.table);
     for (var i = 0; i < fields.length; i++) {
         var l = fields[i].label.toLowerCase(), all = true;
@@ -84,8 +109,8 @@ function candidates(row) {
 }
 
 for (var i = 0; i < SHEET.length; i++) {
-    var row = SHEET[i], head = row.table + '.' + row.payload + ' (' + row.label + ', ' + row.type + '): ';
-    var entry = { table: row.table, payload: row.payload, label: row.label, type: row.type, field: '', how: '', found_type: '', reference: '', type_ok: false, candidates: [] };
+    var row = SHEET[i], head = row.structure + '.' + row.json + ' (' + row.table + (row.label ? ', ' + row.label : '') + ', ' + row.type + '): ';
+    var entry = { table: row.table, structure: row.structure, json: row.json, label: row.label, type: row.type, field: '', how: '', found_type: '', reference: '', type_ok: false, candidates: [] };
     if (!new GlideRecord(row.table).isValid()) {
         lines.push(head + 'TABLE MISSING');
         raise.push(row.table + ' does not exist');
@@ -93,8 +118,8 @@ for (var i = 0; i < SHEET.length; i++) {
         var hit = resolve(row);
         if (!hit) {
             entry.candidates = candidates(row);
-            lines.push(head + 'NOT FOUND - no field named ' + row.payload + ', none labelled "' + row.label + '"' + (entry.candidates.length ? '; similar labels: ' + entry.candidates.join(', ') : ''));
-            raise.push(row.table + '.' + row.payload + ' (' + row.label + ') has no field on this instance');
+            lines.push(head + 'NOT FOUND - no field named ' + row.json + (row.label ? ', none labelled "' + row.label + '"' : '') + (entry.candidates.length ? '; similar labels: ' + entry.candidates.join(', ') : ''));
+            raise.push(row.table + '.' + row.json + (row.label ? ' (' + row.label + ')' : '') + ' has no field on this instance');
         } else {
             entry.field = hit.field.name; entry.how = hit.how; entry.found_type = hit.field.type; entry.reference = hit.field.reference;
             entry.type_ok = (TYPES[row.type] || []).indexOf(hit.field.type) > -1;
@@ -105,16 +130,17 @@ for (var i = 0; i < SHEET.length; i++) {
     }
     report.push(entry);
 }
-for (var p = 0; p < 2; p++)
-    for (var r = 0; r < report.length; r++) {
-        var e = report[r];
-        if ((p == 0) != (e.table == ITEM_TABLE))
-            continue;
-        propertyLines.push((e.table == ITEM_TABLE ? '' : e.table + '.') + (e.field || e.payload) + '=' + e.payload + ',');
-    }
+for (var s = 0; s < SECTIONS.length; s++)
+    sectionLines.push(SECTIONS[s].table + '=' + SECTIONS[s].json + ',');
+for (var r = 0; r < report.length; r++) {
+    var e = report[r];
+    fieldLines.push((e.table == ITEM_TABLE ? '' : e.table + '.') + (e.field || e.json) + '=' + e.json + ',');
+}
 gs.print('SN to VAMP field check on ' + gs.getProperty('instance_name') + ' - ' + SHEET.length + ' sheet rows\\n' + lines.join('\\n'));
-gs.print('Property value to use for usem.vamp.fields.' + ITEM_TABLE + ' (a row not found keeps the sheet name until the field is known):\\n' + propertyLines.join('\\n'));
+gs.print('Property value to use for usem.vamp.sections.' + ITEM_TABLE + ' (the JSON structure of the sheet, in sheet order):\\n' + sectionLines.join('\\n'));
+gs.print('Property value to use for usem.vamp.fields.' + ITEM_TABLE + ' (a row not found keeps the sheet name until the field is known):\\n' + fieldLines.join('\\n'));
 gs.print(raise.length ? 'To raise (' + raise.length + '):\\n- ' + raise.join('\\n- ') : 'Every sheet row resolves to a field of the sheet type.');
-''' % json.dumps([{'table': r['table'], 'payload': r['payload'], 'label': r['label'], 'type': r['type']} for r in rows], indent=4)
+''' % (json.dumps([{'table': r['table'], 'structure': r['structure'], 'json': r['json'], 'label': r['label'], 'type': r['type']} for r in rows], indent=4),
+       json.dumps(sections, indent=4), ITEM_TABLE)
 open(os.path.join(HERE, 'VAMP Field Check - Background Script.js'), 'w').write(check)
-print('sheet rows:', len(rows), '| tables:', sorted(set(r['table'] for r in rows)))
+print('sheet rows:', len(rows), '| sections:', [(s['table'], s['json']) for s in sections])

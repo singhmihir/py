@@ -1,18 +1,31 @@
-SN to VAMP field check on dev390397 - 13 sheet rows
-sn_vul_app_vul_entry.number (Record Number, String): NOT FOUND - no field named number, none labelled "Record Number"
-sn_vul_app_vulnerability.number (Record Number, String): number by same name, type string
-sn_vul_app_vulnerability.primary_ait (Primary AIT, Reference): NOT FOUND - no field named primary_ait, none labelled "Primary AIT"
-sn_vul_app_vulnerable_item.number (Record Number, String): number by same name, type string
-sn_vul_app_vulnerable_item.sys_created_on (Created, Date/Time): sys_created_on by same name, type glide_date_time
-sn_vul_app_vulnerable_item.sys_updated_on (Updated, Date/Time): sys_updated_on by same name, type glide_date_time
-sn_vul_app_vulnerable_item.state (State, Integer): state by same name, type integer
-sn_vul_app_vulnerable_item.configuration_item (Configuration Item, Reference): cmdb_ci by label "Configuration item", type reference -> cmdb_ci
-sn_vul_app_vulnerable_item.u_verification_status (Verification Status, String): NOT FOUND - no field named u_verification_status, none labelled "Verification Status"
-sn_vul_app_vulnerable_item.source_avit_id (Source AVIT ID, String): source_avit_id by same name, type string
-sn_vul_pen_test_assessment_request.number (Record Number, String): number by same name, type string
-sn_vul_pen_test_assessment_request.sys_created_on (Created, Date/Time): sys_created_on by same name, type glide_date_time
-sn_vul_pen_test_assessment_request.u_assessment_id (Assessment ID, String): NOT FOUND - no field named u_assessment_id, none labelled "Assessment ID"; similar labels: risk_assessment_id ("Risk assessment ID")
+SN to VAMP field check on the instance - 16 sheet rows
+tpe.number (sn_vul_app_vul_entry, Record Number, String): NOT FOUND - no field named number, none labelled "Record Number"
+tpe.u_vuln_sub_cat_id (sn_vul_app_vul_entry, String): u_vuln_sub_cat_id by same name, type string
+remediation task.number (sn_vul_app_vulnerability, Record Number, String): number by same name, type string
+remediation task.primary_ait (sn_vul_app_vulnerability, Primary AIT, Reference): u_primary_ait by label "Primary AIT", type reference -> x_196061_bofasim_ait
+remediation task.u_avul_record_url (sn_vul_app_vulnerability, String): u_avul_record_url by same name, type string
+finding.number (sn_vul_app_vulnerable_item, Record Number, String): number by same name, type string
+finding.sys_created_on (sn_vul_app_vulnerable_item, Created, Date/Time): sys_created_on by same name, type glide_date_time
+finding.sys_updated_on (sn_vul_app_vulnerable_item, Updated, Date/Time): sys_updated_on by same name, type glide_date_time
+finding.state (sn_vul_app_vulnerable_item, State, Integer): state by same name, type integer
+finding.configuration_item (sn_vul_app_vulnerable_item, Configuration Item, Reference): cmdb_ci by label "Configuration item", type reference -> cmdb_ci
+finding.u_verification_status (sn_vul_app_vulnerable_item, Verification Status, String): u_verification_status by same name, type string
+finding.source_avit_id (sn_vul_app_vulnerable_item, Source AVIT ID, String): source_avit_id by same name, type string
+finding.u_avit_record_url (sn_vul_app_vulnerable_item, String): u_avit_record_url by same name, type string
+ptreq.number (sn_vul_pen_test_assessment_request, Record Number, String): number by same name, type string
+ptreq.sys_created_on (sn_vul_pen_test_assessment_request, Created, Date/Time): sys_created_on by same name, type glide_date_time
+ptreq.u_assessment_id (sn_vul_pen_test_assessment_request, Assessment ID, String): u_assessment_id by same name, type string
+Property value to use for usem.vamp.sections.sn_vul_app_vulnerable_item (the JSON structure of the sheet, in sheet order):
+sn_vul_app_vul_entry=tpe,
+sn_vul_app_vulnerability=remediation_task,
+sn_vul_app_vulnerable_item=finding,
+sn_vul_pen_test_assessment_request=ptreq,
 Property value to use for usem.vamp.fields.sn_vul_app_vulnerable_item (a row not found keeps the sheet name until the field is known):
+sn_vul_app_vul_entry.number=number,
+sn_vul_app_vul_entry.u_vuln_sub_cat_id=u_vuln_sub_cat_id,
+sn_vul_app_vulnerability.number=number,
+sn_vul_app_vulnerability.u_primary_ait=primary_ait,
+sn_vul_app_vulnerability.u_avul_record_url=u_avul_record_url,
 number=number,
 sys_created_on=sys_created_on,
 sys_updated_on=sys_updated_on,
@@ -20,14 +33,9 @@ state=state,
 cmdb_ci=configuration_item,
 u_verification_status=u_verification_status,
 source_avit_id=source_avit_id,
-sn_vul_app_vul_entry.number=number,
-sn_vul_app_vulnerability.number=number,
-sn_vul_app_vulnerability.primary_ait=primary_ait,
+u_avit_record_url=u_avit_record_url,
 sn_vul_pen_test_assessment_request.number=number,
 sn_vul_pen_test_assessment_request.sys_created_on=sys_created_on,
 sn_vul_pen_test_assessment_request.u_assessment_id=u_assessment_id,
-To raise (4):
+To raise (1):
 - sn_vul_app_vul_entry.number (Record Number) has no field on this instance
-- sn_vul_app_vulnerability.primary_ait (Primary AIT) has no field on this instance
-- sn_vul_app_vulnerable_item.u_verification_status (Verification Status) has no field on this instance
-- sn_vul_pen_test_assessment_request.u_assessment_id (Assessment ID) has no field on this instance

@@ -1,6 +1,8 @@
 [
  {
   "table": "sn_vul_app_vul_entry",
+  "structure": "tpe",
+  "json": "number",
   "payload": "number",
   "label": "Record Number",
   "type": "String",
@@ -8,7 +10,19 @@
   "notes": "This is the Third party Vulnerable Item table (VBL)"
  },
  {
+  "table": "sn_vul_app_vul_entry",
+  "structure": "tpe",
+  "json": "u_vuln_sub_cat_id",
+  "payload": "u_vuln_sub_cat_id",
+  "label": "",
+  "type": "String",
+  "required": "Yes",
+  "notes": ""
+ },
+ {
   "table": "sn_vul_app_vulnerability",
+  "structure": "remediation task",
+  "json": "number",
   "payload": "number",
   "label": "Record Number",
   "type": "String",
@@ -17,6 +31,8 @@
  },
  {
   "table": "sn_vul_app_vulnerability",
+  "structure": "remediation task",
+  "json": "primary_ait",
   "payload": "primary_ait",
   "label": "Primary AIT",
   "type": "Reference",
@@ -24,7 +40,19 @@
   "notes": "This will match the AIT"
  },
  {
+  "table": "sn_vul_app_vulnerability",
+  "structure": "remediation task",
+  "json": "u_avul_record_url",
+  "payload": "u_avul_record_url",
+  "label": "",
+  "type": "String",
+  "required": "Yes",
+  "notes": ""
+ },
+ {
   "table": "sn_vul_app_vulnerable_item",
+  "structure": "finding",
+  "json": "number",
   "payload": "number",
   "label": "Record Number",
   "type": "String",
@@ -33,6 +61,8 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
+  "structure": "finding",
+  "json": "sys_created_on",
   "payload": "sys_created_on",
   "label": "Created",
   "type": "Date/Time",
@@ -41,6 +71,8 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
+  "structure": "finding",
+  "json": "sys_updated_on",
   "payload": "sys_updated_on",
   "label": "Updated",
   "type": "Date/Time",
@@ -49,6 +81,8 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
+  "structure": "finding",
+  "json": "state",
   "payload": "state",
   "label": "State",
   "type": "Integer",
@@ -57,6 +91,8 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
+  "structure": "finding",
+  "json": "configuration_item",
   "payload": "configuration_item",
   "label": "Configuration Item",
   "type": "Reference",
@@ -65,6 +101,8 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
+  "structure": "finding",
+  "json": "u_verification_status",
   "payload": "u_verification_status",
   "label": "Verification Status",
   "type": "String",
@@ -73,6 +111,8 @@
  },
  {
   "table": "sn_vul_app_vulnerable_item",
+  "structure": "finding",
+  "json": "source_avit_id",
   "payload": "source_avit_id",
   "label": "Source AVIT ID",
   "type": "String",
@@ -80,7 +120,19 @@
   "notes": "Vul ID"
  },
  {
+  "table": "sn_vul_app_vulnerable_item",
+  "structure": "finding",
+  "json": "u_avit_record_url",
+  "payload": "u_avit_record_url",
+  "label": "",
+  "type": "String",
+  "required": "Yes",
+  "notes": ""
+ },
+ {
   "table": "sn_vul_pen_test_assessment_request",
+  "structure": "ptreq",
+  "json": "number",
   "payload": "number",
   "label": "Record Number",
   "type": "String",
@@ -89,6 +141,8 @@
  },
  {
   "table": "sn_vul_pen_test_assessment_request",
+  "structure": "ptreq",
+  "json": "sys_created_on",
   "payload": "sys_created_on",
   "label": "Created",
   "type": "Date/Time",
@@ -97,6 +151,8 @@
  },
  {
   "table": "sn_vul_pen_test_assessment_request",
+  "structure": "ptreq",
+  "json": "u_assessment_id",
   "payload": "u_assessment_id",
   "label": "Assessment ID",
   "type": "String",

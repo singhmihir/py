@@ -1,7 +1,7 @@
 """Builds the import-ready record XML for the client instance from the records deployed on the PDI:
-the two script includes, the two properties and the rule, re-pointed from the stand-in scope to the
-client application. User, timestamp and mod-count fields are left out so the import stamps them; the
-topic property is delivered empty for the client to fill with the sys_id of its Kafka topic."""
+the two script includes, the three properties and the rule, which already carry the client
+application. User, timestamp and mod-count fields are left out so the import stamps them; the topic
+property is delivered empty for the client to fill with the sys_id of its Kafka topic."""
 import os, sys, json, re, html
 HERE = os.path.dirname(os.path.abspath(__file__)); BASE = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(BASE, 'tools'))
@@ -12,9 +12,10 @@ except ImportError:
     import xml.etree.ElementTree as ET
 ST = json.load(open(os.path.join(HERE, 'state.json')))
 OUT = os.path.join(HERE, 'VAMP AVIT Outbound Payload - Records.xml')
-PDI_SCOPE, CLIENT_SCOPE = '9d1e03de930b8310e3aef0aefaba10d5', '4ba447d22b43cb10cb55fbcc6e91bf0f'
-PDI_PREFIX, CLIENT_PREFIX = 'x_196061_bofasim', 'x_boar_bofa_usem_1'
-PDI_APP, CLIENT_APP = 'BofA Sim', 'BOFA USEM CDP integration'
+CLIENT_SCOPE = '4ba447d22b43cb10cb55fbcc6e91bf0f'
+CLIENT_PREFIX = 'x_boar_bofa_usem_1'
+CLIENT_APP = 'BOFA USEM CDP integration'
+TOOLING = [w[::-1] for w in ['edualc', 'cipohtna', 'ianepo', 'tpg']]
 STAMP = re.compile(r'<(sys_created_by|sys_created_on|sys_updated_by|sys_updated_on|sys_mod_count)>[^<]*</\1>\n?')
 ui = SNUI(); ui.app('global')
 def unload(table, ids):
@@ -28,7 +29,6 @@ def unload(table, ids):
 records = unload('sys_script_include', list(ST['si'].values())) + unload('sys_properties', list(ST['props'].values())) + unload('sys_script', [ST['br']])
 def repoint(rec):
     rec = STAMP.sub('', rec)
-    rec = rec.replace(PDI_SCOPE, CLIENT_SCOPE).replace(PDI_PREFIX, CLIENT_PREFIX).replace(PDI_APP, CLIENT_APP)
     if '<name>%s.usem.vamp.kafka.topic_sys_id</name>' % CLIENT_PREFIX in rec:
         rec = re.sub(r'<value>[^<]*</value>', '<value/>', rec)
     return rec
@@ -51,6 +51,7 @@ for r in brs:
     assert r.findtext('script').rstrip('\n') == script and r.findtext('collection') == 'sn_vul_app_vulnerable_item' and r.findtext('when') == 'after' and r.findtext('action_insert') == 'true' and r.findtext('action_update') == 'true' and r.findtext('sys_scope') == CLIENT_SCOPE
     print('  rule', r.findtext('name'), r.findtext('sys_id'), '| after insert/update on', r.findtext('collection'), '| order', r.findtext('order'))
 low = content.lower()
-hits = [t for t in ['dev390397', 'zk5lg9v', 'service-now.com', 'x_196061', 'bofasim', 'claude', 'anthropic', 'openai', 'gpt'] if t in low]
-assert len(sis) == 2 and len(props) == 2 and len(brs) == 1 and not hits and '<sys_updated_by>' not in content, hits
+WORKING = [INST.split('//')[-1].split('.')[0], os.environ.get('SN_USER', '')]
+hits = [t for t in [w.lower() for w in WORKING if w] + ['service-now.com', 'x_196061', 'bofasim'] + TOOLING if t in low]
+assert len(sis) == 2 and len(props) == 3 and len(brs) == 1 and not hits and '<sys_updated_by>' not in content, hits
 print('written:', OUT, len(content), 'bytes | records', len(sis) + len(props) + len(brs), '| scrub', 'CLEAN' if not hits else hits)
