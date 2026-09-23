@@ -277,7 +277,7 @@ gs.print('X::' + JSON.stringify(o));
     V = SENT + CONSEQUENCE + ' ' + r['id'] + ' - '
     want = [BUILT + CONSEQUENCE + ' ' + r['id'] + ' - ' + REASONS[k] for k in REASONS]
     want += [BUILT + 'no record - no record was given', BUILT + 'incident ' + r['inc'] + ' - table incident has no section in the payload']
-    want += [V + 'property %s holds no topic sys_id' % TOPIC_PROP, V + 'property %s holds "not-a-sys-id", which is not a topic sys_id' % TOPIC_PROP, V + r['api_missing'],
+    want += [V + 'property %s holds no topic sys_id' % TOPIC_PROP, V + 'property %s holds "not-a-sys-id", which is not a topic sys_id (32 lowercase hexadecimal characters)' % TOPIC_PROP, V + r['api_missing'],
              V + 'payload is empty', V + 'envelope is missing', V + 'envelope.type is missing or empty',
              V + 'envelope.element_count is 2 but consequences holds 1', V + 'payload is empty', SENT + 'no record - no record was given', SENT + CONSEQUENCE + ' ' + r['unsaved'] + ' - the record does not exist']
     unfetched = [m for m in r['lines'] if m.startswith(BUILT + CONSEQUENCE + ' ') and m.endswith(' - the record does not exist')]

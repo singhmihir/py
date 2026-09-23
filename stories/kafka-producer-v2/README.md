@@ -25,8 +25,9 @@ and the consequence table, each with its own payload builder.
   try/catch with one `gs.error` in the format `BOFA_SI_KafkaProducerV2: message not sent for <table>
   <sys_id> - <reason>`, no unused return values, no trailing comma in the argument list.
 - Payload validation lives in the same script include, after a separator line of underscores and a
-  comment saying so: `_validate(payload)` accepts the JSON string or the object, returns the canonical
-  JSON text to send, and throws an Error naming the first problem: empty payload (also the JSON text
+  comment saying so: `_validate(payload)` accepts the JSON string or the object (an object is serialised
+  first and the serialised copy is what is checked and sent, so a value JSON cannot hold never passes the
+  checks and then drops out of the message), returns the canonical JSON text to send, and throws an Error naming the first problem: empty payload (also the JSON text
   of an empty string or of null, which the current rule passes after a failed build), JSON that does
   not parse (with the parser's reason), not an object, envelope missing, any of the nine envelope
   fields missing or empty, no or more than one element list, element list not an array or empty,
@@ -79,8 +80,10 @@ lines written by the script under test (a fresh second is awaited before its sta
   envelope missing, each of the nine envelope fields missing, empty or null, no list or two lists,
   list not an array or empty, `element_count` that does not equal the length of the list (2, 0, true, 1.5, "1.0", " 1", -1,
   [1], "x", "1"), an element that is not an object (first and second
-  position); accepted: the builder's payload as text, as object, pretty-printed (sent compact), the
-  client builder's object, two elements, a list of another name.
+  position), an empty array, an object whose element serialises to `{}` (a value `undefined`) and one
+  whose envelope field is a function (dropped by the serialisation, so reported missing); accepted: the
+  builder's payload as text, as object, pretty-printed (sent compact), the client builder's object, two
+  elements, a list of another name.
 - A2. one script include in the scope, equal to the repository copy; send methods before the
   separator line, validation after it; `ProducerV2.send` called once with the documented argument
   order (topic, key, message, isSync, headers, schemaID).

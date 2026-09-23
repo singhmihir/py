@@ -68,6 +68,9 @@ o.cases.stringified_empty = attempt(JSON.stringify('')); o.cases.json_null = att
 o.cases.truncated_json = attempt(good.substring(0, 40)); o.cases.trailing_garbage = attempt(good + 'x'); o.cases.single_quotes = attempt("{'envelope': {}}");
 o.cases.json_string_literal = attempt('"text"'); o.cases.json_array = attempt('[]'); o.cases.json_number = attempt('42'); o.cases.json_false = attempt('false');
 o.cases.number_payload = attempt(42); o.cases.array_payload = attempt([obj]); o.cases.boolean_payload = attempt(true);
+o.cases.empty_array_object = attempt([]);
+var gone = JSON.parse(good); gone.rem_tasks[0] = {remediation_task: undefined}; o.cases.object_element_undefined = attempt(gone);
+var fn = JSON.parse(good); fn.envelope.type = function() {}; o.cases.object_field_function = attempt(fn);
 o.cases.empty_object = attempt('{}'); o.cases.envelope_string = attempt({envelope: 'x', rem_tasks: obj.rem_tasks}); o.cases.envelope_array = attempt({envelope: [], rem_tasks: obj.rem_tasks});
 var fields = %s;
 for (var i = 0; i < fields.length; i++) {
@@ -113,7 +116,9 @@ check('A the client builder\'s payload object is accepted', C['client_object']['
 for n in ['empty_string', 'blank_string', 'null_payload', 'undefined_payload', 'stringified_empty', 'json_null', 'stringified_failed_object']: refused(n, 'payload is empty')
 for n in ['truncated_json', 'trailing_garbage', 'single_quotes']:
     c = C[n]; check('A refuses %s with the parser reason' % n, (not c['ok']) and c['err'].startswith('payload is not valid JSON - ') and len(c['err']) > len('payload is not valid JSON - '), c.get('err', 'ACCEPTED'))
-for n in ['json_string_literal', 'json_array', 'json_number', 'json_false', 'number_payload', 'array_payload', 'boolean_payload']: refused(n, 'payload is not a JSON object')
+for n in ['json_string_literal', 'json_array', 'json_number', 'json_false', 'number_payload', 'array_payload', 'boolean_payload', 'empty_array_object']: refused(n, 'payload is not a JSON object')
+refused('object_element_undefined', 'rem_tasks[0] is not an element')   # an object is checked as it will be sent: {"remediation_task": undefined} serialises to {}
+refused('object_field_function', 'envelope.type is missing or empty')     # a function is no JSON value and drops out of the text, so the check sees it missing
 for n in ['empty_object', 'envelope_string', 'envelope_array']: refused(n, 'envelope is missing')
 for f in ENVELOPE:
     for kind in ['missing', 'empty', 'null']: refused(kind + '_' + f, 'envelope.' + f + ' is missing or empty')
@@ -265,8 +270,8 @@ for broken in GROUPS:
     prop = GROUPS[broken][0]
     subject = SENT + '%s %s - ' % (SUBJECTS[broken], c['records'][broken])
     for step, sent_expected, line in [('empty', False, 'property %s holds no topic sys_id' % prop), ('padded', True, None),
-                                      ('name', False, 'property %s holds "sn_usem_topic_name", which is not a topic sys_id' % prop),
-                                      ('capitals', False, 'property %s holds "%s", which is not a topic sys_id' % (prop, TOPIC_OF[broken].upper()))]:
+                                      ('name', False, 'property %s holds "sn_usem_topic_name", which is not a topic sys_id (32 lowercase hexadecimal characters)' % prop),
+                                      ('capitals', False, 'property %s holds "%s", which is not a topic sys_id (32 lowercase hexadecimal characters)' % (prop, TOPIC_OF[broken].upper()))]:
         own = [x for x in c['sent'] if x['step'] == broken + ':' + step and x['group'] == broken]
         others = sorted((x['group'], x['topic']) for x in c['sent'] if x['step'] == broken + ':' + step and x['group'] != broken)
         check('C %s property %s: %s; the other two groups still sent to their own topics' % (broken, step, 'sent to the trimmed sys_id' if sent_expected else 'refused before send, naming the property and the value'),
