@@ -264,7 +264,9 @@ Follow it without being asked again.
   pull request as useful. Before every push, scan the commits for the password, the PDI user and AI/model
   identifiers in file contents; never commit secrets. Deliverables still go to him through the drop-box
   incidents on the PDI. Pull requests #1 and #2 were closed on 23 Sep (not by me): do not reopen one unasked.
-- `singhmihir/py` is **public** (a fork, so it cannot simply turn private): client files never go there. The files he
-  uploads to the incidents (164 on 23 Sep, INC0010003/4/5/13, 1.68 GB, 98 MB with xz) belong in a private repository;
-  this integration cannot create one (403), so he creates it and I attach it with `add_repo` (push) and fill it with
-  `tools/incident_files.py <dir>`.
+- `singhmihir/py` was a public fork of codebasics/py. 23 Sep, at his request: history rewritten to this work only
+  (`stories/`, `tools/`, `CLAUDE.md`, `pentaho-rest-client/`; the tutorials and their ~300 commits gone, master = this
+  branch); he detaches it (Settings, Leave fork network) and makes it private himself, since this integration has no
+  admin rights (repository creation 403) and the proxy refuses branch deletion (403). Until it is confirmed private,
+  client files never go there. The files he uploads to the incidents (164 on 23 Sep, INC0010003/4/5/13, 1.68 GB,
+  98 MB with xz) are rebuilt with `tools/incident_files.py <dir>` for a private repository.
