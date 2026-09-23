@@ -1,7 +1,7 @@
 {
- "set": "d9037dfc932f07d0e3aef0aefaba1095",
- "set_name": "SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.2",
- "previous_set": "23986f2893e3c3d0e3aef0aefaba10e4",
+ "set": "a2337e70932b47d0e3aef0aefaba1053",
+ "set_name": "SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.3",
+ "previous_set": "d9037dfc932f07d0e3aef0aefaba1095",
  "scope": "4ba447d22b43cb10cb55fbcc6e91bf0f",
  "si": {
   "BOFASIVampOutboundProcessor": "7da0bea4936b83d0e3aef0aefaba10e0",
@@ -13,7 +13,7 @@
  },
  "app_name": "BOFA USEM CDP integration",
  "default_set": "9814018d93574f10e3aef0aefaba101f",
- "topic": "79a7dd78932b07d0e3aef0aefaba10b8",
+ "topic": "5505797c936f07d0e3aef0aefaba106b",
  "br": "2cb0b2e4936b83d0e3aef0aefaba1067",
  "rows": 24
 }
