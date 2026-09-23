@@ -160,7 +160,7 @@ BOFA_SI_KafkaProducerV2.prototype = {
 
     /**
      * Checks that the payload holds exactly one non-empty list of element objects whose length
-     * equals envelope.element_count, a whole number (or its digits as text); throws otherwise.
+     * equals envelope.element_count; throws otherwise.
      * @param {Object} message - the parsed payload
      * @returns {void}
      */
@@ -176,10 +176,8 @@ BOFA_SI_KafkaProducerV2.prototype = {
         if (!Array.isArray(elements) || elements.length === 0)
             throw new Error(name + ' is not a list of elements');
         var count = message[this.ENVELOPE_KEY].element_count;
-        if (!this._isWholeNumber(count))
-            throw new Error(this.ENVELOPE_KEY + '.element_count is not a whole number: ' + JSON.stringify(count));
-        if (Number(count) !== elements.length)
-            throw new Error(this.ENVELOPE_KEY + '.element_count is ' + count + ' but ' + name + ' holds ' + elements.length);
+        if (count !== elements.length)
+            throw new Error(this.ENVELOPE_KEY + '.element_count is ' + JSON.stringify(count) + ' but ' + name + ' holds ' + elements.length);
         for (var i = 0; i < elements.length; i++)
             if (!this._isObject(elements[i]) || Object.keys(elements[i]).length === 0)
                 throw new Error(name + '[' + i + '] is not an element');
@@ -192,17 +190,6 @@ BOFA_SI_KafkaProducerV2.prototype = {
      */
     _isObject: function(value) {
         return value !== null && typeof value === 'object' && !Array.isArray(value);
-    },
-
-    /**
-     * Tells whether a value is a whole number of zero or more, given as a number or as digits.
-     * @param {*} value - the value to check
-     * @returns {Boolean} true for 0, 1, 2 ... or "0", "1", "2" ...
-     */
-    _isWholeNumber: function(value) {
-        if (typeof value === 'number')
-            return value >= 0 && value % 1 === 0;
-        return typeof value === 'string' && /^[0-9]+$/.test(value);
     },
 
     /**
