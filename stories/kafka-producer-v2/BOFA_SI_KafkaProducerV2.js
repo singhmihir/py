@@ -11,12 +11,11 @@ BOFA_SI_KafkaProducerV2.prototype = {
         this.IS_SYNC = false; // the caller does not wait for the broker acknowledgement
         this.HEADERS = null; // optional, subject to discussion
         this.SCHEMA_ID = null; // optional, no Avro schema in use
-        this.SYS_ID = /^[0-9a-f]{32}$/i;
-        // Each property holds the sys_id of a Kafka Topic [sys_kafka_topic]. The remediation
-        // task tables point at the finding topic until a topic of their own exists; the
-        // consequence table has its own topic, held in the consequence application.
+        this.SYS_ID = /^[0-9a-f]{32}$/;
+        // Each property holds the sys_id of a Kafka Topic [sys_kafka_topic]. Findings, remediation
+        // tasks and consequences each have their own topic; the table of the record picks the property.
         this.FINDING_TOPIC_PROPERTY = 'x_boar_bofa_usem_1.x_boar_bofa.usem.kafka.topic_sys_id';
-        this.REMEDIATION_TASK_TOPIC_PROPERTY = 'x_boar_bofa_usem_1.x_boar_bofa.usem.kafka.topic_sys_id';
+        this.REMEDIATION_TASK_TOPIC_PROPERTY = 'x_boar_bofa_usem_1.usem.cdp.remtask.kafka.topic_sys_id';
         this.CONSEQUENCE_TOPIC_PROPERTY = 'x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id';
         this.TOPIC_PROPERTIES = {
             sn_vul_vulnerable_item: this.FINDING_TOPIC_PROPERTY,

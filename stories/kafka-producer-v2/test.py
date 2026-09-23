@@ -4,7 +4,8 @@ A. the payload validation, one case per refusal reason and the payloads it accep
 A2. the script layout, the ProducerV2.send call and its argument order;
 B. the producer with the send captured: topic, key and message per table, every refusal logged once
    and never sent, the real send on this instance (no Stream Connect) logged in the same format;
-C. the topic property: empty, padded with spaces, holding a topic name;
+C. each of the three topic properties (finding, remediation task, consequence) on its own: empty, padded with
+   spaces, holding a topic name, in capitals, while the other two groups still go to their own topics;
 D. the client's chain in a business rule of the Vulnerability Response scope: the rule as written on
    the client instance (builder object serialised by the rule), the same rule when the builder cannot
    build, and the suggested rule body in both cases.
@@ -27,6 +28,9 @@ TABLES = ['sn_vul_vulnerable_item', 'sn_vul_app_vulnerable_item', 'sn_vul_contai
           'sn_vul_vulnerability', 'sn_vul_app_vulnerability', 'sn_vul_container_vulnerability', 'sn_vulc_result_group',
           'x_boar_bofa_usem_0_consequence']
 CONSEQUENCE_PROPERTY = 'x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id'   # the consequence table's own topic, in the consequence application
+REMTASK_PROPERTY = 'x_boar_bofa_usem_1.usem.cdp.remtask.kafka.topic_sys_id'       # the remediation tasks' own topic, delivered with the producer
+GROUPS = {'finding': (PROPERTY, TABLES[0:4]), 'remediation task': (REMTASK_PROPERTY, TABLES[4:8]), 'consequence': (CONSEQUENCE_PROPERTY, TABLES[8:9])}
+PROPERTY_OF = {t: prop for prop, tables in GROUPS.values() for t in tables}   # table -> topic property, as the producer must map it
 STANDIN = '9d1e03de930b8310e3aef0aefaba10d5'   # stand-in scope that held the producer before it moved to the mirror application
 ENVELOPE = ['type', 'topic_name', 'namespace', 'core_version', 'outbound_version', 'event_id', 'event_timestamp', 'element_count', 'element_activity']
 SENT = 'BOFA_SI_KafkaProducerV2: message not sent for '
@@ -155,7 +159,8 @@ check('A2 one gs.error, one entry-point try/catch plus the JSON parse translatio
 # ---------- B. producer: topic per table, key, message, and every refusal ----------
 b = ui.js(r'''
 (function() {
-var o = {sent: [], subjects: {}, topic: '' + gs.getProperty(%s, ''), consequence_topic: '' + gs.getProperty(%s, '')};
+var o = {sent: [], subjects: {}, topics: {}};
+var props = %s; for (var i = 0; i < props.length; i++) o.topics[props[i]] = '' + gs.getProperty(props[i], '');
 gs.sleep(1100); var t0 = new GlideDateTime().getValue();
 var P = x_boar_bofa_usem_1.BOFA_SI_KafkaProducerV2;
 var g = new GlideRecord('sn_vul_vulnerability'); g.get(%s);
@@ -187,16 +192,19 @@ try { new sn_ih_kafka.ProducerV2(); o.api_missing = ''; } catch (e) { o.api_miss
 var real = new GlideRecord('sn_vul_vulnerability'); real.get(%s);
 try { new P().sendPayload(good, real); o.real_send = 'no throw'; } catch (e) { o.real_send = 'THREW ' + e.message; }
 o.vul = g.getUniqueValue(); o.real = real.getUniqueValue();
-o.defaults = {is_sync: new P().IS_SYNC, headers: new P().HEADERS, schema: new P().SCHEMA_ID, tables: Object.keys(new P().TOPIC_PROPERTIES)};
+o.defaults = {is_sync: new P().IS_SYNC, headers: new P().HEADERS, schema: new P().SCHEMA_ID, tables: Object.keys(new P().TOPIC_PROPERTIES), map: new P().TOPIC_PROPERTIES};
 %s
 gs.print('X::' + JSON.stringify(o));
-})();''' % (json.dumps(PROPERTY), json.dumps(CONSEQUENCE_PROPERTY), json.dumps(SAMPLE), json.dumps(TABLES), json.dumps(SINGLE), lines_since()))
-check('B property fixture holds the topic the build recorded', b['topic'] == ST['topic'], b['topic'])
+})();''' % (json.dumps([PROPERTY, REMTASK_PROPERTY, CONSEQUENCE_PROPERTY]), json.dumps(SAMPLE), json.dumps(TABLES), json.dumps(SINGLE), lines_since()))
+T = b['topics']
+check('B the producer maps every table to its group\'s property: 4 finding tables, 4 remediation task tables, the consequence table',
+      b['defaults']['map'] == PROPERTY_OF, b['defaults']['map'])
+check('B three topic properties, three different topic sys_ids (finding %s, remediation task %s, consequence %s)' % tuple(T.get(p, '')[:8] for p in [PROPERTY, REMTASK_PROPERTY, CONSEQUENCE_PROPERTY]),
+      len(set(T.values())) == 3 and all(re.match(r'^[0-9a-f]{32}$', v) for v in T.values()) and T[PROPERTY] == ST['topic'] and T[REMTASK_PROPERTY] == ST['remtask_topic'], T)
 sent = b['sent']
 check('B one send per table per payload form: %d tables x 2 = %d sends' % (len(TABLES), len(sent)), len(sent) == 2 * len(TABLES))
-check('B every send used the topic of its table\'s property (the consequence table its own, read from the consequence application), three arguments to _send',
-      len(b['consequence_topic']) == 32 and b['consequence_topic'] != ST['topic']
-      and all(s['topic'] == (b['consequence_topic'] if s['table'] == 'x_boar_bofa_usem_0_consequence' else ST['topic']) and s['args'] == 3 for s in sent), (b['consequence_topic'], [(s['table'], s['topic']) for s in sent]))
+check('B every send used the topic of its own table\'s property (finding, remediation task or consequence), three arguments to _send',
+      all(s['topic'] == T[PROPERTY_OF[s['table']]] and s['args'] == 3 for s in sent), [(s['table'], s['topic'][:8]) for s in sent if s['topic'] != T[PROPERTY_OF[s['table']]]])
 check('B every key is <table>.<sys_id>', all(s['key'] == s['expected_key'] and re.match(r'^[a-z0-9_]+\.[0-9a-f]{32}$', s['key']) for s in sent), [s['key'] for s in sent if s['key'] != s['expected_key'] or not re.match(r'^[a-z0-9_]+\.[0-9a-f]{32}$', s['key'])])
 check('B every message is the canonical JSON text, whether given as string or object', all(s['message'] == b['canonical'] for s in sent))
 check('B all nine tables covered (%s)' % ', '.join('%s:%s' % (t, b['subjects'][t]) for t in TABLES), sorted(set(s['table'] for s in sent)) == sorted(TABLES))
@@ -221,31 +229,51 @@ check('B real send (no Stream Connect here): one line in the same format, its re
 print('   real send reason on this instance: %s' % reason)
 REAL_REASON = reason
 
-# ---------- C. the topic property: empty, padded, a topic name ----------
+# ---------- C. each topic property on its own: empty, padded, a topic name, capitals ----------
+# For every group the property is broken in turn while a record of each group is sent: the group's own record is refused
+# (or sent to the trimmed sys_id), the other two groups still go to their own topics.
+SUBJECTS = {'finding': 'sn_vul_vulnerable_item', 'remediation task': 'sn_vul_vulnerability', 'consequence': 'x_boar_bofa_usem_0_consequence'}
 c = ui.js(r'''
 (function() {
-var o = {sent: []};
+var o = {sent: [], restored: {}, records: {}};
 gs.sleep(1100); var t0 = new GlideDateTime().getValue();
 var P = x_boar_bofa_usem_1.BOFA_SI_KafkaProducerV2;
 var g = new GlideRecord('sn_vul_vulnerability'); g.get(%s);
 var good = new RemediationTaskPayloadBuilder().buildPayload(g);
-var p = new GlideRecord('sys_properties'); p.get(%s); var keep = '' + (p.getValue('value') || '');
-function run(value) { p.setValue('value', value); p.update(); var pr = new P(); pr._send = function(t) { o.sent.push('' + t); }; pr.sendPayload(good, g); }
-try {
-    run(''); run('  ' + keep + '  \n'); run('sn_usem_remtask_outbound'); run(keep.toUpperCase());
-} finally {
-    p.setValue('value', keep); p.update();
+var groups = %s, subjects = %s, recs = {};
+for (var name in subjects) { var r = new GlideRecord(subjects[name]); r.orderByDesc('sys_created_on'); r.setLimit(1); r.query(); r.next(); recs[name] = r; o.records[name] = r.getUniqueValue(); }
+function sendAll(step) {
+    for (var name in recs) { var pr = new P(); pr._send = function(t, k) { o.sent.push({step: step, group: name, topic: '' + t, key: '' + k}); }; pr.sendPayload(good, recs[name]); }
 }
-o.restored = '' + gs.getProperty(%s, '');
-o.vul = g.getUniqueValue();
+for (var broken in groups) {
+    var p = new GlideRecord('sys_properties'); p.addQuery('name', groups[broken]); p.query(); p.next(); var keep = '' + (p.getValue('value') || '');
+    try {
+        p.setValue('value', ''); p.update(); sendAll(broken + ':empty');
+        p.setValue('value', '  ' + keep + '  \n'); p.update(); sendAll(broken + ':padded');
+        p.setValue('value', 'sn_usem_topic_name'); p.update(); sendAll(broken + ':name');
+        p.setValue('value', keep.toUpperCase()); p.update(); sendAll(broken + ':capitals');
+    } finally {
+        p.setValue('value', keep); p.update();
+    }
+    o.restored[broken] = '' + gs.getProperty(groups[broken], '') === keep && keep.length == 32;
+}
 %s
 gs.print('X::' + JSON.stringify(o));
-})();''' % (json.dumps(SAMPLE), json.dumps(ST['property']), json.dumps(PROPERTY), lines_since()))
-V = SENT + 'sn_vul_vulnerability %s - ' % c['vul']
-check('C property padded with spaces: the trimmed sys_id is sent; the same sys_id in capitals is accepted', c['sent'] == [ST['topic'], ST['topic'].upper()], c['sent'])
-check('C empty property and a topic name refused before send, naming the property and the value',
-      sorted(c['lines']) == sorted([V + 'property %s holds no topic sys_id' % PROPERTY, V + 'property %s holds "sn_usem_remtask_outbound", which is not a topic sys_id' % PROPERTY]), c['lines'])
-check('C property restored', c['restored'] == ST['topic'], c['restored'])
+})();''' % (json.dumps(SAMPLE), json.dumps({g: GROUPS[g][0] for g in GROUPS}), json.dumps(SUBJECTS), lines_since()))
+TOPIC_OF = {g: T[GROUPS[g][0]] for g in GROUPS}
+for broken in GROUPS:
+    prop = GROUPS[broken][0]
+    subject = SENT + '%s %s - ' % (SUBJECTS[broken], c['records'][broken])
+    for step, sent_expected, line in [('empty', False, 'property %s holds no topic sys_id' % prop), ('padded', True, None),
+                                      ('name', False, 'property %s holds "sn_usem_topic_name", which is not a topic sys_id' % prop),
+                                      ('capitals', False, 'property %s holds "%s", which is not a topic sys_id' % (prop, TOPIC_OF[broken].upper()))]:
+        own = [x for x in c['sent'] if x['step'] == broken + ':' + step and x['group'] == broken]
+        others = sorted((x['group'], x['topic']) for x in c['sent'] if x['step'] == broken + ':' + step and x['group'] != broken)
+        check('C %s property %s: %s; the other two groups still sent to their own topics' % (broken, step, 'sent to the trimmed sys_id' if sent_expected else 'refused before send, naming the property and the value'),
+              (own == [{'step': broken + ':' + step, 'group': broken, 'topic': TOPIC_OF[broken], 'key': SUBJECTS[broken] + '.' + c['records'][broken]}] if sent_expected else (own == [] and (subject + line) in c['lines']))
+              and others == sorted((g, TOPIC_OF[g]) for g in GROUPS if g != broken), (own, others))
+check('C every refusal logged exactly once, nothing else logged (9 lines)', len(c['lines']) == 9 and len(set(c['lines'])) == 9, c['lines'])
+check('C the three properties restored', all(c['restored'].values()) and len(c['restored']) == 3, c['restored'])
 
 # ---------- D. the client's chain in a rule of the Vulnerability Response scope ----------
 original = open(os.path.join(HERE, 'original', 'BOA_BR_VUL_KafkaOutbound.xml')).read()

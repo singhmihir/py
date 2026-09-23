@@ -7,7 +7,10 @@ SCOPE = '4ba447d22b43cb10cb55fbcc6e91bf0f'  # mirror of the client application B
 STANDIN = '9d1e03de930b8310e3aef0aefaba10d5'  # stand-in scoped app that held the producer until V1.4
 CLIENT_SYS_ID = '075d9ba02b9fc7102b30f8e14391bfdb'  # the producer's sys_id on the client instance
 APP_NAME = 'BOFA USEM CDP integration'
-PROPERTY = 'x_boar_bofa_usem_1.x_boar_bofa.usem.kafka.topic_sys_id'  # read by the producer, test fixture on the PDI
+REMTASK_PROPERTY = 'x_boar_bofa_usem_1.usem.cdp.remtask.kafka.topic_sys_id'   # the remediation tasks' own topic, delivered with the producer (empty)
+REMTASK_DESC = ('sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_remtask_outbound, read by BOFA_SI_KafkaProducerV2 for the '
+                'remediation task tables sn_vul_vulnerability, sn_vul_app_vulnerability, sn_vul_container_vulnerability and sn_vulc_result_group.')
+PROPERTY = 'x_boar_bofa_usem_1.x_boar_bofa.usem.kafka.topic_sys_id'  # the finding topic, the client's own property; a test fixture on the PDI
 NAME = 'INC0010003_MS_Kafka Producer V2 with Payload Validation_V1.5'
 SCRIPTS = {n: open(os.path.join(HERE, n + '.js')).read() for n in ['BOFA_SI_KafkaProducerV2']}
 DESC = {
@@ -61,16 +64,27 @@ for (var name in scripts) {
     var back = new GlideRecord('sys_script_include'); back.get(si.getUniqueValue()); new GlideUpdateManager2().saveRecord(back);
     o.si[name] = {sys_id: back.getUniqueValue(), api_name: '' + back.getValue('api_name'), scope: '' + back.sys_scope.getDisplayValue(), access: '' + back.getValue('access')};
 }
+var rp = new GlideRecord('sys_properties'); rp.addQuery('name', %s); rp.query();
+if (!rp.next()) { rp.initialize(); rp.setValue('name', %s); rp.setValue('type', 'string'); }
+var kept = '' + (rp.getValue('value') || '');
+rp.setValue('value', /^[0-9a-f]{32}$/.test(kept) ? kept : gs.generateGUID()); rp.setValue('description', %s);
+rp.update() || rp.insert();
+var rb = new GlideRecord('sys_properties'); rb.get(rp.getUniqueValue()); new GlideUpdateManager2().saveRecord(rb);
+o.remtask = {sys_id: rb.getUniqueValue(), value: '' + rb.getValue('value'), scope: '' + rb.sys_scope.getDisplayValue(), read_back: '' + gs.getProperty(%s, '')};
 var ux = new GlideRecord('sys_update_xml'); ux.addQuery('update_set', o.set); ux.orderBy('target_name'); ux.query();
 while (ux.next()) o.rows.push('' + ux.getValue('target_name') + ' | ' + ux.getValue('action') + ' | ' + ux.application.getDisplayValue());
 gs.print('X::' + JSON.stringify(o));''' % (json.dumps(reuse), json.dumps(ST.get('set', '')), json.dumps(NAME), json.dumps(SCOPE),
-                                         json.dumps(SCRIPTS), json.dumps(DESC), json.dumps(CLIENT_SYS_ID), json.dumps(CLIENT_SYS_ID)), scope=SCOPE)
+                                         json.dumps(SCRIPTS), json.dumps(DESC), json.dumps(CLIENT_SYS_ID), json.dumps(CLIENT_SYS_ID),
+                                         json.dumps(REMTASK_PROPERTY), json.dumps(REMTASK_PROPERTY), json.dumps(REMTASK_DESC), json.dumps(REMTASK_PROPERTY)), scope=SCOPE)
 print('update set:', d['set'], '|', d['set_scope'])
 for n, i in d['si'].items(): print(' ', i['api_name'], i['sys_id'], '|', i['scope'], '| access', i['access'])
 print('\n'.join(' captured: ' + r for r in d['rows']))
-assert d['set_scope'] == APP_NAME and d['rows'] == ['BOFA_SI_KafkaProducerV2 | INSERT_OR_UPDATE | ' + APP_NAME], d['rows']
+print(' remediation task topic property:', REMTASK_PROPERTY, d['remtask']['sys_id'], '|', d['remtask']['scope'], '| value', d['remtask']['value'])
+assert d['set_scope'] == APP_NAME and sorted(d['rows']) == sorted(['BOFA_SI_KafkaProducerV2 | INSERT_OR_UPDATE | ' + APP_NAME, REMTASK_PROPERTY + ' | INSERT_OR_UPDATE | ' + APP_NAME]), d['rows']
+assert d['remtask']['scope'] == APP_NAME and d['remtask']['read_back'] == d['remtask']['value'] and len(d['remtask']['value']) == 32 and d['remtask']['value'] != g['topic'], d['remtask']
 assert all(i['scope'] == APP_NAME and i['access'] == 'public' and i['sys_id'] == CLIENT_SYS_ID and i['api_name'] == 'x_boar_bofa_usem_1.BOFA_SI_KafkaProducerV2' for i in d['si'].values())
 json.dump({'set': d['set'], 'set_name': NAME, 'scope': SCOPE, 'si': {n: i['sys_id'] for n, i in d['si'].items()},
-           'property': g['property'], 'topic': g['topic'], 'global_default': g['global_default']}, open(st_path, 'w'), indent=1)
+           'property': g['property'], 'topic': g['topic'], 'remtask_property': d['remtask']['sys_id'], 'remtask_topic': d['remtask']['value'],
+           'global_default': g['global_default']}, open(st_path, 'w'), indent=1)
 ui.app('global')
-print('deployed: producer in the integration application under its client sys_id, stand-in copy removed, update set scope matches every captured row')
+print('deployed: producer in the integration application under its client sys_id with the remediation task topic property, stand-in copy removed, update set scope matches every captured row')
