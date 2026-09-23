@@ -1,5 +1,5 @@
 """Builds the import-ready record XML for the client instance from the records deployed on the PDI:
-the two script includes, the two properties and the rule, already in the client consequence application
+the processor script include, the two properties and the rule, already in the client consequence application
 x_boar_bofa_usem_0 (BOFA USEM Consequence), which the PDI mirrors with the same scope name and sys_id. User, timestamp and mod-count fields are left out so the import stamps
 them; the topic property is delivered empty for the client to fill with the sys_id of its Kafka topic. The records
 earlier versions delivered under other sys_ids come first, as deletions (Import XML deletes a record of an
@@ -61,5 +61,5 @@ for r in brs:
 low = content.lower()
 TOOLING = [w[::-1] for w in ['edualc', 'cipohtna', 'ianepo', 'tpg', 'rihim']]   # assistant, model and personal names, spelled backwards so this file never carries them
 hits = [t for t in [w.lower() for w in WORKING + [os.environ.get('SN_PASSWORD', '')] if w] + ['service-now.com', 'x_196061', 'bofasim'] + TOOLING if t in low]
-assert len(sis) == 2 and len(props) == 2 and len(brs) == 1 and not hits and '<sys_updated_by>' not in content, hits
+assert len(sis) == len(ST['si']) == 1 and len(props) == 2 and len(brs) == 1 and not hits and '<sys_updated_by>' not in content, hits
 print('written:', OUT, len(content), 'bytes | records', len(sis) + len(props) + len(brs), '| scrub', 'CLEAN' if not hits else hits)

@@ -1,4 +1,5 @@
-"""Checks the Kafka producer V2 in the stand-in scope on the PDI:
+"""Checks the Kafka producer V2, shared by the finding, remediation task and consequence tables, in the mirror of
+the client's integration application (x_boar_bofa_usem_1) on the PDI:
 A. the payload validation, one case per refusal reason and the payloads it accepts;
 A2. the script layout, the ProducerV2.send call and its argument order;
 B. the producer with the send captured: topic, key and message per table, every refusal logged once
@@ -23,7 +24,10 @@ SAMPLE = 'ad21d45d13bc3300a23a7f176144b055'     # VUL0004576
 PLURAL = FX['ids']['sn_vul_vulnerability.plural']
 SINGLE = FX['ids']['sn_vul_vulnerability.single']
 TABLES = ['sn_vul_vulnerable_item', 'sn_vul_app_vulnerable_item', 'sn_vul_container_image_vulnerable_item', 'sn_vulc_result',
-          'sn_vul_vulnerability', 'sn_vul_app_vulnerability', 'sn_vul_container_vulnerability', 'sn_vulc_result_group']
+          'sn_vul_vulnerability', 'sn_vul_app_vulnerability', 'sn_vul_container_vulnerability', 'sn_vulc_result_group',
+          'x_boar_bofa_usem_0_consequence']
+CONSEQUENCE_PROPERTY = 'x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id'   # the consequence table's own topic, in the consequence application
+STANDIN = '9d1e03de930b8310e3aef0aefaba10d5'   # stand-in scope that held the producer before it moved to the mirror application
 ENVELOPE = ['type', 'topic_name', 'namespace', 'core_version', 'outbound_version', 'event_id', 'event_timestamp', 'element_count', 'element_activity']
 SENT = 'BOFA_SI_KafkaProducerV2: message not sent for '
 BUILT = 'BOA_SI_USEM_RemediationTaskPayloadBuilder: payload not built for '
@@ -45,7 +49,7 @@ ui.js('new GlideUpdateSet().set(%s); gs.print("X::{}");' % json.dumps(ST['global
 a = ui.js(r'''
 (function() {
 var o = {cases: {}};
-var V = x_196061_bofasim.BOFA_SI_KafkaProducerV2;
+var V = x_boar_bofa_usem_1.BOFA_SI_KafkaProducerV2;
 function attempt(x) { try { return {ok: true, out: '' + new V()._validate(x)}; } catch (e) { return {ok: false, err: '' + e.message}; } }
 var g = new GlideRecord('sn_vul_vulnerability'); g.get(%s);
 var good = new RemediationTaskPayloadBuilder().buildPayload(g);
@@ -131,12 +135,15 @@ sc = ui.js(r'''
 var o = {names: []};
 var si = new GlideRecord('sys_script_include'); si.addQuery('sys_scope', %s); si.addQuery('name', 'STARTSWITH', 'BOFA_SI_Kafka'); si.query();
 while (si.next()) o.names.push('' + si.getValue('name'));
+var all = new GlideRecord('sys_script_include'); all.addQuery('name', 'BOFA_SI_KafkaProducerV2'); all.query(); o.copies = [];
+while (all.next()) o.copies.push('' + all.getValue('api_name') + ' ' + all.getUniqueValue());
 var p = new GlideRecord('sys_script_include'); p.get(%s); o.script = '' + p.getValue('script');
 gs.print('X::' + JSON.stringify(o));
 })();''' % (json.dumps(ST['scope']), json.dumps(ST['si']['BOFA_SI_KafkaProducerV2'])))
 body = sc['script']; line = body.find('// ______')
 before = ['sendPayload: function', '_topicSysId: function', '_send: function']; after = ['_validate: function', '_parse: function', '_checkEnvelope: function', '_checkElements: function', '_isObject: function', '_isEmpty: function']
 check('A2 only the producer remains in the scope (no separate validator)', sc['names'] == ['BOFA_SI_KafkaProducerV2'], sc['names'])
+check('A2 one copy on the instance, in the integration application under the client\'s sys_id', sc['copies'] == ['x_boar_bofa_usem_1.BOFA_SI_KafkaProducerV2 075d9ba02b9fc7102b30f8e14391bfdb'], sc['copies'])
 check('A2 the deployed script equals the repository copy', body.rstrip('\n') == open(os.path.join(HERE, 'BOFA_SI_KafkaProducerV2.js')).read().rstrip('\n'))
 check('A2 separator line present with the payload validation comment', line > 0 and 'Payload validation' in body[line:line + 400])
 check('A2 send methods before the line, every validation function after it', all(0 < body.find(m) < line for m in before) and all(body.find(m) > line for m in after) and body.find("type: 'BOFA_SI_KafkaProducerV2'") > max(body.find(m) for m in after))
@@ -148,9 +155,9 @@ check('A2 one gs.error, one entry-point try/catch plus the JSON parse translatio
 # ---------- B. producer: topic per table, key, message, and every refusal ----------
 b = ui.js(r'''
 (function() {
-var o = {sent: [], subjects: {}, topic: '' + gs.getProperty(%s, '')};
+var o = {sent: [], subjects: {}, topic: '' + gs.getProperty(%s, ''), consequence_topic: '' + gs.getProperty(%s, '')};
 gs.sleep(1100); var t0 = new GlideDateTime().getValue();
-var P = x_196061_bofasim.BOFA_SI_KafkaProducerV2;
+var P = x_boar_bofa_usem_1.BOFA_SI_KafkaProducerV2;
 var g = new GlideRecord('sn_vul_vulnerability'); g.get(%s);
 var good = new RemediationTaskPayloadBuilder().buildPayload(g);
 o.canonical = JSON.stringify(JSON.parse(good));
@@ -173,7 +180,8 @@ stub().sendPayload('', g);
 var bad = JSON.parse(good); delete bad.envelope.element_activity; stub().sendPayload(JSON.stringify(bad), g);
 
 try { stub().sendPayload(good, null); o.null_record = 'no throw'; } catch (e) { o.null_record = 'THREW ' + e.message; }
-var unsaved = new GlideRecord('sn_vul_vulnerability'); stub().sendPayload(good, unsaved);
+var blank = new GlideRecord('sn_vul_vulnerability'); stub().sendPayload(good, blank);
+var unsaved = new GlideRecord('sn_vul_vulnerability'); unsaved.newRecord(); o.unsaved = unsaved.getUniqueValue(); stub().sendPayload(good, unsaved);
 o.stub_hits_on_refusals = hits;
 try { new sn_ih_kafka.ProducerV2(); o.api_missing = ''; } catch (e) { o.api_missing = '' + (e.message || e); }
 var real = new GlideRecord('sn_vul_vulnerability'); real.get(%s);
@@ -182,27 +190,30 @@ o.vul = g.getUniqueValue(); o.real = real.getUniqueValue();
 o.defaults = {is_sync: new P().IS_SYNC, headers: new P().HEADERS, schema: new P().SCHEMA_ID, tables: Object.keys(new P().TOPIC_PROPERTIES)};
 %s
 gs.print('X::' + JSON.stringify(o));
-})();''' % (json.dumps(PROPERTY), json.dumps(SAMPLE), json.dumps(TABLES), json.dumps(SINGLE), lines_since()))
+})();''' % (json.dumps(PROPERTY), json.dumps(CONSEQUENCE_PROPERTY), json.dumps(SAMPLE), json.dumps(TABLES), json.dumps(SINGLE), lines_since()))
 check('B property fixture holds the topic the build recorded', b['topic'] == ST['topic'], b['topic'])
 sent = b['sent']
 check('B one send per table per payload form: %d tables x 2 = %d sends' % (len(TABLES), len(sent)), len(sent) == 2 * len(TABLES))
-check('B every send used the topic from the property, three arguments to _send', all(s['topic'] == ST['topic'] and s['args'] == 3 for s in sent))
+check('B every send used the topic of its table\'s property (the consequence table its own, read from the consequence application), three arguments to _send',
+      len(b['consequence_topic']) == 32 and b['consequence_topic'] != ST['topic']
+      and all(s['topic'] == (b['consequence_topic'] if s['table'] == 'x_boar_bofa_usem_0_consequence' else ST['topic']) and s['args'] == 3 for s in sent), (b['consequence_topic'], [(s['table'], s['topic']) for s in sent]))
 check('B every key is <table>.<sys_id>', all(s['key'] == s['expected_key'] and re.match(r'^[a-z_]+\.[0-9a-f]{32}$', s['key']) for s in sent))
 check('B every message is the canonical JSON text, whether given as string or object', all(s['message'] == b['canonical'] for s in sent))
-check('B all eight tables covered (%s)' % ', '.join('%s:%s' % (t, b['subjects'][t]) for t in TABLES), sorted(set(s['table'] for s in sent)) == sorted(TABLES))
-check('B refusals never reach send (6 refusals incl. a record without a sys_id, %d stub hits)' % b['stub_hits_on_refusals'], b['stub_hits_on_refusals'] == 0)
+check('B all nine tables covered (%s)' % ', '.join('%s:%s' % (t, b['subjects'][t]) for t in TABLES), sorted(set(s['table'] for s in sent)) == sorted(TABLES))
+check('B refusals never reach send (7 refusals incl. a record without a sys_id and an unsaved one, %d stub hits)' % b['stub_hits_on_refusals'], b['stub_hits_on_refusals'] == 0)
 check('B null record and the real send do not throw', b['null_record'] == 'no throw' and b['real_send'] == 'no throw', (b['null_record'], b['real_send']))
-check('B defaults: async send, no headers, no schema, 8 tables', b['defaults']['is_sync'] is False and b['defaults']['headers'] is None and b['defaults']['schema'] is None and sorted(b['defaults']['tables']) == sorted(TABLES))
+check('B defaults: async send, no headers, no schema, 9 tables', b['defaults']['is_sync'] is False and b['defaults']['headers'] is None and b['defaults']['schema'] is None and sorted(b['defaults']['tables']) == sorted(TABLES))
 V = SENT + 'sn_vul_vulnerability %s - ' % b['vul']
 exact = [SENT + 'incident %s - no Kafka topic is associated with table incident' % b['incident'], V + 'payload is empty', V + 'payload is empty', V + 'envelope.element_activity is missing or empty']
 L = b['lines']
-check('B exactly eight lines logged by this script', len(L) == 8, L)
+check('B exactly nine lines logged by this script', len(L) == 9, L)
 check('B unmapped table, stringified empty string, empty string, envelope breach: one exact line each', all(L.count(m) == exact.count(m) for m in exact), [m for m in exact if m not in L])
 parser = [m for m in L if m.startswith(V + 'payload is not valid JSON - ')]
 check('B malformed JSON: one line with the parser reason', len(parser) == 1 and len(parser[0]) > len(V + 'payload is not valid JSON - '), parser)
 nul = [m for m in L if m == SENT + 'no record - no record was given']
 check('B null record: one line, "no record was given"', len(nul) == 1, L)
-check('B a record without a sys_id: one line naming the table, never sent', (SENT + 'sn_vul_vulnerability - the record has no sys_id') in L, L)
+check('B a record without a sys_id: one line naming the table, never sent', (SENT + 'sn_vul_vulnerability - the record does not exist') in L, L)
+check('B a record never saved: one line naming it, never sent', (SENT + 'sn_vul_vulnerability %s - the record does not exist' % b['unsaved']) in L, L)
 real = [m for m in L if m.startswith(SENT + 'sn_vul_vulnerability %s - ' % b['real'])]
 reason = real[0][len(SENT + 'sn_vul_vulnerability %s - ' % b['real']):] if len(real) == 1 else ''
 check('B real send (no Stream Connect here): one line in the same format, its reason the platform\'s own error for the missing Kafka API (%r)' % b['api_missing'],
@@ -215,7 +226,7 @@ c = ui.js(r'''
 (function() {
 var o = {sent: []};
 gs.sleep(1100); var t0 = new GlideDateTime().getValue();
-var P = x_196061_bofasim.BOFA_SI_KafkaProducerV2;
+var P = x_boar_bofa_usem_1.BOFA_SI_KafkaProducerV2;
 var g = new GlideRecord('sn_vul_vulnerability'); g.get(%s);
 var good = new RemediationTaskPayloadBuilder().buildPayload(g);
 var p = new GlideRecord('sys_properties'); p.get(%s); var keep = '' + (p.getValue('value') || '');
@@ -271,7 +282,7 @@ o.vul = g.getUniqueValue(); o.prop_restored = '' + gs.getProperty(%s, '') === ke
 o.direct = JSON.stringify(new x_196061_bofasim.BOA_SI_USEM_RemediationTaskPayloadBuilder().buildPayload(g, 'UPDATE'));
 %s
 gs.print('X::' + JSON.stringify(o));
-})();''' % (json.dumps(VR_SCOPE), json.dumps(script.replace('x_boar_bofa_usem_1.', 'x_196061_bofasim.')), json.dumps(CLIENT_ST['props'][CLIENT_PROPERTY]), json.dumps(PLURAL),
+})();''' % (json.dumps(VR_SCOPE), json.dumps(script.replace('x_boar_bofa_usem_1.BOA_SI_USEM_RemediationTaskPayloadBuilder', 'x_196061_bofasim.BOA_SI_USEM_RemediationTaskPayloadBuilder')), json.dumps(CLIENT_ST['props'][CLIENT_PROPERTY]), json.dumps(PLURAL),
             'true' if break_builder else 'false', json.dumps(PLURAL), json.dumps(CLIENT_PROPERTY), lines_since())
     raw = ui.run(code, scope=VR_SCOPE)
     m = re.search(r'X::(\{.*\})', raw, re.S)
