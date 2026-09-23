@@ -34,7 +34,7 @@ records = [
 ui = SNUI(); ui.app('global')
 r = ui.s.get(INST + '/sys_properties.do', params={'XML': '', 'sys_id': ST['remtask_property']}); r.raise_for_status()
 m = re.search(r'<sys_properties>(.*?)</sys_properties>', r.text, re.S)
-assert m and '<name>%s</name>' % REMTASK_PROPERTY in m.group(1) and '<sys_scope display_value="BOFA USEM CDP integration">%s</sys_scope>' % CLIENT_SCOPE in m.group(1), r.text[:500]
+assert m and '<name>%s</name>' % REMTASK_PROPERTY in m.group(1) and re.search(r'<sys_scope(?: display_value="[^"]*")?>%s</sys_scope>' % CLIENT_SCOPE, m.group(1)), r.text[:500]
 prop = '<sys_properties action="INSERT_OR_UPDATE">%s</sys_properties>' % re.sub(r'<value>[^<]*</value>', '<value/>', STAMP.sub('', m.group(1)))
 records.append(prop)
 PRIOR = json.load(open(os.path.join(HERE, 'prior_records.json')))['records']

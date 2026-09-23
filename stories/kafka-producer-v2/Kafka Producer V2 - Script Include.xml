@@ -25,12 +25,11 @@ BOFA_SI_KafkaProducerV2.prototype = {
         this.IS_SYNC = false; // the caller does not wait for the broker acknowledgement
         this.HEADERS = null; // optional, subject to discussion
         this.SCHEMA_ID = null; // optional, no Avro schema in use
-        this.SYS_ID = /^[0-9a-f]{32}$/i;
-        // Each property holds the sys_id of a Kafka Topic [sys_kafka_topic]. The remediation
-        // task tables point at the finding topic until a topic of their own exists; the
-        // consequence table has its own topic, held in the consequence application.
+        this.SYS_ID = /^[0-9a-f]{32}$/;
+        // Each property holds the sys_id of a Kafka Topic [sys_kafka_topic]. Findings, remediation
+        // tasks and consequences each have their own topic; the table of the record picks the property.
         this.FINDING_TOPIC_PROPERTY = 'x_boar_bofa_usem_1.x_boar_bofa.usem.kafka.topic_sys_id';
-        this.REMEDIATION_TASK_TOPIC_PROPERTY = 'x_boar_bofa_usem_1.x_boar_bofa.usem.kafka.topic_sys_id';
+        this.REMEDIATION_TASK_TOPIC_PROPERTY = 'x_boar_bofa_usem_1.usem.cdp.remtask.kafka.topic_sys_id';
         this.CONSEQUENCE_TOPIC_PROPERTY = 'x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id';
         this.TOPIC_PROPERTIES = {
             sn_vul_vulnerable_item: this.FINDING_TOPIC_PROPERTY,
@@ -215,4 +214,23 @@ BOFA_SI_KafkaProducerV2.prototype = {
 <sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
 <sys_update_name>sys_script_include_075d9ba02b9fc7102b30f8e14391bfdb</sys_update_name>
 </sys_script_include>
+<sys_properties action="INSERT_OR_UPDATE">
+<choices/>
+<description>sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_remtask_outbound, read by BOFA_SI_KafkaProducerV2 for the remediation task tables sn_vul_vulnerability, sn_vul_app_vulnerability, sn_vul_container_vulnerability and sn_vulc_result_group.</description>
+<ignore_cache>false</ignore_cache>
+<is_private>false</is_private>
+<name>x_boar_bofa_usem_1.usem.cdp.remtask.kafka.topic_sys_id</name>
+<read_roles/>
+<suffix>usem.cdp.remtask.kafka.topic_sys_id</suffix>
+<sys_class_name>sys_properties</sys_class_name>
+<sys_id>8ce77ab4936b47d0e3aef0aefaba10ca</sys_id>
+<sys_name>x_boar_bofa_usem_1.usem.cdp.remtask.kafka.topic_sys_id</sys_name>
+<sys_package>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package>
+<sys_policy/>
+<sys_scope>4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope>
+<sys_update_name>sys_properties_8ce77ab4936b47d0e3aef0aefaba10ca</sys_update_name>
+<type>string</type>
+<value/>
+<write_roles/>
+</sys_properties>
 </unload>
