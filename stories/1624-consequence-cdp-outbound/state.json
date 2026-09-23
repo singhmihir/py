@@ -1,19 +1,18 @@
 {
- "set": "9cd1f9bc932f07d0e3aef0aefaba1097",
- "set_name": "SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.4",
- "previous_set": "ad7463a893e3c3d0e3aef0aefaba10f3",
+ "set": "db02fef893e747d0e3aef0aefaba10e2",
+ "set_name": "SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.5",
+ "previous_set": "9cd1f9bc932f07d0e3aef0aefaba1097",
  "scope": "488be1cd2b1247102b30f8e14391bf0c",
  "default_set": "85687c54936f8f90e3aef0aefaba10c4",
  "app_name": "BOFA USEM Consequence",
  "si": {
-  "BOFASIConsequenceOutboundProcessor": "18e97850936f8f90e3aef0aefaba109e",
-  "BOFASIKafkaProducerConsequence": "98e9f498936f8f90e3aef0aefaba10f2"
+  "BOFASIConsequenceOutboundProcessor": "18e97850936f8f90e3aef0aefaba109e"
  },
  "props": {
   "usem.consequence.kafka.topic_sys_id": "1ce9f498936f8f90e3aef0aefaba10f6",
   "usem.consequence.fields.x_boar_bofa_usem_0_consequence": "70e97898936f8f90e3aef0aefaba101b"
  },
- "topic": "a3a415fc93e707d0e3aef0aefaba10da",
+ "topic": "8bd2bdf0936f07d0e3aef0aefaba105d",
  "br": "3ae9b898936f8f90e3aef0aefaba10ad",
  "rows": 10
 }
