@@ -8,14 +8,15 @@ BOFA_SI_KafkaProducerV2.prototype = {
      * @returns {void}
      */
     initialize: function() {
-        this.IS_SYNC = false; // the caller does not wait for the broker acknowledgement
+        this.IS_SYNC = true; // the send waits for the broker's acknowledgement
         this.HEADERS = null; // optional, subject to discussion
         this.SCHEMA_ID = null; // optional, omitted for now
         this.SYS_ID_PATTERN = /^[0-9a-f]{32}$/;
-        // Each property holds the sys_id of a Kafka Topic [sys_kafka_topic]. Findings, remediation
-        // tasks and consequences each have their own topic; the table of the record picks the property.
+        // Each property holds the sys_id of a Kafka Topic [sys_kafka_topic]; the table of the record
+        // picks the property. The remediation task topic is not finalised yet: its tables use the
+        // finding property until it is.
         this.FINDING_TOPIC_PROPERTY = 'x_boar_bofa_usem_1.x_boar_bofa.usem.kafka.topic_sys_id';
-        this.REMEDIATION_TASK_TOPIC_PROPERTY = 'x_boar_bofa_usem_1.usem.cdp.remtask.kafka.topic_sys_id';
+        this.REMEDIATION_TASK_TOPIC_PROPERTY = 'x_boar_bofa_usem_1.x_boar_bofa.usem.kafka.topic_sys_id';
         this.CONSEQUENCE_TOPIC_PROPERTY = 'x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id';
         this.TOPIC_PROPERTIES = {
             sn_vul_vulnerable_item: this.FINDING_TOPIC_PROPERTY,
@@ -37,9 +38,9 @@ BOFA_SI_KafkaProducerV2.prototype = {
     },
 
     /**
-     * Validates the payload and hands it to the Kafka topic of the record's table with the key
-     * <table>.<sys_id>. A failure before the hand-over, or an error thrown by the send itself, is
-     * logged once and nothing is sent; the send is asynchronous, so delivery to the broker is not awaited.
+     * Validates the payload, sends it to the Kafka topic of the record's table with the key
+     * <table>.<sys_id>, waiting for the broker's acknowledgement, and shows the response on the
+     * record. Any failure is logged once and nothing is sent.
      * @param {String|Object} payload - the message as JSON text or as the object it was built from
      * @param {GlideRecord} record - the record the message is about
      * @returns {void}
@@ -56,7 +57,9 @@ BOFA_SI_KafkaProducerV2.prototype = {
                 throw new Error('the record does not exist');
             var topicSysId = this._topicSysId(table);
             var message = this._validate(payload);
-            this._send(topicSysId, table + '.' + sysId, message);
+            var key = table + '.' + sysId;
+            var response = this._send(topicSysId, key, message);
+            gs.addInfoMessage('Kafka response for ' + key + ': ' + JSON.stringify(response))
         } catch (e) {
             gs.error(this.type + ': message not sent for ' + subject + ' - ' + (e.message || e));
         }
@@ -86,10 +89,10 @@ BOFA_SI_KafkaProducerV2.prototype = {
      * @param {String} topicSysId - sys_id of the Kafka topic
      * @param {String} key - the message key
      * @param {String} message - the message text
-     * @returns {void}
+     * @returns {Object} the response of the send
      */
     _send: function(topicSysId, key, message) {
-        new sn_ih_kafka.ProducerV2().send(topicSysId, key, message, this.IS_SYNC, this.HEADERS, this.SCHEMA_ID);
+        return new sn_ih_kafka.ProducerV2().send(topicSysId, key, message, this.IS_SYNC, this.HEADERS, this.SCHEMA_ID);
     },
 
     // ________________________________________________________________________________________

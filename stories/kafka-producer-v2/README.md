@@ -14,12 +14,12 @@ and the consequence table, each with its own payload builder.
   | tables | topic property |
   |---|---|
   | `sn_vul_vulnerable_item`, `sn_vul_app_vulnerable_item`, `sn_vul_container_image_vulnerable_item`, `sn_vulc_result` (findings) | `x_boar_bofa_usem_1.x_boar_bofa.usem.kafka.topic_sys_id` (the client's existing property) |
-  | `sn_vul_vulnerability`, `sn_vul_app_vulnerability`, `sn_vul_container_vulnerability`, `sn_vulc_result_group` (remediation tasks) | `x_boar_bofa_usem_1.usem.cdp.remtask.kafka.topic_sys_id` (new in V1.5, delivered empty with the producer) |
+  | `sn_vul_vulnerability`, `sn_vul_app_vulnerability`, `sn_vul_container_vulnerability`, `sn_vulc_result_group` (remediation tasks) | `REMEDIATION_TASK_TOPIC_PROPERTY`, set to the finding property until the remediation task topic is finalised |
   | `x_boar_bofa_usem_0_consequence` | `x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id` (in the consequence application, delivered with SNOWUSEMTP-1624; its rule calls `x_boar_bofa_usem_1.BOFA_SI_KafkaProducerV2`) |
 
-  Until V1.4 the remediation task tables reused the finding property, as the client's placeholder did;
-  findings, remediation tasks and consequences now each have their own topic. Same key `<table>.<sys_id>`, same `ProducerV2.send` call
-  with the same arguments (asynchronous, no headers, no schema). Now: configuration in `initialize`,
+  Same key `<table>.<sys_id>`, same `ProducerV2.send` call with the same arguments, now synchronous for every
+  table (`IS_SYNC` true, as the consequence producer had it; no headers, no schema), and the Kafka response shown
+  on the record after each send (`gs.addInfoMessage`, as the consequence producer did). Now: configuration in `initialize`,
   a table-to-property map instead of two if-chains, the property read with a default and a clear
   error when empty, the payload validated before anything is sent, the send isolated in `_send`, one
   try/catch with one `gs.error` in the format `BOFA_SI_KafkaProducerV2: message not sent for <table>
@@ -43,9 +43,7 @@ and the consequence table, each with its own payload builder.
 - `Kafka Producer V2 - Script Include.xml` — the producer for *Import XML* on the client instance,
   under its existing sys_id in `x_boar_bofa_usem_1`, access public, preceded by a deletion of the
   separate validator `BOFA_SI_KafkaPayloadValidator` V1.0 delivered (`prior_records.json`; Import XML
-  deletes a record of an `action="DELETE"` element and ignores a sys_id it does not hold), and followed by the
-  remediation task topic property `x_boar_bofa_usem_1.usem.cdp.remtask.kafka.topic_sys_id`, empty: after the
-  import the client sets it to the sys_id of the Kafka Topic record of `sn_usem_remtask_outbound`. User and
+  deletes a record of an `action="DELETE"` element and ignores a sys_id it does not hold). User and
   timestamp fields are left out so the import stamps them.
 
 ## Suggested rule body (optional, the rule was not part of the ask)
@@ -70,9 +68,8 @@ written serialises the empty string and the producer adds a second line, `payloa
 `build.py` deploys the script include into the PDI mirror of `x_boar_bofa_usem_1` (the client's scope name and
 application sys_id) under the client's own sys_id, where the consequence rule calls it by its client name, under a
 pinned update set (set name `INC0010003_MS_Kafka Producer V2 with Payload Validation_V1.5`); removes the copy of
-earlier versions from the stand-in scope, creates the remediation task topic property in the application (a generated
-sys_id on the PDI, delivered empty) and the finding topic property the client already has (a global test fixture holding a
-generated sys_id). `test.py` runs 111 checks; run twice, all passing both times. Every log check reads only the
+earlier versions from the stand-in scope, and creates the finding topic property the client already has (a global test
+fixture holding a generated sys_id). `test.py` runs 111 checks; run twice, all passing both times. Every log check reads only the
 lines written by the script under test (a fresh second is awaited before its start time is taken).
 - A. validation: every refusal reason from the exact input that triggers it — empty text, blank
   text, null, undefined, the JSON of an empty string or of null (what a rule that serialises a failed
@@ -89,15 +86,17 @@ lines written by the script under test (a fresh second is awaited before its sta
   order (topic, key, message, isSync, headers, schemaID).
 - B. producer with `_send` captured: all nine tables, string and object payloads (18 sends) with
   the topic of the table's property (the consequence table its own, read from the consequence
-  application), the producer's table map checked against the three groups and the three topic sys_ids
-  different, key `<table>.<sys_id>`, canonical message; seven refusals never reach send; exactly nine
+  application), the producer's table map checked table by table (findings and remediation tasks on the
+  finding property, the consequence table on its own) and the two topic sys_ids different, key `<table>.<sys_id>`, canonical message; seven refusals never reach send; exactly nine
   lines logged, one per refusal plus the null record, a record without a sys_id, a record never saved
   and the real send; the real
   send on this instance fails with the platform's own error for the missing Kafka API
   (`undefined is not a function.`) in the same format.
-- C. each of the three topic properties in turn: padded with spaces (trimmed and sent), empty, holding a
-  topic name and in capitals (refused before send, naming the property and the value), while a record of
-  each of the other two groups still goes to its own topic; properties restored.
+- C. each topic property in turn (the finding property, which also serves the remediation tasks, and the
+  consequence property): padded with spaces (trimmed and sent), empty, holding a topic name and in capitals
+  (refused before send, naming the property and the value), while the records of the other tables still go to
+  their own topics; properties restored. C2. the Kafka response shown on the record after a send, for a
+  remediation task and a consequence, and nothing shown when the send fails.
 - D. the client's rule `BOA_BR_VUL_KafkaOutbound` exactly as exported (only its log tag changed),
   created in the Vulnerability Response scope on `sn_vul_vulnerability`, on a real update and a real
   insert: builder → producer ran in the rule's transaction, the payload the rule serialised equals the
