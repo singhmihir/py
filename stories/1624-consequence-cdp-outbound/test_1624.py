@@ -268,9 +268,11 @@ gs.print('X::' + JSON.stringify(o));
           lay == {'consequence': {'number': FX['linked_number'], 'state': 'Open', 'work_notes': FX['latest_work_note']}, 'rule': {'number': FX['rule_number'], 'state': 'Approved'}}, lay)
     miss = json.loads(r['cases']['missing'])['consequences'][0]
     check('C fields the instance lacks are sent as "" and the section keeps the others', miss == {'consequence': {'number': FX['linked_number'], 'extra': ''}, 'rule': {'number': FX['rule_number'], 'extra': ''}}, miss)
-    not_found = [m for m in messages if m.startswith('Consequence fields not found')]
+    # the message ends with its field list; platform log output that follows the last message in the script output is cut off
+    not_found = [re.match(r'Consequence fields not found on this instance, sent as "": [a-z0-9_.]+(?:, [a-z0-9_.]+)*', m).group(0) for m in messages if m.startswith('Consequence fields not found')]
     check('C one info message names the fields the instance lacks, table by table', not_found == ['Consequence fields not found on this instance, sent as "": %s.u_no_such_field, %s.u_no_such_rule_field' % (CONSEQUENCE, RULE)], not_found)
-    check('C every other info message is a payload, one per build', all(m.startswith('Consequence payload for ') for m in messages if m not in not_found) and len(messages) - len(not_found) == 3, [m[:60] for m in messages])
+    others = [m for m in messages if not m.startswith('Consequence fields not found')]
+    check('C every other info message is a payload, one per build', all(m.startswith('Consequence payload for ') for m in others) and len(others) == 3, [m[:60] for m in messages])
     check('C every refused layout, an unfetched record, no record and a record of another table give ""', all(r['cases'][k] == '' for k in REASONS) and r['unfetched'] == '' and r['nothing'] == '' and r['other_record'] == '', {k: r['cases'][k][:40] for k in REASONS if r['cases'][k]})
     V = SENT + CONSEQUENCE + ' ' + r['id'] + ' - '
     want = [BUILT + CONSEQUENCE + ' ' + r['id'] + ' - ' + REASONS[k] for k in REASONS]
