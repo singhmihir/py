@@ -218,9 +218,13 @@ Follow it without being asked again.
 - Kafka stories, current sets (22 Sep review): 1625 `..._Remediation Task CDP Payload_V2.6` (global) plus the client copy
   record XML, producer `INC0010003_MS_Kafka Producer V2 with Payload Validation_V1.5` (record XML), 1624 `..._V1.5`,
   1804 `..._V2.3`. 23 Sep decisions: **one Kafka producer for remediation tasks and consequence**
-  (`x_boar_bofa_usem_1.BOFA_SI_KafkaProducerV2`, table map gives `x_boar_bofa_usem_0_consequence` its own topic
-  property, which stays in the consequence app; `BOFASIKafkaProducerConsequence` deleted; payload builders stay
-  separate; VAMP keeps its own producer); the processors show two info messages, the payload and the configured
+  (`x_boar_bofa_usem_1.BOFA_SI_KafkaProducerV2`; **findings, remediation tasks and consequences each have their own
+  topic sys_id**, the record's table picks the property in `TOPIC_PROPERTIES`: finding tables ->
+  `x_boar_bofa_usem_1.x_boar_bofa.usem.kafka.topic_sys_id` (client's own), remediation task tables ->
+  `x_boar_bofa_usem_1.usem.cdp.remtask.kafka.topic_sys_id` (new, shipped empty in the producer record XML),
+  `x_boar_bofa_usem_0_consequence` -> `x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id` (stays in the
+  consequence app); `BOFASIKafkaProducerConsequence` deleted; payload builders stay separate; VAMP keeps its own
+  producer); the processors show two info messages, the payload and the configured
   fields the instance lacks; activity INSERT/UPDATE only; element_count compared strictly to the list. On the PDI
   the producer lives in the mirror of x_boar_bofa_usem_1 under the client's sys_id. Rendering contract of the CDP payloads (1625, 1624): choices as labels, plain integers as stored
   (display adds "1,250"), `[code]...[/code]` display markup as its visible text (`cr_count`), references `""` when the
