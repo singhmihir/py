@@ -102,19 +102,46 @@ gs.print('X::' + JSON.stringify({rid: '' + new UpdateSetExport().exportUpdateSet
         open(out_path, 'w').write(content)
         return content.count('<sys_update_xml ')
 
-    def ui_import_test(self, xml_path, set_name):
-        """Push an exported file through the same upload path as 'Import Update Set from
-        XML', report the retrieved set's update names, then delete the retrieved copy."""
+    def _upload_retrieved(self, xml_path):
+        """Uploads an exported file as 'Import Update Set from XML' does and returns the retrieved set's
+        sys_id. The file carries the sys_ids of the exporter's temporary copy, which the platform deletes
+        in the background after the download; an upload before that delete has finished loses rows to it.
+        So the upload waits until no set or update of that id is left, and the retrieved set is taken by
+        that id once it holds every update of the file."""
         import time
-        content = open(xml_path).read()
+        import xml.etree.ElementTree as ET
+        content = open(xml_path).read(); root = ET.fromstring(content.encode())
+        rid = root.findtext('sys_remote_update_set/sys_id'); total = len(root.findall('sys_update_xml'))
+        count = '''
+var o = {sets: 0, rows: 0};
+var rs = new GlideRecord('sys_remote_update_set'); if (rs.get(%s)) o.sets = 1;
+var c = new GlideAggregate('sys_update_xml'); c.addQuery('remote_update_set', %s); c.addAggregate('COUNT'); c.query(); if (c.next()) o.rows = parseInt(c.getAggregate('COUNT'));
+gs.print('X::' + JSON.stringify(o));''' % (json.dumps(rid), json.dumps(rid))
+        for _ in range(40):
+            left = self.js(count)
+            if not left['sets'] and not left['rows']:
+                break
+            time.sleep(3)
+        else:
+            raise RuntimeError('the exporter\'s copy %s is still on the instance: %s' % (rid, left))
         self.s.post(INST + '/sys_upload.do', data={
             'sysparm_ck': self.ck(), 'sysparm_target': 'sys_remote_update_set',
             'sysparm_referring_url': 'sys_remote_update_set_list.do', 'sysparm_encryption_context': ''},
             files={'attachFile': (os.path.basename(xml_path), content.encode(), 'text/xml')}, allow_redirects=True)
-        time.sleep(3)
+        for _ in range(20):
+            time.sleep(3)
+            got = self.js(count)
+            if got['sets'] and got['rows'] >= total:
+                break
+        return rid
+
+    def ui_import_test(self, xml_path, set_name):
+        """Push an exported file through the same upload path as 'Import Update Set from
+        XML', report the retrieved set's update names, then delete the retrieved copy."""
+        rid = self._upload_retrieved(xml_path)
         return self.js('''
 var o = {sets: []};
-var rs = new GlideRecord('sys_remote_update_set'); rs.addQuery('name', %s); rs.addQuery('sys_created_on', '>', gs.minutesAgoStart(3)); rs.query();
+var rs = new GlideRecord('sys_remote_update_set'); rs.addQuery('sys_id', %s); rs.addQuery('name', %s); rs.query();
 while (rs.next()) {
     var names = []; var ux = new GlideRecord('sys_update_xml'); ux.addQuery('remote_update_set', rs.getUniqueValue()); ux.query();
     while (ux.next()) names.push('' + ux.getValue('target_name') + ':' + ux.getValue('action'));
@@ -123,22 +150,15 @@ while (rs.next()) {
     while (dd.next()) dd.deleteRecord();
     rs.deleteRecord();
 }
-gs.print('X::' + JSON.stringify(o));''' % json.dumps(set_name))
-
+gs.print('X::' + JSON.stringify(o));''' % (json.dumps(rid), json.dumps(set_name)))
 
     def ui_preview_test(self, xml_path, set_name):
         """As ui_import_test, then runs the platform's preview on the retrieved set and reports its
         problems before the retrieved copy (updates, problems and set) is deleted."""
-        import time
-        content = open(xml_path).read()
-        self.s.post(INST + '/sys_upload.do', data={
-            'sysparm_ck': self.ck(), 'sysparm_target': 'sys_remote_update_set',
-            'sysparm_referring_url': 'sys_remote_update_set_list.do', 'sysparm_encryption_context': ''},
-            files={'attachFile': (os.path.basename(xml_path), content.encode(), 'text/xml')}, allow_redirects=True)
-        time.sleep(3)
+        rid = self._upload_retrieved(xml_path)
         return self.js('''
 var o = {sets: []};
-var rs = new GlideRecord('sys_remote_update_set'); rs.addQuery('name', %s); rs.addQuery('sys_created_on', '>', gs.minutesAgoStart(3)); rs.query();
+var rs = new GlideRecord('sys_remote_update_set'); rs.addQuery('sys_id', %s); rs.addQuery('name', %s); rs.query();
 while (rs.next()) {
     var id = rs.getUniqueValue(), entry = {names: [], problems: [], preview: ''};
     try { new UpdateSetPreviewer().generatePreviewRecordsWithUpdate(id); entry.preview = 'ran'; } catch (e) { entry.preview = 'failed: ' + (e.message || e); }
@@ -152,7 +172,7 @@ while (rs.next()) {
     var dd = new GlideRecord('sys_update_xml'); dd.addQuery('remote_update_set', id); dd.query(); while (dd.next()) dd.deleteRecord();
     again.deleteRecord();
 }
-gs.print('X::' + JSON.stringify(o));''' % json.dumps(set_name))
+gs.print('X::' + JSON.stringify(o));''' % (json.dumps(rid), json.dumps(set_name)))
 
 
 if __name__ == '__main__':

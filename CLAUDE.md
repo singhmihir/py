@@ -73,7 +73,11 @@ Follow it without being asked again.
   download `export_update_set.do?sysparm_sys_id=<remote id>&sysparm_delete_when_done=true&sysparm_is_remote=false&sysparm_ck=<token>`
   (`SNUI.export_update_set`). Hand-built XML once imported empty on the client instance.
 - Then prove the file: push it through `sys_upload.do` (target `sys_remote_update_set`) and confirm the
-  retrieved set shows every update (`SNUI.ui_import_test`), and delete the retrieved copy.
+  retrieved set shows every update (`SNUI.ui_import_test`), and delete the retrieved copy. The file carries
+  the sys_ids of the exporter's temporary copy, which the platform deletes in the background after the
+  download: an upload before that delete finishes loses random rows to it (measured: 21 and 15 of 24), and the
+  retrieved set keeps the file's creation stamp. The harness waits for the copy to go and finds the retrieved
+  set by the file's sys_id.
 - **Never load an export back with `GlideUpdateManager2.loadXML` when the rows carry the local sys_ids** —
   that re-points the local set's own rows and empties it. Native exports carry fresh ids and are safe.
 - Scheduled jobs (`sysauto_script`) and CI lookup rules (`sn_sec_cmn_ci_lookup_rule`, no `update_synch`
