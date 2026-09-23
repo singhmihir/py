@@ -73,18 +73,25 @@ shipped in the set.
   counts. Integration records as Mohammad's (integration, instance, properties), without the REST polling class.
 - Duplicates: coalesce on the VAMP finding id (the AVR API does), and skip a replayed `event_id`.
 
-## Questions posted on the story (23 Sep, plain wording Mihir asked for)
+## Questions (23 Sep, second round, posted with explanations on INC0010013)
+Blockers: 1, 2, 5, 6. Blockers when the story includes creating or updating AVITs: 7, 8, 9 (the AVR import API refuses a
+new AVIT without application, assessment/scan id, severity, vulnerability/CWE and scan type; updates need a stable finding
+id, and a retest result must carry our AVIT number or the source id sent in 1804). 12 blocks testing on dev only.
+The rest can be answered while building.
+
 1. Can you share a sample message for sn_usem_vamp_inbound, with the list of fields and which ones are mandatory? Is it plain JSON or Avro?
 2. Will one message carry one finding, or can one message carry several findings?
 3. Will the message have the same envelope block as our outbound messages (topic name, event id, timestamp, element count, activity)?
 4. What will you use as the message key? We'd like it to be the finding id.
 5. What does a message mean for us: a new finding raised in VAMP, the result of a retest on a finding we sent you (SNOWUSEMTP-1804), or both? If both, how do we tell them apart?
 6. What should ServiceNow create or update from these messages, and is that part of this story? The acceptance criteria only cover loading the data into the import set table.
-7. Which field identifies a finding and stays the same on every update? And how do we find the application and the pen test request on our side (AIT number, assessment id)?
-8. Can you share the list of VAMP statuses and what each one should become in ServiceNow? What should happen when a message says DELETE?
-9. Will there be a mapping sheet for the inbound fields, like the SN to VAMP mapping we got for the outbound story?
-10. Is the topic already receiving messages on dev, and can you send us a few test messages? When we turn the consumer on, should it read only new messages or also the ones already in the topic?
-11. Roughly how many messages a day should we expect, and will there be a one-time load of existing findings at go-live?
-12. Kafka can deliver the same message twice. Does each message carry an id that stays the same on a resend, so we can skip duplicates?
-13. If a message can't be processed (bad data, application not found), who should know about it and how?
-14. Which account should the consumer run as? We'd rather not use a personal account.
+7. Which field identifies a finding and stays the same on every update? For a retest result, will you send back our AVIT number or source id from 1804? How do we find the application and the pen test request on our side (AIT number, assessment id)?
+8. For a new finding we need at least the application id, the assessment or test id, the severity, the vulnerability or CWE id and the type of test. Will all of these be in the message?
+9. Can you share the list of VAMP statuses and what each one should become in ServiceNow? What should happen when a message says DELETE?
+10. Will findings carry evidence such as screenshots or request/response captures? If so, how should that reach us?
+11. Will there be a mapping sheet for the inbound fields, like the SN to VAMP mapping we got for the outbound story?
+12. Is the replication from VAMP's Kafka into sn_usem_vamp_inbound already set up on dev, and can you send us a few test messages? When we turn the consumer on, should it read only new messages or also the ones already in the topic?
+13. Roughly how many messages a day should we expect, and will there be a one-time load of existing findings at go-live?
+14. Kafka can deliver the same message twice. Does each message carry an id that stays the same on a resend, so we can skip duplicates?
+15. If a message can't be processed (bad data, application not found), who should know about it and how?
+16. Which account should the consumer run as? We'd rather not use a personal account.

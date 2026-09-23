@@ -1,0 +1,75 @@
+{
+ "jobs": [
+  {
+   "sys_id": "01614a4e77d10210ee0d0cc2fa5a998a",
+   "cls": "sysauto_script",
+   "name": "CMDB Get Well CIs Processed Via IRE Metric Batch Collection",
+   "active": true
+  },
+  {
+   "sys_id": "15ba55eb77961210129b0cc2fa5a99be",
+   "cls": "sysauto_script",
+   "name": "CMDB Get Well CIs Not Updated Metric Batch Collection",
+   "active": true
+  },
+  {
+   "sys_id": "984496eb0f5020109bf1552dc4767e07",
+   "cls": "sysauto_script",
+   "name": "CMDB Sys Object Source Cleanup",
+   "active": true
+  },
+  {
+   "sys_id": "99e2075453201210d84cddeeff7b1257",
+   "cls": "sysauto_script",
+   "name": "Generate Now Assist Troubleshooting Notifications",
+   "active": true
+  },
+  {
+   "sys_id": "d4a09b6653b8501032b7ddeeff7b12c7",
+   "cls": "sysauto_script",
+   "name": "CMDB Get Well Metric Collection",
+   "active": true
+  }
+ ],
+ "triggers": [
+  {
+   "sys_id": "06a6edcb77d70110863f11898c5a99a3",
+   "name": "@dotwalk/atf-commons-server/SNBOQProcess",
+   "next_action": "2026-09-23 14:25:52"
+  },
+  {
+   "sys_id": "440e91b2b7300110635f860eee11a943",
+   "name": "VA Notification Batch Event Handler",
+   "next_action": "2026-04-01 05:11:16"
+  },
+  {
+   "sys_id": "7098453393030310e3aef0aefaba102d",
+   "name": "VA Event Processor 0",
+   "next_action": "2026-09-23 14:25:52"
+  },
+  {
+   "sys_id": "736b695a735033008564b17afef6a7b8",
+   "name": "VA Event Processor 0",
+   "next_action": "2026-04-01 05:09:40"
+  },
+  {
+   "sys_id": "b098053393030310e3aef0aefaba10ed",
+   "name": "VA Notification Batch Event Handler",
+   "next_action": "2026-09-23 14:25:57"
+  }
+ ],
+ "cleaner": [
+  {
+   "sys_id": "ac31b4f70a0a0b7f00ede6af0c8b6c0a",
+   "table": "syslog",
+   "age": "7776000",
+   "active": true
+  },
+  {
+   "sys_id": "b49bc102373130004f6a80f7bcbe5d0a",
+   "table": "syslog_transaction",
+   "age": "4838400",
+   "active": true
+  }
+ ]
+}
