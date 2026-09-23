@@ -73,7 +73,7 @@ BOFASIVampOutboundProcessor.prototype = {
         this.OUTBOUND_VERSION = '1.0.0';
         this.DATE_FORMAT = 'MM-dd-yyyy';
         this.TIME_FORMAT = 'HH:mm:ss';
-        this.ACTIVITIES = ['INSERT', 'UPDATE', 'DELETE'];
+        this.ACTIVITIES = ['INSERT', 'UPDATE'];
         this.FIELDS_PROPERTY_PREFIX = 'x_boar_bofa_usem_1.usem.vamp.fields.';
         this.RELATED = {
             sn_vul_app_vul_entry: { reference: 'vulnerability' },
@@ -86,8 +86,7 @@ BOFASIVampOutboundProcessor.prototype = {
     },
 
     /**
-     * Builds the message of one application vulnerable item and shows it on the record, with a second
-     * message naming any configured field this instance does not have.
+     * Builds the message of one application vulnerable item and shows it on the record.
      * @param {GlideRecord} record - the application vulnerable item the business rule is running on
      * @returns {string} the payload as JSON text, or "" when it could not be built or did not validate
      */
@@ -96,8 +95,7 @@ BOFASIVampOutboundProcessor.prototype = {
             this._requireRecord(record);
             var table = record.getTableName();
             var sections = this._payloadMap(table);
-            var missing = [];
-            var findings = [this._buildFinding(record, sections, missing)];
+            var findings = [this._buildFinding(record, sections)];
             var payload = {
                 envelope: this._buildEnvelope(this._activity(record), findings.length),
                 findings: findings
@@ -105,8 +103,6 @@ BOFASIVampOutboundProcessor.prototype = {
             this._validatePayload(payload, sections, record);
             var message = JSON.stringify(payload);
             gs.addInfoMessage('VAMP payload for ' + record.getValue('number') + ': ' + message)
-            if (missing.length)
-                gs.addInfoMessage('VAMP fields not found on this instance, sent as "": ' + missing.join(', '))
             return message;
         } catch (e) {
             gs.error(this.type + ': payload not built for ' + this._recordKey(record) + ' - ' + (e.message || e));
@@ -140,7 +136,7 @@ BOFASIVampOutboundProcessor.prototype = {
     /**
      * The activity of the message, taken from the operation the business rule is running for.
      * @param {GlideRecord} record - the application vulnerable item
-     * @returns {string} INSERT, UPDATE or DELETE
+     * @returns {string} INSERT or UPDATE
      */
     _activity: function(record) {
         var operation = String(record.operation() || '').toUpperCase();
@@ -151,7 +147,7 @@ BOFASIVampOutboundProcessor.prototype = {
 
     /**
      * The CDP envelope of the message.
-     * @param {string} activity - INSERT, UPDATE or DELETE
+     * @param {string} activity - INSERT or UPDATE
      * @param {number} elements - the number of findings the message carries
      * @returns {Object} the envelope
      */
@@ -174,14 +170,12 @@ BOFASIVampOutboundProcessor.prototype = {
      * section from its own record, a section reached through a many to many as an array.
      * @param {GlideRecord} record - the application vulnerable item
      * @param {Array} sections - the property, parsed
-     * @param {Array} missing - collects the configured fields this instance does not have
      * @returns {Object} the finding
      */
-    _buildFinding: function(record, sections, missing) {
+    _buildFinding: function(record, sections) {
         var finding = {};
         for (var i = 0; i < sections.length; i++) {
             var section = sections[i], fields = section.fields;
-            this._noteMissing(section.table, fields, missing);
             var records = this._sectionRecords(record, section.table);
             if (!section.many) {
                 finding[section.json] = this._sectionValues(records.length ? records[0] : null, fields);
@@ -277,23 +271,6 @@ BOFASIVampOutboundProcessor.prototype = {
         for (var i = 0; i < fields.length; i++)
             values[fields[i].json] = this._fieldValue(sectionRecord, dictionary, fields[i].field);
         return values;
-    },
-
-    /**
-     * Records the configured fields of a section this instance does not have. The check is made
-     * against the configured table, once per section, so that the message names the same fields
-     * whether the item has one related record, several or none.
-     * @param {string} table - the configured ServiceNow table of the section
-     * @param {Array} fields - the fields of the section
-     * @param {Array} missing - the list collected while the payload is built
-     */
-    _noteMissing: function(table, fields, missing) {
-        var probe = new GlideRecord(table);
-        for (var i = 0; i < fields.length; i++) {
-            var name = table + '.' + fields[i].field;
-            if (!probe.isValidField(fields[i].field) && missing.indexOf(name) < 0)
-                missing.push(name);
-        }
     },
 
     /**
