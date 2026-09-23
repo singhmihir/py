@@ -24,11 +24,15 @@ every existing parameter and behaviour, plus a script that handles a malformed p
   `element_count` not a whole number (a number, or its digits as text) or not matching, an element
   that is not an object. `sendPayload` logs that reason and does not send. The earlier separate
   `BOFA_SI_KafkaPayloadValidator` is withdrawn.
+- A missing record or one without a sys_id is refused (`no record was given`, `the record has no
+  sys_id`), so no message goes out keyed `<table>.null`.
 - The topic property is read with the spaces around its value ignored; an empty value and a value
   that is not a sys_id (a topic name, for instance) are refused before the send, naming the property
   and the value.
 - `Kafka Producer V2 - Script Include.xml` — the producer for *Import XML* on the client instance,
-  under its existing sys_id in `x_boar_bofa_usem_1`, access public. User and timestamp fields are left
+  under its existing sys_id in `x_boar_bofa_usem_1`, access public, preceded by a deletion of the
+  separate validator `BOFA_SI_KafkaPayloadValidator` V1.0 delivered (`prior_records.json`; Import XML
+  deletes a record of an `action="DELETE"` element and ignores a sys_id it does not hold). User and timestamp fields are left
   out so the import stamps them.
 
 ## Suggested rule body (optional, the rule was not part of the ask)
@@ -44,7 +48,7 @@ written serialises the empty string and the producer adds a second line, `payloa
             return;
         new x_boar_bofa_usem_1.BOFA_SI_KafkaProducerV2().sendPayload(payload, current);
     } catch (ex) {
-        gs.error('BOA_BR_VUL_KafkaOutbound: outbound message failed for {0} {1} - {2}', [current.getTableName(), current.getUniqueValue(), ex.message || ex]);
+        gs.error('BOA_BR_VUL_KafkaOutbound: outbound message failed for ' + current.getTableName() + ' ' + current.getUniqueValue() + ' - ' + (ex.message || ex));
     }
 })(current, previous);
 ```
@@ -53,7 +57,7 @@ written serialises the empty string and the producer adds a second line, `payloa
 `build.py` deploys the script include into the stand-in scope under a pinned update set (set name
 `INC0010003_MS_Kafka Producer V2 with Payload Validation_V1.3`), removes the earlier separate
 validator, and creates the topic property the producer reads (a test fixture holding a generated
-sys_id). `test.py` runs 110 checks; run twice, 110/110 both times. Every log check reads only the
+sys_id). `test.py` runs 111 checks; run twice, all passing both times. Every log check reads only the
 lines written by the script under test (a fresh second is awaited before its start time is taken).
 - A. validation: every refusal reason from the exact input that triggers it — empty text, blank
   text, null, undefined, the JSON of an empty string or of null (what a rule that serialises a failed
@@ -68,7 +72,8 @@ lines written by the script under test (a fresh second is awaited before its sta
   order (topic, key, message, isSync, headers, schemaID).
 - B. producer with `_send` captured: all eight tables, string and object payloads (16 sends) with
   the topic from the property, key `<table>.<sys_id>`, canonical message; five refusals never reach
-  send; exactly seven lines logged, one per refusal plus the null record and the real send; the real
+  send; exactly eight lines logged, one per refusal plus the null record, a record without a sys_id
+  and the real send; the real
   send on this instance fails with the platform's own error for the missing Kafka API
   (`undefined is not a function.`) in the same format.
 - C. topic property padded with spaces (trimmed and sent), in capitals (accepted), empty and holding

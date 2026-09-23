@@ -9,9 +9,10 @@
  *     plain, the rule's fields as <rule table>.<field>. SECTIONS of initialize() names the section of
  *     each table and the reference field through which the rule is reached.
  * Rendering by dictionary type: references and document ids as the display value of the record they
- * point at ("" when that record is gone), choices as their labels, counts as stored, date/times as
- * MM-dd-yyyy HH:mm:ss, dates as MM-dd-yyyy, strings and booleans as displayed, anything else as
- * stored; a field missing on the table, an empty field or a section without a record gives "".
+ * point at ("" when that record is gone), journals as their latest entry, choices as their labels,
+ * counts as stored, date/times as MM-dd-yyyy HH:mm:ss, dates as MM-dd-yyyy, strings and booleans as
+ * displayed, anything else as stored; a field missing on the table, an empty field or a section
+ * without a record gives "".
  *
  * Entry point: buildPayload(record). It holds the one try/catch of the feature: any failure, including
  * a payload that does not validate, is logged once with gs.error and returns an empty string, so that
@@ -24,7 +25,8 @@ BOFASIConsequenceOutboundProcessor.prototype = {
      * Constants of the envelope, the formats of the rendered values, the property prefix of the field
      * mapping, the section of each table (its payload name, and for the rule the reference field of
      * the consequence that leads to it), the table searched for a document id whose class field
-     * names no table, and the display markup the platform wraps around some values.
+     * names no table, the journal field types and the display markup the platform wraps around some
+     * values.
      */
     initialize: function() {
         this.TOPIC_NAME = 'sn_usem_consequence_outbound';
@@ -41,6 +43,7 @@ BOFASIConsequenceOutboundProcessor.prototype = {
             x_boar_bofa_usem_0_consequence_rule: { json: 'rule', reference: 'u_rule' }
         };
         this.DOCUMENT_TABLES = { cmdb_ci: 'cmdb_ci' };
+        this.JOURNAL_TYPES = ['journal_input', 'journal', 'journal_list'];
         this.MARKUP = /^\[code\]([\s\S]*)\[\/code\]$/;
         this.UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
         this.TIMESTAMP_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
@@ -88,14 +91,13 @@ BOFASIConsequenceOutboundProcessor.prototype = {
     /**
      * Names a record for the error log without assuming it is usable.
      * @param {GlideRecord} record - the record, possibly absent or invalid
-     * @returns {string} "<table> <sys_id>" when the record can be read, otherwise "no record"
+     * @returns {string} "<table> <sys_id>" (the table alone for a record without a sys_id), "no record"
+     *   for anything that is not a record
      */
     _recordKey: function(record) {
-        try {
-            return record.getTableName() + ' ' + record.getUniqueValue();
-        } catch (e) {
+        if (!record || typeof record.getTableName != 'function')
             return 'no record';
-        }
+        return (record.getTableName() + ' ' + (record.getUniqueValue() || '')).trim();
     },
 
     /**
@@ -177,8 +179,9 @@ BOFASIConsequenceOutboundProcessor.prototype = {
      * @param {string} table - the table of the record
      * @returns {Object[]} one {table, field, section, json} per configured pair, in property order
      * @throws {Error} when the table has no section, the property is missing or empty, holds no field,
-     *   or holds a line with more than one "=", without a field name, without a payload name, of a
-     *   table that has no section, or naming a payload field of its section twice
+     *   or holds a line with more than one "=", without a field name, with a field that is not <field>
+     *   or <table>.<field>, without a payload name, of a table that has no section, or naming a payload
+     *   field of its section twice
      */
     _fieldMapping: function(table) {
         if (!this.SECTIONS[table])
@@ -201,15 +204,17 @@ BOFASIConsequenceOutboundProcessor.prototype = {
                 throw new Error('property ' + property + ' holds a line without a field name: "' + entry + '"');
             if (!json)
                 throw new Error('property ' + property + ' holds a line without a payload name: "' + entry + '"');
-            var at = left.indexOf('.');
-            var source = at < 0 ? table : left.substring(0, at);
+            var parts = left.split('.');
+            var source = parts.length == 2 ? parts[0].trim() : table, field = parts[parts.length - 1].trim();
+            if (parts.length > 2 || !source || !field)
+                throw new Error('property ' + property + ' holds the field "' + left + '", which is not <field> or <table>.<field>: "' + entry + '"');
             if (!this.SECTIONS.hasOwnProperty(source) || (source != table && !this.SECTIONS[source].reference))
                 throw new Error('property ' + property + ' names table ' + source + ', which is not a section of the payload: "' + entry + '"');
             var section = this.SECTIONS[source].json;
             if (names[section + '.' + json])
                 throw new Error('property ' + property + ' names ' + json + ' twice in section ' + section);
             names[section + '.' + json] = true;
-            mapping.push({ table: source, field: at < 0 ? left : left.substring(at + 1), section: section, json: json });
+            mapping.push({ table: source, field: field, section: section, json: json });
         }
         if (!mapping.length)
             throw new Error('property ' + property + ' holds no field');
@@ -275,7 +280,7 @@ BOFASIConsequenceOutboundProcessor.prototype = {
     },
 
     /**
-     * Renders one field of a record.
+     * Renders one field of a record; a journal field as its latest entry.
      * @param {GlideRecord} record - the record of the section; may be absent or invalid
      * @param {GlideRecord} dictionary - a record of the same table, opened by the processor, whose field
      *   descriptors give the field types
@@ -287,9 +292,27 @@ BOFASIConsequenceOutboundProcessor.prototype = {
         if (!this._isRecord(record) || !record.isValidField(field))
             return '';
         var element = record.getElement(field);
-        if (element === null || element.nil())
+        if (element === null)
             return '';
-        return this._renderElement(element, dictionary.getElement(field).getED(), field);
+        var descriptor = dictionary.getElement(field).getED();
+        if (this.JOURNAL_TYPES.indexOf(String(descriptor.getInternalType())) >= 0)
+            return this._plainText(this._latestEntry(element));
+        if (element.nil())
+            return '';
+        return this._renderElement(element, descriptor, field);
+    },
+
+    /**
+     * The text of the latest entry of a journal field, without the header line the platform adds
+     * (date and time, author). A journal keeps its entries apart from the record, so the field itself
+     * is empty on every save that adds no entry.
+     * @param {GlideElement} element - the journal field
+     * @returns {string} the latest entry's text, "" when the journal has none
+     */
+    _latestEntry: function(element) {
+        var entry = String(element.getJournalEntry(1) || '');
+        var header = entry.indexOf('\n');
+        return header < 0 ? '' : entry.substring(header + 1).trim();
     },
 
     /**

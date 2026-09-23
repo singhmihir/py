@@ -102,16 +102,16 @@ for run in (1, 2):
     p, el, e = shape('A', r)
     check('A element_activity from sys_mod_count', e['element_activity'] == ('UPDATE' if x['mod'] > 0 else 'INSERT'), (e['element_activity'], x['mod']))
     f = el['finding']
-    check('A finding number, state as the stored integer, source_avit_id', (f['number'], f['state'], f['source_avit_id']) == (x['number'], x['state'], 'VAMP-FIXTURE-001') and x['state'] == '1', (f, x))
+    check('A finding number, state as the stored integer, source_avit_id', (f['number'], f['state'], f['source_avit_id']) == (x['number'], x['state'], FX['source_avit_id']) and x['state'] == '1', (f, x))
     check('A finding dates MM-dd-yyyy HH:mm:ss', f['sys_created_on'] == x['created'] and f['sys_updated_on'] == x['updated'] and STAMP.match(f['sys_created_on']), (f, x['created'], x['updated']))
     check('A configuration_item resolves through cmdb_ci to the display value Trade Processing Portal', f['configuration_item'] == x['ci_display'] == 'Trade Processing Portal' and len(x['ci']) == 32 and not x['has_ci_field'], (f['configuration_item'], x))
-    check('A the two custom finding fields carry their values', (f['u_verification_status'], f['u_avit_record_url']) == (x['status'], x['url']) and x['status'] == 'Pending Validation' and x['url'].endswith('VAMP-FIXTURE-001'), (f, x))
+    check('A the two custom finding fields carry their values', (f['u_verification_status'], f['u_avit_record_url']) == (x['status'], x['url']) and x['status'] == 'Pending Validation' and x['url'].endswith(FX['source_avit_id']), (f, x))
     check('A tpe read from the entry class: the sub category id of sn_vul_app_vul_entry, never on sn_vul_entry', el['tpe']['u_vuln_sub_cat_id'] == x['entry_sub_cat'] == FX['entry_sub_cat'] and x['entry_class'] == 'sn_vul_app_vul_entry' and not x['entry_sub_cat_on_base'], (el['tpe'], x))
     check('A tpe number "" (no number field on the entry table here) and the entry is the linked one', el['tpe']['number'] == '' and not x['entry_has_number_on_class'] and x['entry_display'] == FX['entry_display'], (el['tpe'], x))
     check('A remediation_task holds both tasks, in task number order', [t['number'] for t in el['remediation_task']] == [t['number'] for t in x['tasks']] == FX['task_numbers'] and len(el['remediation_task']) == 2, (el['remediation_task'], x['tasks']))
-    check('A every task carries its own record url and the Primary AIT as a display value', [t['u_avul_record_url'] for t in el['remediation_task']] == FX['task_urls'] and all(t['primary_ait'] == FX['task_ait'] for t in el['remediation_task']), el['remediation_task'])
+    check('A every task carries its own record url and its own Primary AIT as a display value', [t['u_avul_record_url'] for t in el['remediation_task']] == FX['task_urls'] and [t['primary_ait'] for t in el['remediation_task']] == FX['task_aits'] and len(set(FX['task_aits'])) == 2, el['remediation_task'])
     if run == 1:
-        open(os.path.join(HERE, 'samples', 'Sample payload - application vulnerable item.json'), 'w').write(json.dumps(p, indent=2) + '\n')
+        SAMPLE = p
     check('A ptreq number, created, assessment id', el['ptreq'] == {'number': x['ptreq'], 'sys_created_on': x['ptreq_created'], 'u_assessment_id': x['ptreq_assessment']} and x['ptreq'] == 'PTREQ0012001' and x['ptreq_assessment'] == FX['ptreq_assessment'] and STAMP.match(x['ptreq_created']), (el['ptreq'], x))
 
     print('B. bare fixture', FX['bare_number'])
@@ -199,6 +199,7 @@ gs.print('X::' + JSON.stringify(o));''' % json.dumps(FX['linked']))
         'no_path': base.replace('sn_vul_app_vul_entry.', 'sn_vul_app_vul_scan.'), 'dot_walk': 'cmdb_ci.name=finding.ci_name,\n' + base,
         'left_empty_field': 'sn_vul_app_vul_entry.=tpe.extra,\n' + base, 'two_equals': 'number=finding.number=again,\n' + base,
         'spaced': base.replace('number=finding.number,', ' number = finding . number ,'),
+        'journal': base + '\n' + FX['journal_field'] + '=finding.' + FX['journal_field'] + ',',
     }
     line = lambda k: CASES[k].split('\n')[0]
     REASONS = {
@@ -228,7 +229,7 @@ var a = new GlideRecord(T); a.get(%(linked)s);
 var good = new C().buildPayload(a);
 o.unfetched = new C().buildPayload(new GlideRecord(T));
 o.nothing = new C().buildPayload(null);
-var fp = new GlideRecord('sys_properties'); fp.addQuery('name', FIELDS); fp.query(); fp.next(); var saved = '' + fp.getValue('value');
+var fp = new GlideRecord('sys_properties'); fp.addQuery('name', FIELDS); fp.query(); fp.next(); var saved = '' + (fp.getValue('value') || '');
 try {
     for (var k in cases) { fp.setValue('value', cases[k]); fp.update(); o.cases[k] = new C().buildPayload(a); }
 } finally {
@@ -249,7 +250,7 @@ var t2 = JSON.parse(good); t2.envelope.core_version = '9.9.9'; t2.envelope.event
 o.tampered2 = refusal(t2);
 var t3 = JSON.parse(good); t3.findings = []; o.tampered3 = refusal(t3);
 o.intact = refusal(JSON.parse(good));
-var tp = new GlideRecord('sys_properties'); tp.addQuery('name', TOPIC); tp.query(); tp.next(); var topic = '' + tp.getValue('value');
+var tp = new GlideRecord('sys_properties'); tp.addQuery('name', TOPIC); tp.query(); tp.next(); var topic = '' + (tp.getValue('value') || '');
 try {
     tp.setValue('value', ''); tp.update(); new K().sendPayload(good, a);
     tp.setValue('value', 'not-a-sys-id'); tp.update(); new K().sendPayload(good, a);
@@ -264,13 +265,16 @@ new K().sendPayload('{"a": 1}', a);
 new K().sendPayload('{"envelope": {"element_count": 0}, "findings": []}', a);
 var miscount = JSON.parse(good); miscount.envelope.element_count = 5; new K().sendPayload(JSON.stringify(miscount), a);
 new K().sendPayload(good, null);
+var unsaved = new GlideRecord(T); unsaved.newRecord(); o.unsaved = unsaved.getUniqueValue(); new K().sendPayload(good, unsaved);
 o.id = a.getUniqueValue();
 o.lines = [];
-var l = new GlideRecord('syslog'); l.addQuery('sys_created_on', '>=', t0); l.addQuery('message', 'STARTSWITH', 'BOFASIVampOutboundProcessor').addOrCondition('message', 'STARTSWITH', 'BOFASIKafkaProducerVamp').addOrCondition('message', 'STARTSWITH', 'BOFA_BR_AVIT_VampOutbound'); l.query();
+var l = new GlideRecord('syslog'); l.addQuery('sys_created_on', '>=', t0); l.addQuery('message', 'STARTSWITH', 'BOFASIVampOutboundProcessor').addOrCondition('message', 'STARTSWITH', 'BOFASIKafkaProducerVamp').addOrCondition('message', 'STARTSWITH', 'BOFA_BR_AVIT_VampOutbound'); l.addQuery('sys_created_by', gs.getUserName()); l.query();
 while (l.next()) o.lines.push('' + l.getValue('message'));
 gs.print('X::' + JSON.stringify(o));
 })();""" % dict(default_set=json.dumps(ST['default_set']), item=json.dumps(ITEM), fields=json.dumps(FIELD_PROP), topic=json.dumps(TOPIC_PROP), cases=json.dumps(CASES), linked=json.dumps(FX['linked'])))
     spaced = json.loads(r['cases']['spaced']) if r['cases']['spaced'] else {}
+    journal = json.loads(r['cases']['journal'])['findings'][0]['finding'] if r['cases']['journal'] else {}
+    check('E a journal field is sent as its latest entry, without its header, on a record loaded afresh', journal.get(FX['journal_field']) == FX['latest_comment'], journal.get(FX['journal_field']))
     check('E spaces round the "=" and round the dot of a payload name are ignored: the same finding as the property as delivered', bool(spaced) and spaced['findings'][0]['finding'] == json.loads(build(FX['linked'])['text'])['findings'][0]['finding'], r['cases']['spaced'][:200])
     check('E every refused property gives "", as do an unfetched record, no record and an envelope off its constants', all(r['cases'][k] == '' for k in REASONS) and r['unfetched'] == '' and r['nothing'] == '' and r['off_constants'] == '',
           {k: r['cases'][k][:40] for k in REASONS if r['cases'][k]})
@@ -279,7 +283,8 @@ gs.print('X::' + JSON.stringify(o));
             B + 'payload invalid for %s: the envelope does not carry the configured constants' % FX['linked_number'],
             V + 'property %s holds no topic' % TOPIC_PROP, V + 'property %s holds "not-a-sys-id", which is not a sys_id' % TOPIC_PROP, V + r['api_missing'],
             V + 'the payload is empty', V + 'the payload is not JSON', V + 'the payload has no envelope or no findings', V + 'the payload carries no finding',
-            V + 'the payload counts 5 element(s) and carries 1', 'BOFASIKafkaProducerVamp: message not sent for no record - no record was given']
+            V + 'the payload counts 5 element(s) and carries 1', 'BOFASIKafkaProducerVamp: message not sent for no record - no record was given',
+            'BOFASIKafkaProducerVamp: message not sent for %s %s - no record was given' % (ITEM, r['unsaved'])]
     unfetched = [m for m in r['lines'] if m.startswith('BOFASIVampOutboundProcessor: payload not built for %s ' % ITEM) and m.endswith(' - the record does not exist')]
     others = [m for m in r['lines'] if m not in unfetched]
     check('E one exact line per refusal (%d): every parser refusal, the validation inside buildPayload, the producer refusals, the padded topic trimmed (the send reached), nothing else' % (len(want) + 1),
@@ -294,7 +299,7 @@ gs.print('X::' + JSON.stringify(o));
 var o = {};
 gs.sleep(1100); var t0 = new GlideDateTime().getValue();
 new GlideUpdateSet().set(%(default_set)s);
-var fp = new GlideRecord('sys_properties'); fp.addQuery('name', %(fields)s); fp.query(); fp.next(); var saved = '' + fp.getValue('value');
+var fp = new GlideRecord('sys_properties'); fp.addQuery('name', %(fields)s); fp.query(); fp.next(); var saved = '' + (fp.getValue('value') || '');
 var a = new GlideRecord(%(item)s); a.get(%(linked)s); var keep = '' + a.getValue('short_description');
 try {
     fp.setValue('value', ''); fp.update();
@@ -305,7 +310,7 @@ try {
 }
 o.restored = gs.getProperty(%(fields)s, '') == saved;
 o.lines = [];
-var l = new GlideRecord('syslog'); l.addQuery('sys_created_on', '>=', t0); l.addQuery('message', 'STARTSWITH', 'BOFASIVampOutboundProcessor').addOrCondition('message', 'STARTSWITH', 'BOFASIKafkaProducerVamp').addOrCondition('message', 'STARTSWITH', 'BOFA_BR_AVIT_VampOutbound'); l.query();
+var l = new GlideRecord('syslog'); l.addQuery('sys_created_on', '>=', t0); l.addQuery('message', 'STARTSWITH', 'BOFASIVampOutboundProcessor').addOrCondition('message', 'STARTSWITH', 'BOFASIKafkaProducerVamp').addOrCondition('message', 'STARTSWITH', 'BOFA_BR_AVIT_VampOutbound'); l.addQuery('sys_created_by', gs.getUserName()); l.query();
 while (l.next()) o.lines.push('' + l.getValue('message'));
 gs.print('X::' + JSON.stringify(o));
 })();""" % dict(default_set=json.dumps(ST['default_set']), item=json.dumps(ITEM), fields=json.dumps(FIELD_PROP), linked=json.dumps(FX['linked'])))
@@ -319,15 +324,18 @@ var processor = new x_boar_bofa_usem_1.BOFASIVampOutboundProcessor();
 var linked = %(linked)s, first = %(first)s, second = %(second)s, firstTask = %(first_task)s, secondTask = %(second_task)s;
 function set(m2m, value) { var g = new GlideRecord('sn_vul_app_m2m_vul_group_item'); g.get(m2m); g.setWorkflow(false); g.setValue('sn_vul_app_vulnerability', value); g.update(); }
 function payload() { var a = new GlideRecord('sn_vul_app_vulnerable_item'); a.get(linked); return JSON.parse(processor.buildPayload(a)).findings[0]; }
-o.two = payload();
-set(first, secondTask); set(second, firstTask); o.swapped = payload();
-set(first, firstTask); set(second, secondTask);
-set(second, ''); o.one = payload();
-set(first, ''); o.none = payload();
-set(second, secondTask); set(first, firstTask); o.restored = payload();
-set(second, '00000000000000000000000000000000'); o.dangling = payload();
-set(second, firstTask); o.duplicate = payload();
-set(second, secondTask);
+try {
+    o.two = payload();
+    set(first, secondTask); set(second, firstTask); o.swapped = payload();
+    set(first, firstTask); set(second, secondTask);
+    set(second, ''); o.one = payload();
+    set(first, ''); o.none = payload();
+    set(second, secondTask); set(first, firstTask); o.restored = payload();
+    set(second, '00000000000000000000000000000000'); o.dangling = payload();
+    set(second, firstTask); o.duplicate = payload();
+} finally {
+    set(first, firstTask); set(second, secondTask);
+}
 var renumber = new GlideRecord('sn_vul_app_vulnerability'); renumber.get(firstTask); var number = '' + renumber.getValue('number');
 try {
     renumber.setWorkflow(false); renumber.setValue('number', 'AVUL0000001'); renumber.update(); o.renumbered = payload();
@@ -363,5 +371,9 @@ gs.print('X::' + JSON.stringify(o));
 })();''' % json.dumps(FX['linked']))
     check('G the same finding on both call paths', bool(r['nested']) and bool(r['direct']) and json.loads(r['nested'])['findings'] == json.loads(r['direct'])['findings'], (r['nested'][:100], r['direct'][:100]))
 print('RESULT: %d passed, %d failed' % (passed, failed))
+if not failed:   # the sample is written from run 1 only when every check passed
+    text = json.dumps(SAMPLE, indent=2)
+    assert not re.search(r'probe|fixture|VSO-|' + re.escape(os.environ['SN_USER']), text, re.I), 'test text in the sample'
+    open(os.path.join(HERE, 'samples', 'Sample payload - application vulnerable item.json'), 'w').write(text + '\n')
 ui.app('global')
 sys.exit(1 if failed else 0)

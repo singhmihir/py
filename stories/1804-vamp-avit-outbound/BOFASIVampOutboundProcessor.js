@@ -15,11 +15,12 @@
  * tasks. A record reached through a reference is re-opened in its own class, so that the fields of an
  * extended table are read as well.
  * Rendering by dictionary type, as the sheet's types ask: references and document ids as the display
- * value of the record they point at, lists and domains as displayed, date/times as MM-dd-yyyy HH:mm:ss,
- * dates as MM-dd-yyyy, integers and strings as stored; a field missing on the table, an empty field, a
- * reference whose record is gone or a section without a record gives "". Field types are read from a
- * record of the section's table the processor opens itself: a scoped application may not read the
- * dictionary descriptor of a record handed over from inside a function of a global script.
+ * value of the record they point at, journals as their latest entry, lists and domains as displayed,
+ * date/times as MM-dd-yyyy HH:mm:ss, dates as MM-dd-yyyy, integers and strings as stored; a field
+ * missing on the table, an empty field, a reference whose record is gone or a section without a record
+ * gives "". Field types are read from a record of the section's table the processor opens itself: a
+ * scoped application may not read the dictionary descriptor of a record handed over from inside a
+ * function of a global script.
  *
  * Entry point: buildPayload(record). It holds the one try/catch of the feature: any failure, including
  * a line of the property that does not parse and a payload that does not validate, is logged once
@@ -50,6 +51,7 @@ BOFASIVampOutboundProcessor.prototype = {
         };
         this.UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
         this.TIMESTAMP_PATTERN = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/;
+        this.JOURNAL_TYPES = ['journal_input', 'journal', 'journal_list'];
     },
 
     /**
@@ -99,11 +101,9 @@ BOFASIVampOutboundProcessor.prototype = {
      * @returns {string} "<table> <sys_id>", or "no record"
      */
     _recordKey: function(record) {
-        try {
-            return record.getTableName() + ' ' + record.getUniqueValue();
-        } catch (e) {
+        if (!record || typeof record.getTableName != 'function')
             return 'no record';
-        }
+        return (record.getTableName() + ' ' + (record.getUniqueValue() || '')).trim();
     },
 
     /**
@@ -439,9 +439,27 @@ BOFASIVampOutboundProcessor.prototype = {
         if (!this._isRecord(record) || !record.isValidField(field))
             return '';
         var element = record.getElement(field);
-        if (element === null || element.nil())
+        if (element === null)
             return '';
-        return this._renderElement(element, dictionary.getElement(field).getED());
+        var descriptor = dictionary.getElement(field).getED();
+        if (this.JOURNAL_TYPES.indexOf(String(descriptor.getInternalType())) >= 0)
+            return this._latestEntry(element);
+        if (element.nil())
+            return '';
+        return this._renderElement(element, descriptor);
+    },
+
+    /**
+     * The text of the latest entry of a journal field, without the header line the platform adds
+     * (date and time, author). A journal keeps its entries apart from the record, so the field itself
+     * is empty on every save that adds no entry.
+     * @param {GlideElement} element - the journal field
+     * @returns {string} the latest entry's text, "" when the journal has none
+     */
+    _latestEntry: function(element) {
+        var entry = String(element.getJournalEntry(1) || '');
+        var header = entry.indexOf('\n');
+        return header < 0 ? '' : entry.substring(header + 1).trim();
     },
 
     /**

@@ -66,13 +66,16 @@ RemediationTaskPayloadBuilder.prototype = {
     },
 
     /**
-     * Formats the single error line: <class>: payload not built for <table> <sys_id> - <reason>.
+     * Formats the single error line: <class>: payload not built for <table> <sys_id> - <reason>, the
+     * sys_id left out for a GlideRecord that is not on a record and the subject for anything else.
      * @param {GlideRecord} record - the record being processed, if any
      * @param {Error} e - the error caught
      * @returns {String} the message to log
      */
     _errorMessage: function(record, e) {
-        var subject = this._isRecord(record) ? ' for ' + record.getTableName() + ' ' + record.getUniqueValue() : '';
+        var subject = '';
+        if (record !== null && typeof record === 'object' && typeof record.getTableName === 'function')
+            subject = ' for ' + (record.getTableName() + ' ' + (record.getUniqueValue() || '')).trim();
         return this.type + ': payload not built' + subject + ' - ' + e.message;
     },
 
@@ -172,7 +175,7 @@ RemediationTaskPayloadBuilder.prototype = {
 
     /**
      * Reads one field of the record as the string to send; "" when the field does not exist on the
-     * table or is empty. A journal field is read from its latest entry.
+     * table or is empty. A journal field is read from its latest entry, display markup removed.
      * @param {GlideRecord} record - the remediation task record
      * @param {GlideRecord} dictionary - a record of the same table, opened by the builder, whose
      *                                   field descriptors give the field types
@@ -187,7 +190,7 @@ RemediationTaskPayloadBuilder.prototype = {
             return '';
         var descriptor = dictionary.getElement(field).getED();
         if (this.JOURNAL_TYPES.indexOf(String(descriptor.getInternalType())) >= 0)
-            return this._latestEntry(element);
+            return this._plainText(this._latestEntry(element));
         if (element.nil())
             return '';
         return this._renderElement(element, descriptor);

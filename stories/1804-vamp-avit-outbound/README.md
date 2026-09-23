@@ -30,8 +30,9 @@ assumed.
   `record.operation()`.
 - Values, as the sheet's types ask: references and document ids as the display value of their record
   (`""` when that record is gone, never its sys_id), lists and domains as displayed, dates and
-  date/times `MM-dd-yyyy[ HH:mm:ss]`, integers and strings as stored; a field the instance does not
-  have, an empty field or a section without a record is `""`.
+  date/times `MM-dd-yyyy[ HH:mm:ss]`, integers and strings as stored, a journal field as its latest entry
+  without the date and author line the platform puts above it; a field the instance does not have, an
+  empty field or a section without a record is `""`.
 
 ## Versions
 V1.0 to V1.6 keyed the sections by ServiceNow table name and sent one remediation task.
@@ -43,11 +44,11 @@ as it is.
 **V2.1** (current): field types read in a way a scoped application may use whoever calls it (a record
 handed over from inside a function of a global script refused `getED()` in the scope:
 `StatefulElementDescriptor ... not allowed in scope`, measured on the PDI); a reference or document id
-whose record is gone guarded on every path; document ids, lists, domains and due dates rendered; payload
+whose record is gone guarded on every path; document ids, lists, domains, due dates and journals rendered; payload
 names trimmed and checked around the dot, the field on the left checked (`<field>` or
 `<table>.<field>`, a table with a path from the item); the producer names the item as
-`<table> <sys_id>` in its errors and sends nothing without a saved record; and the records V1.0 to V1.6
-and the V2.0 build delivered under other sys_ids are deleted (see *Earlier sys_ids*).
+`<table> <sys_id>` in its errors and sends nothing without a saved record; and the 19 records V1.0 to V1.6
+delivered under other sys_ids are deleted (see *Earlier sys_ids*).
 
 ### The two bugs fixed in V2.0
 - **Only one remediation task was sent.** `_remediationTask()` read the group item table, ordered by
@@ -74,7 +75,7 @@ and the V2.0 build delivered under other sys_ids are deleted (see *Earlier sys_i
 - `BOFASIKafkaProducerVamp.js` — `sendPayload(payload, record)`: topic sys_id from
   `x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id` (spaces around the value ignored), key
   `<table>.<sys_id>`, `sn_ih_kafka.ProducerV2().send(...)` asynchronous, no headers, no schema; the
-  response shown with `gs.addInfoMessage`; nothing sent without a saved record.
+  response shown with `gs.addInfoMessage`; nothing sent without an existing record.
 - `VAMP Field Check - Background Script.js` — generated from the workbook by `extract_mapping.py`.
   Read only, global scope. For every sheet row it looks for the field behind the JSON field name:
   same name, then the sheet's label, then the `u_` variant; checks the type and prints the two
@@ -83,7 +84,7 @@ and the V2.0 build delivered under other sys_ids are deleted (see *Earlier sys_i
 
 ## Error handling, validation and comments
 Every function carries a JSDoc header. The rule and the two public methods are the only try/catch
-blocks; the private methods throw and the entry point logs one `gs.error` in the form
+blocks besides the helpers that name a record for the log and the producer's JSON parse guard; the private methods throw and the entry point logs one `gs.error` in the form
 `<class>: <what failed> for <table> <sys_id> - <reason>` (`no record` as the key when no record was
 given). The processor refuses a record that was never fetched or does not exist, a property that is
 not configured or holds nothing, a line with more than one "=", without a field name, with a field
@@ -96,7 +97,7 @@ UUID event id, a UTC timestamp, an activity of INSERT / UPDATE / DELETE, `elemen
 number of findings, every configured section present (a list where the sheet is one to many), every
 configured field present as a string, and nothing else in the message; all problems are named in one
 error. A refused build returns `''`, so the rule never calls the producer. The producer refuses an
-empty topic property or one that is not a sys_id, a missing record, and a payload that is empty, not
+empty topic property or one that is not a sys_id, a missing or unsaved record, and a payload that is empty, not
 JSON, without envelope or findings, without a finding, or whose `element_count` does not match.
 
 ## Earlier sys_ids
@@ -124,7 +125,8 @@ reference whose record is gone. E every refusal of the processor and the produce
 line (only the lines of that script are read): each malformed property line, an envelope off its
 constants refused by the validation inside `buildPayload`, three tampered payloads naming every
 validation branch, the topic property empty, padded (trimmed, sent) and malformed, the payloads the
-producer refuses and no record. E2 the rule on a real update with the property empty: the processor
+producer refuses, no record and a record never saved; a journal field configured on the finding, sent as
+its latest entry without its header. E2 the rule on a real update with the property empty: the processor
 logs once and the producer is never called. **F how many remediation tasks the item has**: two, one,
 none, a link whose task is gone, both links on one task (taken once), the two links swapped, and the
 older task (smaller sys_id, larger number) renumbered below the other, to prove the order comes from the
@@ -138,7 +140,8 @@ Adds the sheet's custom fields to the vulnerability tables as stand-ins for the 
 `u_avit_record_url` on the item, `u_assessment_id` on the pen test request), under the global Default
 set, never delivered. Then the linked item with an entry of the extended class, a release with a
 Primary AIT, a CI, a pen test request, an exception approval, a consequence and **two** remediation
-tasks, and the bare item.
+tasks (each with its own Primary AIT), two comments a minute apart and a VAMP source id (`AVT-448812`)
+with its record link, and the bare item.
 
 ## Drivers
 `build_1804.py` (set `SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1` in the mirror application,

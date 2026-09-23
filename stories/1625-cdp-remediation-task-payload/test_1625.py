@@ -107,7 +107,7 @@ for (var i = 0; i < targets.length; i++) {
 }
 var tables = %s;
 for (var t = 0; t < tables.length; t++) {
-    var r = new GlideRecord(tables[t]); r.orderByDesc('sys_updated_on'); r.setLimit(12); r.query(); var n = 0;
+    var r = new GlideRecord(tables[t]); r.addQuery('short_description', 'NOT LIKE', 'VSO-PAYLOAD%%').addOrCondition('short_description', 'ISEMPTY'); r.addQuery('short_description', 'NOT LIKE', 'Payload fixture%%').addOrCondition('short_description', 'ISEMPTY'); r.orderByDesc('sys_updated_on'); r.setLimit(12); r.query(); var n = 0;
     while (r.next() && n < 5) {
         if (have[r.getUniqueValue()]) continue;
         n++; o.rows.push({table: tables[t], id: r.getUniqueValue(), kind: 'latest', payload: b.buildPayload(r), again: b.buildPayload(r)});
@@ -136,6 +136,9 @@ for row in d['rows']:
         want = expect(t, field, cells, sid); values_checked += 1
         if not isinstance(task[key], str) or task[key] != want: bad.append('%s(%s): %r, expected %r' % (key, dictionary(t).get(field, ('missing',))[0], task[key], want))
     check('1d %s: every mapped value (%d) equal to the value worked out through REST' % (tag, len(mapped)), not bad, '; '.join(bad[:6]))
+    stamps = [(key, cells[field]['value'], task[key]) for field, key in mapped if field in cells and re.match(r'^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?$', cells[field]['value'] or '')]
+    wrong_dates = [(k, v, got) for k, v, got in stamps if got != ('%s-%s-%s' % (v[5:7], v[8:10], v[0:4]) + (' ' + v[11:19] if len(v) > 10 else ''))]
+    check('1d2 %s: every stored date or date/time (%d) sent as MM-dd-yyyy[ HH:mm:ss] in UTC, whatever its dictionary type' % (tag, len(stamps)), not wrong_dates and all(DT.match(g) or re.match(r'^\d{2}-\d{2}-\d{4}$', g) for _, _, g in stamps), wrong_dates[:4])
     check('1e %s: change_requests: each change once, cancelled and gone ones left out, number order' % tag, task['change_requests'] == expected_changes(t, sid), '%r vs %r' % (task['change_requests'], expected_changes(t, sid)))
     check('1f %s: exception_requests: approved and expired approvals of this record only' % tag, task['exception_requests'] == expected_exceptions(t, sid), '%r vs %r' % (task['exception_requests'], expected_exceptions(t, sid)))
     again = json.loads(row['again'])
@@ -210,12 +213,26 @@ var inc = new GlideRecord('incident'); inc.setLimit(1); inc.query(); inc.next();
 o.unsupported = b.buildPayload(inc);
 var base = new GlideRecord('task'); base.get(%s); o.base = b.buildPayload(base);
 o.neg = [b.buildPayload(null), b.buildPayload({}), b.buildPayload('VUL0004576'), b.buildPayload(new GlideRecord('sn_vul_vulnerability')), b.buildPayload()];
+// a document id: the record field of an exception approval, mapped for the test only; its table field set, then empty
+var dp = new GlideRecord('sys_properties'); dp.initialize(); dp.setValue('name', %s); dp.setValue('type', 'string'); dp.setValue('value', 'number=number,\ntable=table,\nrecord=record,'); var dpId = dp.insert();
+var other = new GlideRecord('sn_sec_exception_change_approval'); other.get(%s); var keepTable = '' + other.getValue('table');
+try {
+    var linked = new GlideRecord('sn_sec_exception_change_approval'); linked.get(%s); o.doc_linked = new RemediationTaskPayloadBuilder().buildPayload(linked);
+    other.setWorkflow(false); other.setValue('table', ''); other.update();
+    var empty = new GlideRecord('sn_sec_exception_change_approval'); empty.get(%s); o.doc_empty = new RemediationTaskPayloadBuilder().buildPayload(empty);
+} finally {
+    var back = new GlideRecord('sn_sec_exception_change_approval'); back.get(%s); back.setWorkflow(false); back.setValue('table', keepTable); back.update();
+    var gone = new GlideRecord('sys_properties'); if (gone.get(dpId)) gone.deleteRecord();
+}
+o.doc_restored = (function() { var c = new GlideRecord('sn_sec_exception_change_approval'); c.get(%s); return '' + c.getValue('table') == keepTable; })();
 o.msgs = [];
 var l = new GlideRecord('syslog'); l.addQuery('sys_created_on', '>=', t0); l.addQuery('message', 'STARTSWITH', 'RemediationTaskPayloadBuilder'); l.query();
 while (l.next()) o.msgs.push('' + l.getValue('message'));
 var ux = new GlideAggregate('sys_update_xml'); ux.addQuery('update_set', %s); ux.addAggregate('COUNT'); ux.query(); ux.next(); o.delivered_rows = parseInt(ux.getAggregate('COUNT'));
 gs.print('X::' + JSON.stringify(o));
-})();''' % (json.dumps(GLOBAL_DEFAULT), json.dumps(PROP), json.dumps(CASES), json.dumps(REC), json.dumps(REC), json.dumps(ST['set'])))
+})();''' % (json.dumps(GLOBAL_DEFAULT), json.dumps(PROP), json.dumps(CASES), json.dumps(REC), json.dumps(REC), json.dumps('usem.cdp.remtask.fields.sn_sec_exception_change_approval'),
+             json.dumps(FX['ids']['sn_vul_vulnerability.exc.other']), json.dumps(FX['ids']['sn_vul_vulnerability.exc.approved']), json.dumps(FX['ids']['sn_vul_vulnerability.exc.other']),
+             json.dumps(FX['ids']['sn_vul_vulnerability.exc.other']), json.dumps(FX['ids']['sn_vul_vulnerability.exc.other']), json.dumps(ST['set'])))
 layout = json.loads(d2['cases']['layout'])['rem_tasks'][0]['remediation_task']
 check('2a accepted layout: spaces round names, bare name, blank line, CRLF, several pairs on one line, rename',
       list(layout.keys()) == ['task_number', 'short_description', 'bogus', 'owner_name', 'updates', 'status', 'change_requests', 'exception_requests']
@@ -225,15 +242,18 @@ check('2c every refused layout gives "" (%d cases)' % len(REASONS), all(d2['case
 want = ['%s: payload not built for sn_vul_vulnerability %s - %s' % (CLS, REC, REASONS[k]) for k in REASONS]
 want += ['%s: payload not built for incident %s - table incident is not configured in property usem.cdp.remtask.fields.incident' % (CLS, d2['inc_id']),
          '%s: payload not built for task %s - table task is not configured in property usem.cdp.remtask.fields.task' % (CLS, REC)]
-want += ['%s: payload not built - record is not a valid GlideRecord' % CLS] * 5
+want += ['%s: payload not built - record is not a valid GlideRecord' % CLS] * 4 + ['%s: payload not built for sn_vul_vulnerability - record is not a valid GlideRecord' % CLS]
 check('2d exactly one error line per refusal, each naming the reason, nothing else logged (%d lines)' % len(want), sorted(d2['msgs']) == sorted(want),
       'extra: %s | missing: %s' % ([m for m in d2['msgs'] if m not in want], [m for m in want if m not in d2['msgs']]))
 check('2e unsupported table, base task record and invalid inputs give ""', d2['unsupported'] == '' and d2['base'] == '' and d2['neg'] == [''] * 5)
 check('2f property restored, delivered update set untouched (12 rows)', d2['restored'] and d2['delivered_rows'] == 12, d2['delivered_rows'])
+dl, de = json.loads(d2['doc_linked'])['rem_tasks'][0]['remediation_task'], json.loads(d2['doc_empty'])['rem_tasks'][0]['remediation_task']
+check('2g a document id renders the display value of its record, and "" when its table field is empty (the approval record restored)',
+      dl['record'] == FX['tables']['sn_vul_vulnerability']['numbers']['plural'] and dl['table'] == 'sn_vul_vulnerability' and de['record'] == '' and de['table'] == '' and de['number'] == FX['tables']['sn_vul_vulnerability']['exceptions']['other']['number'] and d2['doc_restored'], (dl, de))
 
 # ---------- 3. business rule context ----------
 plural = FX['ids']['sn_vul_vulnerability.plural']
-before = rest('sn_vul_vulnerability', 'sys_id=' + plural, ['reassignment_count', 'total_vis', 'cr_count'])[0]
+before = rest('sn_vul_vulnerability', 'sys_id=' + plural, ['reassignment_count', 'total_vis', 'cr_count', 'description'])[0]
 latest_before = latest_entry(plural, 'comments')[0]
 d3 = ui.js(r'''
 (function() {
@@ -282,8 +302,8 @@ check('3c an insert: INSERT from the operation, comments ""', len(ins) == 1 and 
 insc = by.get(d3['inserted_commented'], [])
 check('3d an insert carrying a comment: comments = that comment', len(insc) == 1 and insc[0]['activity'] == 'INSERT' and insc[0]['comments'] == d3['insert_comment'], insc)
 check('3e no builder error during the rule runs', not d3['errors'], d3['errors'])
-after = rest('sn_vul_vulnerability', 'sys_id=' + plural, ['reassignment_count', 'total_vis', 'cr_count'])[0]
-check('3f fixture counts restored after the rule runs', after == before, after)
+after = rest('sn_vul_vulnerability', 'sys_id=' + plural, ['reassignment_count', 'total_vis', 'cr_count', 'description'])[0]
+check('3f fixture counts and description restored after the rule runs', after == before, after)
 
 # ---------- 4. configuration, hygiene, timing ----------
 sheet = json.load(open(os.path.join(HERE, 'remtask_mapping.json')))
@@ -318,9 +338,10 @@ print('   timing: %d payloads in %d ms' % (d4['perf']['built'], d4['perf']['ms']
 print('\n%s: %d checks, %d failed%s' % ('ALL PASS' if not FAILS else 'FAILED', TOTAL[0], len(FAILS), '' if not FAILS else ' -> ' + '; '.join(FAILS)))
 os.makedirs(os.path.join(HERE, 'samples'), exist_ok=True)
 user = os.environ.get('SN_USER', '')
-for t in TABLES:
+for t in (TABLES if not FAILS else []):   # samples only from a run where every check passed
     txt = json.dumps(PAYLOADS[RECS[t]], indent=2).replace(INST.split('//')[1], 'instance.example.com')
     if user: txt = txt.replace(user, 'admin')
     txt = txt.replace('Mihir Kumar Singh', 'System Administrator')
+    assert not re.search(r'probe|fixture|VSO-', txt, re.I), 'test text in the sample of %s' % t
     open(os.path.join(HERE, 'samples', 'Sample payload - %s.json' % t), 'w').write(txt + '\n')
 sys.exit(1 if FAILS else 0)

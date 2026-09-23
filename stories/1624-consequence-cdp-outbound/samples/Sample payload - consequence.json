@@ -5,8 +5,8 @@
     "namespace": "com.bofa.usem",
     "core_version": "1.0.0",
     "outbound_version": "1.0.0",
-    "event_id": "0a7767a4-9327-c3d0-e3ae-f0aefaba102a",
-    "event_timestamp": "2026-09-22T19:00:19Z",
+    "event_id": "002cc17c-9367-07d0-e3ae-f0aefaba10ad",
+    "event_timestamp": "2026-09-23T02:20:05Z",
     "element_count": 1,
     "element_activity": "UPDATE"
   },
@@ -15,7 +15,7 @@
       "consequence": {
         "state": "Open",
         "accountable_party": "Digest Owner One",
-        "updated_on": "09-22-2026 19:00:16",
+        "updated_on": "09-22-2026 19:01:06",
         "comments": "Consequence outbound fixture (linked)",
         "change_freeze_effective_date": "09-15-2026 12:40:01",
         "consequence_level": "1",

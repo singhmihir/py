@@ -40,10 +40,10 @@ BOFASIKafkaProducerConsequence.prototype = {
      * The message key: table and sys_id of the record.
      * @param {GlideRecord} record - the consequence record
      * @returns {string} "<table>.<sys_id>"
-     * @throws {Error} when no saved record was given
+     * @throws {Error} when no existing record was given
      */
     _messageKey: function(record) {
-        if (!record || typeof record.getTableName != 'function' || !record.getUniqueValue())
+        if (!record || typeof record.isValidRecord != 'function' || !record.isValidRecord())
             throw new Error('no record was given');
         return record.getTableName() + '.' + record.getUniqueValue();
     },
@@ -51,14 +51,13 @@ BOFASIKafkaProducerConsequence.prototype = {
     /**
      * Names a record for the error log without assuming it is usable.
      * @param {GlideRecord} record - the record, possibly absent
-     * @returns {string} "<table> <sys_id>" when the record can be read, otherwise "no record"
+     * @returns {string} "<table> <sys_id>" (the table alone for a record without a sys_id), "no record"
+     *   for anything that is not a record
      */
     _recordKey: function(record) {
-        try {
-            return record.getTableName() + ' ' + record.getUniqueValue();
-        } catch (e) {
+        if (!record || typeof record.getTableName != 'function')
             return 'no record';
-        }
+        return (record.getTableName() + ' ' + (record.getUniqueValue() || '')).trim();
     },
 
     /**

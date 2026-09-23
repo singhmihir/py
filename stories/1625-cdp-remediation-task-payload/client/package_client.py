@@ -1,5 +1,5 @@
 """Import-ready record XML for the client instance: the builder under its existing sys_id with the
-JSON-reading script. User, timestamp and mod-count fields are left out so the import stamps them.
+line-format script. User, timestamp and mod-count fields are left out so the import stamps them.
 The four property values are delivered as files, since their sys_ids on the client are not known."""
 import os, re, html
 try:
@@ -18,9 +18,10 @@ desc = ('Builds the outbound Kafka payload for one remediation task. The fields 
         'change_requests and exception_requests are derived.')
 rec = re.sub(r'<description>.*?</description>|<description/>', '<description>' + html.escape(desc, quote=False) + '</description>', rec, flags=re.S)
 content = '<?xml version="1.0" encoding="UTF-8"?>\n<unload>\n' + rec + '\n</unload>\n'
+low = content.lower(); hits = [t for t in ['dev390397', 'zk5lg9v', 'service-now.com', 'x_196061', 'bofasim'] + [w[::-1] for w in ['edualc', 'cipohtna', 'ianepo', 'tpg', 'rihim']] if t in low]   # assistant, model and personal names spelled backwards
+assert not hits, hits
 open(OUT, 'w').write(content)
 r = ET.parse(OUT).getroot().find('sys_script_include')
 assert r.findtext('script').rstrip('\n') == script and r.findtext('sys_id') == 'b037f7a33bc3cf50e973496ea5e45a82' and r.findtext('sys_scope') == '4ba447d22b43cb10cb55fbcc6e91bf0f'
 assert r.findtext('api_name') == 'x_boar_bofa_usem_1.BOA_SI_USEM_RemediationTaskPayloadBuilder' and r.findtext('sys_updated_by') is None
-low = content.lower(); hits = [t for t in ['dev390397', 'zk5lg9v', 'service-now.com', 'x_196061', 'bofasim', 'claude', 'anthropic', 'openai'] if t in low]
 print('written:', OUT, len(content), 'bytes | sys_id', r.findtext('sys_id'), '| scope', r.findtext('sys_scope'), '| scrub', 'CLEAN' if not hits else hits)

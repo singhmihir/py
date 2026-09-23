@@ -66,11 +66,11 @@ Measured on the PDI and fixed in the reference builder and the client copy alike
 with several changes linked out of number order (the open change twice, a closed one, a cancelled one, one
 of the child class `change_request_imac`, and a link whose change is gone), exception approvals approved,
 expired and requested plus one for another record, two comments a minute apart, a four-digit count and a
-change count held as display markup. `test_1625.py` (304 checks) works every expected value out through
+change count held as display markup. `test_1625.py` (341 checks) works every expected value out through
 the REST API apart from the builder (dictionary type, stored and display value, latest journal row,
 change and exception records) for the twelve fixture tasks, the four sample records and the five latest
 tasks per table (1683 mapped values), checks literals on the fixtures, every property refusal with its
 exact log line, the business rule context (a save adding no comment, a save adding one, inserts) and the
-configuration. `client/test_client.py` (122 checks) compares the client copy, called from inside a
+configuration. `client/test_client.py` (123 checks) compares the client copy, called from inside a
 function of a global script, with the reference on the same 36 records and checks its own refusals.
 Both run twice, all passing.

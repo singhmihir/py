@@ -41,7 +41,8 @@ other sys_ids (see *Earlier sys_ids*).
   empty or names another class than the CI's, `""` when no CI is found; an integer with choices as its label
   and a plain count as stored (a display value carries the user's thousands separator); strings, choices,
   booleans (`true`/`false`) and lists as displayed, so choice fields give their labels as in the client sample
-  (`Change Frozen`); table names and conditions as stored; date/times `MM-dd-yyyy HH:mm:ss`; display markup
+  (`Change Frozen`); table names and conditions as stored; a journal field as its latest entry without the
+  date and author line the platform puts above it; date/times `MM-dd-yyyy HH:mm:ss`; display markup
   `[code]...[/code]` as its visible text; a field missing on the table, an empty field or a consequence without
   a rule gives `""`. Field types are read from a record of the table the processor opens itself: a scoped
   application may not read the dictionary descriptor of a record handed over from inside a function of a
@@ -50,7 +51,7 @@ other sys_ids (see *Earlier sys_ids*).
   `x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id` (spaces around the value ignored), key
   `<table>.<sys_id>`, `sn_ih_kafka.ProducerV2().send(...)` asynchronous, no headers, no schema; the response
   shown with `gs.addInfoMessage`; one try/catch with one `gs.error` in the feature's format
-  `<class>: message not sent for <table> <sys_id> - <reason>`. Without a saved record nothing is sent.
+  `<class>: message not sent for <table> <sys_id> - <reason>`. Without an existing record nothing is sent.
 - `Consequence Field Check - Background Script.js` — generated from the workbook by
   `extract_mapping.py` (with `consequence_mapping.json`). Read only, global scope. For every sheet row
   it looks for the field behind the payload name: the sheet's field name, then the payload name, then
@@ -63,19 +64,21 @@ other sys_ids (see *Earlier sys_ids*).
 
 ## Error handling and payload validation
 Every function in the rule and the two script includes carries a JSDoc header (purpose, parameters,
-return, what it throws). The rule and the two public methods are the only try/catch blocks (besides the
-helpers that name a record for the log); the private methods throw and the entry point logs one `gs.error`
+return, what it throws). The rule and the two public methods are the only try/catch blocks besides the
+helpers that name a record for the log and the producer's JSON parse guard, which turns the parser's error
+into `the payload is not JSON`; the private methods throw and the entry point logs one `gs.error`
 in the form `<class>: <what failed> for <table> <sys_id> - <reason>` (`no record` as the key when no record
 was given). Processor, `buildPayload`: `_requireRecord` refuses a missing record and a record that was never
 fetched or does not exist; `_fieldMapping` refuses a table without a section, a property that is not
 configured or holds no field, and a line with more than one `=`, without a field name, without a payload
-name, of a table that is no section of the payload (a dot-walk such as `u_rule.name` included), or naming a
-payload field of its section twice (the line is quoted); `_validatePayload` checks the finished payload
+name, with a field that is neither `<field>` nor `<table>.<field>` (`a.b.c`, `.name`), of a table that is no
+section of the payload (a dot-walk such as `u_rule.name` included), or naming a payload field of its section
+twice (the line is quoted); `_validatePayload` checks the finished payload
 before it is returned (envelope keys and constants, UUID event id, UTC timestamp, activity in INSERT /
 UPDATE / DELETE, element count 1, one consequence element, every configured section and payload name
 present as a string, no extra sections or keys, the consequence section not empty) and lists every
 problem in one error (`payload invalid: ...; ...`). A refused build returns `''`, so the rule never calls
-the producer. Producer, `sendPayload`: no saved record; `_topicSysId` refuses an empty topic property and a
+the producer. Producer, `sendPayload`: no record, or one that was never saved or fetched; `_topicSysId` refuses an empty topic property and a
 value that is not a sys_id; `_requirePayload` refuses an empty payload, text that is not JSON, JSON without
 `envelope` or `consequences`, no consequence, and an element count other than the consequences carried;
 the Kafka API's own failure is caught by the same block. The info messages (payload, fields not found,
@@ -90,7 +93,9 @@ deletes the five earlier ones (`prior_records.json`): the update set carries a D
 before the current records so that on commit the earlier property goes before the current one of the same
 name is written; the record XML lists them first as `action="DELETE"` elements (Import XML deletes such a
 record and ignores a sys_id it does not hold, measured on the PDI). On an instance without the earlier
-records the deletions do nothing; the platform's preview of the retrieved set shows no problem for them.
+records the deletions do nothing. Where an earlier property was edited after its import (the topic, for
+instance), the platform's preview flags its deletion as *Found a local update that is newer than this one*:
+accept the remote update so that the earlier property goes.
 
 ## Captured from the client forms (21 Sep)
 The consequence form shows Number, AIT (reference), Configuration item with a Class field (a document
@@ -123,8 +128,13 @@ Consequence table: `number`, `state` (1 Open, 2 Deferred, 3 Closed, 4 Cancelled)
 `u_network_isolation_effective_date`, `u_rule` (reference), `u_class` (table name) with `cmdb_ci` as a
 document id depending on it, `u_bofa_ait` (reference to the stand-in AIT table), `u_rejection_reason`;
 rule table: `number`, `name`, `applies_to`, `comments`, `conditions`, `global_exception`, `state`,
-`table`, `valid_from`, `valid_to`. Then one rule record, one consequence linked to the rule, a business
-application CI and an AIT with every field filled, and one bare consequence (`fixtures.json`).
+`table`, `valid_from`, `valid_to`; the consequence table also has a journal (`u_work_notes`) to show that the
+latest entry is sent. Then two rules (CQR0001001 with every field filled and the checkbox on, CQR0001002 a draft
+with the checkbox off and no end date, each with its own author and times), a business application CI and an AIT,
+and five consequences (`fixtures.json`): CON0001001 linked to the first rule with every field filled and two
+work notes a minute apart, CON0001002 bare, CON0001003 whose rule and AIT are gone and whose Class field is
+empty, CON0001004 linked to the second rule with a Class field naming another class than its CI's, CON0001005
+whose CI is gone.
 `getRefRecord()` on a document id returns the record its class field names, and null when the value or
 the class is empty; a column type change on a scoped table runs inside the scope (`ui.js(..., scope=...)`),
 a cross-scope `deleteRecord()` on a dictionary row returns false.

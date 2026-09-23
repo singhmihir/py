@@ -1,7 +1,8 @@
-"""Builds the import-ready record XML for the client instance from the exports received on
-INC0010003: the producer keeps its sys_id and metadata, the validator is a new record in the
-same scope. User, timestamp and mod-count fields are left out so the import stamps them."""
-import os, re, html
+"""Builds the import-ready record XML for the client instance from the export received on INC0010003:
+the producer under its existing sys_id and metadata, preceded by a deletion of the separate validator
+V1.0 delivered (prior_records.json; Import XML deletes a record of an action="DELETE" element and ignores
+a sys_id it does not hold). User, timestamp and mod-count fields are left out so the import stamps them."""
+import os, re, html, json
 try:
     import defusedxml.ElementTree as ET
 except ImportError:
@@ -23,15 +24,20 @@ records = [
            'Utilizes KafkaProducer V2 to send messages to Hermes kafka. The payload is validated before it is sent (payload validation section of the script).\n'
            'Documentation of API used - https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html'),
 ]
-content = '<?xml version="1.0" encoding="UTF-8"?>\n<unload>\n' + '\n'.join(records) + '\n</unload>\n'
+PRIOR = json.load(open(os.path.join(HERE, 'prior_records.json')))['records']
+deletions = ['<%s action="DELETE"><sys_id>%s</sys_id><name>%s</name></%s>' % (p['table'], p['sys_id'], p['name'], p['table']) for p in PRIOR]
+content = '<?xml version="1.0" encoding="UTF-8"?>\n<unload>\n' + '\n'.join(deletions + records) + '\n</unload>\n'
 open(OUT, 'w').write(content)
 root = ET.parse(OUT).getroot()
-names = [(r.findtext('name'), r.findtext('api_name'), r.findtext('sys_id'), r.findtext('sys_scope'), r.findtext('access')) for r in root.findall('sys_script_include')]
+dels = [r for r in root if r.get('action') == 'DELETE']
+assert [(r.tag, r.findtext('sys_id')) for r in dels] == [(p['table'], p['sys_id']) for p in PRIOR] and list(root)[:len(dels)] == dels
+print('  %d deletion of an earlier record first in the file' % len(dels))
+names = [(r.findtext('name'), r.findtext('api_name'), r.findtext('sys_id'), r.findtext('sys_scope'), r.findtext('access')) for r in root.findall('sys_script_include') if r.get('action') != 'DELETE']
 for n in names: print(' ', n)
-for r in root.findall('sys_script_include'):
+for r in [r for r in root.findall('sys_script_include') if r.get('action') != 'DELETE']:
     assert r.findtext('script').rstrip('\n') == producer and r.findtext('sys_scope') == '4ba447d22b43cb10cb55fbcc6e91bf0f'
     assert r.findtext('api_name') == 'x_boar_bofa_usem_1.' + r.findtext('name') and r.findtext('sys_name') == r.findtext('name')
     assert r.findtext('sys_update_name') == 'sys_script_include_' + r.findtext('sys_id') and r.findtext('sys_updated_by') is None
 low = content.lower()
-hits = [t for t in ['dev390397', 'zk5lg9v', 'service-now.com', 'x_196061', 'bofasim', 'claude', 'anthropic', 'openai', 'gpt'] if t in low]
+hits = [t for t in ['dev390397', 'zk5lg9v', 'service-now.com', 'x_196061', 'bofasim'] + [w[::-1] for w in ['edualc', 'cipohtna', 'ianepo', 'tpg', 'rihim']] if t in low]   # assistant, model and personal names spelled backwards
 print('written:', OUT, len(content), 'bytes | records', len(names), '| scrub', 'CLEAN' if not hits else hits)

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-22 18:57:44">
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-23 02:23:08">
 <sys_remote_update_set action="INSERT_OR_UPDATE">
 <application display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</application>
 <application_name>BOFA USEM Consequence</application_name>
@@ -20,64 +20,57 @@
 <summary/>
 <sys_class_name>sys_remote_update_set</sys_class_name>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 18:57:43</sys_created_on>
-<sys_id>c4e6a7249327c3d0e3aef0aefaba10f5</sys_id>
+<sys_created_on>2026-09-23 02:23:08</sys_created_on>
+<sys_id>2cdc493093a707d0e3aef0aefaba10bd</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 18:57:43</sys_updated_on>
+<sys_updated_on>2026-09-23 02:23:08</sys_updated_on>
 <update_set display_value=""/>
 <update_source display_value=""/>
 <updated/>
 </sys_remote_update_set>
 <sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
+<action>INSERT_OR_UPDATE</action>
 <application display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</application>
 <category>customer</category>
 <comments/>
-<name>sys_properties_9d91bcd0932f8f90e3aef0aefaba10e0</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_0.usem.consequence.fields.x_boar_bofa_usem_0_consequence</name><read_roles/><suffix>usem.consequence.fields.x_boar_bofa_usem_0_consequence</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 18:53:24</sys_created_on><sys_id>9d91bcd0932f8f90e3aef0aefaba10e0</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_0.usem.consequence.fields.x_boar_bofa_usem_0_consequence</sys_name><sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0">488be1cd2b1247102b30f8e14391bf0c</sys_package><sys_policy/><sys_scope display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</sys_scope><sys_update_name>sys_properties_9d91bcd0932f8f90e3aef0aefaba10e0</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 18:53:24</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=9d91bcd0932f8f90e3aef0aefaba10e0"/></record_update>]]></payload>
-<payload_hash>-1793027408</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">c4e6a7249327c3d0e3aef0aefaba10f5</remote_update_set>
+<name>sys_script_3ae9b898936f8f90e3aef0aefaba10ad</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;true&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;x_boar_bofa_usem_0_consequence&lt;/collection&gt;&lt;condition/&gt;&lt;description&gt;Builds the CDP payload for the consequence with BOFASIConsequenceOutboundProcessor and sends it with BOFASIKafkaProducerConsequence on every insert and update.&lt;/description&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition/&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;BOFA_BR_Consequence_CdpOutbound&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[/**
+ * BOFA_BR_Consequence_CdpOutbound - after insert and update on the consequence table, order 100.
+ * Builds the CDP payload of the record with BOFASIConsequenceOutboundProcessor and hands it to
+ * BOFASIKafkaProducerConsequence. An empty payload means the processor could not build or validate it
+ * and has logged why; nothing is sent then. Both steps sit in one try/catch: a failure is logged once
+ * and never blocks the record.
+ * @param {GlideRecord} current - the consequence record as saved
+ * @param {GlideRecord} previous - the record before the save (null on insert), not used
+ */
+(function executeRule(current, previous /*null when async*/ ) {
+    try {
+        var payload = new x_boar_bofa_usem_0.BOFASIConsequenceOutboundProcessor().buildPayload(current);
+        if (!payload)
+            return;
+        new x_boar_bofa_usem_0.BOFASIKafkaProducerConsequence().sendPayload(payload, current);
+    } catch (e) {
+        gs.error('BOFA_BR_Consequence_CdpOutbound: outbound message failed for ' + current.getTableName() + ' ' + current.getUniqueValue() + ' - ' + (e.message || e));
+    }
+})(current, previous);
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-21 11:43:34&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;3ae9b898936f8f90e3aef0aefaba10ad&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA_BR_Consequence_CdpOutbound&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0"&gt;488be1cd2b1247102b30f8e14391bf0c&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM Consequence"&gt;488be1cd2b1247102b30f8e14391bf0c&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_3ae9b898936f8f90e3aef0aefaba10ad&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-21 11:43:34&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=3ae9b898936f8f90e3aef0aefaba10ad"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>121721988</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">2cdc493093a707d0e3aef0aefaba10bd</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 18:57:43</sys_created_on>
-<sys_id>08e6a7249327c3d0e3aef0aefaba10f7</sys_id>
+<sys_created_on>2026-09-23 02:23:08</sys_created_on>
+<sys_id>24dc493093a707d0e3aef0aefaba10c0</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca776c1c0000001</sys_recorded_at>
+<sys_recorded_at>1a0cc100ff80000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 18:57:43</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_0.usem.consequence.fields.x_boar_bofa_usem_0_consequence</target_name>
-<type>System Property</type>
+<sys_updated_on>2026-09-23 02:23:08</sys_updated_on>
+<table>x_boar_bofa_usem_0_consequence</table>
+<target_name>BOFA_BR_Consequence_CdpOutbound</target_name>
+<type>Business Rule</type>
 <update_domain>global</update_domain>
-<update_guid>94f5a3205b27c3d009bbc6c0ab7c4426</update_guid>
-<update_guid_history>94f5a3205b27c3d009bbc6c0ab7c4426:-1793027408,eae52320a827c3d0bff6b97bd631ffd7:-1830297540,ea84aba8afe3c3d044430ed8181e818f:-1793027408,7984aba88ce3c3d03c27378f72079134:-1830297540,16f83cd48e6f8f9067d02dada2375347:1657397369,3991fcd0532f8f9047355d060b1f6370:-522370299</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</application>
-<category>customer</category>
-<comments/>
-<name>sys_script_include_97817cd0932f8f90e3aef0aefaba1007</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include"><sys_script_include action="DELETE"><access>public</access><active>false</active><api_name>x_boar_bofa_usem_0.BOFASIKafkaProducerConsequence</api_name><caller_access/><client_callable>false</client_callable><description/><mobile_callable>false</mobile_callable><name>BOFASIKafkaProducerConsequence</name><sandbox_callable>false</sandbox_callable><script/><sys_class_name>sys_script_include</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 18:53:04</sys_created_on><sys_id>97817cd0932f8f90e3aef0aefaba1007</sys_id><sys_mod_count>0</sys_mod_count><sys_name>BOFASIKafkaProducerConsequence</sys_name><sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0">488be1cd2b1247102b30f8e14391bf0c</sys_package><sys_policy/><sys_scope display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</sys_scope><sys_update_name>sys_script_include_97817cd0932f8f90e3aef0aefaba1007</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 18:53:04</sys_updated_on></sys_script_include></record_update>]]></payload>
-<payload_hash>425900370</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">c4e6a7249327c3d0e3aef0aefaba10f5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 18:57:43</sys_created_on>
-<sys_id>0ce6a7249327c3d0e3aef0aefaba10f8</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca76e5df0000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 18:57:43</sys_updated_on>
-<table/>
-<target_name>BOFASIKafkaProducerConsequence</target_name>
-<type>Script Include</type>
-<update_domain>global</update_domain>
-<update_guid>3fc56becd2e3c3d05f4875e9f547be6a</update_guid>
-<update_guid_history>3fc56becd2e3c3d05f4875e9f547be6a:425900370,ffc56becdae3c3d0ba880944f6c89d4e:-2001425082,1274e3a828e3c3d09bb3900819fb7670:425900370,0e74a3a821e3c3d00f4e8e597ea7e3f0:-2001425082,5a546f687de3c3d0b59c90e641e84d1d:425900370,52542f686ee3c3d06226adf3987851d0:-2001425082,dae8f4d4666f8f90d64827a749679fd0:226817563,d7817cd0bf2f8f90b1d5a6c2329e6a09:820434447</update_guid_history>
+<update_guid>a21c817c2b6707d0c0c69c73eb0d6828</update_guid>
+<update_guid_history>a21c817c2b6707d0c0c69c73eb0d6828:121721988,f2e9f898426f8f909780313c499a3e26:121721988</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -130,10 +123,10 @@ BOFASIKafkaProducerConsequence.prototype = {
      * The message key: table and sys_id of the record.
      * @param {GlideRecord} record - the consequence record
      * @returns {string} "&lt;table&gt;.&lt;sys_id&gt;"
-     * @throws {Error} when no saved record was given
+     * @throws {Error} when no existing record was given
      */
     _messageKey: function(record) {
-        if (!record || typeof record.getTableName != 'function' || !record.getUniqueValue())
+        if (!record || typeof record.isValidRecord != 'function' || !record.isValidRecord())
             throw new Error('no record was given');
         return record.getTableName() + '.' + record.getUniqueValue();
     },
@@ -190,23 +183,23 @@ BOFASIKafkaProducerConsequence.prototype = {
 
     type: 'BOFASIKafkaProducerConsequence'
 };
-]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-21 11:43:25&lt;/sys_created_on&gt;&lt;sys_id&gt;98e9f498936f8f90e3aef0aefaba10f2&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFASIKafkaProducerConsequence&lt;/sys_name&gt;&lt;sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0"&gt;488be1cd2b1247102b30f8e14391bf0c&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM Consequence"&gt;488be1cd2b1247102b30f8e14391bf0c&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_98e9f498936f8f90e3aef0aefaba10f2&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-22 18:46:37&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
-<payload_hash>2080408684</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">c4e6a7249327c3d0e3aef0aefaba10f5</remote_update_set>
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-21 11:43:25&lt;/sys_created_on&gt;&lt;sys_id&gt;98e9f498936f8f90e3aef0aefaba10f2&lt;/sys_id&gt;&lt;sys_mod_count&gt;2&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFASIKafkaProducerConsequence&lt;/sys_name&gt;&lt;sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0"&gt;488be1cd2b1247102b30f8e14391bf0c&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM Consequence"&gt;488be1cd2b1247102b30f8e14391bf0c&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_98e9f498936f8f90e3aef0aefaba10f2&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-23 02:19:21&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<payload_hash>399379021</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">2cdc493093a707d0e3aef0aefaba10bd</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 18:57:43</sys_created_on>
-<sys_id>40e6a7249327c3d0e3aef0aefaba10f9</sys_id>
+<sys_created_on>2026-09-23 02:23:08</sys_created_on>
+<sys_id>28dc493093a707d0e3aef0aefaba10c1</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca777ac70000001</sys_recorded_at>
+<sys_recorded_at>1a0cc100f940000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 18:57:43</sys_updated_on>
+<sys_updated_on>2026-09-23 02:23:08</sys_updated_on>
 <table/>
 <target_name>BOFASIKafkaProducerConsequence</target_name>
 <type>Script Include</type>
 <update_domain>global</update_domain>
-<update_guid>99f567200427c3d04d011b7de6e637a0</update_guid>
-<update_guid_history>99f567200427c3d04d011b7de6e637a0:2080408684,ed542f689be3c3d0897966edfa95ba26:2080408684,dce9f4982e6f8f908802c1dbb72406f4:-429527820</update_guid_history>
+<update_guid>a61c817cb96707d0d471d3e9da369f20</update_guid>
+<update_guid_history>a61c817cb96707d0d471d3e9da369f20:399379021,15fb453c126707d0fb8dcc85e4be8ef8:399379021,ed542f689be3c3d0897966edfa95ba26:2080408684,dce9f4982e6f8f908802c1dbb72406f4:-429527820</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -215,43 +208,24 @@ BOFASIKafkaProducerConsequence.prototype = {
 <application display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</application>
 <category>customer</category>
 <comments/>
-<name>sys_script_3ae9b898936f8f90e3aef0aefaba10ad</name>
-<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;true&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;x_boar_bofa_usem_0_consequence&lt;/collection&gt;&lt;condition/&gt;&lt;description&gt;Builds the CDP payload for the consequence with BOFASIConsequenceOutboundProcessor and sends it with BOFASIKafkaProducerConsequence on every insert and update.&lt;/description&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition/&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;BOFA_BR_Consequence_CdpOutbound&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[/**
- * BOFA_BR_Consequence_CdpOutbound - after insert and update on the consequence table, order 100.
- * Builds the CDP payload of the record with BOFASIConsequenceOutboundProcessor and hands it to
- * BOFASIKafkaProducerConsequence. An empty payload means the processor could not build or validate it
- * and has logged why; nothing is sent then. Both steps sit in one try/catch: a failure is logged once
- * and never blocks the record.
- * @param {GlideRecord} current - the consequence record as saved
- * @param {GlideRecord} previous - the record before the save (null on insert), not used
- */
-(function executeRule(current, previous /*null when async*/ ) {
-    try {
-        var payload = new x_boar_bofa_usem_0.BOFASIConsequenceOutboundProcessor().buildPayload(current);
-        if (!payload)
-            return;
-        new x_boar_bofa_usem_0.BOFASIKafkaProducerConsequence().sendPayload(payload, current);
-    } catch (e) {
-        gs.error('BOFA_BR_Consequence_CdpOutbound: outbound message failed for ' + current.getTableName() + ' ' + current.getUniqueValue() + ' - ' + (e.message || e));
-    }
-})(current, previous);
-]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-21 11:43:34&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;3ae9b898936f8f90e3aef0aefaba10ad&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA_BR_Consequence_CdpOutbound&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0"&gt;488be1cd2b1247102b30f8e14391bf0c&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM Consequence"&gt;488be1cd2b1247102b30f8e14391bf0c&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_3ae9b898936f8f90e3aef0aefaba10ad&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-21 11:43:34&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=3ae9b898936f8f90e3aef0aefaba10ad"/&gt;&lt;/record_update&gt;</payload>
-<payload_hash>121721988</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">c4e6a7249327c3d0e3aef0aefaba10f5</remote_update_set>
+<name>sys_properties_1ce9f498936f8f90e3aef0aefaba10f6</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_consequence_outbound, read by BOFASIKafkaProducerConsequence.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id</name><read_roles/><suffix>usem.consequence.kafka.topic_sys_id</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-21 11:43:25</sys_created_on><sys_id>1ce9f498936f8f90e3aef0aefaba10f6</sys_id><sys_mod_count>47</sys_mod_count><sys_name>x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id</sys_name><sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0">488be1cd2b1247102b30f8e14391bf0c</sys_package><sys_policy/><sys_scope display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</sys_scope><sys_update_name>sys_properties_1ce9f498936f8f90e3aef0aefaba10f6</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:23:02</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=1ce9f498936f8f90e3aef0aefaba10f6"/></record_update>]]></payload>
+<payload_hash>1655874535</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">2cdc493093a707d0e3aef0aefaba10bd</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 18:57:43</sys_created_on>
-<sys_id>4ce6a7249327c3d0e3aef0aefaba10f7</sys_id>
+<sys_created_on>2026-09-23 02:23:08</sys_created_on>
+<sys_id>64dc493093a707d0e3aef0aefaba10bf</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca777bcd0000001</sys_recorded_at>
+<sys_recorded_at>1a0cc12e0f00000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 18:57:43</sys_updated_on>
-<table>x_boar_bofa_usem_0_consequence</table>
-<target_name>BOFA_BR_Consequence_CdpOutbound</target_name>
-<type>Business Rule</type>
+<sys_updated_on>2026-09-23 02:23:08</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id</target_name>
+<type>System Property</type>
 <update_domain>global</update_domain>
-<update_guid>95f567204027c3d042087370c9aa67a8</update_guid>
-<update_guid_history>95f567204027c3d042087370c9aa67a8:121721988,f2e9f898426f8f909780313c499a3e26:121721988</update_guid_history>
+<update_guid>6bccc530dda707d07e2f9a2548a35df9</update_guid>
+<update_guid_history>6bccc530dda707d07e2f9a2548a35df9:1655874535,afccc53064a707d0a2e5933ef39396f4:1655874535,09cc053063a707d03469951b460d245d:636387073,cfbc8130e3a707d0c3752b85ab7550b8:-1011933033,29bc41305fa707d0a51b2d44ca92e139:-722143509,51bc013010a707d031178460eb695b94:1655874535,986c49bc096707d08fbd4ed3d6d618e0:636387073,7b5c09bc496707d09f515e857248ad72:-1011933033,9a5c85bc556707d05d97d4f0fb4ef7c6:-722143509,b55c45bcc86707d00e4b25e8a0260e99:1655874535,bffb893cb06707d0363fe48a1f59bcb5:636387073,eefbc53c2b6707d04fcd5888a802d26b:-2116652319,80f76368f827c3d0937777b60d667e21:636387073,7fe723689f27c3d0c38b3b48a83ee530:-1011933033,93e7ef289927c3d056570571675f8513:-722143509,72e76f282f27c3d0d4f1013bf7904bf5:1655874535,639767e44227c3d0ccf3997d2b186483:636387073,1f97e3e4e427c3d017efc69031c377e4:-1011933033,7e97e3e4a227c3d09e1e33beb994c80f:-722143509,559763e41527c3d014d8e112af70eff9:1655874535,9ef6eb245b27c3d0c0fc72542c2c17a9:636387073,0bd667245127c3d08ebc45a47add406b:1655874535,8b96abe00f27c3d08ca13a536df64a5c:-1405999745,ee962be00027c3d03e57e0bfaa6a04ab:-945610859,da962be08927c3d0093c51efa701695d:-722143509,f196e7e0af27c3d08d901f903e3daf1a:1655874535,1f56e3a09b27c3d06cefe26c6232cc69:-1405999745,6d5663a04a27c3d04c2b63549dd6b56a:-945610859,61466f601c27c3d0d2d123fe05cd9310:-722143509,2e366b601e27c3d024168c6e12f7ba15:1655874535,dbd5afec77e3c3d0ce2d5c148e53e213:-1405999745,dcd5abec5ee3c3d04f8e8fb6bed12a82:135928159,16756bacaee3c3d0f1445a1bf3cd57fd:-1405999745,06752bac1ee3c3d0d5486244dfeb6ac2:-945610859,a175e7ac95e3c3d08d30fc14f19852d7:-722143509,8475a7ac9ce3c3d02eb8a61dc2019734:1655874535,8835a36c9be3c3d00bf0fb4ced05abf7:-1405999745,2b25236cd1e3c3d0400548a9abd8569a:-945610859,7d25ef2ca6e3c3d08514fd7c93be7bbc:-722143509,5525ef2cd7e3c3d055d1c46cfda62121:1655874535,99842ba891e3c3d0769a80b9c5e64865:-1405999745,008467a8dfe3c3d0e4af75851c50a62f:135928159,400bf89cd86f8f90dddd4ca75b64a9f3:-1405999745,73ea389cfa6f8f9085864e93f21fee17:-722143509,06ea349c326f8f90136dcd9b2f854491:1655874535,da6ab81ccb6f8f90e611f0cec9b440c0:-1405999745,1f5af41c026f8f907458351d87c7fea8:-722143509,355ab41c5d6f8f900933db9e516c4ee8:1655874535,b0e938987e6f8f900457ed22f8939544:-1405999745</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -265,23 +239,23 @@ BOFASIKafkaProducerConsequence.prototype = {
 
 	// Add your code here
 
-})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-22 18:53:41&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;f5913014932f8f90e3aef0aefaba109e&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA_BR_Consequence_CdpOutbound&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0"&gt;488be1cd2b1247102b30f8e14391bf0c&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM Consequence"&gt;488be1cd2b1247102b30f8e14391bf0c&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_f5913014932f8f90e3aef0aefaba109e&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-22 18:53:41&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=f5913014932f8f90e3aef0aefaba109e"/&gt;&lt;/record_update&gt;</payload>
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-23 02:19:55&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;f5913014932f8f90e3aef0aefaba109e&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA_BR_Consequence_CdpOutbound&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0"&gt;488be1cd2b1247102b30f8e14391bf0c&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM Consequence"&gt;488be1cd2b1247102b30f8e14391bf0c&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_f5913014932f8f90e3aef0aefaba109e&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-23 02:19:55&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=f5913014932f8f90e3aef0aefaba109e"/&gt;&lt;/record_update&gt;</payload>
 <payload_hash>1373896714</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">c4e6a7249327c3d0e3aef0aefaba10f5</remote_update_set>
+<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">2cdc493093a707d0e3aef0aefaba10bd</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 18:57:43</sys_created_on>
-<sys_id>80e6a7249327c3d0e3aef0aefaba10f8</sys_id>
+<sys_created_on>2026-09-23 02:23:08</sys_created_on>
+<sys_id>68dc493093a707d0e3aef0aefaba10c0</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca7775cb0000001</sys_recorded_at>
+<sys_recorded_at>1a0cc0fffd00000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 18:57:43</sys_updated_on>
+<sys_updated_on>2026-09-23 02:23:08</sys_updated_on>
 <table>x_boar_bofa_usem_0_consequence</table>
 <target_name>BOFA_BR_Consequence_CdpOutbound</target_name>
 <type>Business Rule</type>
 <update_domain>global</update_domain>
-<update_guid>f0f52720e927c3d01aaf01bb1930bced</update_guid>
-<update_guid_history>f0f52720e927c3d01aaf01bb1930bced:1373896714,30f527202627c3d01dc811206bd70baf:1789728766,3e842fa8e4e3c3d0293a0b8ec82f67cc:1373896714,fe842fa852e3c3d06f03ba755403961e:1789728766,d6546f68c0e3c3d04ac5f3605d3b6f40:1373896714,9a546f68e1e3c3d04e11a484c6bc802c:1789728766,c6e8f4d4a76f8f902f88062a6bb82f93:-2133596661,b99130143b2f8f90757d68f99c31f7c2:966021271</update_guid_history>
+<update_guid>ad1c017c2f6707d05ce8ab6109ffc7a6</update_guid>
+<update_guid_history>ad1c017c2f6707d05ce8ab6109ffc7a6:1373896714,a11c017cae6707d0c1ebdd0f2c616769:1789728766,f0f52720e927c3d01aaf01bb1930bced:1373896714,30f527202627c3d01dc811206bd70baf:1789728766,3e842fa8e4e3c3d0293a0b8ec82f67cc:1373896714,fe842fa852e3c3d06f03ba755403961e:1789728766,d6546f68c0e3c3d04ac5f3605d3b6f40:1373896714,9a546f68e1e3c3d04e11a484c6bc802c:1789728766,c6e8f4d4a76f8f902f88062a6bb82f93:-2133596661,b99130143b2f8f90757d68f99c31f7c2:966021271</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -291,75 +265,23 @@ BOFASIKafkaProducerConsequence.prototype = {
 <category>customer</category>
 <comments/>
 <name>sys_script_include_c3813cd0932f8f90e3aef0aefaba10ab</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include"><sys_script_include action="DELETE"><access>public</access><active>false</active><api_name>x_boar_bofa_usem_0.BOFASIConsequenceOutboundProcessor</api_name><caller_access/><client_callable>false</client_callable><description/><mobile_callable>false</mobile_callable><name>BOFASIConsequenceOutboundProcessor</name><sandbox_callable>false</sandbox_callable><script/><sys_class_name>sys_script_include</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 18:53:03</sys_created_on><sys_id>c3813cd0932f8f90e3aef0aefaba10ab</sys_id><sys_mod_count>0</sys_mod_count><sys_name>BOFASIConsequenceOutboundProcessor</sys_name><sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0">488be1cd2b1247102b30f8e14391bf0c</sys_package><sys_policy/><sys_scope display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</sys_scope><sys_update_name>sys_script_include_c3813cd0932f8f90e3aef0aefaba10ab</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 18:53:03</sys_updated_on></sys_script_include></record_update>]]></payload>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include"><sys_script_include action="DELETE"><access>public</access><active>false</active><api_name>x_boar_bofa_usem_0.BOFASIConsequenceOutboundProcessor</api_name><caller_access/><client_callable>false</client_callable><description/><mobile_callable>false</mobile_callable><name>BOFASIConsequenceOutboundProcessor</name><sandbox_callable>false</sandbox_callable><script/><sys_class_name>sys_script_include</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:19:22</sys_created_on><sys_id>c3813cd0932f8f90e3aef0aefaba10ab</sys_id><sys_mod_count>0</sys_mod_count><sys_name>BOFASIConsequenceOutboundProcessor</sys_name><sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0">488be1cd2b1247102b30f8e14391bf0c</sys_package><sys_policy/><sys_scope display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</sys_scope><sys_update_name>sys_script_include_c3813cd0932f8f90e3aef0aefaba10ab</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:19:22</sys_updated_on></sys_script_include></record_update>]]></payload>
 <payload_hash>-59516410</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">c4e6a7249327c3d0e3aef0aefaba10f5</remote_update_set>
+<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">2cdc493093a707d0e3aef0aefaba10bd</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 18:57:43</sys_created_on>
-<sys_id>84e6a7249327c3d0e3aef0aefaba10f9</sys_id>
+<sys_created_on>2026-09-23 02:23:08</sys_created_on>
+<sys_id>6cdc493093a707d0e3aef0aefaba10c1</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca76e4650000001</sys_recorded_at>
+<sys_recorded_at>1a0cc0f85860000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 18:57:43</sys_updated_on>
+<sys_updated_on>2026-09-23 02:23:08</sys_updated_on>
 <table/>
 <target_name>BOFASIConsequenceOutboundProcessor</target_name>
 <type>Script Include</type>
 <update_domain>global</update_domain>
-<update_guid>ffc56bec3be3c3d01e4215225b5d7b4a</update_guid>
-<update_guid_history>ffc56bec3be3c3d01e4215225b5d7b4a:-59516410,33c56bec52e3c3d028c1ac5a3334dc15:-1370259462,0a74a3a8ffe3c3d0af2a5ed92c3f60ec:-59516410,0674a3a8b4e3c3d02a2336ec74618474:-1370259462,4e542f6891e3c3d09461eb66912138cb:-59516410,75542f68f9e3c3d07ef378254ff8b280:-1370259462,96e838d42a6f8f9084526e058c4ab833:-1392748786,c0e5b4dc4e2f8f901d919a58a924cad3:-781689342,d795b89c8a2f8f9089978d54b5b8feaf:-1340559170,d7817cd0262f8f909a0eb0d7f2c82b05:-1249488279</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_17817cd0932f8f90e3aef0aefaba100b</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id</name><read_roles/><suffix>usem.consequence.kafka.topic_sys_id</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 18:53:06</sys_created_on><sys_id>17817cd0932f8f90e3aef0aefaba100b</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id</sys_name><sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0">488be1cd2b1247102b30f8e14391bf0c</sys_package><sys_policy/><sys_scope display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</sys_scope><sys_update_name>sys_properties_17817cd0932f8f90e3aef0aefaba100b</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 18:53:06</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=17817cd0932f8f90e3aef0aefaba100b"/></record_update>]]></payload>
-<payload_hash>1521516800</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">c4e6a7249327c3d0e3aef0aefaba10f5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 18:57:43</sys_created_on>
-<sys_id>8ce6a7249327c3d0e3aef0aefaba10f5</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca77132b0000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 18:57:43</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>76d56fec3de3c3d0ac20feb680c7beb3</update_guid>
-<update_guid_history>76d56fec3de3c3d0ac20feb680c7beb3:1521516800,b8d5ebec60e3c3d041df29e0f3ffb993:504282612,f484a7a88be3c3d0fcaa676df21552df:1521516800,a48467a8f5e3c3d070647b7cb867e9e3:504282612,ecf8b8d4146f8f90e3c92e2e662023db:-1830740072,d191bcd0752f8f900b68b081bed602dd:-152861660</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_1ce9f498936f8f90e3aef0aefaba10f6</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_consequence_outbound, read by BOFASIKafkaProducerConsequence.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id</name><read_roles/><suffix>usem.consequence.kafka.topic_sys_id</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-21 11:43:25</sys_created_on><sys_id>1ce9f498936f8f90e3aef0aefaba10f6</sys_id><sys_mod_count>27</sys_mod_count><sys_name>x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id</sys_name><sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0">488be1cd2b1247102b30f8e14391bf0c</sys_package><sys_policy/><sys_scope display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</sys_scope><sys_update_name>sys_properties_1ce9f498936f8f90e3aef0aefaba10f6</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 18:57:31</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=1ce9f498936f8f90e3aef0aefaba10f6"/></record_update>]]></payload>
-<payload_hash>1655874535</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">c4e6a7249327c3d0e3aef0aefaba10f5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 18:57:43</sys_created_on>
-<sys_id>8ce6a7249327c3d0e3aef0aefaba10f6</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca7b16410000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 18:57:43</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>83d66724f827c3d06bc78ef42c1da870</update_guid>
-<update_guid_history>83d66724f827c3d06bc78ef42c1da870:1655874535,0bd667245127c3d08ebc45a47add406b:1655874535,8b96abe00f27c3d08ca13a536df64a5c:-1405999745,ee962be00027c3d03e57e0bfaa6a04ab:-945610859,da962be08927c3d0093c51efa701695d:-722143509,f196e7e0af27c3d08d901f903e3daf1a:1655874535,1f56e3a09b27c3d06cefe26c6232cc69:-1405999745,6d5663a04a27c3d04c2b63549dd6b56a:-945610859,61466f601c27c3d0d2d123fe05cd9310:-722143509,2e366b601e27c3d024168c6e12f7ba15:1655874535,dbd5afec77e3c3d0ce2d5c148e53e213:-1405999745,dcd5abec5ee3c3d04f8e8fb6bed12a82:135928159,16756bacaee3c3d0f1445a1bf3cd57fd:-1405999745,06752bac1ee3c3d0d5486244dfeb6ac2:-945610859,a175e7ac95e3c3d08d30fc14f19852d7:-722143509,8475a7ac9ce3c3d02eb8a61dc2019734:1655874535,8835a36c9be3c3d00bf0fb4ced05abf7:-1405999745,2b25236cd1e3c3d0400548a9abd8569a:-945610859,7d25ef2ca6e3c3d08514fd7c93be7bbc:-722143509,5525ef2cd7e3c3d055d1c46cfda62121:1655874535,99842ba891e3c3d0769a80b9c5e64865:-1405999745,008467a8dfe3c3d0e4af75851c50a62f:135928159,400bf89cd86f8f90dddd4ca75b64a9f3:-1405999745,73ea389cfa6f8f9085864e93f21fee17:-722143509,06ea349c326f8f90136dcd9b2f854491:1655874535,da6ab81ccb6f8f90e611f0cec9b440c0:-1405999745,1f5af41c026f8f907458351d87c7fea8:-722143509,355ab41c5d6f8f900933db9e516c4ee8:1655874535,b0e938987e6f8f900457ed22f8939544:-1405999745</update_guid_history>
+<update_guid>79fb853c726707d0f17d60a9d2a249dc</update_guid>
+<update_guid_history>79fb853c726707d0f17d60a9d2a249dc:-59516410,21fb853c6f6707d016bbf7ba7424f382:-1370259462,ffc56bec3be3c3d01e4215225b5d7b4a:-59516410,33c56bec52e3c3d028c1ac5a3334dc15:-1370259462,0a74a3a8ffe3c3d0af2a5ed92c3f60ec:-59516410,0674a3a8b4e3c3d02a2336ec74618474:-1370259462,4e542f6891e3c3d09461eb66912138cb:-59516410,75542f68f9e3c3d07ef378254ff8b280:-1370259462,96e838d42a6f8f9084526e058c4ab833:-1392748786,c0e5b4dc4e2f8f901d919a58a924cad3:-781689342,d795b89c8a2f8f9089978d54b5b8feaf:-1340559170,d7817cd0262f8f909a0eb0d7f2c82b05:-1249488279</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -369,7 +291,7 @@ BOFASIKafkaProducerConsequence.prototype = {
 <category>customer</category>
 <comments/>
 <name>sys_properties_70e97898936f8f90e3aef0aefaba101b</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>Consequence payload fields, one servicenow_field=payload_field pair per line in payload order: the ServiceNow field on the left (verified with the field check script), the payload name of the tab "Outbound to CDP (consequence)" on the right; the fields of the consequence first, then the fields of its rule as x_boar_bofa_usem_0_consequence_rule.&lt;field&gt;. A field missing on the table or empty is sent as "".</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_0.usem.consequence.fields.x_boar_bofa_usem_0_consequence</name><read_roles/><suffix>usem.consequence.fields.x_boar_bofa_usem_0_consequence</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-21 11:43:27</sys_created_on><sys_id>70e97898936f8f90e3aef0aefaba101b</sys_id><sys_mod_count>34</sys_mod_count><sys_name>x_boar_bofa_usem_0.usem.consequence.fields.x_boar_bofa_usem_0_consequence</sys_name><sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0">488be1cd2b1247102b30f8e14391bf0c</sys_package><sys_policy/><sys_scope display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</sys_scope><sys_update_name>sys_properties_70e97898936f8f90e3aef0aefaba101b</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 18:53:39</sys_updated_on><type>string</type><value>state=state,
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>Consequence payload fields, one servicenow_field=payload_field pair per line in payload order: the ServiceNow field on the left (verified with the field check script), the payload name of the tab "Outbound to CDP (consequence)" on the right; the fields of the consequence first, then the fields of its rule as x_boar_bofa_usem_0_consequence_rule.&lt;field&gt;. A field missing on the table or empty is sent as "".</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_0.usem.consequence.fields.x_boar_bofa_usem_0_consequence</name><read_roles/><suffix>usem.consequence.fields.x_boar_bofa_usem_0_consequence</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-21 11:43:27</sys_created_on><sys_id>70e97898936f8f90e3aef0aefaba101b</sys_id><sys_mod_count>80</sys_mod_count><sys_name>x_boar_bofa_usem_0.usem.consequence.fields.x_boar_bofa_usem_0_consequence</sys_name><sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0">488be1cd2b1247102b30f8e14391bf0c</sys_package><sys_policy/><sys_scope display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</sys_scope><sys_update_name>sys_properties_70e97898936f8f90e3aef0aefaba101b</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:19:47</sys_updated_on><type>string</type><value>state=state,
 u_accountable_party=accountable_party,
 sys_updated_on=updated_on,
 u_comments=comments,
@@ -402,21 +324,21 @@ x_boar_bofa_usem_0_consequence_rule.sys_updated_by=updated_by,
 x_boar_bofa_usem_0_consequence_rule.valid_from=valid_from,
 x_boar_bofa_usem_0_consequence_rule.valid_to=valid_to,</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=70e97898936f8f90e3aef0aefaba101b"/></record_update>]]></payload>
 <payload_hash>-810879767</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">c4e6a7249327c3d0e3aef0aefaba10f5</remote_update_set>
+<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">2cdc493093a707d0e3aef0aefaba10bd</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 18:57:43</sys_created_on>
-<sys_id>c0e6a7249327c3d0e3aef0aefaba10f7</sys_id>
+<sys_created_on>2026-09-23 02:23:08</sys_created_on>
+<sys_id>a8dc493093a707d0e3aef0aefaba10bf</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca777ba90000001</sys_recorded_at>
+<sys_recorded_at>1a0cc100fdb0000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 18:57:43</sys_updated_on>
+<sys_updated_on>2026-09-23 02:23:08</sys_updated_on>
 <table/>
 <target_name>x_boar_bofa_usem_0.usem.consequence.fields.x_boar_bofa_usem_0_consequence</target_name>
 <type>System Property</type>
 <update_domain>global</update_domain>
-<update_guid>1df567200327c3d0f70c6a2a4bd98ea5</update_guid>
-<update_guid_history>1df567200327c3d0f70c6a2a4bd98ea5:-810879767,34f527206827c3d0a8d0977f38192a87:-810879767,30e523203927c3d02dbb94afb253ae01:1770883465,926527ac36e3c3d03e05ba17db700a20:-810879767,646563ac84e3c3d08d16fc3994de5afe:407060922,725523ac38e3c3d05ab619cb75b1c166:873830495,ee55ef6cb4e3c3d066ec5bd623feea51:-416685955,ca55af6c9ee3c3d0380d8b7534a4b79f:-1266076060,14552f6c63e3c3d07835ce6755e216a3:-1474683620,fe45ab6c39e3c3d0f50b899acd332af0:-1867815311,1e456b6cc0e3c3d0a10df770294e68f7:2070212660,86452b6c0ce3c3d0fb6081383fb872b0:-778867492,2145e76c1ae3c3d0fd914de7ce5a22e8:-6858886,c045a76c48e3c3d00c1f47ac759e363a:36833671,cd256f2cc9e3c3d07afe7d22a2e2dff6:-810879767,e825eb2cb8e3c3d0667685e9cff027f0:407060922,4f15eb2c52e3c3d089e8513662268805:873830495,26156b2cffe3c3d0e41cc64abcf907f5:-416685955,86152b2cdae3c3d0e3a6e0716ff17456:-1266076060,7515e72c4ee3c3d01044f224c85c1bcc:-1474683620,d115a72c43e3c3d0b7b1ed5fb10abbf3:-1867815311,6305672cc6e3c3d0e93809d284f9efbf:2070212660,5305272c0be3c3d0a0295bd542ca7f38:-778867492,7605e32cece3c3d0a53ff36b1cc3addc:-6858886,1a05a32c85e3c3d096fb3b76cbd52694:36833671,7684eba892e3c3d051deefa196d7a5ed:-810879767,ed846ba82de3c3d0f7ea3c7292bfb530:1770883465,53daf09c406f8f9060bd1636bc69de5b:-810879767,a5da309c0d6f8f9020d4cd6c2c19392f:1429384531,00dafc5c506f8f902ea320a8bb8e84c3:-810879767,ceca7c5c076f8f904ae35b906465178e:407060922,b64af01c296f8f9015549fddb23c9871:-810879767,414a301c446f8f900f45cf3d481044ab:1429384531,204afcd8996f8f90a7499dfb2ce6aa8f:-810879767,7a3a3cd8de6f8f9072a086d189d7dfb3:407060922,32e9b898a56f8f909bde32d1156ee7aa:-810879767</update_guid_history>
+<update_guid>2a1c817c6c6707d084c2d99172b8c225</update_guid>
+<update_guid_history>2a1c817c6c6707d084c2d99172b8c225:-810879767,a11ccd3cf66707d088c677d9c99ca649:-810879767,ad0c0d3c0b6707d083f4298ddd98a78c:1770883465,7bd7ab28d527c3d0872bc6ace920c35f:-810879767,ced7e7281a27c3d0a2359a64067018dc:407060922,6dd7e7286d27c3d0fa52b5558de95e7f:873830495,51d7a728dc27c3d06e369947697cdf85:-416685955,b0d7e3289627c3d06f08708c9ee1f4b0:-1266076060,07c7e3286627c3d0634112e244860305:-1474683620,9dc76328d627c3d0ebbc7105c3cc9448:-1867815311,e3b7afe42527c3d0cad584b409d1f795:2070212660,b9b76fe42827c3d076c337fd4c5bd0dd:-778867492,5db72fe4b927c3d0de2677bcbd71173d:-6858886,2ba7abe43827c3d0c8980e59e1f5552a:36833671,459723e4c427c3d029b8c70c951a27e7:-810879767,209723e46827c3d0af59800b0b955b12:407060922,4097afa4a027c3d0252586e89670bc8b:873830495,12876fa45927c3d02a67a39f229fc8df:-416685955,0a876fa4a927c3d07a737e6d097a625b:-1266076060,3587eba45227c3d046c96954b0ee9dfa:-1474683620,9187eba4a027c3d0871ee43caef33f91:-1867815311,c987aba49527c3d0f9cf310d78ad2fad:2070212660,24872ba41727c3d078254a80514a08dc:-778867492,f7772ba4aa27c3d087767174c6c02141:-6858886,2377a7a4fb27c3d093bf122c72809b89:36833671,6996a7e01c27c3d04dcd87cccb55765a:-810879767,1d9667e04c27c3d0c2741467ee5dea30:407060922,7c9627e0bb27c3d0be694823c15e9824:873830495,a376efa06f27c3d01e685d09dce1ba20:-416685955,a5762fa0ad27c3d00c59c9757e6d2fda:-1266076060,8476eba0a827c3d0224ad019925b132a:-1474683620,a766aba05227c3d0d89faadb6d9ebfdb:-1867815311,5b666ba00827c3d0483dacb9571275f5:2070212660,fa662ba02427c3d0c7de4f550ca86f6f:-778867492,2e662ba0a327c3d03cf16c125d9c9e2b:-6858886,d666e7a0e127c3d04854f71dda8ab101:36833671,74362b60db27c3d05a83bf697e93af6b:-810879767,4726e7602c27c3d02350b5e2f7c5dd04:407060922,212667605f27c3d0cd2c3c035c667192:873830495,8d26e3608d27c3d0121eaf6e4fb782d5:-416685955,b426e3606f27c3d088ce0e6c17a7d13b:-1266076060,582663604427c3d0a19bd810ee524da7:-1474683620,77162360bd27c3d0197bff9c5960e040:-1867815311,1a16ef205727c3d03f5ead1b74586ac6:2070212660,3d16af205827c3d07f09ff299925aec8:-778867492,3e066b206527c3d06ace0c957c02aeaf:-6858886,d1062b203f27c3d0d05053b7337bf6d5:36833671,34f527206827c3d0a8d0977f38192a87:-810879767,30e523203927c3d02dbb94afb253ae01:1770883465,926527ac36e3c3d03e05ba17db700a20:-810879767,646563ac84e3c3d08d16fc3994de5afe:407060922,725523ac38e3c3d05ab619cb75b1c166:873830495,ee55ef6cb4e3c3d066ec5bd623feea51:-416685955,ca55af6c9ee3c3d0380d8b7534a4b79f:-1266076060,14552f6c63e3c3d07835ce6755e216a3:-1474683620,fe45ab6c39e3c3d0f50b899acd332af0:-1867815311,1e456b6cc0e3c3d0a10df770294e68f7:2070212660,86452b6c0ce3c3d0fb6081383fb872b0:-778867492,2145e76c1ae3c3d0fd914de7ce5a22e8:-6858886,c045a76c48e3c3d00c1f47ac759e363a:36833671,cd256f2cc9e3c3d07afe7d22a2e2dff6:-810879767,e825eb2cb8e3c3d0667685e9cff027f0:407060922,4f15eb2c52e3c3d089e8513662268805:873830495,26156b2cffe3c3d0e41cc64abcf907f5:-416685955,86152b2cdae3c3d0e3a6e0716ff17456:-1266076060,7515e72c4ee3c3d01044f224c85c1bcc:-1474683620,d115a72c43e3c3d0b7b1ed5fb10abbf3:-1867815311,6305672cc6e3c3d0e93809d284f9efbf:2070212660,5305272c0be3c3d0a0295bd542ca7f38:-778867492,7605e32cece3c3d0a53ff36b1cc3addc:-6858886,1a05a32c85e3c3d096fb3b76cbd52694:36833671,7684eba892e3c3d051deefa196d7a5ed:-810879767,ed846ba82de3c3d0f7ea3c7292bfb530:1770883465,53daf09c406f8f9060bd1636bc69de5b:-810879767,a5da309c0d6f8f9020d4cd6c2c19392f:1429384531,00dafc5c506f8f902ea320a8bb8e84c3:-810879767,ceca7c5c076f8f904ae35b906465178e:407060922,b64af01c296f8f9015549fddb23c9871:-810879767,414a301c446f8f900f45cf3d481044ab:1429384531,204afcd8996f8f90a7499dfb2ce6aa8f:-810879767,7a3a3cd8de6f8f9072a086d189d7dfb3:407060922,32e9b898a56f8f909bde32d1156ee7aa:-810879767</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -631,7 +553,7 @@ BOFASIConsequenceOutboundProcessor.prototype = {
                 throw new Error('property ' + property + ' holds a line without a payload name: "' + entry + '"');
             var at = left.indexOf('.');
             var source = at &lt; 0 ? table : left.substring(0, at);
-            if (!this.SECTIONS[source] || (source != table &amp;&amp; !this.SECTIONS[source].reference))
+            if (!this.SECTIONS.hasOwnProperty(source) || (source != table &amp;&amp; !this.SECTIONS[source].reference))
                 throw new Error('property ' + property + ' names table ' + source + ', which is not a section of the payload: "' + entry + '"');
             var section = this.SECTIONS[source].json;
             if (names[section + '.' + json])
@@ -842,23 +764,101 @@ BOFASIConsequenceOutboundProcessor.prototype = {
 
     type: 'BOFASIConsequenceOutboundProcessor'
 };
-]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-21 11:43:24&lt;/sys_created_on&gt;&lt;sys_id&gt;18e97850936f8f90e3aef0aefaba109e&lt;/sys_id&gt;&lt;sys_mod_count&gt;2&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFASIConsequenceOutboundProcessor&lt;/sys_name&gt;&lt;sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0"&gt;488be1cd2b1247102b30f8e14391bf0c&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM Consequence"&gt;488be1cd2b1247102b30f8e14391bf0c&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_18e97850936f8f90e3aef0aefaba109e&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-22 18:53:02&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
-<payload_hash>-1078491159</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">c4e6a7249327c3d0e3aef0aefaba10f5</remote_update_set>
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-21 11:43:24&lt;/sys_created_on&gt;&lt;sys_id&gt;18e97850936f8f90e3aef0aefaba109e&lt;/sys_id&gt;&lt;sys_mod_count&gt;3&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFASIConsequenceOutboundProcessor&lt;/sys_name&gt;&lt;sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0"&gt;488be1cd2b1247102b30f8e14391bf0c&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM Consequence"&gt;488be1cd2b1247102b30f8e14391bf0c&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_18e97850936f8f90e3aef0aefaba109e&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-23 02:19:21&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<payload_hash>1624324199</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">2cdc493093a707d0e3aef0aefaba10bd</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 18:57:43</sys_created_on>
-<sys_id>c4e6a7249327c3d0e3aef0aefaba10f8</sys_id>
+<sys_created_on>2026-09-23 02:23:08</sys_created_on>
+<sys_id>acdc493093a707d0e3aef0aefaba10c0</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca777a990000001</sys_recorded_at>
+<sys_recorded_at>1a0cc100f5c0000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 18:57:43</sys_updated_on>
+<sys_updated_on>2026-09-23 02:23:08</sys_updated_on>
 <table/>
 <target_name>BOFASIConsequenceOutboundProcessor</target_name>
 <type>Script Include</type>
 <update_domain>global</update_domain>
-<update_guid>5df567202427c3d06a733b743d16bc9d</update_guid>
-<update_guid_history>5df567202427c3d06a733b743d16bc9d:-1078491159,9fc52bec77e3c3d0bfe38a368db8379f:-1078491159,9d542f684fe3c3d013dab0b181aa5e14:1951331955,1ce9f498b16f8f90ca52cf8e4af6fef0:-1386973010</update_guid_history>
+<update_guid>ea1c817cf96707d0ee7007ed756d061d</update_guid>
+<update_guid_history>ea1c817cf96707d0ee7007ed756d061d:1624324199,ddfb453c016707d002dd3b4379c72ff2:1624324199,9fc52bec77e3c3d0bfe38a368db8379f:-1078491159,9d542f684fe3c3d013dab0b181aa5e14:1951331955,1ce9f498b16f8f90ca52cf8e4af6fef0:-1386973010</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_17817cd0932f8f90e3aef0aefaba100b</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id</name><read_roles/><suffix>usem.consequence.kafka.topic_sys_id</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:19:26</sys_created_on><sys_id>17817cd0932f8f90e3aef0aefaba100b</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id</sys_name><sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0">488be1cd2b1247102b30f8e14391bf0c</sys_package><sys_policy/><sys_scope display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</sys_scope><sys_update_name>sys_properties_17817cd0932f8f90e3aef0aefaba100b</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:19:26</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=17817cd0932f8f90e3aef0aefaba100b"/></record_update>]]></payload>
+<payload_hash>1521516800</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">2cdc493093a707d0e3aef0aefaba10bd</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:23:08</sys_created_on>
+<sys_id>e0dc493093a707d0e3aef0aefaba10be</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc0f9da40000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:23:08</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>13fb493c526707d06236ecd7b1b50a44</update_guid>
+<update_guid_history>13fb493c526707d06236ecd7b1b50a44:1521516800,32fb093cca6707d0bd47dc2fb470f73f:504282612,76d56fec3de3c3d0ac20feb680c7beb3:1521516800,b8d5ebec60e3c3d041df29e0f3ffb993:504282612,f484a7a88be3c3d0fcaa676df21552df:1521516800,a48467a8f5e3c3d070647b7cb867e9e3:504282612,ecf8b8d4146f8f90e3c92e2e662023db:-1830740072,d191bcd0752f8f900b68b081bed602dd:-152861660</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_97817cd0932f8f90e3aef0aefaba1007</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include"><sys_script_include action="DELETE"><access>public</access><active>false</active><api_name>x_boar_bofa_usem_0.BOFASIKafkaProducerConsequence</api_name><caller_access/><client_callable>false</client_callable><description/><mobile_callable>false</mobile_callable><name>BOFASIKafkaProducerConsequence</name><sandbox_callable>false</sandbox_callable><script/><sys_class_name>sys_script_include</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:19:24</sys_created_on><sys_id>97817cd0932f8f90e3aef0aefaba1007</sys_id><sys_mod_count>0</sys_mod_count><sys_name>BOFASIKafkaProducerConsequence</sys_name><sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0">488be1cd2b1247102b30f8e14391bf0c</sys_package><sys_policy/><sys_scope display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</sys_scope><sys_update_name>sys_script_include_97817cd0932f8f90e3aef0aefaba1007</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:19:24</sys_updated_on></sys_script_include></record_update>]]></payload>
+<payload_hash>425900370</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">2cdc493093a707d0e3aef0aefaba10bd</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:23:08</sys_created_on>
+<sys_id>e0dc493093a707d0e3aef0aefaba10c1</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc0f87450000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:23:08</sys_updated_on>
+<table/>
+<target_name>BOFASIKafkaProducerConsequence</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_guid>86fb853ca16707d06d9e898b04b921fc</update_guid>
+<update_guid_history>86fb853ca16707d06d9e898b04b921fc:425900370,4efb853c736707d034c25c3a5c89fce0:-2001425082,3fc56becd2e3c3d05f4875e9f547be6a:425900370,ffc56becdae3c3d0ba880944f6c89d4e:-2001425082,1274e3a828e3c3d09bb3900819fb7670:425900370,0e74a3a821e3c3d00f4e8e597ea7e3f0:-2001425082,5a546f687de3c3d0b59c90e641e84d1d:425900370,52542f686ee3c3d06226adf3987851d0:-2001425082,dae8f4d4666f8f90d64827a749679fd0:226817563,d7817cd0bf2f8f90b1d5a6c2329e6a09:820434447</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_9d91bcd0932f8f90e3aef0aefaba10e0</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_0.usem.consequence.fields.x_boar_bofa_usem_0_consequence</name><read_roles/><suffix>usem.consequence.fields.x_boar_bofa_usem_0_consequence</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:19:39</sys_created_on><sys_id>9d91bcd0932f8f90e3aef0aefaba10e0</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_0.usem.consequence.fields.x_boar_bofa_usem_0_consequence</sys_name><sys_package display_value="BOFA USEM Consequence" source="x_boar_bofa_usem_0">488be1cd2b1247102b30f8e14391bf0c</sys_package><sys_policy/><sys_scope display_value="BOFA USEM Consequence">488be1cd2b1247102b30f8e14391bf0c</sys_scope><sys_update_name>sys_properties_9d91bcd0932f8f90e3aef0aefaba10e0</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:19:39</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=9d91bcd0932f8f90e3aef0aefaba10e0"/></record_update>]]></payload>
+<payload_hash>-1793027408</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3">2cdc493093a707d0e3aef0aefaba10bd</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:23:08</sys_created_on>
+<sys_id>ecdc493093a707d0e3aef0aefaba10bf</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc0fe1040000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:23:08</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_0.usem.consequence.fields.x_boar_bofa_usem_0_consequence</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>6b0c8d3c1d6707d0e4bef76e7cedacf5</update_guid>
+<update_guid_history>6b0c8d3c1d6707d0e4bef76e7cedacf5:-1793027408,4b0c0d3c236707d093846e444bc872f3:-1830297540,94f5a3205b27c3d009bbc6c0ab7c4426:-1793027408,eae52320a827c3d0bff6b97bd631ffd7:-1830297540,ea84aba8afe3c3d044430ed8181e818f:-1793027408,7984aba88ce3c3d03c27378f72079134:-1830297540,16f83cd48e6f8f9067d02dada2375347:1657397369,3991fcd0532f8f9047355d060b1f6370:-522370299</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>

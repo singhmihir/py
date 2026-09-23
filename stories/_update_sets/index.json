@@ -481,12 +481,21 @@
   ]
  },
  {
+  "name": "SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6",
+  "app": "global",
+  "rows": 12,
+  "exported": 12,
+  "file": "SNOWUSEMTP-1625_MS_Remediation_Task_CDP_Payload_V2.6.xml",
+  "created": "2026-09-23 02:19:02",
+  "scrub": []
+ },
+ {
   "name": "SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3",
   "app": "x_boar_bofa_usem_0 (mirror of the client application, same scope name and sys_id)",
   "rows": 10,
   "exported": 10,
   "file": "SNOWUSEMTP-1624_MS_Consequence_CDP_Outbound_Payload_V1.3.xml",
-  "created": "2026-09-22 18:57:43",
+  "created": "2026-09-23 02:23:08",
   "scrub": [
    "client scope and application sys_id: importable on the client instance as is; the client receives the record XML too",
    "topic property empty, for the client to fill"
@@ -498,19 +507,10 @@
   "rows": 24,
   "exported": 24,
   "file": "SNOWUSEMTP-1804_MS_VAMP_AVIT_Outbound_Payload_V2.1.xml",
-  "created": "2026-09-22 19:19:34",
+  "created": "2026-09-23 02:33:02",
   "scrub": [
    "client scope and application sys_id: importable on the client instance as is; the client receives the record XML too",
    "topic property empty, for the client to fill"
   ]
- },
- {
-  "name": "SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6",
-  "app": "global",
-  "rows": 12,
-  "exported": 12,
-  "file": "SNOWUSEMTP-1625_MS_Remediation_Task_CDP_Payload_V2.6.xml",
-  "created": "2026-09-22 19:26:02",
-  "scrub": []
  }
 ]

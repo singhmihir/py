@@ -79,6 +79,7 @@ try {
     col(%(cons)s, 'cmdb_ci', 'document_id', 'Configuration item', {dependent: 'u_class'});   // as on the client: a document id whose table is the Class field
     col(%(cons)s, 'u_bofa_ait', 'reference', 'AIT', {reference: %(ait)s});
     col(%(cons)s, 'u_rejection_reason', 'string', 'Rejection Reason', {max_length: 1000});
+    col(%(cons)s, 'u_work_notes', 'journal_input', 'Work notes');   // a journal, to prove the latest entry is sent
 } catch (e) { o.errors.push('schema: ' + e); }
 gs.print('X::' + JSON.stringify(o));''' % dict(fx=json.dumps(FX), set=json.dumps(GLOBAL_DEFAULT_SET), rule=json.dumps(RULE), cons=json.dumps(CONSEQUENCE), ait=json.dumps(AIT), app=json.dumps(APP)))
 print('schema:', json.dumps(d))
@@ -110,31 +111,42 @@ function upsert(tableName, key, values, stamps) {
     var b = new GlideRecord(tableName); b.get(id); return b;
 }
 // the rules carry their own authors and times, so that a value read from the wrong section shows
-var r = upsert(%(rule)s, 'rule', {number: 'CQR-FIXTURE-001', name: 'Consequence outbound fixture rule', applies_to: 'New and Existing', comments: 'Consequence outbound fixture rule', conditions: 'u_state=1^EQ', global_exception: true, state: 'Approved', table: 'x_boar_bofa_usem_0_consequence', valid_from: '2026-09-01 00:00:00', valid_to: '2026-12-31 23:59:59'},
+var r = upsert(%(rule)s, 'rule', {number: 'CQR0001001', name: 'Critical exploitable findings past target', applies_to: 'New and Existing', comments: 'Critical findings with a known exploit that are past their remediation target', conditions: 'u_state=1^EQ', global_exception: true, state: 'Approved', table: 'x_boar_bofa_usem_0_consequence', valid_from: '2026-09-01 00:00:00', valid_to: '2026-12-31 23:59:59'},
     {sys_created_on: '2026-08-20 10:15:00', sys_created_by: 'rule.author', sys_updated_on: '2026-09-02 08:30:45', sys_updated_by: 'rule.editor', sys_mod_count: 3});
-var r2 = upsert(%(rule)s, 'rule_off', {number: 'CQR-FIXTURE-002', name: 'Consequence outbound fixture rule without exception', applies_to: 'New', comments: 'Second fixture rule', conditions: 'u_state=2^EQ', global_exception: false, state: 'Draft', table: 'x_boar_bofa_usem_0_consequence', valid_from: '2026-10-01 06:00:00', valid_to: ''},
+var r2 = upsert(%(rule)s, 'rule_off', {number: 'CQR0001002', name: 'High findings on internet facing applications', applies_to: 'New', comments: 'Awaiting exception review', conditions: 'u_state=2^EQ', global_exception: false, state: 'Draft', table: 'x_boar_bofa_usem_0_consequence', valid_from: '2026-10-01 06:00:00', valid_to: ''},
     {sys_created_on: '2026-08-21 11:00:00', sys_created_by: 'rule.author2', sys_updated_on: '2026-08-21 11:00:00', sys_updated_by: 'rule.author2', sys_mod_count: 0});
 o.rule = {sys_id: r.getUniqueValue(), number: '' + r.getValue('number'), display: '' + r.getDisplayValue(), global_exception: '' + r.getValue('global_exception'), created_by: '' + r.getValue('sys_created_by')};
 o.rule_off = {sys_id: r2.getUniqueValue(), global_exception: '' + r2.getValue('global_exception')};
-var l = upsert(%(cons)s, 'linked', {number: 'CONSEQ-CDP-LINKED', state: 1, u_consequence_level: '1', u_accountable_party: 'Digest Owner One', u_comments: 'Consequence outbound fixture (linked)', u_change_freeze_effective_date: '2026-09-15 12:40:01', u_enforcement_status: 1, u_rule: r.getUniqueValue(), u_class: 'cmdb_ci_business_app', cmdb_ci: ciId, u_bofa_ait: aitId, u_rejection_reason: 'Not rejected'});
+var l = upsert(%(cons)s, 'linked', {number: 'CON0001001', state: 1, u_consequence_level: '1', u_accountable_party: 'Application Manager', u_comments: 'Change freeze until the critical findings are remediated', u_change_freeze_effective_date: '2026-09-15 12:40:01', u_enforcement_status: 1, u_rule: r.getUniqueValue(), u_class: 'cmdb_ci_business_app', cmdb_ci: ciId, u_bofa_ait: aitId, u_rejection_reason: 'Not applicable'});
+// two work notes on the linked consequence, the second a minute after the first
+var wn = new GlideAggregate('sys_journal_field'); wn.addQuery('element_id', l.getUniqueValue()); wn.addQuery('element', 'u_work_notes'); wn.addAggregate('COUNT'); wn.query(); wn.next();
+if (parseInt(wn.getAggregate('COUNT')) < 2) {
+    var w1 = new GlideRecord(%(cons)s); w1.get(l.getUniqueValue()); w1.u_work_notes = 'Freeze requested by the application manager'; w1.update();
+    var w2 = new GlideRecord(%(cons)s); w2.get(l.getUniqueValue()); w2.u_work_notes = 'Remediation plan agreed for the next release'; w2.update();
+}
+var j2 = new GlideRecord('sys_journal_field'); j2.addQuery('element_id', l.getUniqueValue()); j2.addQuery('element', 'u_work_notes'); j2.addQuery('value', 'Remediation plan agreed for the next release'); j2.query();
+var j1 = new GlideRecord('sys_journal_field'); j1.addQuery('element_id', l.getUniqueValue()); j1.addQuery('element', 'u_work_notes'); j1.addQuery('value', 'Freeze requested by the application manager'); j1.query();
+if (j2.next() && j1.next()) { var earlier = new GlideDateTime(j2.getValue('sys_created_on')); earlier.addSeconds(-60); j1.autoSysFields(false); j1.setWorkflow(false); j1.setValue('sys_created_on', earlier.getValue()); j1.update(); }
 o.linked = {sys_id: l.getUniqueValue(), number: '' + l.getValue('number'), rule: '' + l.getDisplayValue('u_rule'), ci: '' + l.cmdb_ci.getRefRecord().getDisplayValue(), ci_type: '' + l.cmdb_ci.getED().getInternalType(), ci_raw: '' + l.getValue('cmdb_ci'), ci_class: '' + l.getValue('u_class'), ait: '' + l.getDisplayValue('u_bofa_ait'), state: '' + l.getDisplayValue('state'), enforcement: '' + l.getDisplayValue('u_enforcement_status'), isolation: '' + l.getValue('u_network_isolation_effective_date')};
-var b = upsert(%(cons)s, 'bare', {number: 'CONSEQ-CDP-BARE', state: 1});
+var b = upsert(%(cons)s, 'bare', {number: 'CON0001002', state: 1});
 o.bare = {sys_id: b.getUniqueValue(), number: '' + b.getValue('number'), rule: '' + b.getDisplayValue('u_rule'), ci: '' + (b.getValue('cmdb_ci') || ''), ait: '' + b.getDisplayValue('u_bofa_ait'), level: '' + (b.getValue('u_consequence_level') || '')};
 // a rule and an AIT that are gone, and a configuration item whose class field is empty
-var g1 = upsert(%(cons)s, 'dangling', {number: 'CONSEQ-CDP-DANGLING', state: 2, u_consequence_level: '2', u_enforcement_status: 3, u_rule: GONE, u_bofa_ait: GONE, u_class: '', cmdb_ci: ciId, u_network_isolation_effective_date: '2026-10-05 07:05:09'});
+var g1 = upsert(%(cons)s, 'dangling', {number: 'CON0001003', state: 2, u_consequence_level: '2', u_enforcement_status: 3, u_rule: GONE, u_bofa_ait: GONE, u_class: '', cmdb_ci: ciId, u_network_isolation_effective_date: '2026-10-05 07:05:09'});
 o.dangling = {sys_id: g1.getUniqueValue(), number: '' + g1.getValue('number'), rule_raw: '' + g1.getValue('u_rule'), cls: '' + (g1.getValue('u_class') || ''), ci_raw: '' + g1.getValue('cmdb_ci'), ref: '' + (g1.cmdb_ci.getRefRecord() ? g1.cmdb_ci.getRefRecord().isValidRecord() : null)};
 // a configuration item whose class field names another class than the record's, linked to the second rule
-var g2 = upsert(%(cons)s, 'misclassed', {number: 'CONSEQ-CDP-MISCLASSED', state: 3, u_enforcement_status: 4, u_rule: r2.getUniqueValue(), u_class: 'cmdb_ci_server', cmdb_ci: ciId, u_bofa_ait: aitId});
+var g2 = upsert(%(cons)s, 'misclassed', {number: 'CON0001004', state: 3, u_enforcement_status: 4, u_rule: r2.getUniqueValue(), u_class: 'cmdb_ci_server', cmdb_ci: ciId, u_bofa_ait: aitId});
 o.misclassed = {sys_id: g2.getUniqueValue(), number: '' + g2.getValue('number'), ref: '' + (g2.cmdb_ci.getRefRecord() ? g2.cmdb_ci.getRefRecord().isValidRecord() : null)};
 // a configuration item that is gone
-var g3 = upsert(%(cons)s, 'ghost', {number: 'CONSEQ-CDP-GHOST', state: 4, u_class: 'cmdb_ci_business_app', cmdb_ci: GHOST});
+var g3 = upsert(%(cons)s, 'ghost', {number: 'CON0001005', state: 4, u_class: 'cmdb_ci_business_app', cmdb_ci: GHOST});
 o.ghost = {sys_id: g3.getUniqueValue(), number: '' + g3.getValue('number')};
 gs.print('X::' + JSON.stringify(o));''' % dict(fx=json.dumps(FX), set=json.dumps(GLOBAL_DEFAULT_SET), rule=json.dumps(RULE), cons=json.dumps(CONSEQUENCE), ait=json.dumps(AIT)))
 print('fixtures:', json.dumps(f, indent=1))
-assert f['linked']['rule'] == 'CQR-FIXTURE-001' == f['rule']['display'] and f['linked']['ci'] == 'Trade Processing Portal' and f['linked']['ci_type'] == 'document_id' and len(f['linked']['ci_raw']) == 32 and f['linked']['ci_class'] == 'cmdb_ci_business_app' and f['linked']['ait'] == 'AIT57152' and f['linked']['state'] == 'Open' and f['linked']['enforcement'] == 'Change Frozen' and f['linked']['isolation'] == ''
+assert f['linked']['rule'] == 'CQR0001001' == f['rule']['display'] and f['linked']['ci'] == 'Trade Processing Portal' and f['linked']['ci_type'] == 'document_id' and len(f['linked']['ci_raw']) == 32 and f['linked']['ci_class'] == 'cmdb_ci_business_app' and f['linked']['ait'] == 'AIT57152' and f['linked']['state'] == 'Open' and f['linked']['enforcement'] == 'Change Frozen' and f['linked']['isolation'] == ''
 assert f['bare']['rule'] == '' and f['bare']['ci'] == '' and f['bare']['ait'] == '' and f['bare']['level'] == ''
 assert f['rule']['global_exception'] == '1' and f['rule_off']['global_exception'] == '0' and f['rule']['created_by'] == 'rule.author'
 assert f['dangling']['rule_raw'] == '0' * 32 and f['dangling']['cls'] == '' and f['dangling']['ci_raw'] == f['linked']['ci_raw'] and f['misclassed']['ref'] != 'true'
 json.dump({'rule': f['rule']['sys_id'], 'rule_off': f['rule_off']['sys_id'], 'linked': f['linked']['sys_id'], 'linked_number': f['linked']['number'], 'bare': f['bare']['sys_id'], 'bare_number': f['bare']['number'],
-           'dangling': f['dangling']['sys_id'], 'misclassed': f['misclassed']['sys_id'], 'ghost': f['ghost']['sys_id'], 'ci': f['linked']['ci_raw']}, open(fx_path, 'w'), indent=1)
+           'dangling': f['dangling']['sys_id'], 'misclassed': f['misclassed']['sys_id'], 'ghost': f['ghost']['sys_id'], 'ci': f['linked']['ci_raw'],
+           'rule_number': 'CQR0001001', 'rule_off_number': 'CQR0001002', 'linked_comment': 'Change freeze until the critical findings are remediated',
+           'latest_work_note': 'Remediation plan agreed for the next release'}, open(fx_path, 'w'), indent=1)
 print('FIXTURES OK')

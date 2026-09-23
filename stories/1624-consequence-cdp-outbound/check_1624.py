@@ -35,7 +35,7 @@ if props.get('usem.consequence.fields.' + CONSEQUENCE, {}).get('value') != expec
     problems.append('properties.json field property differs from the resolution')
 if sorted(props) != ['usem.consequence.fields.' + CONSEQUENCE, 'usem.consequence.kafka.topic_sys_id']:
     problems.append('properties.json holds other properties: ' + ', '.join(sorted(props)))
-right_sides = [line.split('=')[1].rstrip(',') for line in expected_value.split('\n')]
+right_sides = [line.split('=')[1].rstrip(',') for line in props['usem.consequence.fields.' + CONSEQUENCE]['value'].split('\n')]   # the delivered property, not the value built from the resolution
 if right_sides != [e['payload'] for e in ordered] or sorted(right_sides) != sorted(p for t, p, l, f in sheet):
     problems.append('payload names on the right of the property are not exactly the sheet JSON field names')
 root = ET.parse(os.path.join(HERE, 'Consequence CDP Outbound Payload - Records.xml')).getroot()

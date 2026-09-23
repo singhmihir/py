@@ -41,11 +41,15 @@ BOFA_SI_KafkaProducerV2.prototype = {
      * @returns {void}
      */
     sendPayload: function(payload, record) {
-        var subject = 'record';
+        var subject = 'no record';
         try {
+            if (!record || typeof record.getTableName !== 'function')
+                throw new Error('no record was given');
             var table = record.getTableName();
             var sysId = record.getUniqueValue();
-            subject = table + ' ' + sysId;
+            subject = (table + ' ' + (sysId || '')).trim();
+            if (!sysId)
+                throw new Error('the record has no sys_id');
             var topicSysId = this._topicSysId(table);
             var message = this._validate(payload);
             this._send(topicSysId, table + '.' + sysId, message);

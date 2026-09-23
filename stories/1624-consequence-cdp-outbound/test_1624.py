@@ -53,7 +53,7 @@ def js(script):
         messages.append(s)
     return json.loads(m.group(1)), messages
 LINES = '''o.lines = [];
-var l = new GlideRecord('syslog'); l.addQuery('sys_created_on', '>=', t0); l.addQuery('message', 'STARTSWITH', 'BOFASIConsequenceOutboundProcessor').addOrCondition('message', 'STARTSWITH', 'BOFASIKafkaProducerConsequence').addOrCondition('message', 'STARTSWITH', 'BOFA_BR_Consequence_CdpOutbound'); l.query();
+var l = new GlideRecord('syslog'); l.addQuery('sys_created_on', '>=', t0); l.addQuery('message', 'STARTSWITH', 'BOFASIConsequenceOutboundProcessor').addOrCondition('message', 'STARTSWITH', 'BOFASIKafkaProducerConsequence').addOrCondition('message', 'STARTSWITH', 'BOFA_BR_Consequence_CdpOutbound'); l.addQuery('sys_created_by', gs.getUserName()); l.query();
 while (l.next()) o.lines.push('' + l.getValue('message'));'''
 START = "gs.sleep(1100); var t0 = new GlideDateTime().getValue();"
 
@@ -139,15 +139,14 @@ gs.print('X::' + JSON.stringify(o));
         check(tag + ' configuration item: %r' % CI_LITERAL[kind], el['consequence']['cmdb_ci'] == CI_LITERAL[kind], el['consequence']['cmdb_ci'])
         if kind == 'linked':
             c, ru = el['consequence'], el['rule']
-            lit = {'state': 'Open', 'enforcement_status': 'Change Frozen', 'rule': 'CQR-FIXTURE-001', 'bofa_ait': 'AIT57152', 'consequence_level': '1', 'accountable_party': 'Digest Owner One',
-                   'change_freeze_effective_date': '09-15-2026 12:40:01', 'network_isolation_effective_date': '', 'rejection_reason': 'Not rejected', 'sys_id': FX['linked']}
-            rlit = {'number': 'CQR-FIXTURE-001', 'global_exception': 'true', 'state': 'Approved', 'screated_by': 'rule.author', 'updated_by': 'rule.editor', 'created_on': '08-20-2026 10:15:00',
+            lit = {'state': 'Open', 'enforcement_status': 'Change Frozen', 'rule': FX['rule_number'], 'bofa_ait': 'AIT57152', 'consequence_level': '1', 'accountable_party': 'Application Manager', 'comments': FX['linked_comment'],
+                   'change_freeze_effective_date': '09-15-2026 12:40:01', 'network_isolation_effective_date': '', 'rejection_reason': 'Not applicable', 'sys_id': FX['linked']}
+            rlit = {'number': FX['rule_number'], 'global_exception': 'true', 'state': 'Approved', 'screated_by': 'rule.author', 'updated_by': 'rule.editor', 'created_on': '08-20-2026 10:15:00',
                     'updated_on': '09-02-2026 08:30:45', 'valid_from': '09-01-2026 00:00:00', 'valid_to': '12-31-2026 23:59:59', 'conditions': 'u_state=1^EQ', 'table': CONSEQUENCE, 'sys_id': FX['rule']}
             wrong = {k: c.get(k) for k, v in lit.items() if c.get(k) != v}; wrong.update({'rule.' + k: ru.get(k) for k, v in rlit.items() if ru.get(k) != v})
             check(tag + ' literals: choices as labels, references and the CI as display values, the rule section from the rule record (its own authors and times), checkbox "true"', not wrong, wrong)
             if run == 1:
-                sample = json.loads(row['nested'].replace(os.environ['SN_USER'], 'admin'))
-                json.dump(sample, open(os.path.join(HERE, 'samples', 'Sample payload - consequence.json'), 'w'), indent=2)
+                SAMPLE = json.loads(row['nested'].replace(os.environ['SN_USER'], 'admin'))
         if kind == 'bare':
             check(tag + ' rule section all "", the consequence carries its own values', all(v == '' for v in el['rule'].values()) and el['consequence']['number'] == FX['bare_number'] and el['consequence']['state'] == 'Open' and el['consequence']['rule'] == '', el)
         if kind == 'dangling':
@@ -156,7 +155,7 @@ gs.print('X::' + JSON.stringify(o));
                   c['rule'] == '' and c['bofa_ait'] == '' and all(v == '' for v in el['rule'].values()) and c['state'] == 'Deferred' and c['enforcement_status'] == 'Pending Network Isolation Decision'
                   and c['network_isolation_effective_date'] == '10-05-2026 07:05:09', c)
         if kind == 'misclassed':
-            check(tag + ' the second rule: checkbox "false", empty valid_to "", state label Closed', el['rule']['global_exception'] == 'false' and el['rule']['valid_to'] == '' and el['rule']['number'] == 'CQR-FIXTURE-002'
+            check(tag + ' the second rule: checkbox "false", empty valid_to "", state label Closed', el['rule']['global_exception'] == 'false' and el['rule']['valid_to'] == '' and el['rule']['number'] == FX['rule_off_number']
                   and el['consequence']['state'] == 'Closed' and el['consequence']['enforcement_status'] == 'Network Isolated', el)
         if kind == 'ghost':
             check(tag + ' a CI that is gone gives ""; state Cancelled', el['consequence']['cmdb_ci'] == '' and el['consequence']['state'] == 'Cancelled', el['consequence'])
@@ -173,9 +172,9 @@ var n = new GlideRecord(T); n.initialize(); n.setValue('number', 'CONSEQ-CDP-INS
 o.inserted_number = '' + n.getValue('number');
 %s
 var c = new GlideRecord(T); c.get(o.inserted); c.setWorkflow(false); c.deleteRecord(); o.gone = !new GlideRecord(T).get(o.inserted);
-var back = new GlideRecord(T); back.get(%s); back.setWorkflow(false); back.setValue('u_comments', 'Consequence outbound fixture (linked)'); back.update();
+var back = new GlideRecord(T); back.get(%s); back.setWorkflow(false); back.setValue('u_comments', %s); back.update();
 gs.print('X::' + JSON.stringify(o));
-})();''' % (START, json.dumps(CONSEQUENCE), json.dumps(FX['linked']), run, run, run, LINES, json.dumps(FX['linked'])))
+})();''' % (START, json.dumps(CONSEQUENCE), json.dumps(FX['linked']), run, run, run, LINES, json.dumps(FX['linked']), json.dumps(FX['linked_comment'])))
     check('B the send was reached on the update and on the insert: one line each, the platform\'s own error for the missing Kafka API (%r), nothing else' % r['api_missing'],
           r['api_missing'] != '' and sorted(r['lines']) == sorted([SENT + CONSEQUENCE + ' ' + FX['linked'] + ' - ' + r['api_missing'], SENT + CONSEQUENCE + ' ' + r['inserted'] + ' - ' + r['api_missing']]), r['lines'])
     payloads = {}
@@ -185,14 +184,16 @@ gs.print('X::' + JSON.stringify(o));
     check('B one payload message per record on the page, nothing else', sorted(payloads) == sorted([FX['linked_number'], r['inserted_number']]) and len(messages) == 2, messages)
     upd, ins = payloads.get(FX['linked_number']), payloads.get(r['inserted_number'])
     check('B update: UPDATE, the two sections, the new comment', bool(upd) and upd['envelope']['element_activity'] == 'UPDATE' and list(upd['consequences'][0]) == ['consequence', 'rule']
-          and upd['consequences'][0]['consequence']['comments'].startswith('Consequence outbound fixture (linked) run %d' % run) and upd['consequences'][0]['rule']['number'] == 'CQR-FIXTURE-001', upd)
+          and upd['consequences'][0]['consequence']['comments'].startswith('Consequence outbound fixture (linked) run %d' % run) and upd['consequences'][0]['rule']['number'] == FX['rule_number'], upd)
     check('B insert: INSERT, state label Deferred, the rule section all ""', bool(ins) and ins['envelope']['element_activity'] == 'INSERT' and ins['consequences'][0]['consequence']['state'] == 'Deferred'
           and all(v == '' for v in ins['consequences'][0]['rule'].values()), ins)
     check('B inserted record removed afterwards', r['gone'])
 
     # ---------- C. error handling ----------
     CASES = {
-        'layout': ' number = number ,\r\n state=state,\n\n x_boar_bofa_usem_0_consequence_rule.number = number ,x_boar_bofa_usem_0_consequence_rule.state=state,',
+        'layout': ' number = number ,\r\n state=state,\n\n x_boar_bofa_usem_0_consequence_rule.number = number ,x_boar_bofa_usem_0_consequence_rule.state=state,\nu_work_notes=work_notes,',
+        'empty_field': 'number=number,\nx_boar_bofa_usem_0_consequence_rule.=valid_to,',
+        'dot_walk_after_table': 'number=number,\nx_boar_bofa_usem_0_consequence_rule.u_owner.name=owner,',
         'two_equals': 'number=number,\nstate=a=b,',
         'no_field': 'number=number,\n=state,',
         'no_payload_name': 'number=number,\nstate=,',
@@ -211,6 +212,8 @@ gs.print('X::' + JSON.stringify(o));
         'other_table': 'property %s names table x_boar_bofa_usem_0_other, which is not a section of the payload: "x_boar_bofa_usem_0_other.name=name"' % FIELD_PROP,
         'dot_walk': 'property %s names table u_rule, which is not a section of the payload: "u_rule.name=rule_name"' % FIELD_PROP,
         'duplicate': 'property %s names number twice in section consequence' % FIELD_PROP,
+        'empty_field': 'property %s holds the field "x_boar_bofa_usem_0_consequence_rule.", which is not <field> or <table>.<field>: "x_boar_bofa_usem_0_consequence_rule.=valid_to"' % FIELD_PROP,
+        'dot_walk_after_table': 'property %s holds the field "x_boar_bofa_usem_0_consequence_rule.u_owner.name", which is not <field> or <table>.<field>: "x_boar_bofa_usem_0_consequence_rule.u_owner.name=owner"' % FIELD_PROP,
         'separators': 'property %s holds no field' % FIELD_PROP,
         'blank': 'table %s is not configured in property %s' % (CONSEQUENCE, FIELD_PROP),
     }
@@ -227,7 +230,7 @@ var good = new C().buildPayload(a);
 o.unfetched = new C().buildPayload(new GlideRecord(T));
 o.nothing = new C().buildPayload(null);
 var inc = new GlideRecord('incident'); inc.setLimit(1); inc.query(); inc.next(); o.inc = inc.getUniqueValue(); o.other_record = new C().buildPayload(inc);
-var fp = new GlideRecord('sys_properties'); fp.addQuery('name', FIELDS); fp.query(); fp.next(); var saved = '' + fp.getValue('value');
+var fp = new GlideRecord('sys_properties'); fp.addQuery('name', FIELDS); fp.query(); fp.next(); var saved = '' + (fp.getValue('value') || '');
 try {
     for (var k in cases) { fp.setValue('value', cases[k]); fp.update(); o.cases[k] = new C().buildPayload(a); }
 } finally {
@@ -238,7 +241,7 @@ var tampered = JSON.parse(good); tampered.envelope.element_count = 2; tampered.e
 var proc = new C();
 try { proc._validatePayload(tampered, a, proc._fieldMapping(T)); o.tampered = 'accepted'; } catch (e) { o.tampered = '' + (e.message || e); }
 try { proc._validatePayload(JSON.parse(good), a, proc._fieldMapping(T)); o.intact = 'accepted'; } catch (e) { o.intact = '' + (e.message || e); }
-var tp = new GlideRecord('sys_properties'); tp.addQuery('name', TOPIC); tp.query(); tp.next(); var topic = '' + tp.getValue('value');
+var tp = new GlideRecord('sys_properties'); tp.addQuery('name', TOPIC); tp.query(); tp.next(); var topic = '' + (tp.getValue('value') || '');
 try {
     tp.setValue('value', ''); tp.update(); new K().sendPayload(good, a);
     tp.setValue('value', 'not-a-sys-id'); tp.update(); new K().sendPayload(good, a);
@@ -253,20 +256,21 @@ new K().sendPayload('{"a": 1}', a);
 new K().sendPayload('{"envelope": {"element_count": 0}, "consequences": []}', a);
 var two = JSON.parse(good); two.envelope.element_count = 2; new K().sendPayload(JSON.stringify(two), a);
 new K().sendPayload(good, null);
+var unsaved = new GlideRecord(T); unsaved.newRecord(); o.unsaved = unsaved.getUniqueValue(); new K().sendPayload(good, unsaved);
 o.id = a.getUniqueValue();
 %s
 gs.print('X::' + JSON.stringify(o));
 })();''' % (START, json.dumps(ST['default_set']), json.dumps(CONSEQUENCE), json.dumps(FIELD_PROP), json.dumps(TOPIC_PROP), json.dumps(CASES), json.dumps(FX['linked']), LINES))
     lay = json.loads(r['cases']['layout'])['consequences'][0]
     check('C accepted layout: spaces round names, CRLF, blank line, two pairs on one line, the same payload name in both sections',
-          lay == {'consequence': {'number': 'CONSEQ-CDP-LINKED', 'state': 'Open'}, 'rule': {'number': 'CQR-FIXTURE-001', 'state': 'Approved'}}, lay)
+          lay == {'consequence': {'number': FX['linked_number'], 'state': 'Open', 'work_notes': FX['latest_work_note']}, 'rule': {'number': FX['rule_number'], 'state': 'Approved'}}, lay)
     check('C every refused layout, an unfetched record, no record and a record of another table give ""', all(r['cases'][k] == '' for k in REASONS) and r['unfetched'] == '' and r['nothing'] == '' and r['other_record'] == '', {k: r['cases'][k][:40] for k in REASONS if r['cases'][k]})
     V = SENT + CONSEQUENCE + ' ' + r['id'] + ' - '
     want = [BUILT + CONSEQUENCE + ' ' + r['id'] + ' - ' + REASONS[k] for k in REASONS]
     want += [BUILT + 'no record - no record was given', BUILT + 'incident ' + r['inc'] + ' - table incident has no section in the payload']
     want += [V + 'property %s holds no topic' % TOPIC_PROP, V + 'property %s holds "not-a-sys-id", which is not a sys_id' % TOPIC_PROP, V + r['api_missing'],
              V + 'the payload is empty', V + 'the payload is not JSON', V + 'the payload has no envelope or no consequences', V + 'the payload carries no consequence',
-             V + 'the payload counts 2 element(s) and carries 1', SENT + 'no record - no record was given']
+             V + 'the payload counts 2 element(s) and carries 1', SENT + 'no record - no record was given', SENT + CONSEQUENCE + ' ' + r['unsaved'] + ' - no record was given']
     unfetched = [m for m in r['lines'] if m.startswith(BUILT + CONSEQUENCE + ' ') and m.endswith(' - the record does not exist')]
     rest_lines = [m for m in r['lines'] if m not in unfetched]
     check('C one exact line per refusal (%d), the unfetched record named, the padded topic accepted and trimmed (the send reached), nothing else' % (len(want) + 1),
@@ -291,5 +295,8 @@ gs.print('X::' + JSON.stringify(o));
     check('D hygiene: one gs.error per script, no gs.info/warn, field types from records the processor opens itself',
           proc.count('gs.error(') == 1 and prod.count('gs.error(') == 1 and 'gs.info' not in proc + prod and 'gs.warn' not in proc + prod and proc.count('getED()') == 1 and 'dictionary.getElement(field).getED()' in proc)
 print('RESULT: %d passed, %d failed' % (passed, failed))
+if not failed:   # the sample is written from run 1 only when every check passed
+    assert not re.search(r'probe|fixture|VSO-|' + re.escape(os.environ['SN_USER']) + '|' + re.escape(INST.split('//')[1].split('.')[0]), json.dumps(SAMPLE), re.I), 'test text in the sample'
+    json.dump(SAMPLE, open(os.path.join(HERE, 'samples', 'Sample payload - consequence.json'), 'w'), indent=2)
 ui.app('global')
 sys.exit(1 if failed else 0)
