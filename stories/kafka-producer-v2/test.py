@@ -197,7 +197,7 @@ check('B one send per table per payload form: %d tables x 2 = %d sends' % (len(T
 check('B every send used the topic of its table\'s property (the consequence table its own, read from the consequence application), three arguments to _send',
       len(b['consequence_topic']) == 32 and b['consequence_topic'] != ST['topic']
       and all(s['topic'] == (b['consequence_topic'] if s['table'] == 'x_boar_bofa_usem_0_consequence' else ST['topic']) and s['args'] == 3 for s in sent), (b['consequence_topic'], [(s['table'], s['topic']) for s in sent]))
-check('B every key is <table>.<sys_id>', all(s['key'] == s['expected_key'] and re.match(r'^[a-z_]+\.[0-9a-f]{32}$', s['key']) for s in sent))
+check('B every key is <table>.<sys_id>', all(s['key'] == s['expected_key'] and re.match(r'^[a-z0-9_]+\.[0-9a-f]{32}$', s['key']) for s in sent), [s['key'] for s in sent if s['key'] != s['expected_key'] or not re.match(r'^[a-z0-9_]+\.[0-9a-f]{32}$', s['key'])])
 check('B every message is the canonical JSON text, whether given as string or object', all(s['message'] == b['canonical'] for s in sent))
 check('B all nine tables covered (%s)' % ', '.join('%s:%s' % (t, b['subjects'][t]) for t in TABLES), sorted(set(s['table'] for s in sent)) == sorted(TABLES))
 check('B refusals never reach send (7 refusals incl. a record without a sys_id and an unsaved one, %d stub hits)' % b['stub_hits_on_refusals'], b['stub_hits_on_refusals'] == 0)
