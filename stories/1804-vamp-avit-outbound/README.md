@@ -115,7 +115,7 @@ the deletions do nothing; the platform's preview shows no problem for them. Wher
 field property was edited on the instance after its import, the preview reports a newer local update
 for its deletion; accepting the remote update is the intended result.
 
-## Tests (`test_1804.py`, 156 checks over two runs in one invocation)
+## Tests (`test_1804.py`, 158 checks over two runs in one invocation)
 A the linked item: the property equals the resolution, the envelope, the sheet's structure names in
 sheet order, the fields per section, both remediation tasks in number order with their own values,
 the entry's sub category id read through the extended class, the configuration item as a display
