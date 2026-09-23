@@ -16,7 +16,7 @@ from snui import SNUI
 SCOPE = '4ba447d22b43cb10cb55fbcc6e91bf0f'          # mirror of the client application BOFA USEM CDP integration on the PDI, same sys_id and scope name
 PREFIX = 'x_boar_bofa_usem_1'
 APP_NAME = 'BOFA USEM CDP integration'
-NAME = 'SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.2'
+NAME = 'SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.3'
 TOPIC_PROP = 'usem.vamp.kafka.topic_sys_id'
 BR_NAME = 'BOFA_BR_AVIT_VampOutbound'
 SI_NAMES = ['BOFASIVampOutboundProcessor', 'BOFASIKafkaProducerVamp']

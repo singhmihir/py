@@ -1,7 +1,7 @@
 # SNOWUSEMTP-1624 — Consequence outbound payload to CDP
 
-Same build as SNOWUSEMTP-1804 (VAMP), applied to the consequence table: one rule, two script
-includes and two properties, the CDP architecture (topic property, one field property on the
+Same build as SNOWUSEMTP-1804 (VAMP), applied to the consequence table: one rule, the payload processor
+and two properties, the CDP architecture (topic property, one field property on the
 consequence table, envelope and rendering in code). The payload names are exactly the JSON field
 names of the tab "Outbound to CDP (consequence)" of `Terminology per Source Consolidation.xlsx`
 (kept here; the two `sys_mod_count` rows carry no "CDP Required = Yes" and are left out, as for the
@@ -19,14 +19,17 @@ instance as they are, and adds error handling, payload validation and function c
 names the sections as the sheet and the client sample do (`consequence`, `rule`), sends choices as labels and a
 reference whose record is gone as `""`, reads the field types in a way a scoped application may use whoever
 calls it, refuses every malformed line of the field property, and deletes the records V1.0/V1.1 delivered under
-other sys_ids (see *Earlier sys_ids*). **V1.4** (current) keeps to what the story and the build asked for: the
-info message naming configured fields the instance lacks is gone (the payload and the Kafka response stay), and
-the validation accepts only the INSERT and UPDATE the rule fires on.
+other sys_ids (see *Earlier sys_ids*). **V1.4** accepts only the INSERT and UPDATE the rule fires on. **V1.5**
+(current) sends through the one Kafka producer shared with the remediation tasks, `BOFA_SI_KafkaProducerV2` of the
+integration application (see `stories/kafka-producer-v2`), which reads the consequence topic property; the
+consequence's own producer is deleted. The processor again names the configured fields the instance lacks in a
+second info message, after the payload.
 
 ## Records
 - `BOFA_BR_Consequence_CdpOutbound.js` — after insert/update rule on `x_boar_bofa_usem_0_consequence`,
-  order 100, no condition: processor → producer, one try/catch with one `gs.error`; an empty payload
-  (a build the processor refused) stops the rule before the producer.
+  order 100, no condition: processor → `x_boar_bofa_usem_1.BOFA_SI_KafkaProducerV2` (the producer shared with
+  the remediation tasks), one try/catch with one `gs.error`; an empty payload (a build the processor refused)
+  stops the rule before the producer.
 - `BOFASIConsequenceOutboundProcessor.js` — `buildPayload(record)` returns the JSON text
   `{envelope, consequences: [{consequence: {...}, rule: {...}}]}` (the section names of the sheet and of the
   client sample, set in `SECTIONS` of `initialize()` with the reference field `u_rule` that leads to the rule;
@@ -49,11 +52,12 @@ the validation accepts only the INSERT and UPDATE the rule fires on.
   a rule gives `""`. Field types are read from a record of the table the processor opens itself: a scoped
   application may not read the dictionary descriptor of a record handed over from inside a function of a
   global script (measured on the PDI: `StatefulElementDescriptor ... not allowed in scope`).
-- `BOFASIKafkaProducerConsequence.js` — `sendPayload(payload, record)`: topic sys_id from
-  `x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id` (spaces around the value ignored), key
-  `<table>.<sys_id>`, `sn_ih_kafka.ProducerV2().send(...)` asynchronous, no headers, no schema; the response
-  shown with `gs.addInfoMessage`; one try/catch with one `gs.error` in the feature's format
-  `<class>: message not sent for <table> <sys_id> - <reason>`. Without an existing record nothing is sent.
+- The producer is the shared `BOFA_SI_KafkaProducerV2` (x_boar_bofa_usem_1, delivered with its own record XML):
+  its table map gives `x_boar_bofa_usem_0_consequence` the topic property
+  `x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id`, which stays in this application; key
+  `<table>.<sys_id>`, asynchronous send, payload validated before it goes, one `gs.error` per failure
+  (`BOFA_SI_KafkaProducerV2: message not sent for <table> <sys_id> - <reason>`). The consequence's own producer
+  of V1.2-V1.4 (`BOFASIKafkaProducerConsequence`) is deleted by this version.
 - `Consequence Field Check - Background Script.js` — generated from the workbook by
   `extract_mapping.py` (with `consequence_mapping.json`). Read only, global scope. For every sheet row
   it looks for the field behind the payload name: the sheet's field name, then the payload name, then
@@ -65,10 +69,8 @@ the validation accepts only the INSERT and UPDATE the rule fires on.
   the payload name, the rule's `x_` names to the plain names, the rest by name.
 
 ## Error handling and payload validation
-Every function in the rule and the two script includes carries a JSDoc header (purpose, parameters,
-return, what it throws). The rule and the two public methods are the only try/catch blocks besides the
-helpers that name a record for the log and the producer's JSON parse guard, which turns the parser's error
-into `the payload is not JSON`; the private methods throw and the entry point logs one `gs.error`
+Every function in the rule and the processor carries a JSDoc header (purpose, parameters, return, what it
+throws). The rule and `buildPayload` are the only try/catch blocks; the private methods throw and the entry point logs one `gs.error`
 in the form `<class>: <what failed> for <table> <sys_id> - <reason>` (`no record` as the key when no record
 was given). Processor, `buildPayload`: `_requireRecord` refuses a missing record and a record that was never
 fetched or does not exist; `_fieldMapping` refuses a table without a section, a property that is not
@@ -80,11 +82,10 @@ before it is returned (envelope keys and constants, UUID event id, UTC timestamp
 UPDATE, element count 1, one consequence element, every configured section and payload name
 present as a string, no extra sections or keys, the consequence section not empty) and lists every
 problem in one error (`payload invalid: ...; ...`). A refused build returns `''`, so the rule never calls
-the producer. Producer, `sendPayload`: no record, or one that was never saved or fetched; `_topicSysId` refuses an empty topic property and a
-value that is not a sys_id; `_requirePayload` refuses an empty payload, text that is not JSON, JSON without
-`envelope` or `consequences`, no consequence, and an element count other than the consequences carried;
-the Kafka API's own failure is caught by the same block. The two info messages (payload, Kafka
-response) stay as in VAMP.
+the producer. The shared producer then refuses no record or one that does not exist, an empty topic property or
+one that is not a sys_id, and a payload that is empty, not JSON, without its envelope fields, or whose element
+count differs from the consequences carried (see `stories/kafka-producer-v2`). Info messages on the record: the
+payload, and the configured fields the instance lacks (sent as `""`).
 
 ## Earlier sys_ids
 V1.0/V1.1 were built in the PDI's stand-in scope and delivered as record XML under the stand-in's sys_ids;

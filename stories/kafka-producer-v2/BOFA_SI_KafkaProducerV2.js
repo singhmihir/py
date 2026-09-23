@@ -13,9 +13,11 @@ BOFA_SI_KafkaProducerV2.prototype = {
         this.SCHEMA_ID = null; // optional, no Avro schema in use
         this.SYS_ID = /^[0-9a-f]{32}$/i;
         // Each property holds the sys_id of a Kafka Topic [sys_kafka_topic]. The remediation
-        // task tables point at the finding topic until a topic of their own exists.
+        // task tables point at the finding topic until a topic of their own exists; the
+        // consequence table has its own topic, held in the consequence application.
         this.FINDING_TOPIC_PROPERTY = 'x_boar_bofa_usem_1.x_boar_bofa.usem.kafka.topic_sys_id';
         this.REMEDIATION_TASK_TOPIC_PROPERTY = 'x_boar_bofa_usem_1.x_boar_bofa.usem.kafka.topic_sys_id';
+        this.CONSEQUENCE_TOPIC_PROPERTY = 'x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id';
         this.TOPIC_PROPERTIES = {
             sn_vul_vulnerable_item: this.FINDING_TOPIC_PROPERTY,
             sn_vul_app_vulnerable_item: this.FINDING_TOPIC_PROPERTY,
@@ -24,10 +26,12 @@ BOFA_SI_KafkaProducerV2.prototype = {
             sn_vul_vulnerability: this.REMEDIATION_TASK_TOPIC_PROPERTY,
             sn_vul_app_vulnerability: this.REMEDIATION_TASK_TOPIC_PROPERTY,
             sn_vul_container_vulnerability: this.REMEDIATION_TASK_TOPIC_PROPERTY,
-            sn_vulc_result_group: this.REMEDIATION_TASK_TOPIC_PROPERTY
+            sn_vulc_result_group: this.REMEDIATION_TASK_TOPIC_PROPERTY,
+            x_boar_bofa_usem_0_consequence: this.CONSEQUENCE_TOPIC_PROPERTY
         };
         // Payload validation: every message is an envelope carrying these fields plus one
         // list of elements, e.g. { "envelope": {...}, "rem_tasks": [ { "remediation_task": {...} } ] }
+        // or { "envelope": {...}, "consequences": [ { "consequence": {...}, "rule": {...} } ] }
         this.ENVELOPE_KEY = 'envelope';
         this.ENVELOPE_FIELDS = ['type', 'topic_name', 'namespace', 'core_version', 'outbound_version',
             'event_id', 'event_timestamp', 'element_count', 'element_activity'];
@@ -43,13 +47,13 @@ BOFA_SI_KafkaProducerV2.prototype = {
     sendPayload: function(payload, record) {
         var subject = 'no record';
         try {
-            if (!record || typeof record.getTableName !== 'function')
+            if (!record || typeof record.isValidRecord !== 'function')
                 throw new Error('no record was given');
             var table = record.getTableName();
             var sysId = record.getUniqueValue();
             subject = (table + ' ' + (sysId || '')).trim();
-            if (!sysId)
-                throw new Error('the record has no sys_id');
+            if (!record.isValidRecord())
+                throw new Error('the record does not exist');
             var topicSysId = this._topicSysId(table);
             var message = this._validate(payload);
             this._send(topicSysId, table + '.' + sysId, message);

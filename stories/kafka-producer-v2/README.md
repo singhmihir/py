@@ -4,12 +4,16 @@ Received on INC0010003 as three record exports (`original/`): the producer scrip
 `BOFA_SI_KafkaProducerV2`, the payload builder `BOA_SI_USEM_RemediationTaskPayloadBuilder` and the
 rule `BOA_BR_VUL_KafkaOutbound` on `sn_vul_vulnerability`, all in application scope
 `x_boar_bofa_usem_1` (rule in `sn_vul`). Asked for: a standardised, efficient producer that keeps
-every existing parameter and behaviour, plus a script that handles a malformed payload.
+every existing parameter and behaviour, plus a script that handles a malformed payload. Since V1.5 the
+same producer also sends the consequence payloads (SNOWUSEMTP-1624): one producer for the remediation tasks
+and the consequence table, each with its own payload builder.
 
 ## Delivered
 - `BOFA_SI_KafkaProducerV2.js` — same class, same public method `sendPayload(payload, record)`,
   same property, same topic-per-table grouping (finding tables, remediation task tables reusing the
-  finding topic until their own exists), same key `<table>.<sys_id>`, same `ProducerV2.send` call
+  finding topic until their own exists), plus the consequence table `x_boar_bofa_usem_0_consequence` with
+  its own topic property `x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id` (kept in the consequence
+  application, delivered with SNOWUSEMTP-1624; its rule calls `x_boar_bofa_usem_1.BOFA_SI_KafkaProducerV2`), same key `<table>.<sys_id>`, same `ProducerV2.send` call
   with the same arguments (asynchronous, no headers, no schema). Now: configuration in `initialize`,
   a table-to-property map instead of two if-chains, the property read with a default and a clear
   error when empty, the payload validated before anything is sent, the send isolated in `_send`, one
@@ -24,8 +28,9 @@ every existing parameter and behaviour, plus a script that handles a malformed p
   `element_count` other than the number of elements in the list, an element
   that is not an object. `sendPayload` logs that reason and does not send. The earlier separate
   `BOFA_SI_KafkaPayloadValidator` is withdrawn.
-- A missing record or one without a sys_id is refused (`no record was given`, `the record has no
-  sys_id`), so no message goes out keyed `<table>.null`.
+- A missing record, or one that does not exist (never saved, or deleted), is refused (`no record was given`,
+  `the record does not exist`), so no message goes out keyed `<table>.null` or for a record CDP never sees.
+  Both rules that call the producer run after insert and update, where the record exists.
 - The topic property is read with the spaces around its value ignored; an empty value and a value
   that is not a sys_id (a topic name, for instance) are refused before the send, naming the property
   and the value.
@@ -53,10 +58,11 @@ written serialises the empty string and the producer adds a second line, `payloa
 })(current, previous);
 ```
 
-## Testing (PDI, stand-in scope `x_196061_bofasim`)
-`build.py` deploys the script include into the stand-in scope under a pinned update set (set name
-`INC0010003_MS_Kafka Producer V2 with Payload Validation_V1.4`), removes the earlier separate
-validator, and creates the topic property the producer reads (a test fixture holding a generated
+## Testing (PDI, mirror of the integration application)
+`build.py` deploys the script include into the PDI mirror of `x_boar_bofa_usem_1` (the client's scope name and
+application sys_id) under the client's own sys_id, where the consequence rule calls it by its client name, under a
+pinned update set (set name `INC0010003_MS_Kafka Producer V2 with Payload Validation_V1.5`); removes the copy of
+earlier versions from the stand-in scope, and creates the topic property the producer reads (a test fixture holding a generated
 sys_id). `test.py` runs 111 checks; run twice, all passing both times. Every log check reads only the
 lines written by the script under test (a fresh second is awaited before its start time is taken).
 - A. validation: every refusal reason from the exact input that triggers it — empty text, blank
@@ -70,9 +76,10 @@ lines written by the script under test (a fresh second is awaited before its sta
 - A2. one script include in the scope, equal to the repository copy; send methods before the
   separator line, validation after it; `ProducerV2.send` called once with the documented argument
   order (topic, key, message, isSync, headers, schemaID).
-- B. producer with `_send` captured: all eight tables, string and object payloads (16 sends) with
-  the topic from the property, key `<table>.<sys_id>`, canonical message; five refusals never reach
-  send; exactly eight lines logged, one per refusal plus the null record, a record without a sys_id
+- B. producer with `_send` captured: all nine tables, string and object payloads (18 sends) with
+  the topic of the table's property (the consequence table its own, read from the consequence
+  application), key `<table>.<sys_id>`, canonical message; seven refusals never reach send; exactly nine
+  lines logged, one per refusal plus the null record, a record without a sys_id, a record never saved
   and the real send; the real
   send on this instance fails with the platform's own error for the missing Kafka API
   (`undefined is not a function.`) in the same format.

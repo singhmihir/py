@@ -216,9 +216,13 @@ Follow it without being asked again.
   `servicenow_field=json_field` pair per line; a field missing on the table or empty is sent as `""`.
   One script include only (`RemediationTaskPayloadBuilder`).
 - Kafka stories, current sets (22 Sep review): 1625 `..._Remediation Task CDP Payload_V2.6` (global) plus the client copy
-  record XML, producer `INC0010003_MS_Kafka Producer V2 with Payload Validation_V1.4` (record XML), 1624 `..._V1.4`,
-  1804 `..._V2.2` (23 Sep: nothing beyond the story and Mihir's asks - only the payload and Kafka response info
-  messages, activity INSERT/UPDATE only, element_count compared strictly to the list). Rendering contract of the CDP payloads (1625, 1624): choices as labels, plain integers as stored
+  record XML, producer `INC0010003_MS_Kafka Producer V2 with Payload Validation_V1.5` (record XML), 1624 `..._V1.5`,
+  1804 `..._V2.3`. 23 Sep decisions: **one Kafka producer for remediation tasks and consequence**
+  (`x_boar_bofa_usem_1.BOFA_SI_KafkaProducerV2`, table map gives `x_boar_bofa_usem_0_consequence` its own topic
+  property, which stays in the consequence app; `BOFASIKafkaProducerConsequence` deleted; payload builders stay
+  separate; VAMP keeps its own producer); the processors show two info messages, the payload and the configured
+  fields the instance lacks; activity INSERT/UPDATE only; element_count compared strictly to the list. On the PDI
+  the producer lives in the mirror of x_boar_bofa_usem_1 under the client's sys_id. Rendering contract of the CDP payloads (1625, 1624): choices as labels, plain integers as stored
   (display adds "1,250"), `[code]...[/code]` display markup as its visible text (`cr_count`), references `""` when the
   record is gone, journals from the latest `sys_journal_field` entry without its header; VAMP keeps its sheet types
   (Integer/String stored, Reference display). Each story keeps one field property + one topic property.

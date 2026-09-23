@@ -30,10 +30,10 @@ expected_lines = ['%s%s=%s,' % ('' if e['table'] == CONSEQUENCE else e['table'] 
 assert result['property'] == expected_lines, (result['property'], expected_lines)
 props = {'usem.consequence.kafka.topic_sys_id': {
     'value': '',
-    'description': 'sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_consequence_outbound, read by BOFASIKafkaProducerConsequence.'},
+    'description': 'sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_consequence_outbound, read by the shared producer BOFA_SI_KafkaProducerV2 (x_boar_bofa_usem_1).'},
     'usem.consequence.fields.' + CONSEQUENCE: {
     'value': '\n'.join(result['property']),
-    'description': 'Consequence payload fields, one servicenow_field=payload_field pair per line in payload order: the ServiceNow field on the left (verified with the field check script), the payload name of the tab "Outbound to CDP (consequence)" on the right; the fields of the consequence first, then the fields of its rule as x_boar_bofa_usem_0_consequence_rule.<field>. A field missing on the table or empty is sent as "".'}}
+    'description': 'Consequence payload fields, one servicenow_field=payload_field pair per line in payload order: the ServiceNow field on the left (confirm it with the field check script on the instance), the payload name of the tab "Outbound to CDP (consequence)" on the right; the fields of the consequence first, then the fields of its rule as x_boar_bofa_usem_0_consequence_rule.<field>. A field missing on the table or empty is sent as "".'}}
 json.dump(props, open(os.path.join(HERE, 'properties.json'), 'w'), indent=1)
 print(output)
 print('\nresolved %d of %d rows; properties.json written' % (sum(1 for e in result['report'] if e['field']), len(result['report'])))

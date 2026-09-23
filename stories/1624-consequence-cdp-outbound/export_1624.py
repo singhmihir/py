@@ -50,7 +50,7 @@ deletes = [x for x in nodes if x.findtext('action') == 'DELETE']; current = [x f
 assert sorted(x.findtext('name') for x in deletes) == sorted(p['table'] + '_' + p['sys_id'] for p in PRIOR), [x.findtext('name') for x in deletes]
 assert max(x.findtext('sys_recorded_at') for x in deletes) < min(x.findtext('sys_recorded_at') for x in current), 'a deletion is recorded after a current record'
 print('deletions of the %d earlier sys_ids recorded before the %d current records' % (len(deletes), len(current)))
-for script in ['BOFASIConsequenceOutboundProcessor', 'BOFASIKafkaProducerConsequence']:
+for script in ['BOFASIConsequenceOutboundProcessor']:
     node = [x for x in current if x.findtext('target_name') == script][0]
     assert open(os.path.join(HERE, script + '.js')).read().rstrip('\n') in node.findtext('payload'), script
 topic_payload = [ET.fromstring(x.findtext('payload')) for x in current if x.findtext('target_name') == TOPIC]

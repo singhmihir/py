@@ -28,7 +28,7 @@ ENVELOPE = ['type', 'topic_name', 'namespace', 'core_version', 'outbound_version
 UUID = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
 MARKUP = re.compile(r'^\[code\]([\s\S]*)\[/code\]$')
 BUILT = 'BOFASIConsequenceOutboundProcessor: payload not built for '
-SENT = 'BOFASIKafkaProducerConsequence: message not sent for '
+SENT = 'BOFA_SI_KafkaProducerV2: message not sent for '   # the shared producer of the integration application
 KINDS = ['linked', 'bare', 'dangling', 'misclassed', 'ghost']
 ui = SNUI(); ui.app('global')
 H = {'X-UserToken': ui.ck(), 'Accept': 'application/json'}
@@ -53,7 +53,7 @@ def js(script):
         messages.append(s)
     return json.loads(m.group(1)), messages
 LINES = '''o.lines = [];
-var l = new GlideRecord('syslog'); l.addQuery('sys_created_on', '>=', t0); l.addQuery('message', 'STARTSWITH', 'BOFASIConsequenceOutboundProcessor').addOrCondition('message', 'STARTSWITH', 'BOFASIKafkaProducerConsequence').addOrCondition('message', 'STARTSWITH', 'BOFA_BR_Consequence_CdpOutbound'); l.addQuery('sys_created_by', gs.getUserName()); l.query();
+var l = new GlideRecord('syslog'); l.addQuery('sys_created_on', '>=', t0); l.addQuery('message', 'STARTSWITH', 'BOFASIConsequenceOutboundProcessor').addOrCondition('message', 'STARTSWITH', 'BOFA_SI_KafkaProducerV2').addOrCondition('message', 'STARTSWITH', 'BOFA_BR_Consequence_CdpOutbound'); l.addQuery('sys_created_by', gs.getUserName()); l.query();
 while (l.next()) o.lines.push('' + l.getValue('message'));'''
 START = "gs.sleep(1100); var t0 = new GlideDateTime().getValue();"
 
@@ -201,6 +201,7 @@ gs.print('X::' + JSON.stringify(o));
         'other_table': 'number=number,\nx_boar_bofa_usem_0_other.name=name,',
         'dot_walk': 'number=number,\nu_rule.name=rule_name,',
         'duplicate': 'number=number,\nstate=number,',
+        'missing': 'number=number,\nu_no_such_field=extra,\nx_boar_bofa_usem_0_consequence_rule.number=number,\nx_boar_bofa_usem_0_consequence_rule.u_no_such_rule_field=extra,',
         'separators': ' ,\n , \r\n,',
         'blank': '',
     }
@@ -224,7 +225,7 @@ var o = {cases: {}};
 new GlideUpdateSet().set(%s);
 try { new sn_ih_kafka.ProducerV2(); o.api_missing = ''; } catch (e) { o.api_missing = '' + (e.message || e); }
 var T = %s, FIELDS = %s, TOPIC = %s, cases = %s;
-var C = x_boar_bofa_usem_0.BOFASIConsequenceOutboundProcessor, K = x_boar_bofa_usem_0.BOFASIKafkaProducerConsequence;
+var C = x_boar_bofa_usem_0.BOFASIConsequenceOutboundProcessor, K = x_boar_bofa_usem_1.BOFA_SI_KafkaProducerV2;
 var a = new GlideRecord(T); a.get(%s);
 var good = new C().buildPayload(a);
 o.unfetched = new C().buildPayload(new GlideRecord(T));
@@ -255,6 +256,7 @@ new K().sendPayload('not json', a);
 new K().sendPayload('{"a": 1}', a);
 new K().sendPayload('{"envelope": {"element_count": 0}, "consequences": []}', a);
 var two = JSON.parse(good); two.envelope.element_count = 2; new K().sendPayload(JSON.stringify(two), a);
+new K().sendPayload(JSON.stringify(''), a);
 new K().sendPayload(good, null);
 var unsaved = new GlideRecord(T); unsaved.newRecord(); o.unsaved = unsaved.getUniqueValue(); new K().sendPayload(good, unsaved);
 o.id = a.getUniqueValue();
@@ -264,17 +266,23 @@ gs.print('X::' + JSON.stringify(o));
     lay = json.loads(r['cases']['layout'])['consequences'][0]
     check('C accepted layout: spaces round names, CRLF, blank line, two pairs on one line, the same payload name in both sections',
           lay == {'consequence': {'number': FX['linked_number'], 'state': 'Open', 'work_notes': FX['latest_work_note']}, 'rule': {'number': FX['rule_number'], 'state': 'Approved'}}, lay)
+    miss = json.loads(r['cases']['missing'])['consequences'][0]
+    check('C fields the instance lacks are sent as "" and the section keeps the others', miss == {'consequence': {'number': FX['linked_number'], 'extra': ''}, 'rule': {'number': FX['rule_number'], 'extra': ''}}, miss)
+    not_found = [m for m in messages if m.startswith('Consequence fields not found')]
+    check('C one info message names the fields the instance lacks, table by table', not_found == ['Consequence fields not found on this instance, sent as "": %s.u_no_such_field, %s.u_no_such_rule_field' % (CONSEQUENCE, RULE)], not_found)
+    check('C every other info message is a payload, one per build', all(m.startswith('Consequence payload for ') for m in messages if m not in not_found) and len(messages) - len(not_found) == 3, [m[:60] for m in messages])
     check('C every refused layout, an unfetched record, no record and a record of another table give ""', all(r['cases'][k] == '' for k in REASONS) and r['unfetched'] == '' and r['nothing'] == '' and r['other_record'] == '', {k: r['cases'][k][:40] for k in REASONS if r['cases'][k]})
     V = SENT + CONSEQUENCE + ' ' + r['id'] + ' - '
     want = [BUILT + CONSEQUENCE + ' ' + r['id'] + ' - ' + REASONS[k] for k in REASONS]
     want += [BUILT + 'no record - no record was given', BUILT + 'incident ' + r['inc'] + ' - table incident has no section in the payload']
-    want += [V + 'property %s holds no topic' % TOPIC_PROP, V + 'property %s holds "not-a-sys-id", which is not a sys_id' % TOPIC_PROP, V + r['api_missing'],
-             V + 'the payload is empty', V + 'the payload is not JSON', V + 'the payload has no envelope or no consequences', V + 'the payload carries no consequence',
-             V + 'the payload counts 2 element(s) and carries 1', SENT + 'no record - no record was given', SENT + CONSEQUENCE + ' ' + r['unsaved'] + ' - no record was given']
+    want += [V + 'property %s holds no topic sys_id' % TOPIC_PROP, V + 'property %s holds "not-a-sys-id", which is not a topic sys_id' % TOPIC_PROP, V + r['api_missing'],
+             V + 'payload is empty', V + 'envelope is missing', V + 'envelope.type is missing or empty',
+             V + 'envelope.element_count is 2 but consequences holds 1', V + 'payload is empty', SENT + 'no record - no record was given', SENT + CONSEQUENCE + ' ' + r['unsaved'] + ' - the record does not exist']
     unfetched = [m for m in r['lines'] if m.startswith(BUILT + CONSEQUENCE + ' ') and m.endswith(' - the record does not exist')]
-    rest_lines = [m for m in r['lines'] if m not in unfetched]
-    check('C one exact line per refusal (%d), the unfetched record named, the padded topic accepted and trimmed (the send reached), nothing else' % (len(want) + 1),
-          len(unfetched) == 1 and sorted(rest_lines) == sorted(want), 'extra: %s | missing: %s' % ([m for m in rest_lines if m not in want], [m for m in want if m not in rest_lines]))
+    parser = [m for m in r['lines'] if m.startswith(V + 'payload is not valid JSON - ')]
+    rest_lines = [m for m in r['lines'] if m not in unfetched and m not in parser]
+    check('C one exact line per refusal (%d), the unfetched record named, text that is not JSON with the parser\'s reason, the padded topic accepted and trimmed (the send reached), nothing else' % (len(want) + 2),
+          len(unfetched) == 1 and len(parser) == 1 and sorted(rest_lines) == sorted(want), 'extra: %s | missing: %s' % ([m for m in rest_lines if m not in want], [m for m in want if m not in rest_lines]))
     check('C validation names every problem of a tampered payload', all(s in r['tampered'] for s in ['payload invalid', 'element_count is "2"', 'not-a-uuid', 'section consequence lacks number', 'section extra is not in the field property', 'carries stranger', 'consequence.state is not a string']), r['tampered'])
     check('C validation accepts the intact payload; both properties restored', r['intact'] == 'accepted' and r['fields_restored'] and r['topic_restored'], (r['intact'], r['fields_restored'], r['topic_restored']))
 
@@ -284,14 +292,18 @@ gs.print('X::' + JSON.stringify(o));
 var o = {props: {}, scripts: {}};
 var p = new GlideRecord('sys_properties'); p.addQuery('name', 'STARTSWITH', 'x_boar_bofa_usem_0.usem.consequence.'); p.query(); while (p.next()) o.props['' + p.getValue('name')] = '' + p.getValue('value');
 var s = new GlideRecord('sys_script_include'); s.addQuery('sys_scope', %s); s.query(); while (s.next()) o.scripts['' + s.getValue('name')] = '' + s.getValue('script');
+var k = new GlideRecord('sys_script_include'); k.addQuery('api_name', 'x_boar_bofa_usem_1.BOFA_SI_KafkaProducerV2'); k.query(); o.producers = []; while (k.next()) o.producers.push('' + k.getValue('script'));
 var b = new GlideRecord('sys_script'); b.addQuery('name', 'BOFA_BR_Consequence_CdpOutbound'); b.query(); o.rules = []; while (b.next()) o.rules.push({script: '' + b.getValue('script'), scope: '' + b.getValue('sys_scope'), order: '' + b.getValue('order')});
 gs.print('X::' + JSON.stringify(o));
 })();''' % json.dumps(ST['scope']))
     check('D two properties: the field property as delivered, the topic a sys_id', sorted(r['props']) == sorted([FIELD_PROP, TOPIC_PROP]) and r['props'][FIELD_PROP] == PROPS['usem.consequence.fields.' + CONSEQUENCE]['value'] and re.match(r'^[0-9a-f]{32}$', r['props'][TOPIC_PROP]), sorted(r['props']))
-    src = {n: open(os.path.join(HERE, n + '.js')).read().rstrip('\n') for n in ['BOFASIConsequenceOutboundProcessor', 'BOFASIKafkaProducerConsequence', 'BOFA_BR_Consequence_CdpOutbound']}
-    check('D the two script includes and the one rule equal the repository copies', sorted(r['scripts']) == ['BOFASIConsequenceOutboundProcessor', 'BOFASIKafkaProducerConsequence']
+    src = {n: open(os.path.join(HERE, n + '.js')).read().rstrip('\n') for n in ['BOFASIConsequenceOutboundProcessor', 'BOFA_BR_Consequence_CdpOutbound']}
+    src['BOFA_SI_KafkaProducerV2'] = open(os.path.join(BASE, 'stories', 'kafka-producer-v2', 'BOFA_SI_KafkaProducerV2.js')).read().rstrip('\n')
+    check('D the shared producer is the one copy of the repository file in the integration application', len(r['producers']) == 1 and r['producers'][0].rstrip('\n') == src['BOFA_SI_KafkaProducerV2'])
+    check('D the one script include of the application and the one rule equal the repository copies; the rule calls the shared producer', sorted(r['scripts']) == ['BOFASIConsequenceOutboundProcessor']
+          and 'new x_boar_bofa_usem_1.BOFA_SI_KafkaProducerV2().sendPayload(payload, current);' in src['BOFA_BR_Consequence_CdpOutbound']
           and all(r['scripts'][n].rstrip('\n') == src[n] for n in r['scripts']) and len(r['rules']) == 1 and r['rules'][0]['script'].rstrip('\n') == src['BOFA_BR_Consequence_CdpOutbound'] and r['rules'][0]['scope'] == ST['scope'])
-    proc, prod = src['BOFASIConsequenceOutboundProcessor'], src['BOFASIKafkaProducerConsequence']
+    proc, prod = src['BOFASIConsequenceOutboundProcessor'], src['BOFA_SI_KafkaProducerV2']
     check('D hygiene: one gs.error per script, no gs.info/warn, field types from records the processor opens itself',
           proc.count('gs.error(') == 1 and prod.count('gs.error(') == 1 and 'gs.info' not in proc + prod and 'gs.warn' not in proc + prod and proc.count('getED()') == 1 and 'dictionary.getElement(field).getED()' in proc)
 print('RESULT: %d passed, %d failed' % (passed, failed))

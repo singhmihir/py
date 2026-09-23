@@ -50,7 +50,8 @@ BOFASIConsequenceOutboundProcessor.prototype = {
     },
 
     /**
-     * Builds and validates the payload of one consequence record and shows it on the record.
+     * Builds and validates the payload of one consequence record and shows it on the record, with a
+     * second message naming any configured field this instance does not have.
      * @param {GlideRecord} record - the consequence record (current in the business rule)
      * @returns {string} the JSON text of the payload; an empty string when it could not be built or did
      *   not validate, in which case the reason has been logged
@@ -59,13 +60,16 @@ BOFASIConsequenceOutboundProcessor.prototype = {
         try {
             this._requireRecord(record);
             var mapping = this._fieldMapping(record.getTableName());
+            var missing = [];
             var payload = {
                 envelope: this._buildEnvelope(this._activity(record)),
-                consequences: [this._buildConsequence(record, mapping)]
+                consequences: [this._buildConsequence(record, mapping, missing)]
             };
             this._validatePayload(payload, record, mapping);
             var message = JSON.stringify(payload);
             gs.addInfoMessage('Consequence payload for ' + record.getValue('number') + ': ' + message)
+            if (missing.length)
+                gs.addInfoMessage('Consequence fields not found on this instance, sent as "": ' + missing.join(', '))
             return message;
         } catch (e) {
             gs.error(this.type + ': payload not built for ' + this._recordKey(record) + ' - ' + (e.message || e));
@@ -136,9 +140,10 @@ BOFASIConsequenceOutboundProcessor.prototype = {
      * may not read the dictionary descriptor of a record handed over by a global script.
      * @param {GlideRecord} record - the consequence record
      * @param {Object[]} mapping - the parsed field property, see _fieldMapping
+     * @param {string[]} missing - receives "<table>.<field>" for every mapped field the instance lacks
      * @returns {Object} the element, its sections keyed by their payload names
      */
-    _buildConsequence: function(record, mapping) {
+    _buildConsequence: function(record, mapping, missing) {
         var element = {};
         var records = {}, dictionaries = {};
         for (var i = 0; i < mapping.length; i++) {
@@ -147,6 +152,8 @@ BOFASIConsequenceOutboundProcessor.prototype = {
                 records[table] = this._sectionRecord(record, table);
                 dictionaries[table] = new GlideRecord(table);
             }
+            if (!dictionaries[table].isValidField(field))
+                missing.push(table + '.' + field);
             if (!element[section])
                 element[section] = {};
             element[section][mapping[i].json] = this._fieldValue(records[table], dictionaries[table], field);

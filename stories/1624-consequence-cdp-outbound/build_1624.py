@@ -1,7 +1,8 @@
 """Deploys the consequence outbound build on the PDI into the mirror of the client consequence application
-(scope x_boar_bofa_usem_0, the client's application sys_id) under a pinned update set: the two script
-includes, the two properties (topic and the one field property of the consequence table) and the after
-insert/update rule on that table. Nothing is renamed: the repository files carry the client names and the
+(scope x_boar_bofa_usem_0, the client's application sys_id) under a pinned update set: the processor script
+include, the two properties (topic and the one field property of the consequence table) and the after
+insert/update rule on that table, which sends through the shared producer BOFA_SI_KafkaProducerV2 of the integration
+application. Nothing is renamed: the repository files carry the client names and the
 PDI holds the same application, so the export imports on the client instance as is. Each version is a
 fresh set: properties of earlier versions that are not deployed any more are removed under the
 application's Default set first. The records earlier versions delivered under other sys_ids (prior_records.json)
@@ -15,13 +16,12 @@ from snui import SNUI
 SCOPE = '488be1cd2b1247102b30f8e14391bf0c'          # mirror of the client application BOFA USEM Consequence on the PDI, same sys_id and scope name
 PREFIX = 'x_boar_bofa_usem_0'                           # the consequence application, which holds the tables, the rule and the scripts
 APP_NAME = 'BOFA USEM Consequence'
-NAME = 'SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.4'
+NAME = 'SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.5'
 BR_NAME = 'BOFA_BR_Consequence_CdpOutbound'
-SI_NAMES = ['BOFASIConsequenceOutboundProcessor', 'BOFASIKafkaProducerConsequence']
+SI_NAMES = ['BOFASIConsequenceOutboundProcessor']   # the payload goes out through the shared producer BOFA_SI_KafkaProducerV2 (x_boar_bofa_usem_1)
 TABLE = PREFIX + '_consequence'
 DESC = {
     'BOFASIConsequenceOutboundProcessor': 'Builds the outbound CDP payload (envelope plus one consequence element with the sections consequence and rule) for a consequence record. The fields come from the property x_boar_bofa_usem_0.usem.consequence.fields.<consequence table>; the rule section is read through the u_rule reference.',
-    'BOFASIKafkaProducerConsequence': 'Sends a consequence payload with sn_ih_kafka.ProducerV2 to the Kafka topic whose sys_id is held in x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id (key <table>.<sys_id>).\nDocumentation of API used - https://www.servicenow.com/docs/r/api-reference/server-api-reference/ProducerV2ScopedAPI.html',
 }
 scripts = {n: open(os.path.join(HERE, n + '.js')).read() for n in SI_NAMES}
 br_script = open(os.path.join(HERE, BR_NAME + '.js')).read()
@@ -49,7 +49,7 @@ var o = {rows: [], si: {}, props: {}};
 var us = new GlideRecord('sys_update_set');
 if (%(has)s && us.get(%(set)s)) { us.setValue('state', 'in progress'); us.setValue('name', %(name)s); us.update(); }
 else { us.initialize(); us.setValue('name', %(name)s); us.setValue('application', %(scope)s);
-  us.setValue('description', 'Consequence outbound integration to CDP: payload processor, Kafka producer, properties and the after insert/update rule on the consequence table.'); us.insert(); }
+  us.setValue('description', 'Consequence outbound integration to CDP: payload processor, properties and the after insert/update rule on the consequence table (sent through BOFA_SI_KafkaProducerV2).'); us.insert(); }
 o.set = us.getUniqueValue(); o.set_scope = '' + us.application.getDisplayValue();
 new GlideUpdateSet().set(o.set);
 var scripts = %(scripts)s, desc = %(desc)s;
@@ -75,7 +75,7 @@ var br = new GlideRecord('sys_script'); br.addQuery('name', %(br)s); br.addQuery
 if (!br.next()) { br.initialize(); br.setValue('name', %(br)s); br.setValue('collection', %(table)s); }
 br.setValue('when', 'after'); br.setValue('order', 100); br.setValue('action_insert', true); br.setValue('action_update', true); br.setValue('action_delete', false); br.setValue('action_query', false);
 br.setValue('active', true); br.setValue('abort_action', false); br.setValue('filter_condition', ''); br.setValue('condition', ''); br.setValue('script', %(br_script)s);
-br.setValue('description', 'Builds the CDP payload for the consequence with BOFASIConsequenceOutboundProcessor and sends it with BOFASIKafkaProducerConsequence on every insert and update.');
+br.setValue('description', 'Builds the CDP payload for the consequence with BOFASIConsequenceOutboundProcessor and sends it with BOFA_SI_KafkaProducerV2 on every insert and update.');
 br.update() || br.insert();
 o.br = {sys_id: br.getUniqueValue(), scope: '' + br.sys_scope.getDisplayValue(), when: '' + br.getValue('when'), order: '' + br.getValue('order'), insert: '' + br.getValue('action_insert'), update: '' + br.getValue('action_update'), active: '' + br.getValue('active'), collection: '' + br.getValue('collection')};
 gs.print('X::' + JSON.stringify(o));''' % dict(has=json.dumps(reuse), set=json.dumps(ST.get('set', '')), name=json.dumps(NAME), scope=json.dumps(SCOPE),
@@ -122,11 +122,11 @@ for s, i in d['props'].items():
     assert i['read_back'] == expect and i['scope'] == APP_NAME and (s != TOPIC_PROP or len(i['read_back']) == 32), (s, i)
 print('  rule:', BR_NAME, d['br']['sys_id'], '|', d['br'])
 print('\n'.join('  captured: ' + r for r in d['rows']))
-assert d['set_scope'] == APP_NAME and all(r.endswith('| ' + APP_NAME) for r in d['rows']) and len(d['rows']) == 2 + len(props) + 1 + len(PRIOR), d['rows']
+assert d['set_scope'] == APP_NAME and all(r.endswith('| ' + APP_NAME) for r in d['rows']) and len(d['rows']) == len(SI_NAMES) + len(props) + 1 + len(PRIOR), d['rows']
 assert sum(1 for r in d['rows'] if '| DELETE |' in r) == len(PRIOR), d['rows']
 assert all(i['scope'] == APP_NAME and i['access'] == 'public' and i['api_name'] == PREFIX + '.' + n for n, i in d['si'].items())
 assert d['br'] == dict(sys_id=d['br']['sys_id'], scope=APP_NAME, when='after', order='100', insert='1', update='1', active='1', collection=TABLE)
 json.dump({'set': d['set'], 'set_name': NAME, 'previous_set': ST.get('set') if not reuse else ST.get('previous_set'), 'scope': SCOPE, 'default_set': DEFAULT_SET, 'app_name': APP_NAME, 'si': {n: i['sys_id'] for n, i in d['si'].items()}, 'props': {s: i['sys_id'] for s, i in d['props'].items()},
            'topic': d['props'][TOPIC_PROP]['read_back'], 'br': d['br']['sys_id'], 'rows': len(d['rows'])}, open(st_path, 'w'), indent=1)
 ui.app('global')
-print('deployed: 2 script includes, %d properties, 1 rule, %d deletions of earlier sys_ids; update set scope matches every captured row' % (len(props), len(PRIOR)))
+print('deployed: %d script include, %d properties, 1 rule, %d deletions of earlier sys_ids; update set scope matches every captured row' % (len(SI_NAMES), len(props), len(PRIOR)))
