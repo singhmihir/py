@@ -149,7 +149,7 @@ its Default set created when missing, stale properties removed, the earlier sys_
 the moment), records captured explicitly, scope audit), `fixtures_1624.py` (two rules with their own
 authors and times, the checkbox on and off; a linked, a bare, a dangling (rule and AIT gone, CI without
 class), a misclassed (class field naming another class) and a ghost (CI gone) consequence), `test_1624.py`
-(100 checks over two runs in one invocation, 24 exact refusal lines among them, every log check reading only the lines of its own script: A every
+(108 checks over two runs in one invocation, 25 exact refusal lines among them, every log check reading only the lines of its own script: A every
 fixture from inside a function of a global script and directly, every value against the value worked out
 through REST plus literals; B the rule on a real update and a real insert; C every refusal of the processor
 and the producer with its exact line; D properties, deployed scripts equal to the repository, hygiene; run 1
