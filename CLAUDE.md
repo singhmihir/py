@@ -13,6 +13,10 @@ Follow it without being asked again.
 - The PDI hibernates after inactivity: `stats.do` returning an *Instance Hibernating* page (HTTP 200)
   or a 502 means asleep. Traffic cannot wake it; Mihir wakes it from the Developer Portal. Re-check
   later instead of hammering it.
+- Speed: `tools/pdi_keep_fast.py` (23 Sep) switched off the idle-instance load (Now Assist troubleshooting notifications,
+  CMDB Get Well collectors, the ATF and Virtual Agent pollers), keeps 7 days of syslog, and installed the hourly job
+  "PDI Keep Fast" that re-applies it and writes `pdi.keep_fast.last_run`; `--restore` puts the originals back. About 220
+  `sys_trigger` rows dated 2013 or at the instance build look overdue but never run: count only the last day.
 - Fixture users on the PDI: `vso.owner.one` / `vso.owner.two` (active), `vso.owner.gone` (inactive).
   Simulated BofA tables on the PDI live in scoped app `x_196061_bofasim` (`_ait` with `app_mgr_netid`,
   `_consequence` with `state` and `u_consequence_level`); Global custom columns get auto-prefixed
@@ -247,6 +251,10 @@ Follow it without being asked again.
 - Log checks: `syslog.sys_created_on` has one-second resolution, so a check block starts with `gs.sleep(1100)` before
   taking its start time and reads only lines at or after it. ProducerV2 is absent on the PDI:
   `new sn_ih_kafka.ProducerV2()` throws `undefined is not a function.`
+- VAMP inbound (SNOWUSEMTP-1639, `stories/1639-vamp-inbound/`, drop-box INC0010013): consume `sn_usem_vamp_inbound` into
+  an import set and transform (no flows), modelled on Mohammad's CDP IVR inbound (1615). Waiting for the payload; 16
+  questions with plain explanations posted 23 Sep; blockers 1, 2, 5, 6, plus 7-9 if the story creates/updates AVITs, 12
+  for testing on dev.
 
 ## Repository layout
 - `tools/snui.py` – harness. `stories/<story>/` – scripts, build/fixture/test/export/attach drivers, README.
@@ -255,4 +263,8 @@ Follow it without being asked again.
   GitHub: commit and push on my own (branch `claude/bofa-user-stories-build-l390e9`), and create or update the
   pull request as useful. Before every push, scan the commits for the password, the PDI user and AI/model
   identifiers in file contents; never commit secrets. Deliverables still go to him through the drop-box
-  incidents on the PDI.
+  incidents on the PDI. Pull requests #1 and #2 were closed on 23 Sep (not by me): do not reopen one unasked.
+- `singhmihir/py` is **public** (a fork, so it cannot simply turn private): client files never go there. The files he
+  uploads to the incidents (164 on 23 Sep, INC0010003/4/5/13, 1.68 GB, 98 MB with xz) belong in a private repository;
+  this integration cannot create one (403), so he creates it and I attach it with `add_repo` (push) and fill it with
+  `tools/incident_files.py <dir>`.
