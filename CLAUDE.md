@@ -35,7 +35,10 @@ Follow it without being asked again.
   is short of time he can run **exactly one**, so put everything needed into a single background script,
   say in the comment that it creates and updates nothing, and name the file to attach back.
 - **He is often minutes from a meeting.** Deliver first and explain in a few lines afterwards; never ask
-  permission mid-task and never hand back a plan in place of the artifact.
+  permission mid-task and never hand back a plan in place of the artifact. But when a request can be read two
+  ways (which script, which property, sync or async), ask the few concrete questions **before** building
+  (AskUserQuestion, one line of context each): he asked for exactly that on 23 Sep after a merge was built on a
+  wrong reading. Say what is on the PDI and what is already on the drop-box incident, so he looks at the right file.
 - He reads deliverables closely and asks about details (a stray scope prefix in a property name, an empty
   record link, a slide that overflows). Everything inside a deliverable carries the client's own names.
 - **Size is part of the deliverable**: a deck he cannot open or show has not been delivered. One worked
@@ -224,9 +227,8 @@ Follow it without being asked again.
   `x_boar_bofa_usem_0.usem.consequence.kafka.topic_sys_id` (stays in the consequence app); **synchronous send for all
   tables and the Kafka response shown on the record** (Mihir's answers 23 Sep); `BOFASIKafkaProducerConsequence` deleted
   (bofadev also has `BOFA_SI_KafkaProducer_Consequence`, IS_SYNC true); payload builders stay separate; VAMP keeps its
-  own producer because AVIT is both a finding table and the VAMP table). Ask Mihir before building when a request is
-  ambiguous; he asked for questions first on 23 Sep. the processors show two info messages, the payload and the configured
-  fields the instance lacks; activity INSERT/UPDATE only; element_count compared strictly to the list. On the PDI
+  own producer because AVIT is both a finding table and the VAMP table). The processors show two info messages, the
+  payload and the configured fields the instance lacks; activity INSERT/UPDATE only; element_count compared strictly to the list. On the PDI
   the producer lives in the mirror of x_boar_bofa_usem_1 under the client's sys_id. Rendering contract of the CDP payloads (1625, 1624): choices as labels, plain integers as stored
   (display adds "1,250"), `[code]...[/code]` display markup as its visible text (`cr_count`), references `""` when the
   record is gone, journals from the latest `sys_journal_field` entry without its header; VAMP keeps its sheet types
@@ -249,7 +251,8 @@ Follow it without being asked again.
 ## Repository layout
 - `tools/snui.py` – harness. `stories/<story>/` – scripts, build/fixture/test/export/attach drivers, README.
   `stories/_update_sets/` – native exports of every delivered update set (index.json).
-- Git: the PDI is the system of record. Do **not** push to GitHub, open or update pull requests, or
-  watch PRs on your own; Mihir says explicitly when to push. When asked, use branch
-  `claude/bofa-user-stories-build-l390e9`, commit story folders, and never commit secrets or
-  AI/model identifiers in file contents.
+- Git: the PDI is the system of record, GitHub the copy of the work. Since 23 Sep Mihir gives a free hand on
+  GitHub: commit and push on my own (branch `claude/bofa-user-stories-build-l390e9`), and create or update the
+  pull request as useful. Before every push, scan the commits for the password, the PDI user and AI/model
+  identifiers in file contents; never commit secrets. Deliverables still go to him through the drop-box
+  incidents on the PDI.

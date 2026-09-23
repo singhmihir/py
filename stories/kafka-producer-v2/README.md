@@ -69,7 +69,7 @@ written serialises the empty string and the producer adds a second line, `payloa
 application sys_id) under the client's own sys_id, where the consequence rule calls it by its client name, under a
 pinned update set (set name `INC0010003_MS_Kafka Producer V2 with Payload Validation_V1.5`); removes the copy of
 earlier versions from the stand-in scope, and creates the finding topic property the client already has (a global test
-fixture holding a generated sys_id). `test.py` runs 111 checks; run twice, all passing both times. Every log check reads only the
+fixture holding a generated sys_id). `test.py` runs 126 checks; run twice, all passing both times. Every log check reads only the
 lines written by the script under test (a fresh second is awaited before its start time is taken).
 - A. validation: every refusal reason from the exact input that triggers it — empty text, blank
   text, null, undefined, the JSON of an empty string or of null (what a rule that serialises a failed
