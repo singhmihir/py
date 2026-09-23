@@ -59,7 +59,7 @@ for r in brs:
     assert r.findtext('script').rstrip('\n') == script and r.findtext('collection') == CONSEQUENCE and r.findtext('when') == 'after' and r.findtext('action_insert') == 'true' and r.findtext('action_update') == 'true' and r.findtext('sys_scope') == CLIENT_SCOPE
     print('  rule', r.findtext('name'), r.findtext('sys_id'), '| after insert/update on', r.findtext('collection'), '| order', r.findtext('order'))
 low = content.lower()
-TOOLING = [w[::-1] for w in ['edualc', 'cipohtna', 'ianepo', 'tpg']]   # assistant and model names, spelled backwards so this file never carries them
-hits = [t for t in [w.lower() for w in WORKING] + ['service-now.com', 'x_196061', 'bofasim'] + TOOLING if t in low]
+TOOLING = [w[::-1] for w in ['edualc', 'cipohtna', 'ianepo', 'tpg', 'rihim']]   # assistant, model and personal names, spelled backwards so this file never carries them
+hits = [t for t in [w.lower() for w in WORKING + [os.environ.get('SN_PASSWORD', '')] if w] + ['service-now.com', 'x_196061', 'bofasim'] + TOOLING if t in low]
 assert len(sis) == 2 and len(props) == 2 and len(brs) == 1 and not hits and '<sys_updated_by>' not in content, hits
 print('written:', OUT, len(content), 'bytes | records', len(sis) + len(props) + len(brs), '| scrub', 'CLEAN' if not hits else hits)

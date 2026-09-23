@@ -1,5 +1,5 @@
 """Deploys the client copy of the builder into the stand-in scope on the PDI, with the four
-client-named properties as global test fixtures, so the JSON parsing is exercised exactly as the
+client-named properties as global test fixtures, so the line-format parsing is exercised as the
 client instance will run it."""
 import os, sys, json
 HERE = os.path.dirname(os.path.abspath(__file__)); STORY = os.path.dirname(HERE); BASE = os.path.dirname(os.path.dirname(STORY))

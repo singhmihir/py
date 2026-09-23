@@ -1,0 +1,10 @@
+{
+ "description": "Records delivered in earlier versions that the current version no longer carries; the record XML deletes each, so that an instance holding an earlier version keeps no orphan.",
+ "records": [
+  {
+   "table": "sys_script_include",
+   "sys_id": "1b6c46b207e1429093e126216095b3ac",
+   "name": "BOFA_SI_KafkaPayloadValidator"
+  }
+ ]
+}

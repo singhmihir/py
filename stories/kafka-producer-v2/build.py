@@ -28,13 +28,13 @@ gs.print('X::' + JSON.stringify(o));''' % (json.dumps(PROPERTY), json.dumps(PROP
 assert g['read_back'] == g['topic'] and len(g['topic']) == 32, g
 print('property fixture:', PROPERTY, '=', g['topic'], '|', g['property_scope'])
 
-# 2. scoped: update set in the stand-in scope, pinned, then the two script includes
+# 2. scoped: update set in the stand-in scope, pinned, then the script include (the separate validator of V1.0 removed)
 d = ui.js('''
 var o = {rows: []};
 var us = new GlideRecord('sys_update_set');
 if (%s && us.get(%s)) { us.setValue('state', 'in progress'); us.setValue('name', %s); us.update(); }
 else { us.initialize(); us.setValue('name', %s); us.setValue('application', %s);
-  us.setValue('description', 'Kafka producer (sn_ih_kafka.ProducerV2) and outbound payload validator for the CDP integration, built here in the stand-in scope.'); us.insert(); }
+  us.setValue('description', 'Kafka producer (sn_ih_kafka.ProducerV2) with payload validation for the CDP integration, built here in the stand-in scope.'); us.insert(); }
 o.set = us.getUniqueValue(); o.set_scope = '' + us.application.getDisplayValue();
 new GlideUpdateSet().set(o.set);
 var scripts = %s; var desc = %s; o.si = {};

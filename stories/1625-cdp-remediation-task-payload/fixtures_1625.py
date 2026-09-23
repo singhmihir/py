@@ -60,9 +60,9 @@ function link(assoc, field, task, change, key) {
 }
 for (var t in LINKS) {
     var assoc = LINKS[t][0], field = LINKS[t][1];
-    var bare = keep(t, t + '.bare', {short_description: 'Payload fixture ' + t + ' (no change)'});
-    var single = keep(t, t + '.single', {short_description: 'Payload fixture ' + t + ' (one change)'});
-    var plural = keep(t, t + '.plural', {short_description: 'Payload fixture ' + t + ' (several changes)'});
+    var bare = keep(t, t + '.bare', {short_description: 'Payload fixture ' + t + ' (no change)', description: ''});
+    var single = keep(t, t + '.single', {short_description: 'Payload fixture ' + t + ' (one change)', description: ''});
+    var plural = keep(t, t + '.plural', {short_description: 'Payload fixture ' + t + ' (several changes)', description: ''});
     o.ids[t + '.bare'] = bare; o.ids[t + '.single'] = single; o.ids[t + '.plural'] = plural;
     link(assoc, field, single, o.ids.chg_open, t + '.single.open');
     // out of number order, the open change twice, a cancelled one, the IMAC class, and one gone

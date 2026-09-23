@@ -41,7 +41,7 @@ function one(table, g, kind) {
 }
 for (var i = 0; i < targets.length; i++) { var g = new GlideRecord(targets[i][0]); g.get(targets[i][1]); have[targets[i][1]] = true; one(targets[i][0], g, targets[i][2]); }
 for (var t = 0; t < tables.length; t++) {
-    var r = new GlideRecord(tables[t]); r.orderByDesc('sys_updated_on'); r.setLimit(12); r.query(); var n = 0;
+    var r = new GlideRecord(tables[t]); r.addQuery('short_description', 'NOT LIKE', 'VSO-PAYLOAD%%').addOrCondition('short_description', 'ISEMPTY'); r.addQuery('short_description', 'NOT LIKE', 'Payload fixture%%').addOrCondition('short_description', 'ISEMPTY'); r.orderByDesc('sys_updated_on'); r.setLimit(12); r.query(); var n = 0;
     while (r.next() && n < 5) { if (have[r.getUniqueValue()]) continue; n++; one(tables[t], r, 'latest'); }
 }
 // the same record handed over directly rather than from inside a function of this global script
@@ -117,12 +117,28 @@ var b = new C();
 var inc = new GlideRecord('incident'); inc.setLimit(1); inc.query(); inc.next(); o.inc_id = inc.getUniqueValue();
 o.unsupported = b.buildPayload(inc, 'UPDATE');
 o.neg = [b.buildPayload(null, 'UPDATE'), b.buildPayload({}, 'UPDATE'), b.buildPayload('VUL0004576', 'UPDATE'), b.buildPayload(new GlideRecord('sn_vul_vulnerability'), 'UPDATE')];
+function viaFunction(g) { return JSON.stringify(new C().buildPayload(g, 'UPDATE')); }
+// a document id: the record field of an exception approval, mapped for the test only; its table field set, then empty
+var dp = new GlideRecord('sys_properties'); dp.initialize(); dp.setValue('name', %s); dp.setValue('type', 'string'); dp.setValue('value', 'number=number,\ntable=table,\nrecord=record,'); var dpId = dp.insert();
+var other = new GlideRecord('sn_sec_exception_change_approval'); other.get(%s); var keepTable = '' + other.getValue('table');
+try {
+    var linked = new GlideRecord('sn_sec_exception_change_approval'); linked.get(%s); o.doc_linked = viaFunction(linked);
+    other.setWorkflow(false); other.setValue('table', ''); other.update();
+    var empty = new GlideRecord('sn_sec_exception_change_approval'); empty.get(%s); o.doc_empty = viaFunction(empty);
+    o.doc_empty_direct = JSON.stringify(new C().buildPayload(empty, 'UPDATE'));
+} finally {
+    var back = new GlideRecord('sn_sec_exception_change_approval'); back.get(%s); back.setWorkflow(false); back.setValue('table', keepTable); back.update();
+    var gone = new GlideRecord('sys_properties'); if (gone.get(dpId)) gone.deleteRecord();
+}
+o.doc_restored = (function() { var c = new GlideRecord('sn_sec_exception_change_approval'); c.get(%s); return '' + c.getValue('table') == keepTable; })();
 o.msgs = [];
 var l = new GlideRecord('syslog'); l.addQuery('sys_created_on', '>=', t0); l.addQuery('message', 'STARTSWITH', 'BOA_SI_USEM_RemediationTaskPayloadBuilder'); l.query();
 while (l.next()) o.msgs.push('' + l.getValue('message'));
 var s = new GlideRecord('sys_script_include'); s.get(%s); o.script = '' + s.getValue('script'); o.api = '' + s.getValue('api_name');
 gs.print('X::' + JSON.stringify(o));
-})();''' % (json.dumps(ST['global_default']), json.dumps(CASES), json.dumps(ST['props'][PROP]), json.dumps(REC), json.dumps(PROP), json.dumps(ST['si'])))
+})();''' % (json.dumps(ST['global_default']), json.dumps(CASES), json.dumps(ST['props'][PROP]), json.dumps(REC), json.dumps(PROP), json.dumps(PREFIX + 'sn_sec_exception_change_approval'),
+             json.dumps(FX['ids']['sn_vul_vulnerability.exc.other']), json.dumps(FX['ids']['sn_vul_vulnerability.exc.approved']), json.dumps(FX['ids']['sn_vul_vulnerability.exc.other']),
+             json.dumps(FX['ids']['sn_vul_vulnerability.exc.other']), json.dumps(FX['ids']['sn_vul_vulnerability.exc.other']), json.dumps(ST['si'])))
 layout = json.loads(n['cases']['layout'])['rem_tasks'][0]['remediation_task']
 sample = [r for r in d['rows'] if r['id'] == REC][0]; sample_task = json.loads(sample['client'])['rem_tasks'][0]['remediation_task']
 check('2a accepted layout: spaces round names, bare name, blank line, CRLF, several pairs on one line, rename, unknown and dot-walked fields as ""',
@@ -131,10 +147,13 @@ check('2a accepted layout: spaces round names, bare name, blank line, CRLF, seve
 check('2b every refused layout gives "" (%d cases)' % len(REASONS), all(n['cases'][k] == '' for k in REASONS), {k: n['cases'][k][:60] for k in REASONS if n['cases'][k] != ''})
 want = ['%s: payload not built for sn_vul_vulnerability %s - %s' % (CLS, REC, REASONS[k]) for k in REASONS]
 want += ['%s: payload not built for incident %s - table incident is not configured in property %sincident' % (CLS, n['inc_id'], PREFIX)]
-want += ['%s: payload not built - record is not a valid GlideRecord' % CLS] * 4
+want += ['%s: payload not built - record is not a valid GlideRecord' % CLS] * 3 + ['%s: payload not built for sn_vul_vulnerability - record is not a valid GlideRecord' % CLS]
 check('2c exactly one error line per refusal, naming the client property, nothing else logged (%d lines)' % len(want), sorted(n['msgs']) == sorted(want),
       'extra: %s | missing: %s' % ([m for m in n['msgs'] if m not in want], [m for m in want if m not in n['msgs']]))
 check('2d unsupported table and invalid inputs give "", property restored', n['unsupported'] == '' and n['neg'] == [''] * 4 and n['restored'])
+dl, de, dd = [json.loads(n[k])['rem_tasks'][0]['remediation_task'] for k in ('doc_linked', 'doc_empty', 'doc_empty_direct')]
+check('2e a document id renders the display value of its record, and "" when its table field is empty, handed over from inside a function and directly (approval record restored)',
+      dl['record'] == FX['tables']['sn_vul_vulnerability']['numbers']['plural'] and de['record'] == '' and dd['record'] == '' and de['table'] == '' and n['doc_restored'], (dl, de, dd))
 
 # ---------- 3. the deployed script ----------
 src = open(os.path.join(HERE, CLS + '.js')).read()

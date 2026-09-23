@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-22 19:26:03">
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-23 02:19:03">
 <sys_remote_update_set action="INSERT_OR_UPDATE">
 <application display_value="Global">global</application>
 <application_name>Global</application_name>
@@ -20,15 +20,162 @@
 <summary/>
 <sys_class_name>sys_remote_update_set</sys_class_name>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:26:02</sys_created_on>
-<sys_id>7a5de3ec9367c3d0e3aef0aefaba1087</sys_id>
+<sys_created_on>2026-09-23 02:19:02</sys_created_on>
+<sys_id>eceb013c936707d0e3aef0aefaba10cd</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:26:02</sys_updated_on>
+<sys_updated_on>2026-09-23 02:19:02</sys_updated_on>
 <update_set display_value=""/>
 <update_source display_value=""/>
 <updated/>
 </sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_7e221caa93c3c310e3aef0aefaba1072</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>CDP required fields sent for sn_vul_container_vulnerability remediation tasks (sheet Outbound to CDP (RemTask)). One servicenow_field=json_field pair per line, each line ending with a comma, in payload order; a field missing on the table or empty is sent as "". The table is supported only while this property exists.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.fields.sn_vul_container_vulnerability</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:51</sys_created_on><sys_id>7e221caa93c3c310e3aef0aefaba1072</sys_id><sys_mod_count>5</sys_mod_count><sys_name>usem.cdp.remtask.fields.sn_vul_container_vulnerability</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_7e221caa93c3c310e3aef0aefaba1072</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-11 09:33:58</sys_updated_on><type>string</type><value>assigned_to=assigned_to,
+assignment_group=assignment_group,
+assignment_type=assignment_type,
+business_service=business_service,
+close_notes=close_notes,
+closed_at=closed_at,
+closed_by=closed_by,
+cmdb_ci=cmdb_ci,
+comments=comments,
+defer_extend_count=defer_extend_count,
+description=description,
+expected_start=expected_start,
+ignore_date=ignore_date,
+ignore_expiration_dt_tm=until,
+ignored_by=ignored_by,
+number=number,
+opened_at=opened_at,
+opened_by=opened_by,
+reassignment_count=reassignment_count,
+remediation_commitment_dt_tm=remediation_commitment_dt_tm,
+remediation_plan=remediation_plan,
+resolution_date=resolution_date,
+resolution_reason=resolution_reason,
+resolved_by=resolved_by,
+risk_rating=risk_rating,
+risk_score=risk_score,
+service_offering=service_offering,
+short_description=short_description,
+state=state,
+status_updated_on=status_updated_on,
+substate=substate,
+sys_class_name=class_name,
+sys_created_by=created_by,
+sys_created_on=created_on,
+sys_id=sys_id,
+sys_updated_by=updated_by,
+sys_updated_on=updated_on,
+total_cis=total_cis,
+ttr_status=ttr_status,
+ttr_target_date=ttr_target_date,
+cr_count=cr_count,
+ignore_reason=ignore_reason,
+sn_vul_entry=sn_vul_entry,
+total_vis=total_vis,</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=7e221caa93c3c310e3aef0aefaba1072"/></record_update>]]></payload>
+<payload_hash>-585699883</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">eceb013c936707d0e3aef0aefaba10cd</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:19:02</sys_created_on>
+<sys_id>20eb013c936707d0e3aef0aefaba10d0</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc0f28c60000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:19:02</sys_updated_on>
+<table/>
+<target_name>usem.cdp.remtask.fields.sn_vul_container_vulnerability</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>c0eb013cf46707d0d9b7f31fb1e4c52f</update_guid>
+<update_guid_history>c0eb013cf46707d0d9b7f31fb1e4c52f:-585699883,fa5cf009fe174f1058161f605ef99bb6:-585699883,1dbb5c81e0df0f10ebebf9f63c5e4708:-1473478876,932b843e998b47105982daae8b624d54:-585699883,6062b0aec60bc3107fdb770a3c6c7136:-1607002997,cb4aec2aecc7c3103f0dcfb7b087bae0:-1139422323,df225caa31c3c310994735ea1c44fa35:752115198</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_f51214aa93c3c310e3aef0aefaba1096</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description>Fields sent to CDP for every remediation task table (CdpRemediationTaskPayloadBuilder). Comma separated; use json_name=field where the JSON key differs from the field name.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.fields.common</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:30</sys_created_on><sys_id>f51214aa93c3c310e3aef0aefaba1096</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.cdp.remtask.fields.common</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_f51214aa93c3c310e3aef0aefaba1096</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-03 12:04:30</sys_updated_on><type>string</type><value>assigned_to,assignment_group,assignment_type,backup_state,business_duration,business_service,calendar_duration,close_notes,closed_at,closed_by,cmdb_ci,comments,company,contact_type,contract,correlation_display,correlation_id,defer_extend_count,delivery_plan,delivery_task,description,due_date,effort,escalation,expected_start,follow_up,group_key,group_list,ignore_date,ignore_expiration,until=ignore_expiration_dt_tm,ignore_expiration_for_risk_reduction,ignore_expiration_for_risk_reduction_dt_tm,ignored_by,impact,knowledge,location,number,opened_at,opened_by,order,parent,priority,reassignment_count,rejection_goto,remediation_commitment_dt_tm,remediation_plan,resolution_date,resolution_reason,resolved_by,risk_rating,risk_score,route_reason,service_offering,short_description,state,status_updated_on,substate,class_name=sys_class_name,created_by=sys_created_by,created_on=sys_created_on,sys_domain,sys_domain_path,sys_id,sys_mod_count,updated_by=sys_updated_by,updated_on=sys_updated_on,table,task_effective_number,time_worked,total_cis,ttr_status,ttr_target_date,u_confidential,urgency,watch_list,work_end,work_start</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=f51214aa93c3c310e3aef0aefaba1096"/></record_update>]]></payload>
+<payload_hash>1301941943</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">eceb013c936707d0e3aef0aefaba10cd</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:19:02</sys_created_on>
+<sys_id>2ceb413c936707d0e3aef0aefaba100f</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a067883d3f0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:19:02</sys_updated_on>
+<table/>
+<target_name>usem.cdp.remtask.fields.common</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>d52a242a09c7c31092d593c701cf41f8</update_guid>
+<update_guid_history>d52a242a09c7c31092d593c701cf41f8:1301941943,961254aa92c3c310fc370c3cc9f5c0d9:-2086787517</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_fb12d4aa93c3c310e3aef0aefaba1010</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description>Change request association for sn_vul_app_vulnerability as &lt;association table&gt;.&lt;field referencing the remediation task&gt;; feeds change_requests in the CDP payload.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.changes.sn_vul_app_vulnerability</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:38</sys_created_on><sys_id>fb12d4aa93c3c310e3aef0aefaba1010</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.cdp.remtask.changes.sn_vul_app_vulnerability</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_fb12d4aa93c3c310e3aef0aefaba1010</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-03 12:04:38</sys_updated_on><type>string</type><value>sn_vul_app_m2m_vg_change_request.sn_vul_app_vulnerability</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=fb12d4aa93c3c310e3aef0aefaba1010"/></record_update>]]></payload>
+<payload_hash>1448545626</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">eceb013c936707d0e3aef0aefaba10cd</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:19:02</sys_created_on>
+<sys_id>60eb413c936707d0e3aef0aefaba1010</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0678867f60000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:19:02</sys_updated_on>
+<table/>
+<target_name>usem.cdp.remtask.changes.sn_vul_app_vulnerability</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>403a282a0bc7c310c72cda9fd89d8c46</update_guid>
+<update_guid_history>403a282a0bc7c310c72cda9fd89d8c46:1448545626,5822d4aa20c3c3102708eaa06e8932f2:-1669258010</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_9a1254aa93c3c310e3aef0aefaba10df</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description>Change request association for sn_vul_vulnerability as &lt;association table&gt;.&lt;field referencing the remediation task&gt;; feeds change_requests in the CDP payload.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.changes.sn_vul_vulnerability</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:32</sys_created_on><sys_id>9a1254aa93c3c310e3aef0aefaba10df</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.cdp.remtask.changes.sn_vul_vulnerability</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_9a1254aa93c3c310e3aef0aefaba10df</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-03 12:04:32</sys_updated_on><type>string</type><value>sn_vul_m2m_vg_change_request.sn_vul_vulnerability</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=9a1254aa93c3c310e3aef0aefaba10df"/></record_update>]]></payload>
+<payload_hash>-1196664708</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">eceb013c936707d0e3aef0aefaba10cd</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:19:02</sys_created_on>
+<sys_id>64eb013c936707d0e3aef0aefaba10d0</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a067884c8e0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:19:02</sys_updated_on>
+<table/>
+<target_name>usem.cdp.remtask.changes.sn_vul_vulnerability</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>d62aa42a68c7c3100252a3e48a3df19c</update_guid>
+<update_guid_history>d62aa42a68c7c3100252a3e48a3df19c:-1196664708,bb1294aaacc3c310e06026c62224db81:-777212408</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
 <sys_update_xml action="INSERT_OR_UPDATE">
 <action>DELETE</action>
 <application display_value="Global">global</application>
@@ -37,15 +184,15 @@
 <name>sys_properties_441290aa93c3c310e3aef0aefaba10d6</name>
 <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description>Fields of a remediation task sent in the outbound Kafka payload (RemediationTaskPayloadBuilder). Comma separated ServiceNow field names, in payload order.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.remtask.payload.fields</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:23</sys_created_on><sys_id>441290aa93c3c310e3aef0aefaba10d6</sys_id><sys_mod_count>6</sys_mod_count><sys_name>usem.remtask.payload.fields</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_441290aa93c3c310e3aef0aefaba10d6</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-03 12:10:21</sys_updated_on><type>string</type><value>assigned_to,assignment_type,closed_at,closed_by,defer_extend_count,number,opened_at,opened_by,reassignment_count,resolution_date,resolved_by,risk_score,short_description,state,status_updated_on,sys_created_by,sys_created_on,sys_updated_by,sys_updated_on,total_cis,ttr_status,ttr_target_date,defer_count,total_vis,u_verification_status</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=441290aa93c3c310e3aef0aefaba10d6"/></record_update>]]></payload>
 <payload_hash>-323801935</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">7a5de3ec9367c3d0e3aef0aefaba1087</remote_update_set>
+<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">eceb013c936707d0e3aef0aefaba10cd</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:26:02</sys_created_on>
-<sys_id>325de3ec9367c3d0e3aef0aefaba1088</sys_id>
+<sys_created_on>2026-09-23 02:19:02</sys_created_on>
+<sys_id>a4eb013c936707d0e3aef0aefaba10ce</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_recorded_at>1a0678844320000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:26:02</sys_updated_on>
+<sys_updated_on>2026-09-23 02:19:02</sys_updated_on>
 <table/>
 <target_name>usem.remtask.payload.fields</target_name>
 <type>System Property</type>
@@ -61,7 +208,7 @@
 <category>customer</category>
 <comments/>
 <name>sys_properties_53225caa93c3c310e3aef0aefaba1093</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>CDP required fields sent for sn_vul_vulnerability remediation tasks (sheet Outbound to CDP (RemTask)). One servicenow_field=json_field pair per line, each line ending with a comma, in payload order; a field missing on the table or empty is sent as "". The table is supported only while this property exists.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.fields.sn_vul_vulnerability</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:52</sys_created_on><sys_id>53225caa93c3c310e3aef0aefaba1093</sys_id><sys_mod_count>118</sys_mod_count><sys_name>usem.cdp.remtask.fields.sn_vul_vulnerability</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_53225caa93c3c310e3aef0aefaba1093</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 18:34:48</sys_updated_on><type>string</type><value>assigned_to=assigned_to,
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>CDP required fields sent for sn_vul_vulnerability remediation tasks (sheet Outbound to CDP (RemTask)). One servicenow_field=json_field pair per line, each line ending with a comma, in payload order; a field missing on the table or empty is sent as "". The table is supported only while this property exists.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.fields.sn_vul_vulnerability</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:52</sys_created_on><sys_id>53225caa93c3c310e3aef0aefaba1093</sys_id><sys_mod_count>166</sys_mod_count><sys_name>usem.cdp.remtask.fields.sn_vul_vulnerability</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_53225caa93c3c310e3aef0aefaba1093</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:17:49</sys_updated_on><type>string</type><value>assigned_to=assigned_to,
 assignment_group=assignment_group,
 assignment_type=assignment_type,
 business_service=business_service,
@@ -110,171 +257,21 @@ patch_sch=patch_sch,
 sn_vul_entry=sn_vul_entry,
 total_vis=total_vis,</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=53225caa93c3c310e3aef0aefaba1093"/></record_update>]]></payload>
 <payload_hash>-894056031</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">7a5de3ec9367c3d0e3aef0aefaba1087</remote_update_set>
+<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">eceb013c936707d0e3aef0aefaba10cd</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:26:02</sys_created_on>
-<sys_id>325de3ec9367c3d0e3aef0aefaba1089</sys_id>
+<sys_created_on>2026-09-23 02:19:02</sys_created_on>
+<sys_id>a4eb013c936707d0e3aef0aefaba10cf</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca90ca630000001</sys_recorded_at>
+<sys_recorded_at>1a0cc0f28680000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:26:02</sys_updated_on>
+<sys_updated_on>2026-09-23 02:19:02</sys_updated_on>
 <table/>
 <target_name>usem.cdp.remtask.fields.sn_vul_vulnerability</target_name>
 <type>System Property</type>
 <update_domain>global</update_domain>
-<update_guid>9a4c63a8b167c3d034aeb9e620667604</update_guid>
-<update_guid_history>9a4c63a8b167c3d034aeb9e620667604:-894056031,e8a1232093e3c3d0415dfc717c62b089:-894056031,98a1efeccda3c3d0fbcbf6ef17c3b243:964584467,2a916fec68a3c3d0bc5557d4d669bbfa:-1507245088,d6912fec13a3c3d0a1efbcf45d43719d:463017016,4e91ebecc7a3c3d0f5ec9fda5ee741f5:1893613576,2191ebec56a3c3d03fec3f9eea06f000:1821576243,b7812becafa3c3d04b62dc66c51a0cc8:976223887,8a81e7ec51a3c3d0b38d02df54be8e24:-2026000810,f181a7ec16a3c3d0e535a02c7ab65e7f:-325216158,a98127eccfa3c3d062a63e2de46f1007:1771150737,3771e3ec85a3c3d090c4f7e401f5b612:139595617,467123ec0ea3c3d0f98c6347b43c6f57:-1538142412,6f212b6c31a3c3d09081e99fa871099d:-894056031,9f21e76c36a3c3d044e0cbd763798ed6:964584467,5921676cc9a3c3d0655689396994ef90:-1507245088,4121276ccea3c3d01e8b87c290ab81df:463017016,9b11a36c99a3c3d0422b4a5ee469a599:1893613576,ad11236c9ea3c3d07250a1cdc997c3c3:1821576243,b301236c70a3c3d0e1f21af7f9915963:976223887,da01af2ca2a3c3d08618029295e4ee01:-2026000810,f5012f2c20a3c3d0e1589df23f7ef986:-325216158,dd01eb2cd3a3c3d07a72ccbe7969b0ec:1771150737,b401ab2c9fa3c3d05ef7599613d74c01:139595617,94016b2c1ca3c3d07b0b45c9ed6e174e:-1538142412,19bfdfe456a3c3d042a9fc648a95e12f:-894056031,0dafdbe423a3c3d07429aba5ee1d4460:964584467,9f9f5be44ba3c3d0d76b7662d2192c96:-1507245088,369fd7e434a3c3d0f5fe204390dae7e5:463017016,2e9fd7e4bfa3c3d038cf1f8c3f3f9894:1893613576,9e9f97e421a3c3d05fae6fded284ac8e:1821576243,7d9f57e43ba3c3d06556b810f2503b6a:976223887,a19f17e4baa3c3d011fa05d3ba247933:-2026000810,0d9fd3e48ba3c3d031590d4c25f698d6:-325216158,ec9f93e4afa3c3d0455524df67ad94c4:1771150737,c09f53e42fa3c3d0db04ece833689b26:139595617,2b8f13e442a3c3d08218712c18f463c8:-1538142412,a56f57a4f4a3c3d08ac985c7726c9159:-894056031,846fd3a455a3c3d0599541fbc72bdf38:964584467,6f5f93a43aa3c3d067dc4081ae152b6a:-1507245088,475f53a434a3c3d062b04e333dcbea35:463017016,7e5f13a456a3c3d016f41b352be5c33d:1893613576,225fdf642ba3c3d0a62ae2082c4699c8:1821576243,ab4f5f6472a3c3d0411d4a7d48bbbc2a:976223887,b14fdb64f8a3c3d07439085736283354:-2026000810,654f9b6493a3c3d013d0f0f7cfd127f9:-325216158,894f5b64c4a3c3d0d27c9dc778b4d2bd:1771150737,744f1b643ca3c3d07b3197419627cf08:139595617,4c4fd764c9a3c3d09d8ce7be1d563b90:-1538142412,470f9b24c0a3c3d09e3df781a4258ce2:-894056031,a60f5b2469a3c3d0a89924f351a04483:964584467,520f1b24bca3c3d0120f58a8346995b0:-1507245088,4a0fd72485a3c3d09f43172764b3731d:463017016,a90f972445a3c3d0d1c2cf9a066cd987:1893613576,1d0f572410a3c3d0e61d384f52fd2de0:1821576243,f00f172418a3c3d02368608e70dc706e:976223887,240f932483a3c3d05440123fec2529d9:-2026000810,72fe932408a3c3d06c7654137a982353:-325216158,aafe132449a3c3d0cd319d338a20ccc7:1771150737,39fe9fe072a3c3d063687b80436d6a15:139595617,3bee5fe039a3c3d09a6d90d59d212014:-1538142412,dabe13e09ca3c3d038c6c6d4fe938e46:-894056031,4abedfa0b3a3c3d002fcdd9932aaa504:964584467,2dbe9fa00ea3c3d035d92229f0ca4766:-1507245088,37ae1fa0c6a3c3d090ffe1ce2090bfaa:463017016,c2ae9ba08fa3c3d090d1dd6064c413ec:1893613576,9cae5ba0cea3c3d06d2ca197817f6d53:1821576243,3b9e1ba0cba3c3d0649e47889a9d8e28:976223887,a39ed7a02ca3c3d06a83ee7e35bfdd47:-2026000810,5f9e97a0b2a3c3d097ff3b01ecb59c44:-325216158,b29e57a0dba3c3d017c96938b41a066c:1771150737,749e93a0a0a3c3d06b3a776e36c47402:139595617,b68e53a06fa3c3d027d3ff818aff240a:-1538142412,89350d418a974f108d186e4249dea0bb:-894056031,bc350d41e7974f10913bbf6456097b6a:964584467,68358941ae974f105ac61de36a4401fc:-87277150,1d8c70494b174f1011dd8fd83f6c46d1:-894056031,b88c3049a1174f1071bdb12fee958a56:964584467,208cfc09db174f10357b9c373d6d448c:-87277150,bf6cf80966174f10078b6792ab20a31f:-894056031,eb6cb80998174f108dd4372651ec414c:964584467,9b6c780967174f10e4be1ca6dbf7fe73:-87277150,165cb00903174f1072eb1a3544014305:-894056031,fb0c1c055adf0f10dcdbc3ed15c9c063:1533167018,5b0c98056cdf0f10c91f3b913a375af5:557536366,310c180510df0f1094b1830eb8fe58c8:-710722501,110c180535df0f10915714c32d284e46:-867237501,93fb9405fbdf0f107a37730541eede23:-179673062,31fb1405acdf0f1090cb102990fab5bc:1190165160,d5fbd005fddf0f10392d3b80ccb7ea4e:750056857,a6dbd8c1f1df0f10e874099e13340442:1533167018,92db98c177df0f10d8aa0d5390cadd8e:557536366,4adb58c105df0f10b1f6e95446c8f723:-710722501,bddb18c1efdf0f109e2ca75a7f42e31c:-867237501,21dbd4c1badf0f109b19e813f946b0ce:-179673062,dddb94c137df0f10bac2b5ac7d48da55:1190165160,34db14c1b4df0f10525e578f0f688660:750056857,a4ab588179df0f104342d64b38d6b3f0:1533167018,cc4b4c3e938b47109677de8cb42c94ae:-894056031,7f3bc83e248b47108fd94ea27ab3c5af:964584467,823b883e158b4710cbe0e7224f2f576e:-87277150,7c2b403e3d8b4710322d9af9d30b0cf9:-894056031,6e72b8aeb00bc310cdb6e78460e72f6b:588387963,f87278ae4d0bc31091d4555e4a21e106:-1711419049,3e62b4ae2e0bc3104dadc2234ea610a2:286495852,8a52bc6eda0bc31053d1cb0961bea823:588387963,a88a2c6a48c7c3102c5ebdf505cdcc80:108506049,b67ae86abcc7c310d095437bbefbd998:-1358510497,5d7aa86a36c7c310600fcfbdb3b2ac28:-58400074,bb3a6c2a0ac7c310c58cca9b0c4b6f50:108506049,826318ee8fc3c310dd0d2f2fa22c2133:-738014627,a16394ee32c3c310793be309cd2ea1a0:-573118912,456394eea9c3c310ea1bd983ed10e827:-2061724670,0b825c2ef9c3c31063bf0fa85670196a:-738014627,e982982e99c3c310e7f5f284555eae1e:-573118912,7b72582e10c3c310673db99c5d7fcd49:-2061724670,3e4218eaf7c3c3100da74161e57a532b:-738014627,cd4294eabcc3c310bbb1b131b30e12b7:-573118912,bc4254ea9ec3c3105826417f7c8a246d:-613954808,b7225caa0ec3c310324b3dd9eea782e6:-738014627</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value="Global">global</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_bf229caa93c3c310e3aef0aefaba1068</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>CDP required fields sent for sn_vulc_result_group remediation tasks (sheet Outbound to CDP (RemTask)). One servicenow_field=json_field pair per line, each line ending with a comma, in payload order; a field missing on the table or empty is sent as "". The table is supported only while this property exists.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.fields.sn_vulc_result_group</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:54</sys_created_on><sys_id>bf229caa93c3c310e3aef0aefaba1068</sys_id><sys_mod_count>5</sys_mod_count><sys_name>usem.cdp.remtask.fields.sn_vulc_result_group</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_bf229caa93c3c310e3aef0aefaba1068</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-11 09:33:59</sys_updated_on><type>string</type><value>assigned_to=assigned_to,
-assignment_group=assignment_group,
-assignment_type=assignment_type,
-business_service=business_service,
-close_notes=close_notes,
-closed_at=closed_at,
-closed_by=closed_by,
-cmdb_ci=cmdb_ci,
-comments=comments,
-defer_extend_count=defer_extend_count,
-description=description,
-expected_start=expected_start,
-ignore_date=ignore_date,
-ignore_expiration_dt_tm=until,
-ignored_by=ignored_by,
-number=number,
-opened_at=opened_at,
-opened_by=opened_by,
-reassignment_count=reassignment_count,
-remediation_commitment_dt_tm=remediation_commitment_dt_tm,
-remediation_plan=remediation_plan,
-resolution_date=resolution_date,
-resolution_reason=resolution_reason,
-resolved_by=resolved_by,
-risk_rating=risk_rating,
-risk_score=risk_score,
-service_offering=service_offering,
-short_description=short_description,
-state=state,
-status_updated_on=status_updated_on,
-substate=substate,
-sys_class_name=class_name,
-sys_created_by=created_by,
-sys_created_on=created_on,
-sys_id=sys_id,
-sys_updated_by=updated_by,
-sys_updated_on=updated_on,
-total_cis=total_cis,
-ttr_status=ttr_status,
-ttr_target_date=ttr_target_date,
-change_request=change_request,
-condition=condition,
-control=control,
-defer_count=defer_count,
-defer_reason=defer_reason,
-manually_modified=manually_modified,
-total_test_results=total_test_results,</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=bf229caa93c3c310e3aef0aefaba1068"/></record_update>]]></payload>
-<payload_hash>1771364326</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">7a5de3ec9367c3d0e3aef0aefaba1087</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:26:02</sys_created_on>
-<sys_id>365de3ec9367c3d0e3aef0aefaba108a</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca90cacd0000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:26:02</sys_updated_on>
-<table/>
-<target_name>usem.cdp.remtask.fields.sn_vulc_result_group</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>964c63a86367c3d0067ed18a889ec90c</update_guid>
-<update_guid_history>964c63a86367c3d0067ed18a889ec90c:1771364326,146c3409db174f106d1ed624f247df71:1771364326,35bbdc81f9df0f107e67af6c83e71a88:-692625962,372b843e938b47107b42fb8206a1eae5:1771364326,c56234ae9d0bc310ed01750e3b9dbe55:1962120334,305a606a7bc7c310fbd22ab5f99d95c4:-89010646,4832dcaa40c3c310613070c58dc2fc38:-926296251</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="Global">global</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_fb12d4aa93c3c310e3aef0aefaba1010</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description>Change request association for sn_vul_app_vulnerability as &lt;association table&gt;.&lt;field referencing the remediation task&gt;; feeds change_requests in the CDP payload.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.changes.sn_vul_app_vulnerability</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:38</sys_created_on><sys_id>fb12d4aa93c3c310e3aef0aefaba1010</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.cdp.remtask.changes.sn_vul_app_vulnerability</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_fb12d4aa93c3c310e3aef0aefaba1010</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-03 12:04:38</sys_updated_on><type>string</type><value>sn_vul_app_m2m_vg_change_request.sn_vul_app_vulnerability</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=fb12d4aa93c3c310e3aef0aefaba1010"/></record_update>]]></payload>
-<payload_hash>1448545626</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">7a5de3ec9367c3d0e3aef0aefaba1087</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:26:02</sys_created_on>
-<sys_id>3a5de3ec9367c3d0e3aef0aefaba108b</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0678867f60000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:26:02</sys_updated_on>
-<table/>
-<target_name>usem.cdp.remtask.changes.sn_vul_app_vulnerability</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>403a282a0bc7c310c72cda9fd89d8c46</update_guid>
-<update_guid_history>403a282a0bc7c310c72cda9fd89d8c46:1448545626,5822d4aa20c3c3102708eaa06e8932f2:-1669258010</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="Global">global</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_5c22d4aa93c3c310e3aef0aefaba10f8</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description>Change request association for sn_vul_container_vulnerability as &lt;association table&gt;.&lt;field referencing the remediation task&gt;; feeds change_requests in the CDP payload.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.changes.sn_vul_container_vulnerability</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:41</sys_created_on><sys_id>5c22d4aa93c3c310e3aef0aefaba10f8</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.cdp.remtask.changes.sn_vul_container_vulnerability</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_5c22d4aa93c3c310e3aef0aefaba10f8</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-03 12:04:41</sys_updated_on><type>string</type><value>sn_vul_container_m2m_remediation_task_change_request.sn_vul_container_vulnerability</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=5c22d4aa93c3c310e3aef0aefaba10f8"/></record_update>]]></payload>
-<payload_hash>1263668940</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">7a5de3ec9367c3d0e3aef0aefaba1087</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:26:02</sys_created_on>
-<sys_id>765de3ec9367c3d0e3aef0aefaba1089</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a067886e060000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:26:02</sys_updated_on>
-<table/>
-<target_name>usem.cdp.remtask.changes.sn_vul_container_vulnerability</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>e03a682a83c7c310ab27de65d01a6d48</update_guid>
-<update_guid_history>e03a682a83c7c310ab27de65d01a6d48:1263668940,0a2298aa14c3c3102f81ce98cf4aff46:2078278744</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="Global">global</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_ca2298aa93c3c310e3aef0aefaba104c</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description>Change request association for sn_vulc_result_group as &lt;association table&gt;.&lt;field referencing the remediation task&gt;; feeds change_requests in the CDP payload.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.changes.sn_vulc_result_group</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:48</sys_created_on><sys_id>ca2298aa93c3c310e3aef0aefaba104c</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.cdp.remtask.changes.sn_vulc_result_group</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_ca2298aa93c3c310e3aef0aefaba104c</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-03 12:04:48</sys_updated_on><type>string</type><value>sn_vulc_m2m_trg_change_request.result_group</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=ca2298aa93c3c310e3aef0aefaba104c"/></record_update>]]></payload>
-<payload_hash>-1182673126</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">7a5de3ec9367c3d0e3aef0aefaba1087</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:26:02</sys_created_on>
-<sys_id>7a5de3ec9367c3d0e3aef0aefaba108a</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0678888f20000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:26:02</sys_updated_on>
-<table/>
-<target_name>usem.cdp.remtask.changes.sn_vulc_result_group</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>4e3aa82ad4c7c3104522fadc74b326fd</update_guid>
-<update_guid_history>4e3aa82ad4c7c3104522fadc74b326fd:-1182673126,2e22d8aa5ac3c3107f4a0d8478fb0526:1487160742</update_guid_history>
+<update_guid>cceb013c2c6707d0cc9ea16e7ac4bd29</update_guid>
+<update_guid_history>cceb013c2c6707d0cc9ea16e7ac4bd29:-894056031,8b9b09b8676707d05cc4aa752e2c7aa8:-894056031,269bc5b83a6707d04be039e1ee6650f4:964584467,da9b85b8be6707d09b697096588fabf0:-1507245088,f59b85b8e66707d0c8df33100d06c733:463017016,489b05b8876707d03d2bd6b11cd17c82:1893613576,f78bc1b8ae6707d04f404818e46f18ba:1821576243,1e8b41b8a46707d03a5bac824c0adcbc:976223887,718bcd789f6707d06fa98714123496f7:-2026000810,008bcd788b6707d01fe960c798857e40:-325216158,d67b4d78fd6707d02fff2e58ec51b882:1771150737,7c7bc9786a6707d02d3f4ea36c9c2c6d:139595617,cb6b49785b6707d060c47524bead35b0:-1538142412,7b1b4df42a6707d09abc1555d09cfd6a:-894056031,821bc9f4686707d01b3275b1ba24b389:964584467,901b89f42c6707d04432b6a3793c84dd:-1507245088,081b49f4406707d03c288a799f82f9b9:463017016,e70b49f4526707d01275cdce23ccdd45:1893613576,d70b09f4b56707d09e0b2cfe4aedfe2d:1821576243,7a0b85f4256707d0150097a46d52d9ac:976223887,450b45f4be6707d088240957975b10d0:-2026000810,b00b05f42e6707d026476c8191f68436:-325216158,540b81f4336707d0bc028b190c0af04b:1771150737,f3fa41f4076707d07a640651f03945d2:139595617,e5facdb43d6707d08eaf6012a2324c67:-1538142412,7f1def6c4f67c3d0ecb0a015648e7ecb:-894056031,d71d6f6ca367c3d067830ec28e92e299:964584467,2d1d2f6cb067c3d0052798ed96827188:-1507245088,111d2f6cd167c3d09a5995ab9fbf7c2b:463017016,f81dab6c4d67c3d0fa2d4ab0d9d4070e:1893613576,b00d2b6c0367c3d0c061e0eb12e0d815:1821576243,9c0da76cfc67c3d0d1a4904a02f0fbc5:976223887,73fc676c1d67c3d051bb1544ce64ba70:-2026000810,2ffc276c6d67c3d04e7b671d696b942c:-325216158,9bfce36c4767c3d0e97e0c01993e22db:1771150737,f2fca36c1b67c3d0888058263d54b3fa:139595617,1afc636c9f67c3d0bf9133f856755af6:-1538142412,ca9ca7e85b67c3d09504880728731693:-894056031,c09c27e80967c3d07eec1c5d52689b35:964584467,1e8ca3e8ce67c3d004d0aa9774be75c1:-1507245088,e08c63e80e67c3d07ae06a8ec83b8df0:463017016,4c8c63e8fe67c3d0c7d4e75bac8c8f22:1893613576,337cefa81767c3d034261ac10f8667f4:1821576243,937cefa81767c3d0a8419ff52d74463f:976223887,8f7c2fa8da67c3d0a0eee5201edb1ae0:-2026000810,336ceba88867c3d0ad951373040c32c4:-325216158,d76caba84867c3d078a2f38b357a68a0:1771150737,7a6c6ba80467c3d0c5a9fd00fb1f177d:139595617,926c2ba87e67c3d0888172e5804f4a7e:-1538142412,e8a1232093e3c3d0415dfc717c62b089:-894056031,98a1efeccda3c3d0fbcbf6ef17c3b243:964584467,2a916fec68a3c3d0bc5557d4d669bbfa:-1507245088,d6912fec13a3c3d0a1efbcf45d43719d:463017016,4e91ebecc7a3c3d0f5ec9fda5ee741f5:1893613576,2191ebec56a3c3d03fec3f9eea06f000:1821576243,b7812becafa3c3d04b62dc66c51a0cc8:976223887,8a81e7ec51a3c3d0b38d02df54be8e24:-2026000810,f181a7ec16a3c3d0e535a02c7ab65e7f:-325216158,a98127eccfa3c3d062a63e2de46f1007:1771150737,3771e3ec85a3c3d090c4f7e401f5b612:139595617,467123ec0ea3c3d0f98c6347b43c6f57:-1538142412,6f212b6c31a3c3d09081e99fa871099d:-894056031,9f21e76c36a3c3d044e0cbd763798ed6:964584467,5921676cc9a3c3d0655689396994ef90:-1507245088,4121276ccea3c3d01e8b87c290ab81df:463017016,9b11a36c99a3c3d0422b4a5ee469a599:1893613576,ad11236c9ea3c3d07250a1cdc997c3c3:1821576243,b301236c70a3c3d0e1f21af7f9915963:976223887,da01af2ca2a3c3d08618029295e4ee01:-2026000810,f5012f2c20a3c3d0e1589df23f7ef986:-325216158,dd01eb2cd3a3c3d07a72ccbe7969b0ec:1771150737,b401ab2c9fa3c3d05ef7599613d74c01:139595617,94016b2c1ca3c3d07b0b45c9ed6e174e:-1538142412,19bfdfe456a3c3d042a9fc648a95e12f:-894056031,0dafdbe423a3c3d07429aba5ee1d4460:964584467,9f9f5be44ba3c3d0d76b7662d2192c96:-1507245088,369fd7e434a3c3d0f5fe204390dae7e5:463017016,2e9fd7e4bfa3c3d038cf1f8c3f3f9894:1893613576,9e9f97e421a3c3d05fae6fded284ac8e:1821576243,7d9f57e43ba3c3d06556b810f2503b6a:976223887,a19f17e4baa3c3d011fa05d3ba247933:-2026000810,0d9fd3e48ba3c3d031590d4c25f698d6:-325216158,ec9f93e4afa3c3d0455524df67ad94c4:1771150737,c09f53e42fa3c3d0db04ece833689b26:139595617,2b8f13e442a3c3d08218712c18f463c8:-1538142412,a56f57a4f4a3c3d08ac985c7726c9159:-894056031,846fd3a455a3c3d0599541fbc72bdf38:964584467,6f5f93a43aa3c3d067dc4081ae152b6a:-1507245088,475f53a434a3c3d062b04e333dcbea35:463017016,7e5f13a456a3c3d016f41b352be5c33d:1893613576,225fdf642ba3c3d0a62ae2082c4699c8:1821576243,ab4f5f6472a3c3d0411d4a7d48bbbc2a:976223887,b14fdb64f8a3c3d07439085736283354:-2026000810,654f9b6493a3c3d013d0f0f7cfd127f9:-325216158,894f5b64c4a3c3d0d27c9dc778b4d2bd:1771150737,744f1b643ca3c3d07b3197419627cf08:139595617,4c4fd764c9a3c3d09d8ce7be1d563b90:-1538142412,470f9b24c0a3c3d09e3df781a4258ce2:-894056031,a60f5b2469a3c3d0a89924f351a04483:964584467,520f1b24bca3c3d0120f58a8346995b0:-1507245088,4a0fd72485a3c3d09f43172764b3731d:463017016,a90f972445a3c3d0d1c2cf9a066cd987:1893613576,1d0f572410a3c3d0e61d384f52fd2de0:1821576243,f00f172418a3c3d02368608e70dc706e:976223887,240f932483a3c3d05440123fec2529d9:-2026000810,72fe932408a3c3d06c7654137a982353:-325216158,aafe132449a3c3d0cd319d338a20ccc7:1771150737,39fe9fe072a3c3d063687b80436d6a15:139595617,3bee5fe039a3c3d09a6d90d59d212014:-1538142412,dabe13e09ca3c3d038c6c6d4fe938e46:-894056031,4abedfa0b3a3c3d002fcdd9932aaa504:964584467,2dbe9fa00ea3c3d035d92229f0ca4766:-1507245088,37ae1fa0c6a3c3d090ffe1ce2090bfaa:463017016,c2ae9ba08fa3c3d090d1dd6064c413ec:1893613576,9cae5ba0cea3c3d06d2ca197817f6d53:1821576243,3b9e1ba0cba3c3d0649e47889a9d8e28:976223887,a39ed7a02ca3c3d06a83ee7e35bfdd47:-2026000810,5f9e97a0b2a3c3d097ff3b01ecb59c44:-325216158,b29e57a0dba3c3d017c96938b41a066c:1771150737,749e93a0a0a3c3d06b3a776e36c47402:139595617,b68e53a06fa3c3d027d3ff818aff240a:-1538142412,89350d418a974f108d186e4249dea0bb:-894056031,bc350d41e7974f10913bbf6456097b6a:964584467,68358941ae974f105ac61de36a4401fc:-87277150,1d8c70494b174f1011dd8fd83f6c46d1:-894056031,b88c3049a1174f1071bdb12fee958a56:964584467,208cfc09db174f10357b9c373d6d448c:-87277150,bf6cf80966174f10078b6792ab20a31f:-894056031,eb6cb80998174f108dd4372651ec414c:964584467,9b6c780967174f10e4be1ca6dbf7fe73:-87277150,165cb00903174f1072eb1a3544014305:-894056031,fb0c1c055adf0f10dcdbc3ed15c9c063:1533167018,5b0c98056cdf0f10c91f3b913a375af5:557536366,310c180510df0f1094b1830eb8fe58c8:-710722501,110c180535df0f10915714c32d284e46:-867237501,93fb9405fbdf0f107a37730541eede23:-179673062,31fb1405acdf0f1090cb102990fab5bc:1190165160,d5fbd005fddf0f10392d3b80ccb7ea4e:750056857,a6dbd8c1f1df0f10e874099e13340442:1533167018,92db98c177df0f10d8aa0d5390cadd8e:557536366,4adb58c105df0f10b1f6e95446c8f723:-710722501,bddb18c1efdf0f109e2ca75a7f42e31c:-867237501,21dbd4c1badf0f109b19e813f946b0ce:-179673062,dddb94c137df0f10bac2b5ac7d48da55:1190165160,34db14c1b4df0f10525e578f0f688660:750056857,a4ab588179df0f104342d64b38d6b3f0:1533167018,cc4b4c3e938b47109677de8cb42c94ae:-894056031,7f3bc83e248b47108fd94ea27ab3c5af:964584467,823b883e158b4710cbe0e7224f2f576e:-87277150,7c2b403e3d8b4710322d9af9d30b0cf9:-894056031,6e72b8aeb00bc310cdb6e78460e72f6b:588387963,f87278ae4d0bc31091d4555e4a21e106:-1711419049,3e62b4ae2e0bc3104dadc2234ea610a2:286495852,8a52bc6eda0bc31053d1cb0961bea823:588387963,a88a2c6a48c7c3102c5ebdf505cdcc80:108506049,b67ae86abcc7c310d095437bbefbd998:-1358510497,5d7aa86a36c7c310600fcfbdb3b2ac28:-58400074,bb3a6c2a0ac7c310c58cca9b0c4b6f50:108506049,826318ee8fc3c310dd0d2f2fa22c2133:-738014627,a16394ee32c3c310793be309cd2ea1a0:-573118912,456394eea9c3c310ea1bd983ed10e827:-2061724670,0b825c2ef9c3c31063bf0fa85670196a:-738014627,e982982e99c3c310e7f5f284555eae1e:-573118912,7b72582e10c3c310673db99c5d7fcd49:-2061724670,3e4218eaf7c3c3100da74161e57a532b:-738014627,cd4294eabcc3c310bbb1b131b30e12b7:-573118912,bc4254ea9ec3c3105826417f7c8a246d:-613954808,b7225caa0ec3c310324b3dd9eea782e6:-738014627</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -351,21 +348,192 @@ CdpRemediationTaskPayloadBuilder.prototype = Object.extendsObject(RemediationTas
 });
 ]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-03 11:24:14&lt;/sys_created_on&gt;&lt;sys_id&gt;7bd840e29383c310e3aef0aefaba10b8&lt;/sys_id&gt;&lt;sys_mod_count&gt;3&lt;/sys_mod_count&gt;&lt;sys_name&gt;CdpRemediationTaskPayloadBuilder&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_7bd840e29383c310e3aef0aefaba10b8&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-03 12:04:56&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
 <payload_hash>-630720395</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">7a5de3ec9367c3d0e3aef0aefaba1087</remote_update_set>
+<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">eceb013c936707d0e3aef0aefaba10cd</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:26:02</sys_created_on>
-<sys_id>7e5de3ec9367c3d0e3aef0aefaba108b</sys_id>
+<sys_created_on>2026-09-23 02:19:02</sys_created_on>
+<sys_id>a4eb413c936707d0e3aef0aefaba1010</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_recorded_at>1a0678806ac0000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:26:02</sys_updated_on>
+<sys_updated_on>2026-09-23 02:19:02</sys_updated_on>
 <table/>
 <target_name>CdpRemediationTaskPayloadBuilder</target_name>
 <type>Script Include</type>
 <update_domain>global</update_domain>
 <update_guid>8e1aa02ab7c7c3105b1be2453ed73180</update_guid>
 <update_guid_history>8e1aa02ab7c7c3105b1be2453ed73180:-630720395,8832dcaa82c3c310a424fc83f3e30ee0:-1813065727,bba018a66bc3c31075655c36f1647f47:-971903234,9d294ce2be83c3102df8aa67ed6d6b0e:2027416365,73d840e21583c3107cbb48c461dc8dbb:1418676414</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_bf229caa93c3c310e3aef0aefaba1068</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>CDP required fields sent for sn_vulc_result_group remediation tasks (sheet Outbound to CDP (RemTask)). One servicenow_field=json_field pair per line, each line ending with a comma, in payload order; a field missing on the table or empty is sent as "". The table is supported only while this property exists.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.fields.sn_vulc_result_group</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:54</sys_created_on><sys_id>bf229caa93c3c310e3aef0aefaba1068</sys_id><sys_mod_count>5</sys_mod_count><sys_name>usem.cdp.remtask.fields.sn_vulc_result_group</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_bf229caa93c3c310e3aef0aefaba1068</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-11 09:33:59</sys_updated_on><type>string</type><value>assigned_to=assigned_to,
+assignment_group=assignment_group,
+assignment_type=assignment_type,
+business_service=business_service,
+close_notes=close_notes,
+closed_at=closed_at,
+closed_by=closed_by,
+cmdb_ci=cmdb_ci,
+comments=comments,
+defer_extend_count=defer_extend_count,
+description=description,
+expected_start=expected_start,
+ignore_date=ignore_date,
+ignore_expiration_dt_tm=until,
+ignored_by=ignored_by,
+number=number,
+opened_at=opened_at,
+opened_by=opened_by,
+reassignment_count=reassignment_count,
+remediation_commitment_dt_tm=remediation_commitment_dt_tm,
+remediation_plan=remediation_plan,
+resolution_date=resolution_date,
+resolution_reason=resolution_reason,
+resolved_by=resolved_by,
+risk_rating=risk_rating,
+risk_score=risk_score,
+service_offering=service_offering,
+short_description=short_description,
+state=state,
+status_updated_on=status_updated_on,
+substate=substate,
+sys_class_name=class_name,
+sys_created_by=created_by,
+sys_created_on=created_on,
+sys_id=sys_id,
+sys_updated_by=updated_by,
+sys_updated_on=updated_on,
+total_cis=total_cis,
+ttr_status=ttr_status,
+ttr_target_date=ttr_target_date,
+change_request=change_request,
+condition=condition,
+control=control,
+defer_count=defer_count,
+defer_reason=defer_reason,
+manually_modified=manually_modified,
+total_test_results=total_test_results,</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=bf229caa93c3c310e3aef0aefaba1068"/></record_update>]]></payload>
+<payload_hash>1771364326</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">eceb013c936707d0e3aef0aefaba10cd</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:19:02</sys_created_on>
+<sys_id>a8eb013c936707d0e3aef0aefaba10d0</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc0f28e80000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:19:02</sys_updated_on>
+<table/>
+<target_name>usem.cdp.remtask.fields.sn_vulc_result_group</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>c8eb013c5c6707d0b582f509fc2fd231</update_guid>
+<update_guid_history>c8eb013c5c6707d0b582f509fc2fd231:1771364326,146c3409db174f106d1ed624f247df71:1771364326,35bbdc81f9df0f107e67af6c83e71a88:-692625962,372b843e938b47107b42fb8206a1eae5:1771364326,c56234ae9d0bc310ed01750e3b9dbe55:1962120334,305a606a7bc7c310fbd22ab5f99d95c4:-89010646,4832dcaa40c3c310613070c58dc2fc38:-926296251</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_ee22d8aa93c3c310e3aef0aefaba102c</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>CDP required fields sent for sn_vul_app_vulnerability remediation tasks (sheet Outbound to CDP (RemTask)). One servicenow_field=json_field pair per line, each line ending with a comma, in payload order; a field missing on the table or empty is sent as "". The table is supported only while this property exists.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.fields.sn_vul_app_vulnerability</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:49</sys_created_on><sys_id>ee22d8aa93c3c310e3aef0aefaba102c</sys_id><sys_mod_count>5</sys_mod_count><sys_name>usem.cdp.remtask.fields.sn_vul_app_vulnerability</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_ee22d8aa93c3c310e3aef0aefaba102c</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-11 09:33:57</sys_updated_on><type>string</type><value>assigned_to=assigned_to,
+assignment_group=assignment_group,
+assignment_type=assignment_type,
+business_service=business_service,
+close_notes=close_notes,
+closed_at=closed_at,
+closed_by=closed_by,
+cmdb_ci=cmdb_ci,
+comments=comments,
+defer_extend_count=defer_extend_count,
+description=description,
+expected_start=expected_start,
+ignore_date=ignore_date,
+ignore_expiration_dt_tm=until,
+ignored_by=ignored_by,
+number=number,
+opened_at=opened_at,
+opened_by=opened_by,
+reassignment_count=reassignment_count,
+remediation_commitment_dt_tm=remediation_commitment_dt_tm,
+remediation_plan=remediation_plan,
+resolution_date=resolution_date,
+resolution_reason=resolution_reason,
+resolved_by=resolved_by,
+risk_rating=risk_rating,
+risk_score=risk_score,
+service_offering=service_offering,
+short_description=short_description,
+state=state,
+status_updated_on=status_updated_on,
+substate=substate,
+sys_class_name=class_name,
+sys_created_by=created_by,
+sys_created_on=created_on,
+sys_id=sys_id,
+sys_updated_by=updated_by,
+sys_updated_on=updated_on,
+total_cis=total_cis,
+ttr_status=ttr_status,
+ttr_target_date=ttr_target_date,
+cr_count=cr_count,
+defer_count=defer_count,
+ignore_reason=ignore_reason,
+remediation_commitment_date=remediation_commitment_date,
+sn_vul_entry=sn_vul_entry,
+total_vis=total_vis,
+u_avul_record_url=u_avul_record_url,
+u_verification_status=u_verification_status,</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=ee22d8aa93c3c310e3aef0aefaba102c"/></record_update>]]></payload>
+<payload_hash>1576886837</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">eceb013c936707d0e3aef0aefaba10cd</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:19:02</sys_created_on>
+<sys_id>e4eb413c936707d0e3aef0aefaba100f</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc0f28980000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:19:02</sys_updated_on>
+<table/>
+<target_name>usem.cdp.remtask.fields.sn_vul_app_vulnerability</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>c8eb013cf56707d07bf50ec02d9fbf2c</update_guid>
+<update_guid_history>c8eb013cf56707d07bf50ec02d9fbf2c:1576886837,a25cb009c3174f10d7178725ab45dee7:1576886837,27ab9881fbdf0f102a00adf656616ce7:-369088540,ba2bc03ee88b4710e8f013f3056eeade:1576886837,c06270aed90bc310b92335e50def5b22:1542405467,254aac2aadc7c310ce0567f06e6a612d:169741605,7a221caa1bc3c31066aa733adb26426c:-1515262914</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_5c22d4aa93c3c310e3aef0aefaba10f8</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description>Change request association for sn_vul_container_vulnerability as &lt;association table&gt;.&lt;field referencing the remediation task&gt;; feeds change_requests in the CDP payload.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.changes.sn_vul_container_vulnerability</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:41</sys_created_on><sys_id>5c22d4aa93c3c310e3aef0aefaba10f8</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.cdp.remtask.changes.sn_vul_container_vulnerability</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_5c22d4aa93c3c310e3aef0aefaba10f8</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-03 12:04:41</sys_updated_on><type>string</type><value>sn_vul_container_m2m_remediation_task_change_request.sn_vul_container_vulnerability</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=5c22d4aa93c3c310e3aef0aefaba10f8"/></record_update>]]></payload>
+<payload_hash>1263668940</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">eceb013c936707d0e3aef0aefaba10cd</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:19:02</sys_created_on>
+<sys_id>e8eb013c936707d0e3aef0aefaba10cf</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a067886e060000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:19:02</sys_updated_on>
+<table/>
+<target_name>usem.cdp.remtask.changes.sn_vul_container_vulnerability</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>e03a682a83c7c310ab27de65d01a6d48</update_guid>
+<update_guid_history>e03a682a83c7c310ab27de65d01a6d48:1263668940,0a2298aa14c3c3102f81ce98cf4aff46:2078278744</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -443,13 +611,16 @@ RemediationTaskPayloadBuilder.prototype = {
     },
 
     /**
-     * Formats the single error line: &lt;class&gt;: payload not built for &lt;table&gt; &lt;sys_id&gt; - &lt;reason&gt;.
+     * Formats the single error line: &lt;class&gt;: payload not built for &lt;table&gt; &lt;sys_id&gt; - &lt;reason&gt;, the
+     * sys_id left out for a GlideRecord that is not on a record and the subject for anything else.
      * @param {GlideRecord} record - the record being processed, if any
      * @param {Error} e - the error caught
      * @returns {String} the message to log
      */
     _errorMessage: function(record, e) {
-        var subject = this._isRecord(record) ? ' for ' + record.getTableName() + ' ' + record.getUniqueValue() : '';
+        var subject = '';
+        if (record !== null &amp;&amp; typeof record === 'object' &amp;&amp; typeof record.getTableName === 'function')
+            subject = ' for ' + (record.getTableName() + ' ' + (record.getUniqueValue() || '')).trim();
         return this.type + ': payload not built' + subject + ' - ' + e.message;
     },
 
@@ -549,7 +720,7 @@ RemediationTaskPayloadBuilder.prototype = {
 
     /**
      * Reads one field of the record as the string to send; "" when the field does not exist on the
-     * table or is empty. A journal field is read from its latest entry.
+     * table or is empty. A journal field is read from its latest entry, display markup removed.
      * @param {GlideRecord} record - the remediation task record
      * @param {GlideRecord} dictionary - a record of the same table, opened by the builder, whose
      *                                   field descriptors give the field types
@@ -564,7 +735,7 @@ RemediationTaskPayloadBuilder.prototype = {
             return '';
         var descriptor = dictionary.getElement(field).getED();
         if (this.JOURNAL_TYPES.indexOf(String(descriptor.getInternalType())) &gt;= 0)
-            return this._latestEntry(element);
+            return this._plainText(this._latestEntry(element));
         if (element.nil())
             return '';
         return this._renderElement(element, descriptor);
@@ -737,165 +908,23 @@ RemediationTaskPayloadBuilder.prototype = {
 
     type: 'RemediationTaskPayloadBuilder'
 };
-]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-03 11:24:13&lt;/sys_created_on&gt;&lt;sys_id&gt;a7d840e29383c310e3aef0aefaba10b0&lt;/sys_id&gt;&lt;sys_mod_count&gt;12&lt;/sys_mod_count&gt;&lt;sys_name&gt;RemediationTaskPayloadBuilder&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_a7d840e29383c310e3aef0aefaba10b0&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-22 19:21:21&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
-<payload_hash>-977858138</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">7a5de3ec9367c3d0e3aef0aefaba1087</remote_update_set>
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-03 11:24:13&lt;/sys_created_on&gt;&lt;sys_id&gt;a7d840e29383c310e3aef0aefaba10b0&lt;/sys_id&gt;&lt;sys_mod_count&gt;13&lt;/sys_mod_count&gt;&lt;sys_name&gt;RemediationTaskPayloadBuilder&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_a7d840e29383c310e3aef0aefaba10b0&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-22 19:46:11&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<payload_hash>666682390</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">eceb013c936707d0e3aef0aefaba10cd</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:26:02</sys_created_on>
-<sys_id>b25de3ec9367c3d0e3aef0aefaba108c</sys_id>
+<sys_created_on>2026-09-23 02:19:02</sys_created_on>
+<sys_id>e8eb413c936707d0e3aef0aefaba1010</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca90cb480000001</sys_recorded_at>
+<sys_recorded_at>1a0cc0f29120000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:26:02</sys_updated_on>
+<sys_updated_on>2026-09-23 02:19:02</sys_updated_on>
 <table/>
 <target_name>RemediationTaskPayloadBuilder</target_name>
 <type>Script Include</type>
 <update_domain>global</update_domain>
-<update_guid>9e4c63a8b867c3d0f4952f24fe2de621</update_guid>
-<update_guid_history>9e4c63a8b867c3d0f4952f24fe2de621:-977858138,964c63a80867c3d023a9c6707bac9d12:-977858138,17d0632c44a3c3d054a1148bc8eaab43:1003587201,a13edf2051a3c3d0d3da5dc4c6641ee2:481101438,6f258941d9974f10b18b1e15fcb99a43:981448343,586c7409c1174f10c5aefa1585ecfccc:692870137,31bbdc81a2df0f10a5d986c21d2ac695:-1772870848,772bc43e338b47101a2769ad7f262724:692870137,4d6234ae5c0bc3102f2d563527984862:1040027032,015aa06aa4c7c3103f65b7b9eab7aeca:-254045133,c9439caef9c3c3107f5f8fbf28fc2bac:1474691302,0c32dcaaf1c3c310f803ae59b2eb45da:-2038547050,f3a018a664c3c31017822868860e6342:-577220184,b3d840e22a83c31096a0399dcca669b4:1489101505</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value="Global">global</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_7e221caa93c3c310e3aef0aefaba1072</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>CDP required fields sent for sn_vul_container_vulnerability remediation tasks (sheet Outbound to CDP (RemTask)). One servicenow_field=json_field pair per line, each line ending with a comma, in payload order; a field missing on the table or empty is sent as "". The table is supported only while this property exists.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.fields.sn_vul_container_vulnerability</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:51</sys_created_on><sys_id>7e221caa93c3c310e3aef0aefaba1072</sys_id><sys_mod_count>5</sys_mod_count><sys_name>usem.cdp.remtask.fields.sn_vul_container_vulnerability</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_7e221caa93c3c310e3aef0aefaba1072</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-11 09:33:58</sys_updated_on><type>string</type><value>assigned_to=assigned_to,
-assignment_group=assignment_group,
-assignment_type=assignment_type,
-business_service=business_service,
-close_notes=close_notes,
-closed_at=closed_at,
-closed_by=closed_by,
-cmdb_ci=cmdb_ci,
-comments=comments,
-defer_extend_count=defer_extend_count,
-description=description,
-expected_start=expected_start,
-ignore_date=ignore_date,
-ignore_expiration_dt_tm=until,
-ignored_by=ignored_by,
-number=number,
-opened_at=opened_at,
-opened_by=opened_by,
-reassignment_count=reassignment_count,
-remediation_commitment_dt_tm=remediation_commitment_dt_tm,
-remediation_plan=remediation_plan,
-resolution_date=resolution_date,
-resolution_reason=resolution_reason,
-resolved_by=resolved_by,
-risk_rating=risk_rating,
-risk_score=risk_score,
-service_offering=service_offering,
-short_description=short_description,
-state=state,
-status_updated_on=status_updated_on,
-substate=substate,
-sys_class_name=class_name,
-sys_created_by=created_by,
-sys_created_on=created_on,
-sys_id=sys_id,
-sys_updated_by=updated_by,
-sys_updated_on=updated_on,
-total_cis=total_cis,
-ttr_status=ttr_status,
-ttr_target_date=ttr_target_date,
-cr_count=cr_count,
-ignore_reason=ignore_reason,
-sn_vul_entry=sn_vul_entry,
-total_vis=total_vis,</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=7e221caa93c3c310e3aef0aefaba1072"/></record_update>]]></payload>
-<payload_hash>-585699883</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">7a5de3ec9367c3d0e3aef0aefaba1087</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:26:02</sys_created_on>
-<sys_id>ba5de3ec9367c3d0e3aef0aefaba1089</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca90cab00000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:26:02</sys_updated_on>
-<table/>
-<target_name>usem.cdp.remtask.fields.sn_vul_container_vulnerability</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>9e4c63a86767c3d083bdc75227e11f09</update_guid>
-<update_guid_history>9e4c63a86767c3d083bdc75227e11f09:-585699883,fa5cf009fe174f1058161f605ef99bb6:-585699883,1dbb5c81e0df0f10ebebf9f63c5e4708:-1473478876,932b843e998b47105982daae8b624d54:-585699883,6062b0aec60bc3107fdb770a3c6c7136:-1607002997,cb4aec2aecc7c3103f0dcfb7b087bae0:-1139422323,df225caa31c3c310994735ea1c44fa35:752115198</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value="Global">global</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_ee22d8aa93c3c310e3aef0aefaba102c</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>CDP required fields sent for sn_vul_app_vulnerability remediation tasks (sheet Outbound to CDP (RemTask)). One servicenow_field=json_field pair per line, each line ending with a comma, in payload order; a field missing on the table or empty is sent as "". The table is supported only while this property exists.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.fields.sn_vul_app_vulnerability</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:49</sys_created_on><sys_id>ee22d8aa93c3c310e3aef0aefaba102c</sys_id><sys_mod_count>5</sys_mod_count><sys_name>usem.cdp.remtask.fields.sn_vul_app_vulnerability</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_ee22d8aa93c3c310e3aef0aefaba102c</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-11 09:33:57</sys_updated_on><type>string</type><value>assigned_to=assigned_to,
-assignment_group=assignment_group,
-assignment_type=assignment_type,
-business_service=business_service,
-close_notes=close_notes,
-closed_at=closed_at,
-closed_by=closed_by,
-cmdb_ci=cmdb_ci,
-comments=comments,
-defer_extend_count=defer_extend_count,
-description=description,
-expected_start=expected_start,
-ignore_date=ignore_date,
-ignore_expiration_dt_tm=until,
-ignored_by=ignored_by,
-number=number,
-opened_at=opened_at,
-opened_by=opened_by,
-reassignment_count=reassignment_count,
-remediation_commitment_dt_tm=remediation_commitment_dt_tm,
-remediation_plan=remediation_plan,
-resolution_date=resolution_date,
-resolution_reason=resolution_reason,
-resolved_by=resolved_by,
-risk_rating=risk_rating,
-risk_score=risk_score,
-service_offering=service_offering,
-short_description=short_description,
-state=state,
-status_updated_on=status_updated_on,
-substate=substate,
-sys_class_name=class_name,
-sys_created_by=created_by,
-sys_created_on=created_on,
-sys_id=sys_id,
-sys_updated_by=updated_by,
-sys_updated_on=updated_on,
-total_cis=total_cis,
-ttr_status=ttr_status,
-ttr_target_date=ttr_target_date,
-cr_count=cr_count,
-defer_count=defer_count,
-ignore_reason=ignore_reason,
-remediation_commitment_date=remediation_commitment_date,
-sn_vul_entry=sn_vul_entry,
-total_vis=total_vis,
-u_avul_record_url=u_avul_record_url,
-u_verification_status=u_verification_status,</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=ee22d8aa93c3c310e3aef0aefaba102c"/></record_update>]]></payload>
-<payload_hash>1576886837</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">7a5de3ec9367c3d0e3aef0aefaba1087</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:26:02</sys_created_on>
-<sys_id>be5de3ec9367c3d0e3aef0aefaba108a</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca90ca910000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:26:02</sys_updated_on>
-<table/>
-<target_name>usem.cdp.remtask.fields.sn_vul_app_vulnerability</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>964c63a81867c3d0c28d13858c1a3307</update_guid>
-<update_guid_history>964c63a81867c3d0c28d13858c1a3307:1576886837,a25cb009c3174f10d7178725ab45dee7:1576886837,27ab9881fbdf0f102a00adf656616ce7:-369088540,ba2bc03ee88b4710e8f013f3056eeade:1576886837,c06270aed90bc310b92335e50def5b22:1542405467,254aac2aadc7c310ce0567f06e6a612d:169741605,7a221caa1bc3c31066aa733adb26426c:-1515262914</update_guid_history>
+<update_guid>c0eb013cfd6707d03e27899a7a767c34</update_guid>
+<update_guid_history>c0eb013cfd6707d03e27899a7a767c34:666682390,4af17fa82da7c3d040f009755ee5bdac:666682390,964c63a80867c3d023a9c6707bac9d12:-977858138,17d0632c44a3c3d054a1148bc8eaab43:1003587201,a13edf2051a3c3d0d3da5dc4c6641ee2:481101438,6f258941d9974f10b18b1e15fcb99a43:981448343,586c7409c1174f10c5aefa1585ecfccc:692870137,31bbdc81a2df0f10a5d986c21d2ac695:-1772870848,772bc43e338b47101a2769ad7f262724:692870137,4d6234ae5c0bc3102f2d563527984862:1040027032,015aa06aa4c7c3103f65b7b9eab7aeca:-254045133,c9439caef9c3c3107f5f8fbf28fc2bac:1474691302,0c32dcaaf1c3c310f803ae59b2eb45da:-2038547050,f3a018a664c3c31017822868860e6342:-577220184,b3d840e22a83c31096a0399dcca669b4:1489101505</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -904,50 +933,24 @@ u_verification_status=u_verification_status,</value><write_roles/></sys_properti
 <application display_value="Global">global</application>
 <category>customer</category>
 <comments/>
-<name>sys_properties_f51214aa93c3c310e3aef0aefaba1096</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description>Fields sent to CDP for every remediation task table (CdpRemediationTaskPayloadBuilder). Comma separated; use json_name=field where the JSON key differs from the field name.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.fields.common</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:30</sys_created_on><sys_id>f51214aa93c3c310e3aef0aefaba1096</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.cdp.remtask.fields.common</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_f51214aa93c3c310e3aef0aefaba1096</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-03 12:04:30</sys_updated_on><type>string</type><value>assigned_to,assignment_group,assignment_type,backup_state,business_duration,business_service,calendar_duration,close_notes,closed_at,closed_by,cmdb_ci,comments,company,contact_type,contract,correlation_display,correlation_id,defer_extend_count,delivery_plan,delivery_task,description,due_date,effort,escalation,expected_start,follow_up,group_key,group_list,ignore_date,ignore_expiration,until=ignore_expiration_dt_tm,ignore_expiration_for_risk_reduction,ignore_expiration_for_risk_reduction_dt_tm,ignored_by,impact,knowledge,location,number,opened_at,opened_by,order,parent,priority,reassignment_count,rejection_goto,remediation_commitment_dt_tm,remediation_plan,resolution_date,resolution_reason,resolved_by,risk_rating,risk_score,route_reason,service_offering,short_description,state,status_updated_on,substate,class_name=sys_class_name,created_by=sys_created_by,created_on=sys_created_on,sys_domain,sys_domain_path,sys_id,sys_mod_count,updated_by=sys_updated_by,updated_on=sys_updated_on,table,task_effective_number,time_worked,total_cis,ttr_status,ttr_target_date,u_confidential,urgency,watch_list,work_end,work_start</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=f51214aa93c3c310e3aef0aefaba1096"/></record_update>]]></payload>
-<payload_hash>1301941943</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">7a5de3ec9367c3d0e3aef0aefaba1087</remote_update_set>
+<name>sys_properties_ca2298aa93c3c310e3aef0aefaba104c</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description>Change request association for sn_vulc_result_group as &lt;association table&gt;.&lt;field referencing the remediation task&gt;; feeds change_requests in the CDP payload.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.changes.sn_vulc_result_group</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:48</sys_created_on><sys_id>ca2298aa93c3c310e3aef0aefaba104c</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.cdp.remtask.changes.sn_vulc_result_group</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_ca2298aa93c3c310e3aef0aefaba104c</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-03 12:04:48</sys_updated_on><type>string</type><value>sn_vulc_m2m_trg_change_request.result_group</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=ca2298aa93c3c310e3aef0aefaba104c"/></record_update>]]></payload>
+<payload_hash>-1182673126</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">eceb013c936707d0e3aef0aefaba10cd</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:26:02</sys_created_on>
-<sys_id>f25de3ec9367c3d0e3aef0aefaba108b</sys_id>
+<sys_created_on>2026-09-23 02:19:02</sys_created_on>
+<sys_id>eceb013c936707d0e3aef0aefaba10d0</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a067883d3f0000001</sys_recorded_at>
+<sys_recorded_at>1a0678888f20000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:26:02</sys_updated_on>
+<sys_updated_on>2026-09-23 02:19:02</sys_updated_on>
 <table/>
-<target_name>usem.cdp.remtask.fields.common</target_name>
+<target_name>usem.cdp.remtask.changes.sn_vulc_result_group</target_name>
 <type>System Property</type>
 <update_domain>global</update_domain>
-<update_guid>d52a242a09c7c31092d593c701cf41f8</update_guid>
-<update_guid_history>d52a242a09c7c31092d593c701cf41f8:1301941943,961254aa92c3c310fc370c3cc9f5c0d9:-2086787517</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="Global">global</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_9a1254aa93c3c310e3aef0aefaba10df</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description>Change request association for sn_vul_vulnerability as &lt;association table&gt;.&lt;field referencing the remediation task&gt;; feeds change_requests in the CDP payload.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>usem.cdp.remtask.changes.sn_vul_vulnerability</name><read_roles/><suffix/><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-03 12:04:32</sys_created_on><sys_id>9a1254aa93c3c310e3aef0aefaba10df</sys_id><sys_mod_count>0</sys_mod_count><sys_name>usem.cdp.remtask.changes.sn_vul_vulnerability</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_properties_9a1254aa93c3c310e3aef0aefaba10df</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-03 12:04:32</sys_updated_on><type>string</type><value>sn_vul_m2m_vg_change_request.sn_vul_vulnerability</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=9a1254aa93c3c310e3aef0aefaba10df"/></record_update>]]></payload>
-<payload_hash>-1196664708</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1625_MS_Remediation Task CDP Payload_V2.6">7a5de3ec9367c3d0e3aef0aefaba1087</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:26:02</sys_created_on>
-<sys_id>fe5de3ec9367c3d0e3aef0aefaba1089</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a067884c8e0000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:26:02</sys_updated_on>
-<table/>
-<target_name>usem.cdp.remtask.changes.sn_vul_vulnerability</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>d62aa42a68c7c3100252a3e48a3df19c</update_guid>
-<update_guid_history>d62aa42a68c7c3100252a3e48a3df19c:-1196664708,bb1294aaacc3c310e06026c62224db81:-777212408</update_guid_history>
+<update_guid>4e3aa82ad4c7c3104522fadc74b326fd</update_guid>
+<update_guid_history>4e3aa82ad4c7c3104522fadc74b326fd:-1182673126,2e22d8aa5ac3c3107f4a0d8478fb0526:1487160742</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>

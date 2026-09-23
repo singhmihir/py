@@ -220,7 +220,7 @@ BOFASIConsequenceOutboundProcessor.prototype = {
                 throw new Error('property ' + property + ' holds a line without a payload name: "' + entry + '"');
             var at = left.indexOf('.');
             var source = at < 0 ? table : left.substring(0, at);
-            if (!this.SECTIONS[source] || (source != table && !this.SECTIONS[source].reference))
+            if (!this.SECTIONS.hasOwnProperty(source) || (source != table && !this.SECTIONS[source].reference))
                 throw new Error('property ' + property + ' names table ' + source + ', which is not a section of the payload: "' + entry + '"');
             var section = this.SECTIONS[source].json;
             if (names[section + '.' + json])
@@ -493,10 +493,10 @@ BOFASIKafkaProducerConsequence.prototype = {
      * The message key: table and sys_id of the record.
      * @param {GlideRecord} record - the consequence record
      * @returns {string} "<table>.<sys_id>"
-     * @throws {Error} when no saved record was given
+     * @throws {Error} when no existing record was given
      */
     _messageKey: function(record) {
-        if (!record || typeof record.getTableName != 'function' || !record.getUniqueValue())
+        if (!record || typeof record.isValidRecord != 'function' || !record.isValidRecord())
             throw new Error('no record was given');
         return record.getTableName() + '.' + record.getUniqueValue();
     },

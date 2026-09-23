@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <unload>
+<sys_script_include action="DELETE"><sys_id>1b6c46b207e1429093e126216095b3ac</sys_id><name>BOFA_SI_KafkaPayloadValidator</name></sys_script_include>
 <sys_script_include action="INSERT_OR_UPDATE">
 <access>public</access>
 <active>true</active>
@@ -54,11 +55,15 @@ BOFA_SI_KafkaProducerV2.prototype = {
      * @returns {void}
      */
     sendPayload: function(payload, record) {
-        var subject = 'record';
+        var subject = 'no record';
         try {
+            if (!record || typeof record.getTableName !== 'function')
+                throw new Error('no record was given');
             var table = record.getTableName();
             var sysId = record.getUniqueValue();
-            subject = table + ' ' + sysId;
+            subject = (table + ' ' + (sysId || '')).trim();
+            if (!sysId)
+                throw new Error('the record has no sys_id');
             var topicSysId = this._topicSysId(table);
             var message = this._validate(payload);
             this._send(topicSysId, table + '.' + sysId, message);

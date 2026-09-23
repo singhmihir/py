@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-22 19:19:35">
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-23 02:33:03">
 <sys_remote_update_set action="INSERT_OR_UPDATE">
 <application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
 <application_name>BOFA USEM CDP integration</application_name>
@@ -20,38 +20,79 @@
 <summary/>
 <sys_class_name>sys_remote_update_set</sys_class_name>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>0ceb2f289367c3d0e3aef0aefaba10b5</sys_id>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>e51f81b893a707d0e3aef0aefaba10eb</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
 <update_set display_value=""/>
 <update_source display_value=""/>
 <updated/>
 </sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_baa072e4936b83d0e3aef0aefaba1017</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>VAMP payload, one servicenow_field=json_field pair per line in payload order. On the left the ServiceNow field (verified with the field check script): the fields of the application vulnerable item plain, the fields of another section as &lt;table&gt;.&lt;field&gt;. On the right the payload name of the sheet "SN to VAMP" as &lt;json structure&gt;.&lt;json field&gt;; the sections of the payload are the structures in the order this property introduces them, and the section of a table reached through a many to many (the remediation tasks of the item) is a list, one entry per linked record. A field missing on the table or empty is sent as "".</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</name><read_roles/><suffix>usem.vamp.fields.sn_vul_app_vulnerable_item</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 15:00:53</sys_created_on><sys_id>baa072e4936b83d0e3aef0aefaba1017</sys_id><sys_mod_count>243</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_baa072e4936b83d0e3aef0aefaba1017</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:26:26</sys_updated_on><type>string</type><value>sn_vul_app_vul_entry.number=tpe.number,
+sn_vul_app_vul_entry.u_vuln_sub_cat_id=tpe.u_vuln_sub_cat_id,
+sn_vul_app_vulnerability.number=remediation_task.number,
+sn_vul_app_vulnerability.u_primary_ait=remediation_task.primary_ait,
+sn_vul_app_vulnerability.u_avul_record_url=remediation_task.u_avul_record_url,
+number=finding.number,
+sys_created_on=finding.sys_created_on,
+sys_updated_on=finding.sys_updated_on,
+state=finding.state,
+cmdb_ci=finding.configuration_item,
+u_verification_status=finding.u_verification_status,
+source_avit_id=finding.source_avit_id,
+u_avit_record_url=finding.u_avit_record_url,
+sn_vul_pen_test_assessment_request.number=ptreq.number,
+sn_vul_pen_test_assessment_request.sys_created_on=ptreq.sys_created_on,
+sn_vul_pen_test_assessment_request.u_assessment_id=ptreq.u_assessment_id,</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=baa072e4936b83d0e3aef0aefaba1017"/></record_update>]]></payload>
+<payload_hash>108730948</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>211f49b893a707d0e3aef0aefaba108b</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc16508c0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>22ad49342ca707d00ea4dffe35579b52</update_guid>
+<update_guid_history>22ad49342ca707d00ea4dffe35579b52:108730948,2a9dc1349ea707d091e0eb11fc51b4e5:108730948,628dcdf05ba707d03cf62dbb5ee6d527:1668634916,9abba3287167c3d0947c9adb5053dceb:108730948,bdbb63285467c3d0dacac25852bcd33c:1291589492,7f8b2be48a67c3d00b10f41b939b6fc4:108730948,128ba7e4c267c3d05a687b431b755a92:-976237962,548b27e4ff67c3d06dee7a5ff60f7bbd:-353503931,4c8be3e44467c3d06fec1d1637e93f30:925613936,cd7b23e4ba67c3d09f05f636900cf5c5:2069361952,976befa44767c3d09797e7368d55feea:1447008232,396b6fa44367c3d0ee06d917356dc722:-1596546319,ff5b2fa49467c3d0122994f72fe5a95b:2090832666,e35beba47067c3d0c5b4a814ec2ce913:140962110,f55b2ba40c67c3d09b382eed1b3de550:-676165255,d85ba7a42667c3d0d009673af16c29ea:1632955909,bf4ba7a41667c3d09ef70e721b76110c:1478494615,db4b27a4d767c3d0bcbcaa1dbab7b61e:-1919217429,e54ba3a46667c3d013a91887246e0685:162661739,554b63a4ba67c3d0b2df9359715a148e:1211387161,4f3bef641167c3d0bfdf5b60493d31cd:1291589492,570ba7646667c3d09a480bfeef429f5b:108730948,dd0be3649367c3d0a5b206b49fd085cf:1291589492,64eaeb241f67c3d0ab88f488f426d1af:108730948,d4ea6b24a667c3d0b6c4a3a248fff0f1:-976237962,77da6b24b867c3d01eb5c8090001e130:-353503931,cadaa7243f67c3d0d16657173e3f5fbb:925613936,14da27244a67c3d05c1de58640a06177:2069361952,0cdae324e867c3d0a835a3c789b6f272:1447008232,a7caa3243c67c3d023b0f6b1c0302eb5:-1596546319,87ca63242967c3d0ceb9ed5884e8b6f6:2090832666,9dca2324f767c3d08a87e42058e2ff38:140962110,b3baafe06267c3d0a7289ce5f1218d4b:-676165255,9bba6fe09267c3d00889283b5dbf29fc:1632955909,beba2fe00467c3d0441a743a7b8e54b5:1478494615,d6baebe06867c3d03d7db3a0a2a52aae:-1919217429,edba6be05267c3d0ba6acf47a5dc56ac:162661739,09ba2be06267c3d08a70e5b467d072bd:1211387161,1faa67e0c967c3d0017795f211c0f7ee:1291589492,295aa7a0e167c3d018003df3c0feb8f4:108730948,c55a67a0ba67c3d07e9b24e432314d99:1291589492,462a6b609367c3d0476d53f66147f422:108730948,e02a2b605f67c3d07ee9476094fa2d9c:-976237962,761a67601667c3d0b93c01c934dc0bed:-353503931,911a6760e767c3d0efe97f030132a91d:925613936,c91ae3606467c3d0b77f176978c508f9:2069361952,b41ae3601967c3d0e2e98984c1ed015e:1447008232,030a23606167c3d0f38f5914e17e2786:-1596546319,d50aaf20ca67c3d02645ffd205ac40fa:2090832666,0d0aaf206f67c3d0b53188ae82e40c86:140962110,e00a6f206267c3d04bd6e5f8ea7eef4b:-676165255,5ef9eb202d67c3d0bd4b8c260e84f95c:1632955909,0be9e7202e67c3d0ae99f4f0715510fa:1478494615,66e9e7206a67c3d041d1cf248994d76c:-1919217429,bde9a7204467c3d0b7dfbb9c6abbd82f:162661739,04e9e3206a67c3d08105d25501acd24d:1211387161,5ad963205c67c3d0b7443202fa43db20:1291589492,d72963acf827c3d012ae12433684537a:108730948,ce29ef6ca427c3d04a685220e354a808:1668634916,57c783e481af83d07ba3fb5e68414dcd:108730948,24c743e442af83d061cc60e467513f03:-353503931,bab7cfa452af83d0cb0c5fbc9128fe42:108730948,c4b74fa406af83d0e33e53b25e356509:1447008232,6ba7cba47baf83d05e1560ce894d3360:108730948,70a74ba4acaf83d0259c81b8367c0b02:-1596546319,369787a4d2af83d088f90888ff34eac7:108730948,4097c3a45faf83d0c4391c76dc7c9ea1:2090832666,a68783a423af83d046067fcbc3467fd1:108730948,0d8743a489af83d02291c9bac219590a:1478494615,5087cf6417af83d05c628086db2fe379:108730948,76770f64dfaf83d0aebc62b220a24c59:-1919217429,41770f6487af83d0563a6c83217ca206:108730948,6f67c764a6af83d083ffb1f53f8455ec:162661739,e9678764faaf83d0f7a5b2b7c3d3f5f7:108730948,b25707640faf83d0a30f5b426a0a5043:1291589492,6ed68be077af83d02cdb0479cf91ce8c:108730948,05d60be0a7af83d014dbe0f826d28589:-353503931,57c687e0cfaf83d007f9dadcf82804f7:108730948,64c607e0b6af83d0148df5686df237ef:1447008232,40c6c3e0e6af83d03a75ea2f1f963b85:108730948,deb603e074af83d048de9055a908f1ac:-1596546319,8eb603e038af83d09b7d855319d0e200:108730948,17a60fa02daf83d0eb947482c1d371ce:2090832666,2da68ba079af83d04f28589ddcd5c2f8:108730948,72960ba07baf83d04d9e4ef2c26a9ca5:1478494615,f49687a092af83d004dfe22f5b6ef976:108730948,168607a00eaf83d0b6d04c92391c2124:-1919217429,2c86c3a0b7af83d07109f1679789706b:108730948,a0768f60f3af83d02b8a27525be11029:162661739,bb660f60f5af83d080758a9e40c6728e:108730948,8a66cb604caf83d0a9d80ae852dd6184:1291589492,2215cf2c8e6f83d0528d4ea293f308e3:108730948,57054f2c726f83d0fb9dccbd8269db86:-353503931,a905cb2cfd6f83d0373039471d0fb8d6:108730948,84054b2c7f6f83d060034bb13950197a:1447008232,3ff40b2c116f83d079811e0e4abcf206:108730948,4df4472cb76f83d0b7d4011d5df68363:-1596546319,07e4072cdb6f83d0df123ed63d2b26d3:108730948,65e4832cde6f83d078109aaa0055f022:2090832666,37d4cfe8a26f83d0fddc119b53c75eab:108730948,eed48fe8a46f83d0b891a39f7e51d569:1478494615,3cd40fe8806f83d077efbf2b3ffeb985:108730948,5fc44be8746f83d0135b4e47c853cdee:-1919217429,36c44be8a16f83d04dabdf8e440506ad:108730948,15c4c7e8536f83d036c20270fdafa5f3:162661739,efb487e8896f83d0635aaf943b20b745:108730948,f8b4c3e8996f83d089624d1d84d84e5e:1291589492,a7448f684c6f83d0950152aba7be51db:108730948,4a440f68506f83d0ff8f6fb1aec4b177:-353503931,98448b68fd6f83d02a7e31622a92cadf:108730948,76344b68686f83d0bc74ae42272ba843:1447008232,1a34c768556f83d06a5e8f8a96cd57d8:108730948,b4340768376f83d0b6de03827e0af108:-1596546319,3624c368a66f83d077285f06fc56e844:108730948,cd24cf28366f83d00cd3d61b626982da:2090832666,6024cf28746f83d06364cabad27b5b15:108730948,9c140f28446f83d07073357b4ad33264:1478494615,c8144b28e36f83d03f09a5ca107d9ea1:108730948,c904c728bf6f83d01206676b214378ca:-1919217429,6804c728b16f83d0d971adcaf7a35b6f:108730948,2af3c328c36f83d0455e98bde3866afb:162661739,13e303286b6f83d02b9a39ecec435dfe:108730948,a0e38fe48b6f83d0426320a3d7473f6c:1291589492,22238b64a96f83d08ec0f1eeeeb7ba07:108730948,4d23c764386f83d00abfa42a19bee2e4:1447008232,9f13c764d16f83d00d9cb8ad56d29808:108730948,241347648e6f83d04551b53df079b57b:-1596546319,8413c364376f83d0f50b102c7f48df9e:108730948,a2034364fb6f83d0a755e1919bbdcaf8:2090832666,9a0343640a6f83d0f06f88c9cb1b341f:108730948,24038f24e66f83d0cc3b9d9e70e4ab94:1478494615,76f20f24ab6f83d010ed69abd0c9ddd8:108730948,9df28b24af6f83d0a68a6d43c37faba6:-1919217429,abe20b24886f83d08e11564bc0ccd2ea:108730948,cae2c724b36f83d0488a3723fb5ec718:162661739,1ce28724886f83d0bcd9da839dcd372e:108730948,22d20724bf6f83d00ef6776e8968462d:1291589492,f742c7a05d6f83d0fb2213482ea25eeb:108730948,3842c3a02c6f83d015be2f9fa33c7fdc:1447008232,d44283a0886f83d0be48d6fcb70805a2:108730948,1132cf600f6f83d05a458c7b1f4072ed:-1596546319,fc32cf603b6f83d051db6fbb7f4e0779:108730948,3a224f60426f83d08fb18a2461b83137:2090832666,c9228b60306f83d044b470a4665a32e6:108730948,061247608a6f83d0463ff62784563adb:1478494615,d5124760236f83d0669b70e31956824d:108730948,cb024360c86f83d0b2bbbc69f6b4caa2:-1919217429,e6024360466f83d0ebeeb1d3ff6b2552:108730948,53f18f20b76f83d07807614d179ee9c7:162661739,b6f10f201c6f83d0ac3d94d0bfce1aba:108730948,19f1cb20c96f83d00c6372de1d9cecc7:1291589492,bc31c7ac1b2f83d095add75ebd948c41:108730948,396d3ee0e02f83d00422e72432ae31e2:-331377674,c15d7ae0182f83d0883f544d0a4b2c10:792780776,794d36e05c2f83d0581c430754723ee6:-331377674,804df2e0532f83d0b192dd8b9dc4f18c:1610486063,151db6a0832f83d07e15ead45b5716f1:-331377674,241d36a0b92f83d02840ddfeb534dffa:1914002614,d70df2a0562f83d0943141dc1722adb3:-331377674,6e0db2a0522f83d097e19195cd8e8c88:-33621259,10ac3e20242f83d0b16825b7ff413c80:-331377674,dd9c7a20492f83d045ab40f763dd28d6:792780776,5f8cb620032f83d0a62ad6c17db6d5f2:-331377674,fe8cb620f82f83d0f394408429ac6300:1610486063,8f4cb6ecb9eb83d0b2cc92a6748dde82:-331377674,e24c76ecc2eb83d0c260b152648f0559:1914002614,c54cf2ecb9eb83d0cce36fdd19c2a5c7:-331377674,1b3c72ec7feb83d090327bdf74e61dd8:-33621259,895a3e68a1eb83d0c86e6466bc27b231:-331377674,034a7a68bdeb83d0394821237409fe1a:792780776,d63a366865eb83d0899c06317723b948:-331377674,a03ab2683beb83d05e95a1f087df318c:1610486063,19f936287beb83d01cd8f53961775b1e:-331377674,fcf9b22841eb83d00d18d409e0230c22:1914002614,fde9322818eb83d0bca1afde643d4be0:-331377674,4de9bee4b9eb83d088d2e3a7337f0bea:-33621259,fc89baa485eb83d091668f710afd9d6b:-331377674,6d79f6a46feb83d0cecfe84ad88cecbf:792780776,fb6976a401eb83d00bdd424b3fcf3328:-331377674,536936a497eb83d032c246bb7adee006:1610486063,de493a6494eb83d01779de3adb180171:-331377674,7549f66457eb83d042ce422ceb23c948:1914002614,02397664f9eb83d0234c3a1948b8f040:-331377674,1939f26422eb83d05dcdd1025262133d:-33621259,92a8f6e0f8eb83d04ffcd08313eda244:-331377674,64a876e0a9eb83d0a08419ca319b3f6e:792780776,a69872e0c8eb83d0ada523984eb162ea:-331377674,029872e099eb83d04fa935069a4558a9:1610486063,776876a009eb83d0bc5c673ecb8b9e2e:-331377674,c368f2a0e7eb83d07bb0b51f36588d6a:1914002614,a06872a053eb83d00c3b90e94c43adeb:-331377674,e25832a0dfeb83d0fce4e43ed9647941:-33621259,61e77a2016eb83d0c5d3e4723f50909f:-331377674,9ed7b620e3eb83d0c019500acd0b4f47:792780776,83c77220bfeb83d0cfb7e569618aa6d3:-331377674,fec77220b1eb83d0dd212032f41f1651:1610486063,fc97b2ec87ab83d0cab7fe77bd3bf1ab:-331377674,438772eca3ab83d023dcc2565e24e352:1914002614,bd8732ece5ab83d0767bf7183115ff1a:-331377674,8d87beac06ab83d03caf9384a68e7848:-33621259,1e567ae8f8ab83d04abd092f8ce1ae33:-331377674,5456b6e8c4ab83d0825fcc7b232e9f11:792780776,3046b2e8b2ab83d0b0a476b2b6cd833b:-331377674,0b3632e8ecab83d014738d7af6f82258:1610486063,5f0636a844ab83d0ce60409037175fb7:-331377674,3206f2a849ab83d0fb009045ea03308c:1914002614,a10672a883ab83d095a6015ac4b74387:-331377674,890632a8e3ab83d0d20312bf1d63461f:-33621259,97953e28dcab83d084857f72e4949b07:-331377674,80957a28caab83d00e508aa114706b71:792780776,5285b628edab83d0edaf16a1d3594d56:-331377674,28853628e4ab83d0a719fb644a16d350:1610486063,4855b6e4b4ab83d019e41e0fa622d6c6:-331377674,ef45b6e4fbab83d007d494ee8cef170b:1914002614,924536e419ab83d0a30a9a4af2e5968f:-331377674,6c45f2e4ffab83d08cefe37571d12529:-33621259,f464ba24cbab83d0a40d08a89beacb86:-331377674,a654f6240fab83d0e5a2201b6c476a49:792780776,2c543624eeab83d0d4b7bdc44f34ca27:-331377674,d854b22411ab83d00e6ad846d5ded926:1610486063,45343ae050ab83d0a9e8e56b2d386c7b:-331377674,6834f6e0b9ab83d0282eeaa0dc7c3bee:1914002614,872476e012ab83d059c80f52c1f81abb:-331377674,442472e068ab83d0838b532ed64aebc7:-33621259,39b37e6019ab83d0431a48c7ddc11a3f:-331377674,72a37a60f0ab83d0748d59b0acadd31c:792780776,2b93b660b4ab83d0aaaf60dab1a98291:-331377674,479376603fab83d0c3763784e01e6ec4:1610486063,4d733a20c9ab83d0a286454b3d34caa0:-331377674,5b63f62084ab83d01e5bf0c77baa2184:1914002614,b563762070ab83d095f6dade100ab392:-331377674,4563362020ab83d0259d5afe3b36098c:-33621259,f6d23aacb26b83d07c6f8ea580be87ed:-331377674,81d2f6ac1a6b83d03c3debd4f7a555dd:1610486063,8cb2fa6c466b83d0e0250e4f2d61f933:-331377674,6ba2ba6cf46b83d0108c5a0ba82d6d74:1914002614,06a27a6c246b83d0f3586bab6eff4418:-331377674,d1a2f66c456b83d080cc7584adef9dc7:-33621259,ae22fee8156b83d0749818eb55f7f832:-331377674,73123ee8366b83d052bb5ad692eea37b:1610486063,4be1fea87f6b83d01334bbbe978cb982:-331377674,a2e17ea84f6b83d0d44fae67daa1f7e3:1914002614,b3d1f6a83a6b83d0497ae8b066990de4:-331377674,bdd136a80d6b83d07f8b5ea9e4242d27:-33621259,1cb0b2e4746b83d01e8fa4c107cf4264:-331377674</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
 <sys_update_xml action="INSERT_OR_UPDATE">
 <action>DELETE</action>
 <application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
 <category>customer</category>
 <comments/>
 <name>sys_properties_400cb01b939b0790e3aef0aefaba1015</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.fields.remediation_task</name><read_roles/><suffix>usem.vamp.avit.fields.remediation_task</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:06:16</sys_created_on><sys_id>400cb01b939b0790e3aef0aefaba1015</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.remediation_task</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_400cb01b939b0790e3aef0aefaba1015</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:06:16</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=400cb01b939b0790e3aef0aefaba1015"/></record_update>]]></payload>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.fields.remediation_task</name><read_roles/><suffix>usem.vamp.avit.fields.remediation_task</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:25:04</sys_created_on><sys_id>400cb01b939b0790e3aef0aefaba1015</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.remediation_task</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_400cb01b939b0790e3aef0aefaba1015</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:25:04</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=400cb01b939b0790e3aef0aefaba1015"/></record_update>]]></payload>
 <payload_hash>-1410101688</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>00eb2f289367c3d0e3aef0aefaba10d1</sys_id>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>211f81b893a707d0e3aef0aefaba10ed</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca8309210000001</sys_recorded_at>
+<sys_recorded_at>1a0cc14c1300000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
 <table/>
 <target_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.remediation_task</target_name>
 <type>System Property</type>
 <update_domain>global</update_domain>
-<update_guid>0ad8e72c3e27c3d0d98b2de2b97294a9</update_guid>
-<update_guid_history>0ad8e72c3e27c3d0d98b2de2b97294a9:-1410101688,79d8a72c0d27c3d0421276a34a9b3465:335216084,5def7c93d7db07906aa86ee96d9c4726:68934560,500cf01b099b0790dba867a93e7afd06:1746812972</update_guid_history>
+<update_guid>654d09b0b6a707d0ba0b5c9a2d89f53a</update_guid>
+<update_guid_history>654d09b0b6a707d0ba0b5c9a2d89f53a:-1410101688,d54dc5b01aa707d0ec2c48a7b915fe6f:335216084,0ad8e72c3e27c3d0d98b2de2b97294a9:-1410101688,79d8a72c0d27c3d0421276a34a9b3465:335216084,5def7c93d7db07906aa86ee96d9c4726:68934560,500cf01b099b0790dba867a93e7afd06:1746812972</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -60,24 +101,128 @@
 <application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
 <category>customer</category>
 <comments/>
-<name>sys_properties_8edb78d7939b0790e3aef0aefaba10df</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</name><read_roles/><suffix>usem.vamp.kafka.topic_sys_id</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:05:27</sys_created_on><sys_id>8edb78d7939b0790e3aef0aefaba10df</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_8edb78d7939b0790e3aef0aefaba10df</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:05:27</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=8edb78d7939b0790e3aef0aefaba10df"/></record_update>]]></payload>
-<payload_hash>869182503</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
+<name>sys_properties_fd0c341b939b0790e3aef0aefaba1076</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ci</name><read_roles/><suffix>usem.vamp.avit.fields.ci</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:25:16</sys_created_on><sys_id>fd0c341b939b0790e3aef0aefaba1076</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ci</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_fd0c341b939b0790e3aef0aefaba1076</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:25:16</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=fd0c341b939b0790e3aef0aefaba1076"/></record_update>]]></payload>
+<payload_hash>-2084511761</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>00eb2f289367c3d0e3aef0aefaba10d3</sys_id>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>251f49b893a707d0e3aef0aefaba108c</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca825dc30000001</sys_recorded_at>
+<sys_recorded_at>1a0cc1524010000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ci</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>ff5d4db045a707d0329520062f9f5cae</update_guid>
+<update_guid_history>ff5d4db045a707d0329520062f9f5cae:-2084511761,f55d0db025a707d00c639c1e37189ba0:-27967877,c2e82f2ccd27c3d0fdd0d02b86ad487b:-2084511761,f1e8eb2c4327c3d013b4d5ded05478e3:-27967877,c9ff34d38edb0790b263905f1a074794:1306119402,520c341bde9b0790db3f75caf080cbb2:1787944670</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_06db78d7939b0790e3aef0aefaba10aa</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include"><sys_script_include action="DELETE"><access>public</access><active>false</active><api_name>x_boar_bofa_usem_1.BOFASIKafkaProducerVamp</api_name><caller_access/><client_callable>false</client_callable><description/><mobile_callable>false</mobile_callable><name>BOFASIKafkaProducerVamp</name><sandbox_callable>false</sandbox_callable><script/><sys_class_name>sys_script_include</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:24:06</sys_created_on><sys_id>06db78d7939b0790e3aef0aefaba10aa</sys_id><sys_mod_count>0</sys_mod_count><sys_name>BOFASIKafkaProducerVamp</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_script_include_06db78d7939b0790e3aef0aefaba10aa</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:24:06</sys_updated_on></sys_script_include></record_update>]]></payload>
+<payload_hash>243290452</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>291f49b893a707d0e3aef0aefaba108d</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc13d35a0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
+<table/>
+<target_name>BOFASIKafkaProducerVamp</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_guid>f60d8570c0a707d024ff736f993b515d</update_guid>
+<update_guid_history>f60d8570c0a707d024ff736f993b515d:243290452,f60d857089a707d0fa89ab7ad0c97235:-1672829216,34a823e89327c3d0fe07d4d1e8c916b2:243290452,a8a823e89b27c3d072a16ac9dac0047d:-1672829216,8570b2a4696b83d079b8f9fb799923eb:100586737,46db78d7109b0790636f15087f9cafac:-1255777307</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_66eb7cd7939b0790e3aef0aefaba1058</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.sections</name><read_roles/><suffix>usem.vamp.avit.sections</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:24:40</sys_created_on><sys_id>66eb7cd7939b0790e3aef0aefaba1058</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.sections</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_66eb7cd7939b0790e3aef0aefaba1058</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:24:40</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=66eb7cd7939b0790e3aef0aefaba1058"/></record_update>]]></payload>
+<payload_hash>-1080106616</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>2d1f49b893a707d0e3aef0aefaba1089</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc147cf20000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_1.usem.vamp.avit.sections</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>913d01b033a707d0a199cd9adc5f1cc2</update_guid>
+<update_guid_history>913d01b033a707d0a199cd9adc5f1cc2:-1080106616,3c3d01b0a4a707d0760c096190248542:-259133828,b8c82fe86e27c3d0305abdd55cbe7e11:-1080106616,e5b867e80227c3d02b7486303df509e9:-259133828,abef30d3cadb07902ea3767f7cb97473:-1977449949,2cfbbcd76f9b07907ef21e83300cf5a9:964019479</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_0e89811f931f0790e3aef0aefaba102e</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</name><read_roles/><suffix>usem.vamp.fields.sn_vul_app_vulnerable_item</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:26:17</sys_created_on><sys_id>0e89811f931f0790e3aef0aefaba102e</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_0e89811f931f0790e3aef0aefaba102e</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:26:17</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=0e89811f931f0790e3aef0aefaba102e"/></record_update>]]></payload>
+<payload_hash>1909075577</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>2d1f81b893a707d0e3aef0aefaba10eb</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc15f42e0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>f49d0134a7a707d07c931d34d2adae86</update_guid>
+<update_guid_history>f49d0134a7a707d07c931d34d2adae86:1909075577,0f8dcdf077a707d035f5cc06fa71479d:-1243859603,f62923ac8127c3d098fd5d768cb0eaef:1909075577,1e2923acfa27c3d08e5b905aff8c640c:-1243859603,1b70b6a4ef6b83d01b402effb3dae30b:-1704988415,c10fcd9b145f07908500df1c10736dab:-1283156491,413b4153a45f079077283ba29b49ae0f:-503148738,b389c11fe61f0790a7ef63023b56d397:-556967792</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_8ea0fea4936b83d0e3aef0aefaba1037</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_verification_outbound, read by BOFASIKafkaProducerVamp.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</name><read_roles/><suffix>usem.vamp.kafka.topic_sys_id</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 15:00:50</sys_created_on><sys_id>8ea0fea4936b83d0e3aef0aefaba1037</sys_id><sys_mod_count>105</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_8ea0fea4936b83d0e3aef0aefaba1037</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:32:13</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=8ea0fea4936b83d0e3aef0aefaba1037"/></record_update>]]></payload>
+<payload_hash>902427097</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>611f49b893a707d0e3aef0aefaba108a</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc1b6dc20000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
 <table/>
 <target_name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</target_name>
 <type>System Property</type>
 <update_domain>global</update_domain>
-<update_guid>53a8e3e81227c3d0afc352e76656f7f8</update_guid>
-<update_guid_history>53a8e3e81227c3d0afc352e76656f7f8:869182503,baa8a3e8f227c3d054d950f402e7c454:-59926349,4e90faa4da6b83d0baaaa885d20b4742:-1333968371,eaeb7cd73b9b0790a4c287eca9977554:-173497087</update_guid_history>
+<update_guid>dcfe01b883a707d02852fe88cfcdc2cb</update_guid>
+<update_guid_history>dcfe01b883a707d02852fe88cfcdc2cb:902427097,90fe01b83ca707d03f18b15e0bd0bc19:902427097,51ce85782fa707d028c85ad415332f34:-1260754090,b0ce4578b5a707d06eb5242a62df4a3c:-1449660372,9bbec17854a707d0ab67b4b02de8397f:150286265,edbe41784da707d01464f85a92001421:902427097,e13e4db45ba707d073558ce7b04da2ed:-1260754090,d93e4db4b4a707d0c90fe9a0e5d31f26:-1449660372,f43ec9b436a707d0091bf43184f95add:150286265,832e49b499a707d0ee3fbda884db597e:902427097,8b2d8d70a6a707d03db6bc00719c880b:-1260754090,e01d0970dfa707d093a77f30cf831d9d:1121399222,2ffba3683567c3d03330c227d43f9e0d:-1260754090,43dbeb280267c3d0d7da1aaa1c160850:902427097,62abefe41f67c3d01107dc7dd6907a0b:1728040576,8dab6fe47b67c3d041d18652e80d80a0:1743859926,e4ab2fe4d867c3d09426d9cf03c785b1:150286265,fe9babe48667c3d0fcde09ef4419c3ce:902427097,cefa63644467c3d0d6ba0d7b640383bf:1728040576,35faef240767c3d06fc44feafc2f8caf:1743859926,90faaf24b367c3d0b82029b4dec1b36e:150286265,5aea6f248067c3d0dc7a42255be6fc84:902427097,d84aa3a0ee67c3d02df5361d6ff4c20b:1728040576,c44a63a09767c3d0958f8126456cac29:1743859926,673aef608667c3d0471bcb22a2dcc495:150286265,393aaf60ac67c3d0448e837834274f02:902427097,fba867e88c27c3d0e4b77e9c2302df5d:1728040576,51a863e8f227c3d0b93e32d1b05a8365:-184773408,64e78be4feaf83d0bf9b5de6919b73af:1728040576,8bd70be447af83d0307cf8d161d4e778:150286265,9ad7c7e43baf83d00967baa05125e817:1728040576,70d707e46faf83d0841d25bf656e79b1:902427097,9817872480af83d070d52302721ffc5b:1728040576,7a07c324cbaf83d05e3d0f46857b55f4:150286265,4907832436af83d0de13bbf09d62de42:1728040576,19e60fe0e4af83d0ad622e10cd4790e0:902427097,ed064b2077af83d0acf95da812439a8a:1728040576,40f5c320baaf83d06293cef366ecce2d:902427097,07d58fec376f83d095f96a7c8b68aa8e:-1245035177,e5c50bec686f83d0cdbfbe9bf63ac76a:902427097,f8a543ecb96f83d0da1614c26a9e070d:1167569044,6f458f6c2a6f83d0fc532c894ef1b8c1:902427097,eb250b6ca76f83d059ce930720e7b2a8:-951286658,d625876c446f83d0e2cc85503bae64be:150286265,7125876c3c6f83d0e10710beedb6856a:-951286658,8825c36c6f6f83d04c9c0a43f7ecd0a1:902427097,fa6487a86a6f83d0efd0dd63ab0f8516:-951286658,0464c3a8606f83d0fbf2f14d31b636dd:150286265,e35443a8e96f83d0f9de490eeee97bee:-951286658,c95403a8696f83d095afad1778c62016:902427097,9f3303a4e36f83d06436196c477ec55d:-951286658,ca33cf64836f83d0f2782dc52715f40c:150286265,6d334f64aa6f83d064b9c5bd9146da55:-951286658,c4330f64fb6f83d080a187f7f1d4b549:902427097,f082c3e0b56f83d0d1afa23b083209f4:-951286658,437203e0fa6f83d097cbebb967a1cbf8:150286265,d17203e0b16f83d08b9bed6a34493268:-951286658,2a628fa0226f83d0611cfc8ec24f5e37:902427097,bb7df224c72f83d0b6dcd7c30f920e91:-951286658,097db224ca2f83d006fcbe0396c15704:150286265,307d3224982f83d0059294e7e643cce8:-951286658,176dfee0662f83d0d9c47f6cbea37254:902427097,65bcf260032f83d0ea2d8184a15601f2:-951286658,00bc72606e2f83d002a2fc0b1f3d46bd:150286265,2bac7260b82f83d081f65f78be95d455:-951286658,86acbe20cd2f83d0d3813529dfda7ce1:902427097,df6a36a873eb83d03afbbfc5e5331f4e:-951286658,fd6ab2a880eb83d05dc0caf6bd790c7f:150286265,596a32a878eb83d05173ca28eeff9b8a:-951286658,ab5abe6818eb83d0fad843ae437095d0:902427097,f69972e4eceb83d043acfb9d6d7798b1:-951286658,519932e462eb83d032566fce20a05a36:150286265,b099bea4c7eb83d06960fe4031a8c468:-951286658,5f897ea402eb83d0b345dc7189e4c12c:902427097,e5d8b224f4eb83d06fc7ba2f79123174:-951286658,f2c832249aeb83d0326add5d12509ec2:150286265,dec8bee063eb83d0c7e4e0e1156ba0bf:-951286658,74b87ae0beeb83d004f4644c3bc08826:902427097,bb08b26042eb83d06e7deee098e54dfb:-951286658,a3f7be2094eb83d049cfae18ca68360f:150286265,79f73e20e2eb83d07ecf844989027b67:-951286658,87e7ba204feb83d0ba59c6489f5982e6:902427097,a086f22c4dab83d081c2afe571ba95f1:-951286658,7e76722c67ab83d01ae6b4fa143acd94:150286265,66663ee89cab83d0e6b380c89e254fe9:-951286658,3756bae88eab83d0871becd2585c80e1:902427097,f6b5b2684aab83d0bdb917ad34519177:-951286658,80b5326870ab83d0800941a80726d593:150286265,6ba53268a6ab83d0ce7602cf2a85c31e:-951286658,42a5be2898ab83d025e8c51577bbf27e:902427097,c374726494ab83d097f4765181d34397:-951286658,ed74326437ab83d06a9fb5d62ad02c21:150286265,5d74fe2443ab83d0b3bed98115460d27:-951286658,e3643e248aab83d0d18992435c28f806:902427097,edd336a0b8ab83d0acdcb38e01b97a85:-951286658,04d3f2a024ab83d0fab4af648780476d:150286265,16c372a0d5ab83d0a7c304ab47d06529:-951286658,ebb3fe604cab83d09c9f7a08bc1dddb3:902427097,b20336ec4a6b83d062dad5951828fdb8:-951286658,9103b2ec366b83d0e807e758524db6fa:150286265,f00372ecc96b83d0c3ee48fba79cae38:-951286658,f9f2feac896b83d082e52a78ecb1f33b:902427097,46527a2c476b83d0fadfe54727bc14d1:-951286658,e4523a2cf26b83d07e94b1abd2902f32:150286265,8b42b62c096b83d01191044805d99152:-951286658,5442362c5c6b83d07abf1fa6c170cba0:902427097,96a0fea4da6b83d00b131768521047d2:-951286658</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -86,24 +231,24 @@
 <application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
 <category>customer</category>
 <comments/>
-<name>sys_properties_c2ffb4d393db0790e3aef0aefaba101b</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.finding.fields.sn_vul_app_vulnerable_item</name><read_roles/><suffix>usem.vamp.finding.fields.sn_vul_app_vulnerable_item</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:07:20</sys_created_on><sys_id>c2ffb4d393db0790e3aef0aefaba101b</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.finding.fields.sn_vul_app_vulnerable_item</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_c2ffb4d393db0790e3aef0aefaba101b</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:07:20</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=c2ffb4d393db0790e3aef0aefaba101b"/></record_update>]]></payload>
-<payload_hash>2019191070</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
+<name>sys_properties_1c0cf01b939b0790e3aef0aefaba1009</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ait</name><read_roles/><suffix>usem.vamp.avit.fields.ait</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:25:07</sys_created_on><sys_id>1c0cf01b939b0790e3aef0aefaba1009</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ait</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_1c0cf01b939b0790e3aef0aefaba1009</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:25:07</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=1c0cf01b939b0790e3aef0aefaba1009"/></record_update>]]></payload>
+<payload_hash>-1963053153</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>04eb2f289367c3d0e3aef0aefaba10d4</sys_id>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>611f81b893a707d0e3aef0aefaba10ec</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca83feb20000001</sys_recorded_at>
+<sys_recorded_at>1a0cc14e2b30000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
 <table/>
-<target_name>x_boar_bofa_usem_1.usem.vamp.finding.fields.sn_vul_app_vulnerable_item</target_name>
+<target_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ait</target_name>
 <type>System Property</type>
 <update_domain>global</update_domain>
-<update_guid>69192b6c6827c3d0ad85390b977fc676</update_guid>
-<update_guid_history>69192b6c6827c3d0ad85390b977fc676:2019191070,81192b6cf827c3d0ba8b64095e3b9f22:1178850322,7e794ddbf31f0790e08123734ca15122:-157419668,1effb4d358db07906927b1fcff49a3e4:-47627168</update_guid_history>
+<update_guid>fb4d49b07ca707d0b1aff193079671d8</update_guid>
+<update_guid_history>fb4d49b07ca707d0b1aff193079671d8:-1963053153,3d4d49b098a707d0acefaa88f0e2fb09:1122284947,29e8eb2c6f27c3d0db6530082e2bd305:-1963053153,77d82b2c0327c3d0644497e4837402ca:1122284947,5ddf3893fddb0790f88c5071809049fd:800212782,310cf01bd19b07905a755254ff9bb8a0:1595073058</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -112,28 +257,102 @@
 <application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
 <category>customer</category>
 <comments/>
-<name>sys_script_0f0cf41b939b0790e3aef0aefaba106f</name>
-<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="DELETE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;false&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;false&lt;/action_update&gt;&lt;active&gt;false&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;false&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vul_app_vulnerable_item&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition/&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;BOFA_BR_AVIT_VampOutbound&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous /*null when async*/) {
-
-	// Add your code here
-
-})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-22 19:07:19&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;0f0cf41b939b0790e3aef0aefaba106f&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA_BR_AVIT_VampOutbound&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM CDP integration"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_0f0cf41b939b0790e3aef0aefaba106f&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-22 19:07:19&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=0f0cf41b939b0790e3aef0aefaba106f"/&gt;&lt;/record_update&gt;</payload>
-<payload_hash>-542756120</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
+<name>sys_properties_be0cb41b939b0790e3aef0aefaba109c</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ptreq</name><read_roles/><suffix>usem.vamp.avit.fields.ptreq</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:25:46</sys_created_on><sys_id>be0cb41b939b0790e3aef0aefaba109c</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ptreq</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_be0cb41b939b0790e3aef0aefaba109c</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:25:46</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=be0cb41b939b0790e3aef0aefaba109c"/></record_update>]]></payload>
+<payload_hash>-864344303</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>08eb2f289367c3d0e3aef0aefaba10d5</sys_id>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>651f49b893a707d0e3aef0aefaba108b</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca83f4b80000001</sys_recorded_at>
+<sys_recorded_at>1a0cc1563c30000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
-<table>sn_vul_app_vulnerable_item</table>
-<target_name>BOFA_BR_AVIT_VampOutbound</target_name>
-<type>Business Rule</type>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ptreq</target_name>
+<type>System Property</type>
 <update_domain>global</update_domain>
-<update_guid>3c19e76ce027c3d0175f291f77ccba0f</update_guid>
-<update_guid_history>3c19e76ce027c3d0175f291f77ccba0f:-542756120,3419a76c7d27c3d086fdd973fd2f62c5:1123850460,b070b2a4376b83d0bca4737ab913ecb4:1922870294,9f0cf41ba49b0790dbd53e5b6feef693:-727555318</update_guid_history>
+<update_guid>f36d45f0dca707d020179a8e4f4f297a</update_guid>
+<update_guid_history>f36d45f0dca707d020179a8e4f4f297a:-864344303,5f6dc1f058a707d015450a3e6c41b2e8:-2011535867,e419676c3e27c3d067701eb6c60dad73:-864344303,ad09e36c6327c3d036e52951053d0ad1:-2011535867,ecfff0d3fbdb0790352249a44f766948:1284694768,4f0cb41b339b07907027b23ba65749ef:-1386908188</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_ff79cddb931f0790e3aef0aefaba1084</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vul_entry</name><read_roles/><suffix>usem.vamp.fields.sn_vul_app_vul_entry</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:25:52</sys_created_on><sys_id>ff79cddb931f0790e3aef0aefaba1084</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vul_entry</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_ff79cddb931f0790e3aef0aefaba1084</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:25:52</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=ff79cddb931f0790e3aef0aefaba1084"/></record_update>]]></payload>
+<payload_hash>-300511965</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>691f49b893a707d0e3aef0aefaba108c</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc15ac5f0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vul_entry</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>d08d49f0aea707d0fe6da0cd54c129ba</update_guid>
+<update_guid_history>d08d49f0aea707d0fe6da0cd54c129ba:-300511965,ae7d49f0a7a707d0b8252c633b49ed74:399780119,eb19eb6c7927c3d0080c20cae2157ab0:-300511965,cb19ab6c6d27c3d0039ac58a6c87108f:399780119,ca2b0d134e5f0790667e220abd9804e0:1191289506,4c89cddb2a1f0790706d7f85d434aedb:-458058346</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_4c89011f931f0790e3aef0aefaba1074</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerability</name><read_roles/><suffix>usem.vamp.fields.sn_vul_app_vulnerability</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:26:07</sys_created_on><sys_id>4c89011f931f0790e3aef0aefaba1074</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerability</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_4c89011f931f0790e3aef0aefaba1074</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:26:07</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=4c89011f931f0790e3aef0aefaba1074"/></record_update>]]></payload>
+<payload_hash>-1959792281</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>6d1f49b893a707d0e3aef0aefaba1088</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc15cbb50000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerability</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>da8d4df0b5a707d05a8cbd3f0e68effe</update_guid>
+<update_guid_history>da8d4df0b5a707d05a8cbd3f0e68effe:-1959792281,fd8dc9f0b4a707d0e5625696ac2d74ac:-1421918373,9c296f6c4e27c3d0fe7c464441b2a197:-1959792281,cc292f6c5d27c3d005c4f9dbf9ee6f8e:-1421918373,f42b8913b35f0790dd2dc279a28df114:829201673,0689811f781f0790eaa0a8e722c84d2b:1919585429</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_79db78d7939b0790e3aef0aefaba10a3</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include"><sys_script_include action="DELETE"><access>public</access><active>false</active><api_name>x_boar_bofa_usem_1.BOFASIVampOutboundProcessor</api_name><caller_access/><client_callable>false</client_callable><description/><mobile_callable>false</mobile_callable><name>BOFASIVampOutboundProcessor</name><sandbox_callable>false</sandbox_callable><script/><sys_class_name>sys_script_include</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:24:04</sys_created_on><sys_id>79db78d7939b0790e3aef0aefaba10a3</sys_id><sys_mod_count>0</sys_mod_count><sys_name>BOFASIVampOutboundProcessor</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_script_include_79db78d7939b0790e3aef0aefaba10a3</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:24:04</sys_updated_on></sys_script_include></record_update>]]></payload>
+<payload_hash>519951742</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>6d1f49b893a707d0e3aef0aefaba108d</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc13d10d0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
+<table/>
+<target_name>BOFASIVampOutboundProcessor</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_guid>660d8570bda707d00459b78905336331</update_guid>
+<update_guid_history>660d8570bda707d00459b78905336331:519951742,2e0d4570f9a707d0a6968647a43ccfd5:1050163466,28a823e8f927c3d0670dd1c76e4b5479:519951742,40a8efa85b27c3d0afcf7e122d045ebb:1050163466,d170f2a4086b83d0a2639e65df4a375a:-1179807331,6dd5d15fb79f0790c370c6c9a74d754f:1107942953,6c24d51b969f0790f95d558ccdacb18a:607423163,500fcd9b605f079081ac0f645266de61:1838867962,5b2b8d13a85f0790d7fa8593247f8cee:-817055981,3b79cddbf71f07900a8ffccebd3f5a82:-992406027,0effb4d312db079097a6c1621f24af18:1746907130,46db78d74e9b07904cd25d224a4e11a8:1606119786</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -143,23 +362,23 @@
 <category>customer</category>
 <comments/>
 <name>sys_properties_52a0fea4936b83d0e3aef0aefaba10d6</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.sections.sn_vul_app_vulnerable_item</name><read_roles/><suffix>usem.vamp.sections.sn_vul_app_vulnerable_item</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:07:55</sys_created_on><sys_id>52a0fea4936b83d0e3aef0aefaba10d6</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.sections.sn_vul_app_vulnerable_item</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_52a0fea4936b83d0e3aef0aefaba10d6</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:07:55</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=52a0fea4936b83d0e3aef0aefaba10d6"/></record_update>]]></payload>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.sections.sn_vul_app_vulnerable_item</name><read_roles/><suffix>usem.vamp.sections.sn_vul_app_vulnerable_item</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:26:42</sys_created_on><sys_id>52a0fea4936b83d0e3aef0aefaba10d6</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.sections.sn_vul_app_vulnerable_item</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_52a0fea4936b83d0e3aef0aefaba10d6</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:26:42</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=52a0fea4936b83d0e3aef0aefaba10d6"/></record_update>]]></payload>
 <payload_hash>1123360846</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>0ceb2f289367c3d0e3aef0aefaba10d1</sys_id>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>a11f49b893a707d0e3aef0aefaba1089</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca84864b0000001</sys_recorded_at>
+<sys_recorded_at>1a0cc1641340000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
 <table/>
 <target_name>x_boar_bofa_usem_1.usem.vamp.sections.sn_vul_app_vulnerable_item</target_name>
 <type>System Property</type>
 <update_domain>global</update_domain>
-<update_guid>8a3967acf727c3d0c0c2a29f54d13a97</update_guid>
-<update_guid_history>8a3967acf727c3d0c0c2a29f54d13a97:1123360846,613927ac6427c3d032d7dfd0d6189385:-2107957182,e52183ac8b2f83d05d53379ba9c480b4:405296071,0c6dfae0f22f83d022d38310985b3fed:1576973651,b85d3ae09a2f83d00e738bc2e0f7dd23:275682198,fe3db2e0fa2f83d070da2c8dc8015e46:1576973651,1a3d72e0602f83d0b4d46f79f1b0496e:4577875,9e2d7ea0482f83d00a97cc25b10d5c55:1576973651,ce2d3ea00a2f83d038ff6def2de84c9a:414796649,102dfaa09d2f83d0e800f715f6147146:1576973651,bb1d7aa0972f83d0bfab12b917f87fde:549412784,c8acfa20c32f83d0f8d34dc3d5205448:1576973651,fc9c3a20cf2f83d0c080c19f67d4eac3:275682198,198cf220212f83d0d8eaff3afc9392f1:1576973651,748cf220972f83d0df8f5d8f772f6194:4577875,d37c7220a72f83d0e7f144f73032a976:1576973651,9c7cfeecf2eb83d0db2e81537c8d7401:414796649,535c3aec5deb83d08b201ecda7fac2f8:1576973651,a95c3aece0eb83d06dc6c7bcb1da8f33:549412784,a05afa6864eb83d0c2ecb5103a7ba135:1576973651,c54ab6687ceb83d0872b62e6eeab269b:275682198,cf2a72685ceb83d05c283ac6b7ba7175:1576973651,e61a3e28a4eb83d0607f28ca6f55eb22:4577875,7b0aba2816eb83d0873a66c0d20f3025:1576973651,820a7a2805eb83d0eba9bc47191fb06d:414796649,6c0af628c9eb83d0461b0060383f2ee5:1576973651,4c0ab628e9eb83d0571653cc2a38ef87:549412784,c7797aa4c1eb83d0d3687133347b70f3:1576973651,8979b6a4e7eb83d02de831586284c8eb:275682198,656972a4ceeb83d04f6789128bccc587:1576973651,cd6932a46beb83d06d0a1fb8edda8cc9:4577875,2f59be6465eb83d0cea93570980501c6:1576973651,fd593e641ceb83d080882a6483a5c6d0:414796649,a459fa64a2eb83d064369fb7fb89e5f3:1576973651,0059ba6450eb83d0b42f8a9390771d0e:549412784,79a8b6e038eb83d06c9700cf688fa5b8:1576973651,c0a836e0a0eb83d0e0af9dd0df05266a:275682198,e098fea004eb83d0f30cb12d7c203caa:1576973651,8498bea02beb83d05ba6d01a71678b36:4577875,5188faa01ceb83d0feeb904a9e02011c:1576973651,8188baa023eb83d0626092e5bbc46018:414796649,9378f6a013eb83d0c242cb68bd97e09e:1576973651,ad78b6a0a6eb83d082f7e9166de888f2:549412784,c9e7f6206feb83d0d0a89456ba8ee98b:1576973651,0ed7362003eb83d0846380c9341d060e:275682198,cdc7beec5dab83d0631755d460e8cdf7:1576973651,d7b77eec7eab83d02f72a37acb2c3922:4577875,60b7faec61ab83d0a5ee55b41b281133:1576973651,03a77aec3dab83d0d1f92f3485466007:414796649,4ca7f6ec78ab83d0858cbb4ba631d5a0:1576973651,2397b6ec5cab83d0855c40d5ad202959:549412784,c256f6e8cdab83d0790dca2d380e9270:1576973651,a24636e826ab83d0bd11f5899f171424:275682198,d4367ea81eab83d02603489db7ba12db:1576973651,6b263ea863ab83d01fdbe8193ff17b5f:4577875,fc26baa8f4ab83d03cfb05833dd8b6a1:1576973651,98267aa812ab83d02c1aaacbdc2f8c80:414796649,1116f6a857ab83d0259700b70381f191:1576973651,f816b6a8ddab83d084612045bdc23d89:549412784,f295ba28f4ab83d0364c4f10fa6f5981:1576973651,3b853a28f2ab83d08765fe8320bee262:275682198,f97572288dab83d0575050d88c7830c9:1576973651,847532288dab83d06643e3606ae2b54a:4577875,ee65bee48bab83d0d4c0e80614878180:1576973651,4e65bee40eab83d01de59f9632bc6c31:414796649,24653ee451ab83d00e2f4018ad291f59:1576973651,3e557ae4b1ab83d0d7978206e181c764:549412784,18643a24d7ab83d0539b43a1d935f278:1576973651,1654b624f4ab83d033f48975fce4871e:275682198,7a4472245fab83d06d31a4dcd384b702:1576973651,9644322470ab83d04ed46b90ae53963b:4577875,34447ee0a0ab83d0b5454a12c4cc40f9:1576973651,e0447ee05bab83d05f6c6d604c144a7c:414796649,3634fae057ab83d0c5006e1654ec855a:1576973651,9a34bae04aab83d02d1938678cc7256c:549412784,00b3fa60c1ab83d0620239172dd7bba5:1576973651,49a33a6012ab83d0eb09e0d1663860af:275682198,f193f26018ab83d01a3d3c1c02287813:1576973651,ef837260e0ab83d034223125f5d2fbdc:4577875,82833260aeab83d060effdec405faf94:1576973651,bd83fe20d3ab83d0bd3df8d36dae01ee:414796649,00837e20e8ab83d0e44056f9697773ad:1576973651,bb733e200eab83d088144efdb6150d07:549412784,cae2faac146b83d071f09bbccfe76b7c:1576973651,14e2baac586b83d0b2e44793afd410d0:275682198,1bc2f2ac676b83d0518c4cc5700e47cf:1576973651,b9c2f2ac316b83d0f9fd90c78aa76085:4577875,c0c272ac336b83d03ccf20872ae66539:1576973651,afb2fe6ce86b83d00a31881dee358c6f:414796649,4ab2be6cad6b83d0893b8255a4bcd096:1576973651,6db27e6c2c6b83d02be577cb448e9081:549412784,b532b22c896b83d073f5e71c6d2b545d:1576973651,c032322c7c6b83d056a9b7e9c6f2543d:275682198,c512bae8956b83d06427c7ab588bec02:1576973651,ac123ae8526b83d09e3d12e00bb443bf:4577875,310276e84d6b83d088334f20e0c405a6:1576973651,1d0276e88c6b83d04b45835b4c55ac19:414796649,1af1b2e8c16b83d00c75a222ce3edaa9:1576973651,8ef132e86c6b83d0454a93334b0a33fc:549412784,32a072e4fb6b83d0eeba4810b102db14:1576973651</update_guid_history>
+<update_guid>e9adc53486a707d0d7cd5c51782b95a0</update_guid>
+<update_guid_history>e9adc53486a707d0d7cd5c51782b95a0:1123360846,1dadc53403a707d01342c32eb436e522:-2107957182,8a3967acf727c3d0c0c2a29f54d13a97:1123360846,613927ac6427c3d032d7dfd0d6189385:-2107957182,e52183ac8b2f83d05d53379ba9c480b4:405296071,0c6dfae0f22f83d022d38310985b3fed:1576973651,b85d3ae09a2f83d00e738bc2e0f7dd23:275682198,fe3db2e0fa2f83d070da2c8dc8015e46:1576973651,1a3d72e0602f83d0b4d46f79f1b0496e:4577875,9e2d7ea0482f83d00a97cc25b10d5c55:1576973651,ce2d3ea00a2f83d038ff6def2de84c9a:414796649,102dfaa09d2f83d0e800f715f6147146:1576973651,bb1d7aa0972f83d0bfab12b917f87fde:549412784,c8acfa20c32f83d0f8d34dc3d5205448:1576973651,fc9c3a20cf2f83d0c080c19f67d4eac3:275682198,198cf220212f83d0d8eaff3afc9392f1:1576973651,748cf220972f83d0df8f5d8f772f6194:4577875,d37c7220a72f83d0e7f144f73032a976:1576973651,9c7cfeecf2eb83d0db2e81537c8d7401:414796649,535c3aec5deb83d08b201ecda7fac2f8:1576973651,a95c3aece0eb83d06dc6c7bcb1da8f33:549412784,a05afa6864eb83d0c2ecb5103a7ba135:1576973651,c54ab6687ceb83d0872b62e6eeab269b:275682198,cf2a72685ceb83d05c283ac6b7ba7175:1576973651,e61a3e28a4eb83d0607f28ca6f55eb22:4577875,7b0aba2816eb83d0873a66c0d20f3025:1576973651,820a7a2805eb83d0eba9bc47191fb06d:414796649,6c0af628c9eb83d0461b0060383f2ee5:1576973651,4c0ab628e9eb83d0571653cc2a38ef87:549412784,c7797aa4c1eb83d0d3687133347b70f3:1576973651,8979b6a4e7eb83d02de831586284c8eb:275682198,656972a4ceeb83d04f6789128bccc587:1576973651,cd6932a46beb83d06d0a1fb8edda8cc9:4577875,2f59be6465eb83d0cea93570980501c6:1576973651,fd593e641ceb83d080882a6483a5c6d0:414796649,a459fa64a2eb83d064369fb7fb89e5f3:1576973651,0059ba6450eb83d0b42f8a9390771d0e:549412784,79a8b6e038eb83d06c9700cf688fa5b8:1576973651,c0a836e0a0eb83d0e0af9dd0df05266a:275682198,e098fea004eb83d0f30cb12d7c203caa:1576973651,8498bea02beb83d05ba6d01a71678b36:4577875,5188faa01ceb83d0feeb904a9e02011c:1576973651,8188baa023eb83d0626092e5bbc46018:414796649,9378f6a013eb83d0c242cb68bd97e09e:1576973651,ad78b6a0a6eb83d082f7e9166de888f2:549412784,c9e7f6206feb83d0d0a89456ba8ee98b:1576973651,0ed7362003eb83d0846380c9341d060e:275682198,cdc7beec5dab83d0631755d460e8cdf7:1576973651,d7b77eec7eab83d02f72a37acb2c3922:4577875,60b7faec61ab83d0a5ee55b41b281133:1576973651,03a77aec3dab83d0d1f92f3485466007:414796649,4ca7f6ec78ab83d0858cbb4ba631d5a0:1576973651,2397b6ec5cab83d0855c40d5ad202959:549412784,c256f6e8cdab83d0790dca2d380e9270:1576973651,a24636e826ab83d0bd11f5899f171424:275682198,d4367ea81eab83d02603489db7ba12db:1576973651,6b263ea863ab83d01fdbe8193ff17b5f:4577875,fc26baa8f4ab83d03cfb05833dd8b6a1:1576973651,98267aa812ab83d02c1aaacbdc2f8c80:414796649,1116f6a857ab83d0259700b70381f191:1576973651,f816b6a8ddab83d084612045bdc23d89:549412784,f295ba28f4ab83d0364c4f10fa6f5981:1576973651,3b853a28f2ab83d08765fe8320bee262:275682198,f97572288dab83d0575050d88c7830c9:1576973651,847532288dab83d06643e3606ae2b54a:4577875,ee65bee48bab83d0d4c0e80614878180:1576973651,4e65bee40eab83d01de59f9632bc6c31:414796649,24653ee451ab83d00e2f4018ad291f59:1576973651,3e557ae4b1ab83d0d7978206e181c764:549412784,18643a24d7ab83d0539b43a1d935f278:1576973651,1654b624f4ab83d033f48975fce4871e:275682198,7a4472245fab83d06d31a4dcd384b702:1576973651,9644322470ab83d04ed46b90ae53963b:4577875,34447ee0a0ab83d0b5454a12c4cc40f9:1576973651,e0447ee05bab83d05f6c6d604c144a7c:414796649,3634fae057ab83d0c5006e1654ec855a:1576973651,9a34bae04aab83d02d1938678cc7256c:549412784,00b3fa60c1ab83d0620239172dd7bba5:1576973651,49a33a6012ab83d0eb09e0d1663860af:275682198,f193f26018ab83d01a3d3c1c02287813:1576973651,ef837260e0ab83d034223125f5d2fbdc:4577875,82833260aeab83d060effdec405faf94:1576973651,bd83fe20d3ab83d0bd3df8d36dae01ee:414796649,00837e20e8ab83d0e44056f9697773ad:1576973651,bb733e200eab83d088144efdb6150d07:549412784,cae2faac146b83d071f09bbccfe76b7c:1576973651,14e2baac586b83d0b2e44793afd410d0:275682198,1bc2f2ac676b83d0518c4cc5700e47cf:1576973651,b9c2f2ac316b83d0f9fd90c78aa76085:4577875,c0c272ac336b83d03ccf20872ae66539:1576973651,afb2fe6ce86b83d00a31881dee358c6f:414796649,4ab2be6cad6b83d0893b8255a4bcd096:1576973651,6db27e6c2c6b83d02be577cb448e9081:549412784,b532b22c896b83d073f5e71c6d2b545d:1576973651,c032322c7c6b83d056a9b7e9c6f2543d:275682198,c512bae8956b83d06427c7ab588bec02:1576973651,ac123ae8526b83d09e3d12e00bb443bf:4577875,310276e84d6b83d088334f20e0c405a6:1576973651,1d0276e88c6b83d04b45835b4c55ac19:414796649,1af1b2e8c16b83d00c75a222ce3edaa9:1576973651,8ef132e86c6b83d0454a93334b0a33fc:549412784,32a072e4fb6b83d0eeba4810b102db14:1576973651</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -693,21 +912,174 @@ BOFASIVampOutboundProcessor.prototype = {
 };
 ]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-22 15:00:49&lt;/sys_created_on&gt;&lt;sys_id&gt;7da0bea4936b83d0e3aef0aefaba10e0&lt;/sys_id&gt;&lt;sys_mod_count&gt;5&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFASIVampOutboundProcessor&lt;/sys_name&gt;&lt;sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM CDP integration"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_7da0bea4936b83d0e3aef0aefaba10e0&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-22 19:05:20&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
 <payload_hash>-81761462</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>0ceb2f289367c3d0e3aef0aefaba10d6</sys_id>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>a11f49b893a707d0e3aef0aefaba108e</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca8498780000001</sys_recorded_at>
+<sys_recorded_at>1a0cc1650060000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
 <table/>
 <target_name>BOFASIVampOutboundProcessor</target_name>
 <type>Script Include</type>
 <update_domain>global</update_domain>
-<update_guid>4339e7ac0427c3d0aeb3c5c3b399a48c</update_guid>
-<update_guid_history>4339e7ac0427c3d0aeb3c5c3b399a48c:-81761462,e798efa87b27c3d03e9ec7348f4b1d71:-81761462,29a307e4026f83d0194a72a0b7156c84:-1240381649,b22147ac6a2f83d0cdf238aacb207796:-335437078,d7fbb6acd2eb83d0f7d3b42ea41648d0:798991580,6d47f2ac23ab83d0acd04b9c6cbd7dc3:992093584,f1a0bea4ea6b83d097c00c0b6e066ee7:-505349840</update_guid_history>
+<update_guid>e2ad493406a707d0104e6d4c08cdba4a</update_guid>
+<update_guid_history>e2ad493406a707d0104e6d4c08cdba4a:-81761462,e798efa87b27c3d03e9ec7348f4b1d71:-81761462,29a307e4026f83d0194a72a0b7156c84:-1240381649,b22147ac6a2f83d0cdf238aacb207796:-335437078,d7fbb6acd2eb83d0f7d3b42ea41648d0:798991580,6d47f2ac23ab83d0acd04b9c6cbd7dc3:992093584,f1a0bea4ea6b83d097c00c0b6e066ee7:-505349840</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_8edb78d7939b0790e3aef0aefaba10df</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</name><read_roles/><suffix>usem.vamp.kafka.topic_sys_id</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:24:13</sys_created_on><sys_id>8edb78d7939b0790e3aef0aefaba10df</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_8edb78d7939b0790e3aef0aefaba10df</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:24:13</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=8edb78d7939b0790e3aef0aefaba10df"/></record_update>]]></payload>
+<payload_hash>869182503</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>a51f49b893a707d0e3aef0aefaba108a</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc143e140000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>e12d4d70d7a707d0bda861dcdd5bb891</update_guid>
+<update_guid_history>e12d4d70d7a707d0bda861dcdd5bb891:869182503,f82dc97024a707d01343ff861dd4646c:-59926349,53a8e3e81227c3d0afc352e76656f7f8:869182503,baa8a3e8f227c3d054d950f402e7c454:-59926349,4e90faa4da6b83d0baaaa885d20b4742:-1333968371,eaeb7cd73b9b0790a4c287eca9977554:-173497087</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_1efb301b939b0790e3aef0aefaba1093</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.fields.tpe</name><read_roles/><suffix>usem.vamp.avit.fields.tpe</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:24:59</sys_created_on><sys_id>1efb301b939b0790e3aef0aefaba1093</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.tpe</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_1efb301b939b0790e3aef0aefaba1093</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:24:59</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=1efb301b939b0790e3aef0aefaba1093"/></record_update>]]></payload>
+<payload_hash>-845628862</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>a51f81b893a707d0e3aef0aefaba10ec</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc14b5cf0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.tpe</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>704d85b079a707d0d6433351c16c6832</update_guid>
+<update_guid_history>704d85b079a707d0d6433351c16c6832:-845628862,6c4d45b093a707d06d8750854b77afa6:-2055258058,d5d8272cea27c3d0906126d72ce287c5:-845628862,f0d8a32c0b27c3d0b4f1906f61ed99f0:-2055258058,0fdf78931adb079020b61ed6162f3f64:1943208324,c40cb01b789b07909e4dfe65bc941611:-215952624</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_c2ffb4d393db0790e3aef0aefaba101b</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.finding.fields.sn_vul_app_vulnerable_item</name><read_roles/><suffix>usem.vamp.finding.fields.sn_vul_app_vulnerable_item</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:25:49</sys_created_on><sys_id>c2ffb4d393db0790e3aef0aefaba101b</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.finding.fields.sn_vul_app_vulnerable_item</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_c2ffb4d393db0790e3aef0aefaba101b</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:25:49</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=c2ffb4d393db0790e3aef0aefaba101b"/></record_update>]]></payload>
+<payload_hash>2019191070</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>a91f49b893a707d0e3aef0aefaba108b</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc1572810000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_1.usem.vamp.finding.fields.sn_vul_app_vulnerable_item</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>7c7dc5f096a707d04bf0f7142ca74d04</update_guid>
+<update_guid_history>7c7dc5f096a707d04bf0f7142ca74d04:2019191070,547d85f0c3a707d0b8b7f183141799b6:1178850322,69192b6c6827c3d0ad85390b977fc676:2019191070,81192b6cf827c3d0ba8b64095e3b9f22:1178850322,7e794ddbf31f0790e08123734ca15122:-157419668,1effb4d358db07906927b1fcff49a3e4:-47627168</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_0f0cf41b939b0790e3aef0aefaba106f</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="DELETE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;false&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;false&lt;/action_update&gt;&lt;active&gt;false&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;false&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vul_app_vulnerable_item&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition/&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;BOFA_BR_AVIT_VampOutbound&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous /*null when async*/) {
+
+	// Add your code here
+
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-23 02:25:49&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;0f0cf41b939b0790e3aef0aefaba106f&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA_BR_AVIT_VampOutbound&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM CDP integration"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_0f0cf41b939b0790e3aef0aefaba106f&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-23 02:25:49&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=0f0cf41b939b0790e3aef0aefaba106f"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-542756120</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>ad1f49b893a707d0e3aef0aefaba108c</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc15665f0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
+<table>sn_vul_app_vulnerable_item</table>
+<target_name>BOFA_BR_AVIT_VampOutbound</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>487d45f0b8a707d0fff8afd88175cfc6</update_guid>
+<update_guid_history>487d45f0b8a707d0fff8afd88175cfc6:-542756120,bf6d45f00da707d0d08c5802a8d6d0ad:1123850460,3c19e76ce027c3d0175f291f77ccba0f:-542756120,3419a76c7d27c3d086fdd973fd2f62c5:1123850460,b070b2a4376b83d0bca4737ab913ecb4:1922870294,9f0cf41ba49b0790dbd53e5b6feef693:-727555318</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_2cb0b2e4936b83d0e3aef0aefaba1067</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;true&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vul_app_vulnerable_item&lt;/collection&gt;&lt;condition/&gt;&lt;description&gt;Builds the VAMP payload for the application vulnerable item with BOFASIVampOutboundProcessor and sends it with BOFASIKafkaProducerVamp on every insert and update.&lt;/description&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition/&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;BOFA_BR_AVIT_VampOutbound&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[/**
+ * BOFA_BR_AVIT_VampOutbound - after insert and update on the application vulnerable item table,
+ * order 100. Builds the VAMP payload of the record with BOFASIVampOutboundProcessor and hands it to
+ * BOFASIKafkaProducerVamp. An empty payload means the processor could not build or validate it and
+ * has logged why; nothing is sent then. Both steps sit in one try/catch: a failure is logged once
+ * and never blocks the record.
+ * @param {GlideRecord} current - the application vulnerable item as saved
+ * @param {GlideRecord} previous - the record before the save (null on insert), not used
+ */
+(function executeRule(current, previous /*null when async*/ ) {
+    try {
+        var payload = new x_boar_bofa_usem_1.BOFASIVampOutboundProcessor().buildPayload(current);
+        if (!payload)
+            return;
+        new x_boar_bofa_usem_1.BOFASIKafkaProducerVamp().sendPayload(payload, current);
+    } catch (e) {
+        gs.error('BOFA_BR_AVIT_VampOutbound: outbound message failed for ' + current.getTableName() + ' ' + current.getUniqueValue() + ' - ' + (e.message || e));
+    }
+})(current, previous);
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-22 15:01:00&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;2cb0b2e4936b83d0e3aef0aefaba1067&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA_BR_AVIT_VampOutbound&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM CDP integration"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_2cb0b2e4936b83d0e3aef0aefaba1067&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-22 15:50:21&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=2cb0b2e4936b83d0e3aef0aefaba1067"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>1507423295</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>e11f49b893a707d0e3aef0aefaba108d</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc1650ad0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
+<table>sn_vul_app_vulnerable_item</table>
+<target_name>BOFA_BR_AVIT_VampOutbound</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>aaad4934c4a707d02b9025a34be55854</update_guid>
+<update_guid_history>aaad4934c4a707d02b9025a34be55854:1507423295,17fbb6ac6deb83d04cc96a436575c9de:1507423295,68b0b2e40e6b83d0ad46046b7996d1c9:-1634440839</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -717,23 +1089,101 @@ BOFASIVampOutboundProcessor.prototype = {
 <category>customer</category>
 <comments/>
 <name>sys_properties_620c741b939b0790e3aef0aefaba109f</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.fields.consequence</name><read_roles/><suffix>usem.vamp.avit.fields.consequence</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:06:51</sys_created_on><sys_id>620c741b939b0790e3aef0aefaba109f</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.consequence</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_620c741b939b0790e3aef0aefaba109f</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:06:51</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=620c741b939b0790e3aef0aefaba109f"/></record_update>]]></payload>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.fields.consequence</name><read_roles/><suffix>usem.vamp.avit.fields.consequence</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:25:36</sys_created_on><sys_id>620c741b939b0790e3aef0aefaba109f</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.consequence</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_620c741b939b0790e3aef0aefaba109f</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:25:36</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=620c741b939b0790e3aef0aefaba109f"/></record_update>]]></payload>
 <payload_hash>-623693848</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>40eb2f289367c3d0e3aef0aefaba10d2</sys_id>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>e51f49b893a707d0e3aef0aefaba1089</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca83a64e0000001</sys_recorded_at>
+<sys_recorded_at>1a0cc1559170000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
 <table/>
 <target_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.consequence</target_name>
 <type>System Property</type>
 <update_domain>global</update_domain>
-<update_guid>8c09636c0927c3d0148b834bb5129eb8</update_guid>
-<update_guid_history>8c09636c0927c3d0148b834bb5129eb8:-623693848,aff8236c2627c3d0626a8df9f8ac29dc:-691791396,adef7c93b7db079037bfe8790f47aab9:-1829535076,3a0cb41b6a9b07906250fb7263d81504:-512347608</update_guid_history>
+<update_guid>036dc1f0ffa707d0f8785dc634a15c9f</update_guid>
+<update_guid_history>036dc1f0ffa707d0f8785dc634a15c9f:-623693848,aa6d81f0d5a707d0f85764de187116bf:-691791396,8c09636c0927c3d0148b834bb5129eb8:-623693848,aff8236c2627c3d0626a8df9f8ac29dc:-691791396,adef7c93b7db079037bfe8790f47aab9:-1829535076,3a0cb41b6a9b07906250fb7263d81504:-512347608</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_960c341b939b0790e3aef0aefaba10e7</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.fields.exception</name><read_roles/><suffix>usem.vamp.avit.fields.exception</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:25:32</sys_created_on><sys_id>960c341b939b0790e3aef0aefaba10e7</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.exception</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_960c341b939b0790e3aef0aefaba10e7</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:25:32</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=960c341b939b0790e3aef0aefaba10e7"/></record_update>]]></payload>
+<payload_hash>1407123292</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>e91f49b893a707d0e3aef0aefaba108a</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc1533e20000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.exception</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>b46d01f058a707d0c6c52646b42a1ab2</update_guid>
+<update_guid_history>b46d01f058a707d0c6c52646b42a1ab2:1407123292,d86d01f0a8a707d0b309484dfb392614:-1452052400,7df8ef2ca527c3d0544fe02aec9a5670:1407123292,77e86f2ceb27c3d00268a42c7c7896ce:-1452052400,c4ff30d39adb0790fee530ddf4c882eb:-1300776531,e60c741b859b0790b5b6035088f9169b:-1584675935</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_24fbbcd7939b0790e3aef0aefaba10ad</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.fields.finding</name><read_roles/><suffix>usem.vamp.avit.fields.finding</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:24:49</sys_created_on><sys_id>24fbbcd7939b0790e3aef0aefaba10ad</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.finding</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_24fbbcd7939b0790e3aef0aefaba10ad</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:24:49</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=24fbbcd7939b0790e3aef0aefaba10ad"/></record_update>]]></payload>
+<payload_hash>-748999646</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>e91f81b893a707d0e3aef0aefaba10ec</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc14a4080000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.finding</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>bb3d05b0cca707d0cbcd5e41a1053722</update_guid>
+<update_guid_history>bb3d05b0cca707d0cbcd5e41a1053722:-748999646,1b3d81b02ca707d0f7936098895a95f5:1233413142,1bc8afe85d27c3d0f73e0611afe7c3b3:-748999646,69c86fe8db27c3d0fb6cb872bfaca182:1233413142,38eff8938adb0790c05bd93defa3793f:754450419,12fbfcd7349b07904b651cd6067e778b:1973090175</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>DELETE</action>
+<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
+<category>customer</category>
+<comments/>
+<name>sys_properties_f789051f931f0790e3aef0aefaba10ac</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_pen_test_assessment_request</name><read_roles/><suffix>usem.vamp.fields.sn_vul_pen_test_assessment_request</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-23 02:26:32</sys_created_on><sys_id>f789051f931f0790e3aef0aefaba10ac</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_pen_test_assessment_request</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_f789051f931f0790e3aef0aefaba10ac</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-23 02:26:32</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=f789051f931f0790e3aef0aefaba10ac"/></record_update>]]></payload>
+<payload_hash>763119052</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>ed1f49b893a707d0e3aef0aefaba108b</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0cc1635740000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
+<table/>
+<target_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_pen_test_assessment_request</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_guid>fcad8534eba707d03959bb0a48b2696c</update_guid>
+<update_guid_history>fcad8534eba707d03959bb0a48b2696c:763119052,d0ad453464a707d0ab7bb52278eef038:-77221696,1939e3ac9d27c3d07689dcb244fd71b1:763119052,b839a3ac3127c3d0f01d2026ff0ecc82:-77221696,592bc913105f079018999708c0e1c2a0:1794433732,2999451ff51f07900bc8e96faf80d3ca:1972292024</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>
@@ -787,10 +1237,10 @@ BOFASIKafkaProducerVamp.prototype = {
      * The message key: table and sys_id of the record.
      * @param {GlideRecord} record - the application vulnerable item
      * @returns {string} "&lt;table&gt;.&lt;sys_id&gt;"
-     * @throws {Error} when no saved record was given
+     * @throws {Error} when no existing record was given
      */
     _messageKey: function(record) {
-        if (!record || typeof record.getTableName != 'function' || !record.getUniqueValue())
+        if (!record || typeof record.isValidRecord != 'function' || !record.isValidRecord())
             throw new Error('no record was given');
         return record.getTableName() + '.' + record.getUniqueValue();
     },
@@ -847,473 +1297,23 @@ BOFASIKafkaProducerVamp.prototype = {
 
     type: 'BOFASIKafkaProducerVamp'
 };
-]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-22 15:00:50&lt;/sys_created_on&gt;&lt;sys_id&gt;86a0bea4936b83d0e3aef0aefaba10e9&lt;/sys_id&gt;&lt;sys_mod_count&gt;2&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFASIKafkaProducerVamp&lt;/sys_name&gt;&lt;sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM CDP integration"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_86a0bea4936b83d0e3aef0aefaba10e9&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-22 19:05:20&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
-<payload_hash>891248461</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-22 15:00:50&lt;/sys_created_on&gt;&lt;sys_id&gt;86a0bea4936b83d0e3aef0aefaba10e9&lt;/sys_id&gt;&lt;sys_mod_count&gt;3&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFASIKafkaProducerVamp&lt;/sys_name&gt;&lt;sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM CDP integration"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_86a0bea4936b83d0e3aef0aefaba10e9&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-23 02:24:03&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<payload_hash>89067224</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">e51f81b893a707d0e3aef0aefaba10eb</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>40eb2f289367c3d0e3aef0aefaba10d7</sys_id>
+<sys_created_on>2026-09-23 02:33:02</sys_created_on>
+<sys_id>f51f49b893a707d0e3aef0aefaba108e</sys_id>
 <sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca8498ba0000001</sys_recorded_at>
+<sys_recorded_at>1a0cc16503a0000001</sys_recorded_at>
 <sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
+<sys_updated_on>2026-09-23 02:33:02</sys_updated_on>
 <table/>
 <target_name>BOFASIKafkaProducerVamp</target_name>
 <type>Script Include</type>
 <update_domain>global</update_domain>
-<update_guid>0339e7ace727c3d0842a35f7d6c1a48f</update_guid>
-<update_guid_history>0339e7ace727c3d0842a35f7d6c1a48f:891248461,6398efa86427c3d0667b39323c2c8577:891248461,1ffbb6acfaeb83d058512c293cc5c9d5:74730683,c6a0bea43a6b83d0f39b6c6002ed2ceb:-173027708</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_4c89011f931f0790e3aef0aefaba1074</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerability</name><read_roles/><suffix>usem.vamp.fields.sn_vul_app_vulnerability</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:07:32</sys_created_on><sys_id>4c89011f931f0790e3aef0aefaba1074</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerability</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_4c89011f931f0790e3aef0aefaba1074</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:07:32</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=4c89011f931f0790e3aef0aefaba1074"/></record_update>]]></payload>
-<payload_hash>-1959792281</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>44eb2f289367c3d0e3aef0aefaba10d1</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca842c6a0000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerability</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>9c296f6c4e27c3d0fe7c464441b2a197</update_guid>
-<update_guid_history>9c296f6c4e27c3d0fe7c464441b2a197:-1959792281,cc292f6c5d27c3d005c4f9dbf9ee6f8e:-1421918373,f42b8913b35f0790dd2dc279a28df114:829201673,0689811f781f0790eaa0a8e722c84d2b:1919585429</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_960c341b939b0790e3aef0aefaba10e7</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.fields.exception</name><read_roles/><suffix>usem.vamp.avit.fields.exception</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:06:36</sys_created_on><sys_id>960c341b939b0790e3aef0aefaba10e7</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.exception</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_960c341b939b0790e3aef0aefaba10e7</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:06:36</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=960c341b939b0790e3aef0aefaba10e7"/></record_update>]]></payload>
-<payload_hash>1407123292</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>44eb2f289367c3d0e3aef0aefaba10d3</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca8382a60000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.exception</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>7df8ef2ca527c3d0544fe02aec9a5670</update_guid>
-<update_guid_history>7df8ef2ca527c3d0544fe02aec9a5670:1407123292,77e86f2ceb27c3d00268a42c7c7896ce:-1452052400,c4ff30d39adb0790fee530ddf4c882eb:-1300776531,e60c741b859b0790b5b6035088f9169b:-1584675935</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_f789051f931f0790e3aef0aefaba10ac</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_pen_test_assessment_request</name><read_roles/><suffix>usem.vamp.fields.sn_vul_pen_test_assessment_request</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:07:46</sys_created_on><sys_id>f789051f931f0790e3aef0aefaba10ac</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_pen_test_assessment_request</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_f789051f931f0790e3aef0aefaba10ac</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:07:46</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=f789051f931f0790e3aef0aefaba10ac"/></record_update>]]></payload>
-<payload_hash>763119052</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>48eb2f289367c3d0e3aef0aefaba10d4</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca847c590000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_pen_test_assessment_request</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>1939e3ac9d27c3d07689dcb244fd71b1</update_guid>
-<update_guid_history>1939e3ac9d27c3d07689dcb244fd71b1:763119052,b839a3ac3127c3d0f01d2026ff0ecc82:-77221696,592bc913105f079018999708c0e1c2a0:1794433732,2999451ff51f07900bc8e96faf80d3ca:1972292024</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_script_2cb0b2e4936b83d0e3aef0aefaba1067</name>
-<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;true&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vul_app_vulnerable_item&lt;/collection&gt;&lt;condition/&gt;&lt;description&gt;Builds the VAMP payload for the application vulnerable item with BOFASIVampOutboundProcessor and sends it with BOFASIKafkaProducerVamp on every insert and update.&lt;/description&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition/&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;BOFA_BR_AVIT_VampOutbound&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[/**
- * BOFA_BR_AVIT_VampOutbound - after insert and update on the application vulnerable item table,
- * order 100. Builds the VAMP payload of the record with BOFASIVampOutboundProcessor and hands it to
- * BOFASIKafkaProducerVamp. An empty payload means the processor could not build or validate it and
- * has logged why; nothing is sent then. Both steps sit in one try/catch: a failure is logged once
- * and never blocks the record.
- * @param {GlideRecord} current - the application vulnerable item as saved
- * @param {GlideRecord} previous - the record before the save (null on insert), not used
- */
-(function executeRule(current, previous /*null when async*/ ) {
-    try {
-        var payload = new x_boar_bofa_usem_1.BOFASIVampOutboundProcessor().buildPayload(current);
-        if (!payload)
-            return;
-        new x_boar_bofa_usem_1.BOFASIKafkaProducerVamp().sendPayload(payload, current);
-    } catch (e) {
-        gs.error('BOFA_BR_AVIT_VampOutbound: outbound message failed for ' + current.getTableName() + ' ' + current.getUniqueValue() + ' - ' + (e.message || e));
-    }
-})(current, previous);
-]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-22 15:01:00&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;2cb0b2e4936b83d0e3aef0aefaba1067&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA_BR_AVIT_VampOutbound&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="BOFA USEM CDP integration"&gt;4ba447d22b43cb10cb55fbcc6e91bf0f&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_2cb0b2e4936b83d0e3aef0aefaba1067&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-22 15:50:21&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=2cb0b2e4936b83d0e3aef0aefaba1067"/&gt;&lt;/record_update&gt;</payload>
-<payload_hash>1507423295</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>4ceb2f289367c3d0e3aef0aefaba10d5</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca84991d0000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
-<table>sn_vul_app_vulnerable_item</table>
-<target_name>BOFA_BR_AVIT_VampOutbound</target_name>
-<type>Business Rule</type>
-<update_domain>global</update_domain>
-<update_guid>8b39e7ac0d27c3d0b0cbd03bfdf25896</update_guid>
-<update_guid_history>8b39e7ac0d27c3d0b0cbd03bfdf25896:1507423295,17fbb6ac6deb83d04cc96a436575c9de:1507423295,68b0b2e40e6b83d0ad46046b7996d1c9:-1634440839</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_script_include_06db78d7939b0790e3aef0aefaba10aa</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include"><sys_script_include action="DELETE"><access>public</access><active>false</active><api_name>x_boar_bofa_usem_1.BOFASIKafkaProducerVamp</api_name><caller_access/><client_callable>false</client_callable><description/><mobile_callable>false</mobile_callable><name>BOFASIKafkaProducerVamp</name><sandbox_callable>false</sandbox_callable><script/><sys_class_name>sys_script_include</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:05:24</sys_created_on><sys_id>06db78d7939b0790e3aef0aefaba10aa</sys_id><sys_mod_count>0</sys_mod_count><sys_name>BOFASIKafkaProducerVamp</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_script_include_06db78d7939b0790e3aef0aefaba10aa</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:05:24</sys_updated_on></sys_script_include></record_update>]]></payload>
-<payload_hash>243290452</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>80eb2f289367c3d0e3aef0aefaba10d6</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca8232640000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
-<table/>
-<target_name>BOFASIKafkaProducerVamp</target_name>
-<type>Script Include</type>
-<update_domain>global</update_domain>
-<update_guid>34a823e89327c3d0fe07d4d1e8c916b2</update_guid>
-<update_guid_history>34a823e89327c3d0fe07d4d1e8c916b2:243290452,a8a823e89b27c3d072a16ac9dac0047d:-1672829216,8570b2a4696b83d079b8f9fb799923eb:100586737,46db78d7109b0790636f15087f9cafac:-1255777307</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_1efb301b939b0790e3aef0aefaba1093</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.fields.tpe</name><read_roles/><suffix>usem.vamp.avit.fields.tpe</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:06:08</sys_created_on><sys_id>1efb301b939b0790e3aef0aefaba1093</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.tpe</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_1efb301b939b0790e3aef0aefaba1093</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:06:08</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=1efb301b939b0790e3aef0aefaba1093"/></record_update>]]></payload>
-<payload_hash>-845628862</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>84eb2f289367c3d0e3aef0aefaba10d0</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca82fb370000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.tpe</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>d5d8272cea27c3d0906126d72ce287c5</update_guid>
-<update_guid_history>d5d8272cea27c3d0906126d72ce287c5:-845628862,f0d8a32c0b27c3d0b4f1906f61ed99f0:-2055258058,0fdf78931adb079020b61ed6162f3f64:1943208324,c40cb01b789b07909e4dfe65bc941611:-215952624</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_66eb7cd7939b0790e3aef0aefaba1058</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.sections</name><read_roles/><suffix>usem.vamp.avit.sections</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:05:38</sys_created_on><sys_id>66eb7cd7939b0790e3aef0aefaba1058</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.sections</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_66eb7cd7939b0790e3aef0aefaba1058</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:05:38</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=66eb7cd7939b0790e3aef0aefaba1058"/></record_update>]]></payload>
-<payload_hash>-1080106616</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>84eb2f289367c3d0e3aef0aefaba10d2</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca82b4e20000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_1.usem.vamp.avit.sections</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>b8c82fe86e27c3d0305abdd55cbe7e11</update_guid>
-<update_guid_history>b8c82fe86e27c3d0305abdd55cbe7e11:-1080106616,e5b867e80227c3d02b7486303df509e9:-259133828,abef30d3cadb07902ea3767f7cb97473:-1977449949,2cfbbcd76f9b07907ef21e83300cf5a9:964019479</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_baa072e4936b83d0e3aef0aefaba1017</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>VAMP payload, one servicenow_field=json_field pair per line in payload order. On the left the ServiceNow field (verified with the field check script): the fields of the application vulnerable item plain, the fields of another section as &lt;table&gt;.&lt;field&gt;. On the right the payload name of the sheet "SN to VAMP" as &lt;json structure&gt;.&lt;json field&gt;; the sections of the payload are the structures in the order this property introduces them, and the section of a table reached through a many to many (the remediation tasks of the item) is a list, one entry per linked record. A field missing on the table or empty is sent as "".</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</name><read_roles/><suffix>usem.vamp.fields.sn_vul_app_vulnerable_item</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 15:00:53</sys_created_on><sys_id>baa072e4936b83d0e3aef0aefaba1017</sys_id><sys_mod_count>187</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_baa072e4936b83d0e3aef0aefaba1017</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:07:45</sys_updated_on><type>string</type><value>sn_vul_app_vul_entry.number=tpe.number,
-sn_vul_app_vul_entry.u_vuln_sub_cat_id=tpe.u_vuln_sub_cat_id,
-sn_vul_app_vulnerability.number=remediation_task.number,
-sn_vul_app_vulnerability.u_primary_ait=remediation_task.primary_ait,
-sn_vul_app_vulnerability.u_avul_record_url=remediation_task.u_avul_record_url,
-number=finding.number,
-sys_created_on=finding.sys_created_on,
-sys_updated_on=finding.sys_updated_on,
-state=finding.state,
-cmdb_ci=finding.configuration_item,
-u_verification_status=finding.u_verification_status,
-source_avit_id=finding.source_avit_id,
-u_avit_record_url=finding.u_avit_record_url,
-sn_vul_pen_test_assessment_request.number=ptreq.number,
-sn_vul_pen_test_assessment_request.sys_created_on=ptreq.sys_created_on,
-sn_vul_pen_test_assessment_request.u_assessment_id=ptreq.u_assessment_id,</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=baa072e4936b83d0e3aef0aefaba1017"/></record_update>]]></payload>
-<payload_hash>108730948</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>88eb2f289367c3d0e3aef0aefaba10d3</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca8498ff0000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>0339e7ac9027c3d01d26bcf9f7963894</update_guid>
-<update_guid_history>0339e7ac9027c3d01d26bcf9f7963894:108730948,d72963acf827c3d012ae12433684537a:108730948,ce29ef6ca427c3d04a685220e354a808:1668634916,57c783e481af83d07ba3fb5e68414dcd:108730948,24c743e442af83d061cc60e467513f03:-353503931,bab7cfa452af83d0cb0c5fbc9128fe42:108730948,c4b74fa406af83d0e33e53b25e356509:1447008232,6ba7cba47baf83d05e1560ce894d3360:108730948,70a74ba4acaf83d0259c81b8367c0b02:-1596546319,369787a4d2af83d088f90888ff34eac7:108730948,4097c3a45faf83d0c4391c76dc7c9ea1:2090832666,a68783a423af83d046067fcbc3467fd1:108730948,0d8743a489af83d02291c9bac219590a:1478494615,5087cf6417af83d05c628086db2fe379:108730948,76770f64dfaf83d0aebc62b220a24c59:-1919217429,41770f6487af83d0563a6c83217ca206:108730948,6f67c764a6af83d083ffb1f53f8455ec:162661739,e9678764faaf83d0f7a5b2b7c3d3f5f7:108730948,b25707640faf83d0a30f5b426a0a5043:1291589492,6ed68be077af83d02cdb0479cf91ce8c:108730948,05d60be0a7af83d014dbe0f826d28589:-353503931,57c687e0cfaf83d007f9dadcf82804f7:108730948,64c607e0b6af83d0148df5686df237ef:1447008232,40c6c3e0e6af83d03a75ea2f1f963b85:108730948,deb603e074af83d048de9055a908f1ac:-1596546319,8eb603e038af83d09b7d855319d0e200:108730948,17a60fa02daf83d0eb947482c1d371ce:2090832666,2da68ba079af83d04f28589ddcd5c2f8:108730948,72960ba07baf83d04d9e4ef2c26a9ca5:1478494615,f49687a092af83d004dfe22f5b6ef976:108730948,168607a00eaf83d0b6d04c92391c2124:-1919217429,2c86c3a0b7af83d07109f1679789706b:108730948,a0768f60f3af83d02b8a27525be11029:162661739,bb660f60f5af83d080758a9e40c6728e:108730948,8a66cb604caf83d0a9d80ae852dd6184:1291589492,2215cf2c8e6f83d0528d4ea293f308e3:108730948,57054f2c726f83d0fb9dccbd8269db86:-353503931,a905cb2cfd6f83d0373039471d0fb8d6:108730948,84054b2c7f6f83d060034bb13950197a:1447008232,3ff40b2c116f83d079811e0e4abcf206:108730948,4df4472cb76f83d0b7d4011d5df68363:-1596546319,07e4072cdb6f83d0df123ed63d2b26d3:108730948,65e4832cde6f83d078109aaa0055f022:2090832666,37d4cfe8a26f83d0fddc119b53c75eab:108730948,eed48fe8a46f83d0b891a39f7e51d569:1478494615,3cd40fe8806f83d077efbf2b3ffeb985:108730948,5fc44be8746f83d0135b4e47c853cdee:-1919217429,36c44be8a16f83d04dabdf8e440506ad:108730948,15c4c7e8536f83d036c20270fdafa5f3:162661739,efb487e8896f83d0635aaf943b20b745:108730948,f8b4c3e8996f83d089624d1d84d84e5e:1291589492,a7448f684c6f83d0950152aba7be51db:108730948,4a440f68506f83d0ff8f6fb1aec4b177:-353503931,98448b68fd6f83d02a7e31622a92cadf:108730948,76344b68686f83d0bc74ae42272ba843:1447008232,1a34c768556f83d06a5e8f8a96cd57d8:108730948,b4340768376f83d0b6de03827e0af108:-1596546319,3624c368a66f83d077285f06fc56e844:108730948,cd24cf28366f83d00cd3d61b626982da:2090832666,6024cf28746f83d06364cabad27b5b15:108730948,9c140f28446f83d07073357b4ad33264:1478494615,c8144b28e36f83d03f09a5ca107d9ea1:108730948,c904c728bf6f83d01206676b214378ca:-1919217429,6804c728b16f83d0d971adcaf7a35b6f:108730948,2af3c328c36f83d0455e98bde3866afb:162661739,13e303286b6f83d02b9a39ecec435dfe:108730948,a0e38fe48b6f83d0426320a3d7473f6c:1291589492,22238b64a96f83d08ec0f1eeeeb7ba07:108730948,4d23c764386f83d00abfa42a19bee2e4:1447008232,9f13c764d16f83d00d9cb8ad56d29808:108730948,241347648e6f83d04551b53df079b57b:-1596546319,8413c364376f83d0f50b102c7f48df9e:108730948,a2034364fb6f83d0a755e1919bbdcaf8:2090832666,9a0343640a6f83d0f06f88c9cb1b341f:108730948,24038f24e66f83d0cc3b9d9e70e4ab94:1478494615,76f20f24ab6f83d010ed69abd0c9ddd8:108730948,9df28b24af6f83d0a68a6d43c37faba6:-1919217429,abe20b24886f83d08e11564bc0ccd2ea:108730948,cae2c724b36f83d0488a3723fb5ec718:162661739,1ce28724886f83d0bcd9da839dcd372e:108730948,22d20724bf6f83d00ef6776e8968462d:1291589492,f742c7a05d6f83d0fb2213482ea25eeb:108730948,3842c3a02c6f83d015be2f9fa33c7fdc:1447008232,d44283a0886f83d0be48d6fcb70805a2:108730948,1132cf600f6f83d05a458c7b1f4072ed:-1596546319,fc32cf603b6f83d051db6fbb7f4e0779:108730948,3a224f60426f83d08fb18a2461b83137:2090832666,c9228b60306f83d044b470a4665a32e6:108730948,061247608a6f83d0463ff62784563adb:1478494615,d5124760236f83d0669b70e31956824d:108730948,cb024360c86f83d0b2bbbc69f6b4caa2:-1919217429,e6024360466f83d0ebeeb1d3ff6b2552:108730948,53f18f20b76f83d07807614d179ee9c7:162661739,b6f10f201c6f83d0ac3d94d0bfce1aba:108730948,19f1cb20c96f83d00c6372de1d9cecc7:1291589492,bc31c7ac1b2f83d095add75ebd948c41:108730948,396d3ee0e02f83d00422e72432ae31e2:-331377674,c15d7ae0182f83d0883f544d0a4b2c10:792780776,794d36e05c2f83d0581c430754723ee6:-331377674,804df2e0532f83d0b192dd8b9dc4f18c:1610486063,151db6a0832f83d07e15ead45b5716f1:-331377674,241d36a0b92f83d02840ddfeb534dffa:1914002614,d70df2a0562f83d0943141dc1722adb3:-331377674,6e0db2a0522f83d097e19195cd8e8c88:-33621259,10ac3e20242f83d0b16825b7ff413c80:-331377674,dd9c7a20492f83d045ab40f763dd28d6:792780776,5f8cb620032f83d0a62ad6c17db6d5f2:-331377674,fe8cb620f82f83d0f394408429ac6300:1610486063,8f4cb6ecb9eb83d0b2cc92a6748dde82:-331377674,e24c76ecc2eb83d0c260b152648f0559:1914002614,c54cf2ecb9eb83d0cce36fdd19c2a5c7:-331377674,1b3c72ec7feb83d090327bdf74e61dd8:-33621259,895a3e68a1eb83d0c86e6466bc27b231:-331377674,034a7a68bdeb83d0394821237409fe1a:792780776,d63a366865eb83d0899c06317723b948:-331377674,a03ab2683beb83d05e95a1f087df318c:1610486063,19f936287beb83d01cd8f53961775b1e:-331377674,fcf9b22841eb83d00d18d409e0230c22:1914002614,fde9322818eb83d0bca1afde643d4be0:-331377674,4de9bee4b9eb83d088d2e3a7337f0bea:-33621259,fc89baa485eb83d091668f710afd9d6b:-331377674,6d79f6a46feb83d0cecfe84ad88cecbf:792780776,fb6976a401eb83d00bdd424b3fcf3328:-331377674,536936a497eb83d032c246bb7adee006:1610486063,de493a6494eb83d01779de3adb180171:-331377674,7549f66457eb83d042ce422ceb23c948:1914002614,02397664f9eb83d0234c3a1948b8f040:-331377674,1939f26422eb83d05dcdd1025262133d:-33621259,92a8f6e0f8eb83d04ffcd08313eda244:-331377674,64a876e0a9eb83d0a08419ca319b3f6e:792780776,a69872e0c8eb83d0ada523984eb162ea:-331377674,029872e099eb83d04fa935069a4558a9:1610486063,776876a009eb83d0bc5c673ecb8b9e2e:-331377674,c368f2a0e7eb83d07bb0b51f36588d6a:1914002614,a06872a053eb83d00c3b90e94c43adeb:-331377674,e25832a0dfeb83d0fce4e43ed9647941:-33621259,61e77a2016eb83d0c5d3e4723f50909f:-331377674,9ed7b620e3eb83d0c019500acd0b4f47:792780776,83c77220bfeb83d0cfb7e569618aa6d3:-331377674,fec77220b1eb83d0dd212032f41f1651:1610486063,fc97b2ec87ab83d0cab7fe77bd3bf1ab:-331377674,438772eca3ab83d023dcc2565e24e352:1914002614,bd8732ece5ab83d0767bf7183115ff1a:-331377674,8d87beac06ab83d03caf9384a68e7848:-33621259,1e567ae8f8ab83d04abd092f8ce1ae33:-331377674,5456b6e8c4ab83d0825fcc7b232e9f11:792780776,3046b2e8b2ab83d0b0a476b2b6cd833b:-331377674,0b3632e8ecab83d014738d7af6f82258:1610486063,5f0636a844ab83d0ce60409037175fb7:-331377674,3206f2a849ab83d0fb009045ea03308c:1914002614,a10672a883ab83d095a6015ac4b74387:-331377674,890632a8e3ab83d0d20312bf1d63461f:-33621259,97953e28dcab83d084857f72e4949b07:-331377674,80957a28caab83d00e508aa114706b71:792780776,5285b628edab83d0edaf16a1d3594d56:-331377674,28853628e4ab83d0a719fb644a16d350:1610486063,4855b6e4b4ab83d019e41e0fa622d6c6:-331377674,ef45b6e4fbab83d007d494ee8cef170b:1914002614,924536e419ab83d0a30a9a4af2e5968f:-331377674,6c45f2e4ffab83d08cefe37571d12529:-33621259,f464ba24cbab83d0a40d08a89beacb86:-331377674,a654f6240fab83d0e5a2201b6c476a49:792780776,2c543624eeab83d0d4b7bdc44f34ca27:-331377674,d854b22411ab83d00e6ad846d5ded926:1610486063,45343ae050ab83d0a9e8e56b2d386c7b:-331377674,6834f6e0b9ab83d0282eeaa0dc7c3bee:1914002614,872476e012ab83d059c80f52c1f81abb:-331377674,442472e068ab83d0838b532ed64aebc7:-33621259,39b37e6019ab83d0431a48c7ddc11a3f:-331377674,72a37a60f0ab83d0748d59b0acadd31c:792780776,2b93b660b4ab83d0aaaf60dab1a98291:-331377674,479376603fab83d0c3763784e01e6ec4:1610486063,4d733a20c9ab83d0a286454b3d34caa0:-331377674,5b63f62084ab83d01e5bf0c77baa2184:1914002614,b563762070ab83d095f6dade100ab392:-331377674,4563362020ab83d0259d5afe3b36098c:-33621259,f6d23aacb26b83d07c6f8ea580be87ed:-331377674,81d2f6ac1a6b83d03c3debd4f7a555dd:1610486063,8cb2fa6c466b83d0e0250e4f2d61f933:-331377674,6ba2ba6cf46b83d0108c5a0ba82d6d74:1914002614,06a27a6c246b83d0f3586bab6eff4418:-331377674,d1a2f66c456b83d080cc7584adef9dc7:-33621259,ae22fee8156b83d0749818eb55f7f832:-331377674,73123ee8366b83d052bb5ad692eea37b:1610486063,4be1fea87f6b83d01334bbbe978cb982:-331377674,a2e17ea84f6b83d0d44fae67daa1f7e3:1914002614,b3d1f6a83a6b83d0497ae8b066990de4:-331377674,bdd136a80d6b83d07f8b5ea9e4242d27:-33621259,1cb0b2e4746b83d01e8fa4c107cf4264:-331377674</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_fd0c341b939b0790e3aef0aefaba1076</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ci</name><read_roles/><suffix>usem.vamp.avit.fields.ci</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:06:34</sys_created_on><sys_id>fd0c341b939b0790e3aef0aefaba1076</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ci</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_fd0c341b939b0790e3aef0aefaba1076</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:06:34</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=fd0c341b939b0790e3aef0aefaba1076"/></record_update>]]></payload>
-<payload_hash>-2084511761</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>8ceb2f289367c3d0e3aef0aefaba10d4</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca8349f40000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ci</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>c2e82f2ccd27c3d0fdd0d02b86ad487b</update_guid>
-<update_guid_history>c2e82f2ccd27c3d0fdd0d02b86ad487b:-2084511761,f1e8eb2c4327c3d013b4d5ded05478e3:-27967877,c9ff34d38edb0790b263905f1a074794:1306119402,520c341bde9b0790db3f75caf080cbb2:1787944670</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_0e89811f931f0790e3aef0aefaba102e</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</name><read_roles/><suffix>usem.vamp.fields.sn_vul_app_vulnerable_item</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:07:42</sys_created_on><sys_id>0e89811f931f0790e3aef0aefaba102e</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_0e89811f931f0790e3aef0aefaba102e</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:07:42</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=0e89811f931f0790e3aef0aefaba102e"/></record_update>]]></payload>
-<payload_hash>1909075577</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>c0eb2f289367c3d0e3aef0aefaba10b6</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca8455e70000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vulnerable_item</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>f62923ac8127c3d098fd5d768cb0eaef</update_guid>
-<update_guid_history>f62923ac8127c3d098fd5d768cb0eaef:1909075577,1e2923acfa27c3d08e5b905aff8c640c:-1243859603,1b70b6a4ef6b83d01b402effb3dae30b:-1704988415,c10fcd9b145f07908500df1c10736dab:-1283156491,413b4153a45f079077283ba29b49ae0f:-503148738,b389c11fe61f0790a7ef63023b56d397:-556967792</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_1c0cf01b939b0790e3aef0aefaba1009</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ait</name><read_roles/><suffix>usem.vamp.avit.fields.ait</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:06:20</sys_created_on><sys_id>1c0cf01b939b0790e3aef0aefaba1009</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ait</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_1c0cf01b939b0790e3aef0aefaba1009</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:06:20</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=1c0cf01b939b0790e3aef0aefaba1009"/></record_update>]]></payload>
-<payload_hash>-1963053153</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>c0eb2f289367c3d0e3aef0aefaba10b7</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca833fac0000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ait</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>29e8eb2c6f27c3d0db6530082e2bd305</update_guid>
-<update_guid_history>29e8eb2c6f27c3d0db6530082e2bd305:-1963053153,77d82b2c0327c3d0644497e4837402ca:1122284947,5ddf3893fddb0790f88c5071809049fd:800212782,310cf01bd19b07905a755254ff9bb8a0:1595073058</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_ff79cddb931f0790e3aef0aefaba1084</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vul_entry</name><read_roles/><suffix>usem.vamp.fields.sn_vul_app_vul_entry</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:07:23</sys_created_on><sys_id>ff79cddb931f0790e3aef0aefaba1084</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vul_entry</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_ff79cddb931f0790e3aef0aefaba1084</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:07:23</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=ff79cddb931f0790e3aef0aefaba1084"/></record_update>]]></payload>
-<payload_hash>-300511965</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>c0eb2f289367c3d0e3aef0aefaba10d5</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca8421d40000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_1.usem.vamp.fields.sn_vul_app_vul_entry</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>eb19eb6c7927c3d0080c20cae2157ab0</update_guid>
-<update_guid_history>eb19eb6c7927c3d0080c20cae2157ab0:-300511965,cb19ab6c6d27c3d0039ac58a6c87108f:399780119,ca2b0d134e5f0790667e220abd9804e0:1191289506,4c89cddb2a1f0790706d7f85d434aedb:-458058346</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_script_include_79db78d7939b0790e3aef0aefaba10a3</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include"><sys_script_include action="DELETE"><access>public</access><active>false</active><api_name>x_boar_bofa_usem_1.BOFASIVampOutboundProcessor</api_name><caller_access/><client_callable>false</client_callable><description/><mobile_callable>false</mobile_callable><name>BOFASIVampOutboundProcessor</name><sandbox_callable>false</sandbox_callable><script/><sys_class_name>sys_script_include</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:05:22</sys_created_on><sys_id>79db78d7939b0790e3aef0aefaba10a3</sys_id><sys_mod_count>0</sys_mod_count><sys_name>BOFASIVampOutboundProcessor</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_script_include_79db78d7939b0790e3aef0aefaba10a3</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:05:22</sys_updated_on></sys_script_include></record_update>]]></payload>
-<payload_hash>519951742</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>c4eb2f289367c3d0e3aef0aefaba10d6</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca822e900000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
-<table/>
-<target_name>BOFASIVampOutboundProcessor</target_name>
-<type>Script Include</type>
-<update_domain>global</update_domain>
-<update_guid>28a823e8f927c3d0670dd1c76e4b5479</update_guid>
-<update_guid_history>28a823e8f927c3d0670dd1c76e4b5479:519951742,40a8efa85b27c3d0afcf7e122d045ebb:1050163466,d170f2a4086b83d0a2639e65df4a375a:-1179807331,6dd5d15fb79f0790c370c6c9a74d754f:1107942953,6c24d51b969f0790f95d558ccdacb18a:607423163,500fcd9b605f079081ac0f645266de61:1838867962,5b2b8d13a85f0790d7fa8593247f8cee:-817055981,3b79cddbf71f07900a8ffccebd3f5a82:-992406027,0effb4d312db079097a6c1621f24af18:1746907130,46db78d74e9b07904cd25d224a4e11a8:1606119786</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_24fbbcd7939b0790e3aef0aefaba10ad</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.fields.finding</name><read_roles/><suffix>usem.vamp.avit.fields.finding</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:05:58</sys_created_on><sys_id>24fbbcd7939b0790e3aef0aefaba10ad</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.finding</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_24fbbcd7939b0790e3aef0aefaba10ad</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:05:58</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=24fbbcd7939b0790e3aef0aefaba10ad"/></record_update>]]></payload>
-<payload_hash>-748999646</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>c8eb2f289367c3d0e3aef0aefaba10d0</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca82da290000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.finding</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>1bc8afe85d27c3d0f73e0611afe7c3b3</update_guid>
-<update_guid_history>1bc8afe85d27c3d0f73e0611afe7c3b3:-748999646,69c86fe8db27c3d0fb6cb872bfaca182:1233413142,38eff8938adb0790c05bd93defa3793f:754450419,12fbfcd7349b07904b651cd6067e778b:1973090175</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_8ea0fea4936b83d0e3aef0aefaba1037</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>sys_id of the Kafka Topic record [sys_kafka_topic] for sn_usem_verification_outbound, read by BOFASIKafkaProducerVamp.</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</name><read_roles/><suffix>usem.vamp.kafka.topic_sys_id</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 15:00:50</sys_created_on><sys_id>8ea0fea4936b83d0e3aef0aefaba1037</sys_id><sys_mod_count>93</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_8ea0fea4936b83d0e3aef0aefaba1037</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:19:29</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=8ea0fea4936b83d0e3aef0aefaba1037"/></record_update>]]></payload>
-<payload_hash>902427097</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>c8eb2f289367c3d0e3aef0aefaba10d2</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca8f196d0000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_1.usem.vamp.kafka.topic_sys_id</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>8bdbeb283f67c3d086f15074de96ef54</update_guid>
-<update_guid_history>8bdbeb283f67c3d086f15074de96ef54:902427097,43dbeb280267c3d0d7da1aaa1c160850:902427097,62abefe41f67c3d01107dc7dd6907a0b:1728040576,8dab6fe47b67c3d041d18652e80d80a0:1743859926,e4ab2fe4d867c3d09426d9cf03c785b1:150286265,fe9babe48667c3d0fcde09ef4419c3ce:902427097,cefa63644467c3d0d6ba0d7b640383bf:1728040576,35faef240767c3d06fc44feafc2f8caf:1743859926,90faaf24b367c3d0b82029b4dec1b36e:150286265,5aea6f248067c3d0dc7a42255be6fc84:902427097,d84aa3a0ee67c3d02df5361d6ff4c20b:1728040576,c44a63a09767c3d0958f8126456cac29:1743859926,673aef608667c3d0471bcb22a2dcc495:150286265,393aaf60ac67c3d0448e837834274f02:902427097,fba867e88c27c3d0e4b77e9c2302df5d:1728040576,51a863e8f227c3d0b93e32d1b05a8365:-184773408,64e78be4feaf83d0bf9b5de6919b73af:1728040576,8bd70be447af83d0307cf8d161d4e778:150286265,9ad7c7e43baf83d00967baa05125e817:1728040576,70d707e46faf83d0841d25bf656e79b1:902427097,9817872480af83d070d52302721ffc5b:1728040576,7a07c324cbaf83d05e3d0f46857b55f4:150286265,4907832436af83d0de13bbf09d62de42:1728040576,19e60fe0e4af83d0ad622e10cd4790e0:902427097,ed064b2077af83d0acf95da812439a8a:1728040576,40f5c320baaf83d06293cef366ecce2d:902427097,07d58fec376f83d095f96a7c8b68aa8e:-1245035177,e5c50bec686f83d0cdbfbe9bf63ac76a:902427097,f8a543ecb96f83d0da1614c26a9e070d:1167569044,6f458f6c2a6f83d0fc532c894ef1b8c1:902427097,eb250b6ca76f83d059ce930720e7b2a8:-951286658,d625876c446f83d0e2cc85503bae64be:150286265,7125876c3c6f83d0e10710beedb6856a:-951286658,8825c36c6f6f83d04c9c0a43f7ecd0a1:902427097,fa6487a86a6f83d0efd0dd63ab0f8516:-951286658,0464c3a8606f83d0fbf2f14d31b636dd:150286265,e35443a8e96f83d0f9de490eeee97bee:-951286658,c95403a8696f83d095afad1778c62016:902427097,9f3303a4e36f83d06436196c477ec55d:-951286658,ca33cf64836f83d0f2782dc52715f40c:150286265,6d334f64aa6f83d064b9c5bd9146da55:-951286658,c4330f64fb6f83d080a187f7f1d4b549:902427097,f082c3e0b56f83d0d1afa23b083209f4:-951286658,437203e0fa6f83d097cbebb967a1cbf8:150286265,d17203e0b16f83d08b9bed6a34493268:-951286658,2a628fa0226f83d0611cfc8ec24f5e37:902427097,bb7df224c72f83d0b6dcd7c30f920e91:-951286658,097db224ca2f83d006fcbe0396c15704:150286265,307d3224982f83d0059294e7e643cce8:-951286658,176dfee0662f83d0d9c47f6cbea37254:902427097,65bcf260032f83d0ea2d8184a15601f2:-951286658,00bc72606e2f83d002a2fc0b1f3d46bd:150286265,2bac7260b82f83d081f65f78be95d455:-951286658,86acbe20cd2f83d0d3813529dfda7ce1:902427097,df6a36a873eb83d03afbbfc5e5331f4e:-951286658,fd6ab2a880eb83d05dc0caf6bd790c7f:150286265,596a32a878eb83d05173ca28eeff9b8a:-951286658,ab5abe6818eb83d0fad843ae437095d0:902427097,f69972e4eceb83d043acfb9d6d7798b1:-951286658,519932e462eb83d032566fce20a05a36:150286265,b099bea4c7eb83d06960fe4031a8c468:-951286658,5f897ea402eb83d0b345dc7189e4c12c:902427097,e5d8b224f4eb83d06fc7ba2f79123174:-951286658,f2c832249aeb83d0326add5d12509ec2:150286265,dec8bee063eb83d0c7e4e0e1156ba0bf:-951286658,74b87ae0beeb83d004f4644c3bc08826:902427097,bb08b26042eb83d06e7deee098e54dfb:-951286658,a3f7be2094eb83d049cfae18ca68360f:150286265,79f73e20e2eb83d07ecf844989027b67:-951286658,87e7ba204feb83d0ba59c6489f5982e6:902427097,a086f22c4dab83d081c2afe571ba95f1:-951286658,7e76722c67ab83d01ae6b4fa143acd94:150286265,66663ee89cab83d0e6b380c89e254fe9:-951286658,3756bae88eab83d0871becd2585c80e1:902427097,f6b5b2684aab83d0bdb917ad34519177:-951286658,80b5326870ab83d0800941a80726d593:150286265,6ba53268a6ab83d0ce7602cf2a85c31e:-951286658,42a5be2898ab83d025e8c51577bbf27e:902427097,c374726494ab83d097f4765181d34397:-951286658,ed74326437ab83d06a9fb5d62ad02c21:150286265,5d74fe2443ab83d0b3bed98115460d27:-951286658,e3643e248aab83d0d18992435c28f806:902427097,edd336a0b8ab83d0acdcb38e01b97a85:-951286658,04d3f2a024ab83d0fab4af648780476d:150286265,16c372a0d5ab83d0a7c304ab47d06529:-951286658,ebb3fe604cab83d09c9f7a08bc1dddb3:902427097,b20336ec4a6b83d062dad5951828fdb8:-951286658,9103b2ec366b83d0e807e758524db6fa:150286265,f00372ecc96b83d0c3ee48fba79cae38:-951286658,f9f2feac896b83d082e52a78ecb1f33b:902427097,46527a2c476b83d0fadfe54727bc14d1:-951286658,e4523a2cf26b83d07e94b1abd2902f32:150286265,8b42b62c096b83d01191044805d99152:-951286658,5442362c5c6b83d07abf1fa6c170cba0:902427097,96a0fea4da6b83d00b131768521047d2:-951286658</update_guid_history>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>DELETE</action>
-<application display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</application>
-<category>customer</category>
-<comments/>
-<name>sys_properties_be0cb41b939b0790e3aef0aefaba109c</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="DELETE"><choices/><description/><ignore_cache>false</ignore_cache><is_private>false</is_private><name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ptreq</name><read_roles/><suffix>usem.vamp.avit.fields.ptreq</suffix><sys_class_name>sys_properties</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 19:07:00</sys_created_on><sys_id>be0cb41b939b0790e3aef0aefaba109c</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ptreq</sys_name><sys_package display_value="BOFA USEM CDP integration" source="x_boar_bofa_usem_1">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_package><sys_policy/><sys_scope display_value="BOFA USEM CDP integration">4ba447d22b43cb10cb55fbcc6e91bf0f</sys_scope><sys_update_name>sys_properties_be0cb41b939b0790e3aef0aefaba109c</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 19:07:00</sys_updated_on><type>string</type><value/><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=be0cb41b939b0790e3aef0aefaba109c"/></record_update>]]></payload>
-<payload_hash>-864344303</payload_hash>
-<remote_update_set display_value="SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1">0ceb2f289367c3d0e3aef0aefaba10b5</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>admin</sys_created_by>
-<sys_created_on>2026-09-22 19:19:34</sys_created_on>
-<sys_id>cceb2f289367c3d0e3aef0aefaba10d3</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_recorded_at>1a0ca83f1e70000001</sys_recorded_at>
-<sys_updated_by>admin</sys_updated_by>
-<sys_updated_on>2026-09-22 19:19:34</sys_updated_on>
-<table/>
-<target_name>x_boar_bofa_usem_1.usem.vamp.avit.fields.ptreq</target_name>
-<type>System Property</type>
-<update_domain>global</update_domain>
-<update_guid>e419676c3e27c3d067701eb6c60dad73</update_guid>
-<update_guid_history>e419676c3e27c3d067701eb6c60dad73:-864344303,ad09e36c6327c3d036e52951053d0ad1:-2011535867,ecfff0d3fbdb0790352249a44f766948:1284694768,4f0cb41b339b07907027b23ba65749ef:-1386908188</update_guid_history>
+<update_guid>22ad49345fa707d0c6cbc56e07e9b34d</update_guid>
+<update_guid_history>22ad49345fa707d0c6cbc56e07e9b34d:89067224,c20d457049a707d0a5d34fbea1da4fa1:89067224,6398efa86427c3d0667b39323c2c8577:891248461,1ffbb6acfaeb83d058512c293cc5c9d5:74730683,c6a0bea43a6b83d0f39b6c6002ed2ceb:-173027708</update_guid_history>
 <update_set display_value=""/>
 <view/>
 </sys_update_xml>

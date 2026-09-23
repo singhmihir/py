@@ -2,11 +2,15 @@
  "rule": "14d93498936f8f90e3aef0aefaba103a",
  "rule_off": "ac04af2893e3c3d0e3aef0aefaba10ae",
  "linked": "58d93498936f8f90e3aef0aefaba103b",
- "linked_number": "CONSEQ-CDP-LINKED",
+ "linked_number": "CON0001001",
  "bare": "14d93498936f8f90e3aef0aefaba103d",
- "bare_number": "CONSEQ-CDP-BARE",
+ "bare_number": "CON0001002",
  "dangling": "a404af2893e3c3d0e3aef0aefaba10b0",
  "misclassed": "6c04af2893e3c3d0e3aef0aefaba10b0",
  "ghost": "a404af2893e3c3d0e3aef0aefaba10b1",
- "ci": "3bd3511193f2c750e3aef0aefaba10f1"
+ "ci": "3bd3511193f2c750e3aef0aefaba10f1",
+ "rule_number": "CQR0001001",
+ "rule_off_number": "CQR0001002",
+ "linked_comment": "Change freeze until the critical findings are remediated",
+ "latest_work_note": "Remediation plan agreed for the next release"
 }

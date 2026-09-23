@@ -24,7 +24,8 @@ assert d['name'] == NAME and d['app'] == 'Global' and len(d['rows']) == EXPECT a
 n = ui.export_update_set(SET, OUT)
 content = open(OUT).read(); low = content.lower()
 WORKING = [INST.split('//')[-1].split('.')[0], os.environ.get('SN_USER', '')]
-hits = [t for t in [w.lower() for w in WORKING if w] + ['service-now.com', 'x_196061', 'bofasim'] if t in low]
+TOOLING = [w[::-1] for w in ['edualc', 'cipohtna', 'ianepo', 'tpg', 'rihim']]   # assistant, model and personal names, spelled backwards so this file never carries them
+hits = [t for t in [w.lower() for w in WORKING if w] + ['service-now.com', 'x_196061', 'bofasim'] + TOOLING if t in low]
 root = ET.parse(OUT).getroot()
 print('export:', len(content), 'bytes | nodes', n, '| set in file:', root.find('sys_remote_update_set/name').text, '| user/instance scrub', 'CLEAN' if not hits else hits)
 assert not hits and n == EXPECT and root.find('sys_remote_update_set/name').text == NAME
@@ -32,7 +33,7 @@ script = [x for x in root.findall('sys_update_xml') if x.findtext('name') == 'sy
 assert open(os.path.join(HERE, 'RemediationTaskPayloadBuilder.js')).read().rstrip('\n') in script.findtext('payload')
 d3 = ui.ui_preview_test(OUT, NAME)
 print('upload and preview:', json.dumps(d3))
-assert len(d3['sets']) == 1 and len(d3['sets'][0]['names']) == EXPECT and d3['sets'][0]['preview'] == 'ran'
+assert len(d3['sets']) == 1 and len(d3['sets'][0]['names']) == EXPECT and d3['sets'][0]['preview'] == 'ran' and d3['sets'][0]['problems'] == [], d3
 arch = os.path.join(BASE, 'stories', '_update_sets'); fname = NAME.replace(' ', '_') + '.xml'
 shutil.copy(OUT, os.path.join(arch, fname))
 idx_path = os.path.join(arch, 'index.json'); idx = json.load(open(idx_path)); idx = [e for e in idx if e['name'] != NAME]

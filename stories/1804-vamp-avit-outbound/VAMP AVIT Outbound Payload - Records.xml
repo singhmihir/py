@@ -614,10 +614,10 @@ BOFASIKafkaProducerVamp.prototype = {
      * The message key: table and sys_id of the record.
      * @param {GlideRecord} record - the application vulnerable item
      * @returns {string} "<table>.<sys_id>"
-     * @throws {Error} when no saved record was given
+     * @throws {Error} when no existing record was given
      */
     _messageKey: function(record) {
-        if (!record || typeof record.getTableName != 'function' || !record.getUniqueValue())
+        if (!record || typeof record.isValidRecord != 'function' || !record.isValidRecord())
             throw new Error('no record was given');
         return record.getTableName() + '.' + record.getUniqueValue();
     },

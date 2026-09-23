@@ -17,7 +17,7 @@ OUT = os.path.join(HERE, 'VAMP AVIT Outbound Payload - Records.xml')
 CLIENT_SCOPE = '4ba447d22b43cb10cb55fbcc6e91bf0f'
 CLIENT_PREFIX = 'x_boar_bofa_usem_1'
 CLIENT_APP = 'BOFA USEM CDP integration'
-TOOLING = [w[::-1] for w in ['edualc', 'cipohtna', 'ianepo', 'tpg']]
+TOOLING = [w[::-1] for w in ['edualc', 'cipohtna', 'ianepo', 'tpg', 'rihim']]   # assistant, model and personal names, spelled backwards so this file never carries them
 STAMP = re.compile(r'<(sys_created_by|sys_created_on|sys_updated_by|sys_updated_on|sys_mod_count)>[^<]*</\1>\n?')
 ui = SNUI(); ui.app('global')
 def unload(table, ids):
@@ -60,6 +60,6 @@ for r in brs:
     print('  rule', r.findtext('name'), r.findtext('sys_id'), '| after insert/update on', r.findtext('collection'), '| order', r.findtext('order'))
 low = content.lower()
 WORKING = [INST.split('//')[-1].split('.')[0], os.environ.get('SN_USER', '')]
-hits = [t for t in [w.lower() for w in WORKING if w] + ['service-now.com', 'x_196061', 'bofasim'] + TOOLING if t in low]
+hits = [t for t in [w.lower() for w in WORKING + [os.environ.get('SN_PASSWORD', '')] if w] + ['service-now.com', 'x_196061', 'bofasim'] + TOOLING if t in low]
 assert len(sis) == 2 and len(props) == 2 and len(brs) == 1 and not hits and '<sys_updated_by>' not in content, hits
 print('written:', OUT, len(content), 'bytes | records', len(sis) + len(props) + len(brs), '| scrub', 'CLEAN' if not hits else hits)

@@ -38,6 +38,7 @@ col('sn_vul_pen_test_assessment_request', 'u_assessment_id', 'string', 'Assessme
 
 var ci = new GlideRecord('cmdb_ci_business_app'); ci.addQuery('name', 'Trade Processing Portal'); ci.query(); ci.next(); L.ci = ci.getUniqueValue();
 var ait = new GlideRecord('x_196061_bofasim_ait'); ait.addQuery('number', 'AIT57152'); ait.query(); ait.next(); L.ait = ait.getUniqueValue();
+var ait2 = new GlideRecord('x_196061_bofasim_ait'); ait2.addQuery('number', '!=', 'AIT57152'); ait2.addNotNullQuery('number'); ait2.orderBy('number'); ait2.setLimit(1); ait2.query(); ait2.next(); L.ait2 = ait2.getUniqueValue();
 // the entry of the extended class: its sub category id is a field of sn_vul_app_vul_entry only, never of sn_vul_entry
 var entry = new GlideRecord('sn_vul_app_vul_entry');
 if (!(fx.links && fx.links.entry && entry.get(fx.links.entry) && entry.getValue('sys_class_name') == 'sn_vul_app_vul_entry')) {
@@ -66,8 +67,19 @@ function item(key, values) {
             status: '' + (b.getValue('u_verification_status') || ''), url: '' + (b.getValue('u_avit_record_url') || '')};
 }
 o.linked = item('linked', {short_description: 'VAMP outbound fixture (linked)', vulnerability: L.entry, application_release: L.release, cmdb_ci: L.ci,
-    assessment_request: L.ptreq, u_consequence: L.consequence, source_avit_id: 'VAMP-FIXTURE-001',
-    u_verification_status: 'Pending Validation', u_avit_record_url: 'https://example.invalid/avit/VAMP-FIXTURE-001'});
+    assessment_request: L.ptreq, u_consequence: L.consequence, source_avit_id: 'AVT-448812',
+    u_verification_status: 'Pending Validation', u_avit_record_url: 'https://vamp.example.com/findings/AVT-448812'});
+// two comments on the item, the second a minute after the first, to prove a journal is sent as its latest entry
+var journalField = new GlideRecord('sn_vul_app_vulnerable_item').isValidField('comments') ? 'comments' : 'work_notes';
+var jc = new GlideAggregate('sys_journal_field'); jc.addQuery('element_id', o.linked.sys_id); jc.addQuery('element', journalField); jc.addAggregate('COUNT'); jc.query(); jc.next();
+if (parseInt(jc.getAggregate('COUNT')) < 2) {
+    var c1 = new GlideRecord('sn_vul_app_vulnerable_item'); c1.get(o.linked.sys_id); c1[journalField] = 'Retest requested after the fix was deployed'; c1.update();
+    var c2 = new GlideRecord('sn_vul_app_vulnerable_item'); c2.get(o.linked.sys_id); c2[journalField] = 'Retest scheduled with the assessment team'; c2.update();
+}
+var k2 = new GlideRecord('sys_journal_field'); k2.addQuery('element_id', o.linked.sys_id); k2.addQuery('element', journalField); k2.addQuery('value', 'Retest scheduled with the assessment team'); k2.query();
+var k1 = new GlideRecord('sys_journal_field'); k1.addQuery('element_id', o.linked.sys_id); k1.addQuery('element', journalField); k1.addQuery('value', 'Retest requested after the fix was deployed'); k1.query();
+if (k2.next() && k1.next()) { var before = new GlideDateTime(k2.getValue('sys_created_on')); before.addSeconds(-60); k1.autoSysFields(false); k1.setWorkflow(false); k1.setValue('sys_created_on', before.getValue()); k1.update(); }
+o.journal = {field: journalField, type: '' + new GlideRecord('sn_vul_app_vulnerable_item').getElement(journalField).getED().getInternalType()};
 
 var e = new GlideRecord('sn_sec_exception_change_approval');
 if (!(fx.exception && e.get(fx.exception))) { e.initialize(); }
@@ -87,12 +99,13 @@ function task(key, values) {
     return {sys_id: '' + id, number: '' + g.getValue('number'), ait: '' + g.getDisplayValue('u_primary_ait'), url: '' + g.getValue('u_avul_record_url')};
 }
 var first = new GlideRecord('sn_vul_app_vulnerability'); first.get(L.avul);
-first.setWorkflow(false); first.setValue('u_primary_ait', L.ait); first.setValue('u_avul_record_url', 'https://example.invalid/avul/' + first.getValue('number')); first.update();
+first.setWorkflow(false); first.setValue('u_primary_ait', L.ait); first.setValue('u_avul_record_url', 'https://vamp.example.com/tasks/' + first.getValue('number')); first.update();
 o.tasks = {first: {sys_id: '' + L.avul, number: '' + first.getValue('number'), ait: '' + first.getDisplayValue('u_primary_ait'), url: '' + first.getValue('u_avul_record_url')}};
-o.tasks.second = task('second', {short_description: 'VAMP outbound fixture (second remediation task)', u_primary_ait: L.ait,
-    u_avul_record_url: 'https://example.invalid/avul/second', state: 1});
+o.tasks.second = task('second', {short_description: 'VAMP outbound fixture (second remediation task)', u_primary_ait: L.ait2,
+    u_avul_record_url: 'https://vamp.example.com/tasks/second', state: 1});
 var second = new GlideRecord('sn_vul_app_vulnerability'); second.get(o.tasks.second.sys_id);
-second.setWorkflow(false); second.setValue('u_avul_record_url', 'https://example.invalid/avul/' + second.getValue('number')); second.update();
+second.setWorkflow(false); second.setValue('u_avul_record_url', 'https://vamp.example.com/tasks/' + second.getValue('number')); second.update();
+o.tasks.second.ait = '' + second.getDisplayValue('u_primary_ait');
 o.tasks.second.url = '' + second.getValue('u_avul_record_url');
 function link(taskId) {
     var m = new GlideRecord('sn_vul_app_m2m_vul_group_item');
@@ -114,15 +127,16 @@ assert not d['errors'], d['errors']
 assert d['entry']['cls'] == 'sn_vul_app_vul_entry' and d['entry']['sub_cat'] == 'VSC-4471' and d['entry']['on_class'] and not d['entry']['on_base'], d['entry']
 assert d['linked']['ait'] == 'AIT57152' and d['linked']['ci'] == 'Trade Processing Portal' and d['linked']['ptreq'] == 'PTREQ0012001' and d['linked']['cons'] == 'CONSEQ-L2-OPEN'
 assert d['linked']['exc'] == d['exception']['number'] and d['exception']['state'] == 'Approved' and d['linked']['entry']
-assert d['linked']['status'] == 'Pending Validation' and d['linked']['url'].endswith('VAMP-FIXTURE-001')
+assert d['linked']['status'] == 'Pending Validation' and d['linked']['url'].endswith('AVT-448812') and d['journal']['type'] == 'journal_input', d['journal']
 assert d['linked_tasks'] == 2 and d['tasks']['first']['number'] != d['tasks']['second']['number'], (d['linked_tasks'], d['tasks'])
-assert d['tasks']['first']['ait'] == d['tasks']['second']['ait'] == 'AIT57152' and d['tasks']['first']['url'] and d['tasks']['second']['url']
+assert d['tasks']['first']['ait'] == 'AIT57152' and d['tasks']['second']['ait'] not in ('', 'AIT57152') and d['tasks']['first']['url'] and d['tasks']['second']['url'], d['tasks']
 assert d['bare']['release'] == '' and d['bare']['ci'] == '' and d['bare']['entry'] == '' and d['bare']['exc'] == '' and d['bare_tasks'] == 0
 tasks = {k: v['sys_id'] for k, v in d['tasks'].items()}
 order = sorted([d['tasks']['first'], d['tasks']['second']], key=lambda t: t['number'])
 json.dump({'linked': d['linked']['sys_id'], 'linked_number': d['linked']['number'], 'bare': d['bare']['sys_id'], 'bare_number': d['bare']['number'],
            'exception': d['exception']['sys_id'], 'exception_number': d['exception']['number'], 'm2m': d['m2m'], 'tasks': tasks,
-           'task_numbers': [t['number'] for t in order], 'task_urls': [t['url'] for t in order], 'task_ait': 'AIT57152',
+           'task_numbers': [t['number'] for t in order], 'task_urls': [t['url'] for t in order], 'task_aits': [t['ait'] for t in order],
+           'source_avit_id': 'AVT-448812', 'journal_field': d['journal']['field'], 'latest_comment': 'Retest scheduled with the assessment team',
            'entry_sub_cat': d['entry']['sub_cat'], 'entry_display': d['entry']['display'], 'ptreq_assessment': d['ptreq']['assessment'],
            'avul': d['tasks']['first']['number'], 'links': d['links']}, open(fx_path, 'w'), indent=1)
 print('FIXTURES OK')

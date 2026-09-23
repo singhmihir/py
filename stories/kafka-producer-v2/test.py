@@ -177,8 +177,10 @@ stub().sendPayload('{bad json', g);
 stub().sendPayload(JSON.stringify(''), g);
 stub().sendPayload('', g);
 var bad = JSON.parse(good); delete bad.envelope.element_activity; stub().sendPayload(JSON.stringify(bad), g);
-o.stub_hits_on_refusals = hits;
+
 try { stub().sendPayload(good, null); o.null_record = 'no throw'; } catch (e) { o.null_record = 'THREW ' + e.message; }
+var unsaved = new GlideRecord('sn_vul_vulnerability'); stub().sendPayload(good, unsaved);
+o.stub_hits_on_refusals = hits;
 try { new sn_ih_kafka.ProducerV2(); o.api_missing = ''; } catch (e) { o.api_missing = '' + (e.message || e); }
 var real = new GlideRecord('sn_vul_vulnerability'); real.get(%s);
 try { new P().sendPayload(good, real); o.real_send = 'no throw'; } catch (e) { o.real_send = 'THREW ' + e.message; }
@@ -194,18 +196,19 @@ check('B every send used the topic from the property, three arguments to _send',
 check('B every key is <table>.<sys_id>', all(s['key'] == s['expected_key'] and re.match(r'^[a-z_]+\.[0-9a-f]{32}$', s['key']) for s in sent))
 check('B every message is the canonical JSON text, whether given as string or object', all(s['message'] == b['canonical'] for s in sent))
 check('B all eight tables covered (%s)' % ', '.join('%s:%s' % (t, b['subjects'][t]) for t in TABLES), sorted(set(s['table'] for s in sent)) == sorted(TABLES))
-check('B refusals never reach send (5 refusals, %d stub hits)' % b['stub_hits_on_refusals'], b['stub_hits_on_refusals'] == 0)
+check('B refusals never reach send (6 refusals incl. a record without a sys_id, %d stub hits)' % b['stub_hits_on_refusals'], b['stub_hits_on_refusals'] == 0)
 check('B null record and the real send do not throw', b['null_record'] == 'no throw' and b['real_send'] == 'no throw', (b['null_record'], b['real_send']))
 check('B defaults: async send, no headers, no schema, 8 tables', b['defaults']['is_sync'] is False and b['defaults']['headers'] is None and b['defaults']['schema'] is None and sorted(b['defaults']['tables']) == sorted(TABLES))
 V = SENT + 'sn_vul_vulnerability %s - ' % b['vul']
 exact = [SENT + 'incident %s - no Kafka topic is associated with table incident' % b['incident'], V + 'payload is empty', V + 'payload is empty', V + 'envelope.element_activity is missing or empty']
 L = b['lines']
-check('B exactly seven lines logged by this script', len(L) == 7, L)
+check('B exactly eight lines logged by this script', len(L) == 8, L)
 check('B unmapped table, stringified empty string, empty string, envelope breach: one exact line each', all(L.count(m) == exact.count(m) for m in exact), [m for m in exact if m not in L])
 parser = [m for m in L if m.startswith(V + 'payload is not valid JSON - ')]
 check('B malformed JSON: one line with the parser reason', len(parser) == 1 and len(parser[0]) > len(V + 'payload is not valid JSON - '), parser)
-nul = [m for m in L if m.startswith(SENT + 'record - ')]
-check('B null record: one line, subject "record"', len(nul) == 1, nul)
+nul = [m for m in L if m == SENT + 'no record - no record was given']
+check('B null record: one line, "no record was given"', len(nul) == 1, L)
+check('B a record without a sys_id: one line naming the table, never sent', (SENT + 'sn_vul_vulnerability - the record has no sys_id') in L, L)
 real = [m for m in L if m.startswith(SENT + 'sn_vul_vulnerability %s - ' % b['real'])]
 reason = real[0][len(SENT + 'sn_vul_vulnerability %s - ' % b['real']):] if len(real) == 1 else ''
 check('B real send (no Stream Connect here): one line in the same format, its reason the platform\'s own error for the missing Kafka API (%r)' % b['api_missing'],
@@ -221,7 +224,7 @@ gs.sleep(1100); var t0 = new GlideDateTime().getValue();
 var P = x_196061_bofasim.BOFA_SI_KafkaProducerV2;
 var g = new GlideRecord('sn_vul_vulnerability'); g.get(%s);
 var good = new RemediationTaskPayloadBuilder().buildPayload(g);
-var p = new GlideRecord('sys_properties'); p.get(%s); var keep = '' + p.getValue('value');
+var p = new GlideRecord('sys_properties'); p.get(%s); var keep = '' + (p.getValue('value') || '');
 function run(value) { p.setValue('value', value); p.update(); var pr = new P(); pr._send = function(t) { o.sent.push('' + t); }; pr.sendPayload(good, g); }
 try {
     run(''); run('  ' + keep + '  \n'); run('sn_usem_remtask_outbound'); run(keep.toUpperCase());
@@ -256,8 +259,8 @@ br.setValue('name', 'TEST BOA_BR_VUL_KafkaOutbound'); br.setValue('collection', 
 br.setValue('order', 10000); br.setValue('action_update', true); br.setValue('action_insert', true); br.setValue('active', true); br.setValue('advanced', true);
 br.setValue('sys_scope', %s); br.setValue('script', %s);
 o.br = '' + br.insert(); var check = new GlideRecord('sys_script'); check.get(o.br); o.rule_scope = '' + check.getValue('sys_scope');
-var prop = new GlideRecord('sys_properties'); prop.get(%s); var keepProp = '' + prop.getValue('value');
-var g = new GlideRecord('sn_vul_vulnerability'); g.get(%s); var keep = '' + g.getValue('description');
+var prop = new GlideRecord('sys_properties'); prop.get(%s); var keepProp = '' + (prop.getValue('value') || '');
+var g = new GlideRecord('sn_vul_vulnerability'); g.get(%s); var keep = '' + (g.getValue('description') || '');
 try {
     if (%s) { prop.setValue('value', ''); prop.update(); }
     g.setValue('description', 'Kafka rule probe ' + new GlideDateTime().getNumericValue()); g.update();
