@@ -10,8 +10,8 @@ BOFA_SI_KafkaProducerV2.prototype = {
     initialize: function() {
         this.IS_SYNC = false; // the caller does not wait for the broker acknowledgement
         this.HEADERS = null; // optional, subject to discussion
-        this.SCHEMA_ID = null; // optional, no Avro schema in use
-        this.SYS_ID = /^[0-9a-f]{32}$/;
+        this.SCHEMA_ID = null; // optional, omitted for now
+        this.SYS_ID_PATTERN = /^[0-9a-f]{32}$/;
         // Each property holds the sys_id of a Kafka Topic [sys_kafka_topic]. Findings, remediation
         // tasks and consequences each have their own topic; the table of the record picks the property.
         this.FINDING_TOPIC_PROPERTY = 'x_boar_bofa_usem_1.x_boar_bofa.usem.kafka.topic_sys_id';
@@ -37,8 +37,9 @@ BOFA_SI_KafkaProducerV2.prototype = {
     },
 
     /**
-     * Validates the payload and sends it to the Kafka topic of the record's table with the key
-     * <table>.<sys_id>; any failure is logged once and nothing is sent.
+     * Validates the payload and hands it to the Kafka topic of the record's table with the key
+     * <table>.<sys_id>. A failure before the hand-over, or an error thrown by the send itself, is
+     * logged once and nothing is sent; the send is asynchronous, so delivery to the broker is not awaited.
      * @param {String|Object} payload - the message as JSON text or as the object it was built from
      * @param {GlideRecord} record - the record the message is about
      * @returns {void}
@@ -64,7 +65,7 @@ BOFA_SI_KafkaProducerV2.prototype = {
     /**
      * Resolves the Kafka topic of a table from its system property, spaces around the value
      * ignored; throws when the table has no topic, or the property is empty or holds something
-     * other than a sys_id (a topic name, for instance).
+     * other than a sys_id of 32 lowercase hexadecimal characters (a topic name, for instance).
      * @param {String} table - the source table name
      * @returns {String} sys_id of the Kafka Topic [sys_kafka_topic]
      */
@@ -75,8 +76,8 @@ BOFA_SI_KafkaProducerV2.prototype = {
         var topicSysId = String(gs.getProperty(property, '')).trim();
         if (!topicSysId)
             throw new Error('property ' + property + ' holds no topic sys_id');
-        if (!this.SYS_ID.test(topicSysId))
-            throw new Error('property ' + property + ' holds "' + topicSysId + '", which is not a topic sys_id');
+        if (!this.SYS_ID_PATTERN.test(topicSysId))
+            throw new Error('property ' + property + ' holds "' + topicSysId + '", which is not a topic sys_id (32 lowercase hexadecimal characters)');
         return topicSysId;
     },
 
@@ -100,16 +101,16 @@ BOFA_SI_KafkaProducerV2.prototype = {
     // ________________________________________________________________________________________
 
     /**
-     * Checks the payload against the message contract and serialises it; throws an Error naming
-     * the first problem found. The JSON text of an empty string or of null, which a caller passes
-     * when it serialises a payload that could not be built, counts as an empty payload.
+     * Checks the payload against the message contract and returns the text to send; throws an Error
+     * naming the first problem found. An object is serialised first and the serialised copy is what is
+     * checked and sent, so that a value JSON cannot hold never passes the checks and then drops out of
+     * the message. The JSON text of an empty string or of null, which a caller passes when it
+     * serialises a payload that could not be built, counts as an empty payload.
      * @param {String|Object} payload - JSON text or the object it was built from
      * @returns {String} the message text to send
      */
     _validate: function(payload) {
-        if (this._isEmpty(payload))
-            throw new Error('payload is empty');
-        var message = typeof payload === 'string' ? this._parse(payload) : payload;
+        var message = this._parse(typeof payload === 'string' ? payload : JSON.stringify(payload));
         if (message === null || message === '')
             throw new Error('payload is empty');
         if (!this._isObject(message))
@@ -120,12 +121,13 @@ BOFA_SI_KafkaProducerV2.prototype = {
     },
 
     /**
-     * Parses JSON text; throws with the parser's reason when it is not valid JSON.
-     * @param {String} text - the payload text
+     * Parses JSON text; throws when there is no text, or with the parser's reason when it is not
+     * valid JSON.
+     * @param {String} text - the payload text; undefined when the payload has no JSON form
      * @returns {*} the parsed value
      */
     _parse: function(text) {
-        if (!text.trim())
+        if (typeof text !== 'string' || !text.trim())
             throw new Error('payload is empty');
         try {
             return JSON.parse(text);
@@ -182,7 +184,7 @@ BOFA_SI_KafkaProducerV2.prototype = {
     },
 
     /**
-     * Tells whether a value is undefined, null or an empty string.
+     * Tells whether an envelope value is undefined, null or shows as an empty string.
      * @param {*} value - the value to check
      * @returns {Boolean} true when empty
      */
