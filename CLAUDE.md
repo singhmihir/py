@@ -216,8 +216,9 @@ Follow it without being asked again.
   `servicenow_field=json_field` pair per line; a field missing on the table or empty is sent as `""`.
   One script include only (`RemediationTaskPayloadBuilder`).
 - Kafka stories, current sets (22 Sep review): 1625 `..._Remediation Task CDP Payload_V2.6` (global) plus the client copy
-  record XML, producer `INC0010003_MS_Kafka Producer V2 with Payload Validation_V1.3` (record XML), 1624 `..._V1.3`,
-  1804 `..._V2.1`. Rendering contract of the CDP payloads (1625, 1624): choices as labels, plain integers as stored
+  record XML, producer `INC0010003_MS_Kafka Producer V2 with Payload Validation_V1.4` (record XML), 1624 `..._V1.4`,
+  1804 `..._V2.2` (23 Sep: nothing beyond the story and Mihir's asks - only the payload and Kafka response info
+  messages, activity INSERT/UPDATE only, element_count compared strictly to the list). Rendering contract of the CDP payloads (1625, 1624): choices as labels, plain integers as stored
   (display adds "1,250"), `[code]...[/code]` display markup as its visible text (`cr_count`), references `""` when the
   record is gone, journals from the latest `sys_journal_field` entry without its header; VAMP keeps its sheet types
   (Integer/String stored, Reference display). Each story keeps one field property + one topic property.

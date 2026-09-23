@@ -15,11 +15,13 @@ captures from the client forms, still built in the PDI's stand-in scope and re-p
 XML; V1.2 is built in a PDI mirror of the client application itself (same scope name,
 same sys_id, tables `x_boar_bofa_usem_0_consequence` and `x_boar_bofa_usem_0_consequence_rule`), so the
 native update set export and the record XML both carry the client names and import on the client
-instance as they are, and adds error handling, payload validation and function comments. **V1.3** (current)
+instance as they are, and adds error handling, payload validation and function comments. **V1.3**
 names the sections as the sheet and the client sample do (`consequence`, `rule`), sends choices as labels and a
 reference whose record is gone as `""`, reads the field types in a way a scoped application may use whoever
 calls it, refuses every malformed line of the field property, and deletes the records V1.0/V1.1 delivered under
-other sys_ids (see *Earlier sys_ids*).
+other sys_ids (see *Earlier sys_ids*). **V1.4** (current) keeps to what the story and the build asked for: the
+info message naming configured fields the instance lacks is gone (the payload and the Kafka response stay), and
+the validation accepts only the INSERT and UPDATE the rule fires on.
 
 ## Records
 - `BOFA_BR_Consequence_CdpOutbound.js` — after insert/update rule on `x_boar_bofa_usem_0_consequence`,
@@ -28,8 +30,8 @@ other sys_ids (see *Earlier sys_ids*).
 - `BOFASIConsequenceOutboundProcessor.js` — `buildPayload(record)` returns the JSON text
   `{envelope, consequences: [{consequence: {...}, rule: {...}}]}` (the section names of the sheet and of the
   client sample, set in `SECTIONS` of `initialize()` with the reference field `u_rule` that leads to the rule;
-  the array key `consequences` as in the client sample) and shows it with `gs.addInfoMessage` on the record;
-  a second message names any configured field the instance does not have. Envelope as CDP (topic
+  the array key `consequences` as in the client sample) and shows it with `gs.addInfoMessage` on the record.
+  Envelope as CDP (topic
   `sn_usem_consequence_outbound`, namespace `com.bofa.usem`, versions 1.0.0, UUID event id, UTC timestamp,
   element_count 1, element_activity from `record.operation()`). Every field comes from the one property
   `x_boar_bofa_usem_0.usem.consequence.fields.x_boar_bofa_usem_0_consequence` in the CDP line format
@@ -74,15 +76,15 @@ configured or holds no field, and a line with more than one `=`, without a field
 name, with a field that is neither `<field>` nor `<table>.<field>` (`a.b.c`, `.name`), of a table that is no
 section of the payload (a dot-walk such as `u_rule.name` included), or naming a payload field of its section
 twice (the line is quoted); `_validatePayload` checks the finished payload
-before it is returned (envelope keys and constants, UUID event id, UTC timestamp, activity in INSERT /
-UPDATE / DELETE, element count 1, one consequence element, every configured section and payload name
+before it is returned (envelope keys and constants, UUID event id, UTC timestamp, activity INSERT or
+UPDATE, element count 1, one consequence element, every configured section and payload name
 present as a string, no extra sections or keys, the consequence section not empty) and lists every
 problem in one error (`payload invalid: ...; ...`). A refused build returns `''`, so the rule never calls
 the producer. Producer, `sendPayload`: no record, or one that was never saved or fetched; `_topicSysId` refuses an empty topic property and a
 value that is not a sys_id; `_requirePayload` refuses an empty payload, text that is not JSON, JSON without
 `envelope` or `consequences`, no consequence, and an element count other than the consequences carried;
-the Kafka API's own failure is caught by the same block. The info messages (payload, fields not found,
-Kafka response) stay as in VAMP.
+the Kafka API's own failure is caught by the same block. The two info messages (payload, Kafka
+response) stay as in VAMP.
 
 ## Earlier sys_ids
 V1.0/V1.1 were built in the PDI's stand-in scope and delivered as record XML under the stand-in's sys_ids;
@@ -140,7 +142,7 @@ the class is empty; a column type change on a scoped table runs inside the scope
 a cross-scope `deleteRecord()` on a dictionary row returns false.
 
 ## Drivers
-`build_1624.py` (set `SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3` in the mirror application,
+`build_1624.py` (set `SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.4` in the mirror application,
 its Default set created when missing, stale properties removed, the earlier sys_ids captured as deletions
 (each created under its old sys_id and deleted again; a current property of the same name steps aside for
 the moment), records captured explicitly, scope audit), `fixtures_1624.py` (two rules with their own

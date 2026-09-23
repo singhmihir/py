@@ -21,7 +21,7 @@ every existing parameter and behaviour, plus a script that handles a malformed p
   of an empty string or of null, which the current rule passes after a failed build), JSON that does
   not parse (with the parser's reason), not an object, envelope missing, any of the nine envelope
   fields missing or empty, no or more than one element list, element list not an array or empty,
-  `element_count` not a whole number (a number, or its digits as text) or not matching, an element
+  `element_count` other than the number of elements in the list, an element
   that is not an object. `sendPayload` logs that reason and does not send. The earlier separate
   `BOFA_SI_KafkaPayloadValidator` is withdrawn.
 - A missing record or one without a sys_id is refused (`no record was given`, `the record has no
@@ -55,7 +55,7 @@ written serialises the empty string and the producer adds a second line, `payloa
 
 ## Testing (PDI, stand-in scope `x_196061_bofasim`)
 `build.py` deploys the script include into the stand-in scope under a pinned update set (set name
-`INC0010003_MS_Kafka Producer V2 with Payload Validation_V1.3`), removes the earlier separate
+`INC0010003_MS_Kafka Producer V2 with Payload Validation_V1.4`), removes the earlier separate
 validator, and creates the topic property the producer reads (a test fixture holding a generated
 sys_id). `test.py` runs 111 checks; run twice, all passing both times. Every log check reads only the
 lines written by the script under test (a fresh second is awaited before its start time is taken).
@@ -63,10 +63,10 @@ lines written by the script under test (a fresh second is awaited before its sta
   text, null, undefined, the JSON of an empty string or of null (what a rule that serialises a failed
   build passes), JSON that does not parse (with the parser's reason), JSON that is not an object,
   envelope missing, each of the nine envelope fields missing, empty or null, no list or two lists,
-  list not an array or empty, `element_count` that is not a whole number (true, 1.5, "1.0", " 1", -1,
-  [1], "x") or does not match the list, an element that is not an object (first and second
+  list not an array or empty, `element_count` that does not equal the length of the list (2, 0, true, 1.5, "1.0", " 1", -1,
+  [1], "x", "1"), an element that is not an object (first and second
   position); accepted: the builder's payload as text, as object, pretty-printed (sent compact), the
-  client builder's object, `element_count` as the digits "1", two elements, a list of another name.
+  client builder's object, two elements, a list of another name.
 - A2. one script include in the scope, equal to the repository copy; send methods before the
   separator line, validation after it; `ProducerV2.send` called once with the documented argument
   order (topic, key, message, isSync, headers, schemaID).

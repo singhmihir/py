@@ -115,16 +115,10 @@ refused('extra_key', 'payload must hold the envelope and one list of elements, f
 for n in ['list_is_object', 'list_empty', 'list_string']: refused(n, 'rem_tasks is not a list of elements')
 refused('count_too_high', 'envelope.element_count is 2 but rem_tasks holds 1')
 refused('count_zero', 'envelope.element_count is 0 but rem_tasks holds 1')
-refused('count_text', 'envelope.element_count is not a whole number: "x"')
-refused('count_true', 'envelope.element_count is not a whole number: true')
-refused('count_decimal', 'envelope.element_count is not a whole number: 1.5')
-refused('count_decimal_text', 'envelope.element_count is not a whole number: "1.0"')
-refused('count_padded', 'envelope.element_count is not a whole number: " 1"')
-refused('count_negative', 'envelope.element_count is not a whole number: -1')
-refused('count_array', 'envelope.element_count is not a whole number: [1]')
+for n, shown in [('count_text', '"x"'), ('count_true', 'true'), ('count_decimal', '1.5'), ('count_decimal_text', '"1.0"'), ('count_padded', '" 1"'), ('count_negative', '-1'), ('count_array', '[1]'), ('count_as_string', '"1"')]:
+    refused(n, 'envelope.element_count is %s but rem_tasks holds 1' % shown)
 for n in ['element_string', 'element_empty_object', 'element_null', 'element_array']: refused(n, 'rem_tasks[0] is not an element')
 refused('second_element_bad', 'rem_tasks[1] is not an element')
-check('A accepts element_count given as the digits "1"', C['count_as_string']['ok'] and json.loads(C['count_as_string']['out'])['envelope']['element_count'] == '1')
 check('A accepts two elements with element_count 2', C['two_elements']['ok'] and len(json.loads(C['two_elements']['out'])['rem_tasks']) == 2)
 refused('two_elements_count_one', 'envelope.element_count is 1 but rem_tasks holds 2')
 refused('no_envelope_other_list', 'envelope is missing')
@@ -141,7 +135,7 @@ var p = new GlideRecord('sys_script_include'); p.get(%s); o.script = '' + p.getV
 gs.print('X::' + JSON.stringify(o));
 })();''' % (json.dumps(ST['scope']), json.dumps(ST['si']['BOFA_SI_KafkaProducerV2'])))
 body = sc['script']; line = body.find('// ______')
-before = ['sendPayload: function', '_topicSysId: function', '_send: function']; after = ['_validate: function', '_parse: function', '_checkEnvelope: function', '_checkElements: function', '_isObject: function', '_isWholeNumber: function', '_isEmpty: function']
+before = ['sendPayload: function', '_topicSysId: function', '_send: function']; after = ['_validate: function', '_parse: function', '_checkEnvelope: function', '_checkElements: function', '_isObject: function', '_isEmpty: function']
 check('A2 only the producer remains in the scope (no separate validator)', sc['names'] == ['BOFA_SI_KafkaProducerV2'], sc['names'])
 check('A2 the deployed script equals the repository copy', body.rstrip('\n') == open(os.path.join(HERE, 'BOFA_SI_KafkaProducerV2.js')).read().rstrip('\n'))
 check('A2 separator line present with the payload validation comment', line > 0 and 'Payload validation' in body[line:line + 400])

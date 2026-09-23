@@ -19,7 +19,6 @@ MANY = 'sn_vul_app_vulnerability'          # the section reached through the gro
 NAMES = [s['json'] for s in SECTIONS]
 TABLE_OF = {s['json']: s['table'] for s in SECTIONS}
 FIELDS = {s['json']: [r['json'] for r in SHEET if r['table'] == s['table']] for s in SECTIONS}
-NOT_FOUND = ['%s.%s' % (e['table'], e['json']) for e in RESOLUTION if not e['field']]
 ENVELOPE = ['type', 'topic_name', 'namespace', 'core_version', 'outbound_version', 'event_id', 'event_timestamp', 'element_count', 'element_activity']
 UUID = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
 STAMP = re.compile(r'^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$')
@@ -92,7 +91,7 @@ def shape(tag, r):
     check(tag + ' every value is a string', all(isinstance(v, str) for n in NAMES for x in (el[n] if n == 'remediation_task' else [el[n]]) for v in x.values()), el)
     check(tag + ' no processor error logged', r['errors_after'] == r['errors_before'], (r['errors_before'], r['errors_after']))
     check(tag + ' first info message holds exactly the payload', r['messages'][:1] == ['VAMP payload for ' + el['finding']['number'] + ': ' + r['text']], r['messages'])
-    check(tag + ' second info message names the fields this instance does not have, nothing else', r['messages'][1:] == ['VAMP fields not found on this instance, sent as "": ' + ', '.join(NOT_FOUND)] and NOT_FOUND == ['sn_vul_app_vul_entry.number'], (r['messages'][1:], NOT_FOUND))
+    check(tag + ' the payload is the only info message', r['messages'][1:] == [], r['messages'][1:])
     return p, el, e
 
 for run in (1, 2):
@@ -118,7 +117,7 @@ for run in (1, 2):
     r = build(FX['bare']); x = r['expect']
     p, el, e = shape('B', r)
     check('B remediation_task is an empty list', el['remediation_task'] == [] and x['tasks'] == [], (el['remediation_task'], x['tasks']))
-    check('B the not-found message is the same as for an item with tasks: it names the table, not the records', r['messages'][1:] == ['VAMP fields not found on this instance, sent as "": ' + ', '.join(NOT_FOUND)], r['messages'][1:])
+    check('B the payload is the only info message', r['messages'][1:] == [], r['messages'][1:])
     check('B tpe and ptreq render "" for every field', all(v == '' for k in ['tpe', 'ptreq'] for v in el[k].values()), el)
     check('B finding still carries its own values, configuration_item "" with no CI', el['finding']['number'] == x['number'] and el['finding']['state'] == '1' and el['finding']['source_avit_id'] == '' and el['finding']['configuration_item'] == '' and x['ci'] == '', el['finding'])
 
@@ -145,8 +144,7 @@ gs.print('X::' + JSON.stringify(o));''' % dict(linked=json.dumps(FX['linked']), 
         mm = re.match(r'VAMP payload for (\S+): (\{.*\})$', msg)
         if mm:
             payloads[mm.group(1)] = json.loads(mm.group(2))
-    not_found = [m for m in messages if m.startswith('VAMP fields not found')]
-    check('C info messages on the page: one payload per item plus the not-found list, nothing else', sorted(payloads) == sorted([FX['linked_number'], r['inserted']['number']]) and 1 <= len(not_found) <= 2 and all(m == 'VAMP fields not found on this instance, sent as "": ' + ', '.join(NOT_FOUND) for m in not_found) and len(messages) == len(payloads) + len(not_found), (len(messages), len(payloads), len(not_found), messages))
+    check('C info messages on the page: one payload per item, nothing else', sorted(payloads) == sorted([FX['linked_number'], r['inserted']['number']]) and len(messages) == len(payloads), (len(messages), len(payloads), messages))
     upd = payloads.get(FX['linked_number']); ins = payloads.get(r['inserted']['number'])
     check('C update: the rule sends the same shape, element_activity UPDATE, both tasks, the CI display value', bool(upd) and upd['envelope']['element_activity'] == 'UPDATE' and list(upd['findings'][0].keys()) == NAMES and [t['number'] for t in upd['findings'][0]['remediation_task']] == FX['task_numbers'] and upd['findings'][0]['finding']['configuration_item'] == 'Trade Processing Portal', upd)
     check('C insert: producer logged one send failure for the new item', r['after_insert']['producer'] == 1 and r['after_insert']['processor'] == r['before']['processor'] and r['after_insert']['rule'] == r['before']['rule'], (r['before'], r['after_insert']))
