@@ -34,7 +34,7 @@ BOFASIConsequenceOutboundProcessor.prototype = {
         this.CORE_VERSION = '1.0.0';
         this.OUTBOUND_VERSION = '1.0.0';
         this.ELEMENT_COUNT = 1;
-        this.ACTIVITIES = ['INSERT', 'UPDATE', 'DELETE'];
+        this.ACTIVITIES = ['INSERT', 'UPDATE'];
         this.DATE_FORMAT = 'MM-dd-yyyy';
         this.TIME_FORMAT = 'HH:mm:ss';
         this.FIELDS_PROPERTY_PREFIX = 'x_boar_bofa_usem_0.usem.consequence.fields.';
@@ -59,16 +59,13 @@ BOFASIConsequenceOutboundProcessor.prototype = {
         try {
             this._requireRecord(record);
             var mapping = this._fieldMapping(record.getTableName());
-            var missing = [];
             var payload = {
                 envelope: this._buildEnvelope(this._activity(record)),
-                consequences: [this._buildConsequence(record, mapping, missing)]
+                consequences: [this._buildConsequence(record, mapping)]
             };
             this._validatePayload(payload, record, mapping);
             var message = JSON.stringify(payload);
             gs.addInfoMessage('Consequence payload for ' + record.getValue('number') + ': ' + message)
-            if (missing.length)
-                gs.addInfoMessage('Consequence fields not found on this instance, sent as "": ' + missing.join(', '))
             return message;
         } catch (e) {
             gs.error(this.type + ': payload not built for ' + this._recordKey(record) + ' - ' + (e.message || e));
@@ -104,7 +101,7 @@ BOFASIConsequenceOutboundProcessor.prototype = {
      * The activity the envelope reports: the operation of the business rule that runs, else derived from
      * the update count when the processor is called outside a rule.
      * @param {GlideRecord} record - the consequence record
-     * @returns {string} INSERT, UPDATE or DELETE
+     * @returns {string} INSERT or UPDATE
      */
     _activity: function(record) {
         var operation = String(record.operation() || '').toUpperCase();
@@ -115,7 +112,7 @@ BOFASIConsequenceOutboundProcessor.prototype = {
 
     /**
      * The envelope of the message.
-     * @param {string} activity - INSERT, UPDATE or DELETE
+     * @param {string} activity - INSERT or UPDATE
      * @returns {Object} the envelope with the constants of initialize(), a new event id and the current UTC time
      */
     _buildEnvelope: function(activity) {
@@ -139,10 +136,9 @@ BOFASIConsequenceOutboundProcessor.prototype = {
      * may not read the dictionary descriptor of a record handed over by a global script.
      * @param {GlideRecord} record - the consequence record
      * @param {Object[]} mapping - the parsed field property, see _fieldMapping
-     * @param {string[]} missing - receives "<table>.<field>" for every mapped field the instance lacks
      * @returns {Object} the element, its sections keyed by their payload names
      */
-    _buildConsequence: function(record, mapping, missing) {
+    _buildConsequence: function(record, mapping) {
         var element = {};
         var records = {}, dictionaries = {};
         for (var i = 0; i < mapping.length; i++) {
@@ -151,8 +147,6 @@ BOFASIConsequenceOutboundProcessor.prototype = {
                 records[table] = this._sectionRecord(record, table);
                 dictionaries[table] = new GlideRecord(table);
             }
-            if (!dictionaries[table].isValidField(field))
-                missing.push(table + '.' + field);
             if (!element[section])
                 element[section] = {};
             element[section][mapping[i].json] = this._fieldValue(records[table], dictionaries[table], field);

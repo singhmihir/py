@@ -41,7 +41,7 @@ property, as for the CDP payloads; the remediation tasks sent as a list; the vul
 in its own class; error handling, payload validation and comments on every function; built in a PDI
 mirror of the client integration application, so the update set carries the client names and imports
 as it is.
-**V2.1** (current): field types read in a way a scoped application may use whoever calls it (a record
+**V2.1**: field types read in a way a scoped application may use whoever calls it (a record
 handed over from inside a function of a global script refused `getED()` in the scope:
 `StatefulElementDescriptor ... not allowed in scope`, measured on the PDI); a reference or document id
 whose record is gone guarded on every path; document ids, lists, domains, due dates and journals rendered; payload
@@ -49,6 +49,9 @@ names trimmed and checked around the dot, the field on the left checked (`<field
 `<table>.<field>`, a table with a path from the item); the producer names the item as
 `<table> <sys_id>` in its errors and sends nothing without a saved record; and the 19 records V1.0 to V1.6
 delivered under other sys_ids are deleted (see *Earlier sys_ids*).
+**V2.2** (current) keeps to what the story and the build asked for: the info message naming configured fields
+the instance lacks is gone (the payload and the Kafka response stay), and the validation accepts only the
+INSERT and UPDATE the rule fires on.
 
 ### The two bugs fixed in V2.0
 - **Only one remediation task was sent.** `_remediationTask()` read the group item table, ordered by
@@ -66,8 +69,7 @@ delivered under other sys_ids are deleted (see *Earlier sys_ids*).
 - `BOFA_BR_AVIT_VampOutbound.js` — after insert/update on `sn_vul_app_vulnerable_item`, order 100, no
   condition: processor → producer, one try/catch; a payload the processor refused is not sent.
 - `BOFASIVampOutboundProcessor.js` — `buildPayload(record)` returns the JSON text and shows it with
-  `gs.addInfoMessage` on the item; a second message names any configured field the instance does not
-  have. `_payloadMap()` reads the one property and yields the sections with their table, their shape
+  `gs.addInfoMessage` on the item. `_payloadMap()` reads the one property and yields the sections with their table, their shape
   and their fields. The paths from the item to the other sections live in `initialize()`:
   `vulnerability` for the entry, `assessment_request` for the pen test request and the group item
   table for the remediation tasks; a path with `list` makes its section a list and a task linked more
@@ -93,7 +95,7 @@ that is not `<field>` or `<table>.<field>`, of a table with no path from the ite
 `<structure>.<field>` (one dot, both parts present; spaces around them ignored), a section that would
 take fields from two tables, and the same payload name twice in a section.
 `_validatePayload` then checks the finished message before it is returned: the envelope constants, a
-UUID event id, a UTC timestamp, an activity of INSERT / UPDATE / DELETE, `element_count` equal to the
+UUID event id, a UTC timestamp, an activity of INSERT or UPDATE, `element_count` equal to the
 number of findings, every configured section present (a list where the sheet is one to many), every
 configured field present as a string, and nothing else in the message; all problems are named in one
 error. A refused build returns `''`, so the rule never calls the producer. The producer refuses an
@@ -119,7 +121,7 @@ for its deletion; accepting the remote update is the intended result.
 A the linked item: the property equals the resolution, the envelope, the sheet's structure names in
 sheet order, the fields per section, both remediation tasks in number order with their own values,
 the entry's sub category id read through the extended class, the configuration item as a display
-value, the not-found message. B an item with nothing linked: an empty task list and `""` everywhere.
+value, the payload as the only info message. B an item with nothing linked: an empty task list and `""` everywhere.
 C the rule on a real update and a real insert. D rendering by dictionary type, including a date, and a
 reference whose record is gone. E every refusal of the processor and the producer with its exact log
 line (only the lines of that script are read): each malformed property line, an envelope off its
@@ -144,7 +146,7 @@ tasks (each with its own Primary AIT), two comments a minute apart and a VAMP so
 with its record link, and the bare item.
 
 ## Drivers
-`build_1804.py` (set `SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.1` in the mirror application,
+`build_1804.py` (set `SNOWUSEMTP-1804_MS_VAMP AVIT Outbound Payload_V2.2` in the mirror application,
 its Default set created when missing, the earlier sys_ids captured as deletions (each created under its
 old sys_id and deleted again; a current property of the same name steps aside for the moment), records
 captured explicitly, scope audit), `resolve_1804.py`, `test_1804.py` (run 1 writes the sample),

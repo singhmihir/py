@@ -15,7 +15,7 @@ from snui import SNUI
 SCOPE = '488be1cd2b1247102b30f8e14391bf0c'          # mirror of the client application BOFA USEM Consequence on the PDI, same sys_id and scope name
 PREFIX = 'x_boar_bofa_usem_0'                           # the consequence application, which holds the tables, the rule and the scripts
 APP_NAME = 'BOFA USEM Consequence'
-NAME = 'SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.3'
+NAME = 'SNOWUSEMTP-1624_MS_Consequence CDP Outbound Payload_V1.4'
 BR_NAME = 'BOFA_BR_Consequence_CdpOutbound'
 SI_NAMES = ['BOFASIConsequenceOutboundProcessor', 'BOFASIKafkaProducerConsequence']
 TABLE = PREFIX + '_consequence'
