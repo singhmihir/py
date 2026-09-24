@@ -42,6 +42,10 @@ mapping hard-coded in the script; the raw message is not kept; no duplicate hand
 the integration run is created COMPLETE before anything runs; the stream runs as a named person; draft flow and action
 shipped in the set.
 
+`build_doc_1615.js` builds *CDP IVR Inbound Integration - Architecture Overview.docx* (24 Sep, for Vamsi, on INC0010013):
+the live path, every record linked on the client dev instance, the message shape, the transform scripts, Stream Connect
+settings, the records off the live path and the points above. Render check: `NODE_MODULES=<dir with docx> node build_doc_1615.js`.
+
 ## What the platform offers (PDI, measured 23 Sep)
 - Stream Connect consumer types (`sys_kafka_etl_consumer` subclasses): Script Consumer, ETL Consumer (Robust
   Transform Engine) and **Transform Map Consumer** (`sys_kafka_transform_map_consumer`: `transform_map`,
