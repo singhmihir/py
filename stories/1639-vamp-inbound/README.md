@@ -44,7 +44,11 @@ shipped in the set.
 
 `build_doc_1615.js` builds *CDP IVR Inbound Integration - Architecture Overview.docx* (24 Sep, for Vamsi, on INC0010013):
 the live path, every record linked on the client dev instance, the message shape, the transform scripts, Stream Connect
-settings, the records off the live path and the points above. Render check: `NODE_MODULES=<dir with docx> node build_doc_1615.js`.
+settings, the records off the live path and the points above. `build_doc_1615_scripts.js` builds *CDP IVR Inbound
+Integration - Transform Scripts Explained.docx* (24 Sep, on INC0010013): one finding through onStart / onBefore /
+onComplete with hostImport and the Detection API opened up (facts read from the OOB `sn_sec_cmn.ImportHostCmn` and
+`sn_vul.DetectionBase`), the records left behind and eight likely questions. Shared helpers in `doc_helpers.js`.
+Render check: `NODE_MODULES=<dir with docx> node build_doc_1615.js` (same for the scripts document).
 
 ## What the platform offers (PDI, measured 23 Sep)
 - Stream Connect consumer types (`sys_kafka_etl_consumer` subclasses): Script Consumer, ETL Consumer (Robust
