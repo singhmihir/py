@@ -43,7 +43,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8"><style>
   .kicker { font-size: 9px; letter-spacing: 1.1px; text-transform: uppercase; color: #6a7075; font-weight: bold; margin-bottom: 3px; }
   .kicker.teal { color: #1f5f5f; } .kicker.orange { color: #a5581a; } .kicker.red { color: #9b2c2c; }
   .title { font-size: 13.5px; font-weight: bold; line-height: 1.25; overflow-wrap: anywhere; }
-  .desc { font-size: 10.8px; color: #555b60; line-height: 1.4; margin-top: 3px; }
+  .desc { font-size: 10.8px; color: #555b60; line-height: 1.4; margin-top: 3px; overflow-wrap: anywhere; }
   .desc b { color: #1c1e21; }
   .chips { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
   .chip { font-family: "Liberation Mono", "Courier New", monospace; font-size: 9px; background: #e3eeee; color: #1f5f5f; border-radius: 3px; padding: 2px 5px; white-space: nowrap; }
@@ -79,12 +79,12 @@ const html = `<!doctype html><html><head><meta charset="utf-8"><style>
 <div class="sub">VAMP has no integration into ServiceNow today. The consumer stages one row per finding; the Transform Map's own scripts hand each row to the <b>AVR import API</b>, the code every application-scanner integration already uses, so application matching, vulnerability entries, state mapping and the AVIT lifecycle are inherited. One table the API does not cover, the pen test request, is filled by a small lookup-or-create in the same script.</div>
 
 <div class="src">${card({ kicker: 'Source', title: 'VAMP', desc: 'source of the pen test findings and their retest results', style: 'flex:0 0 380px' })}</div>
-${varrow('publishes each finding or retest result as a JSON message')}
+${varrow('publishes each finding or retest result as a JSON message to Hermes')}
 
 ${band({ label: '1 · Kafka transport', desc: 'licensed platform infrastructure, configured, not built', body: [
-  card({ kicker: 'Shared bus', title: 'Confluent Kafka', desc: 'the bank’s shared layer; VAMP’s topic mirrored into it' }),
-  harrow('replicated into'),
-  card({ kicker: 'ServiceNow · Stream Connect', title: 'Topic sn_usem_vamp_inbound', desc: 'already created on dev: 16 partitions, USEM namespace, JSON, at-least-once delivery', chips: ['sys_kafka_topic', 'sys_kafka_subscription'] }),
+  card({ kicker: 'ServiceNow · Hermes', title: 'Hermes Kafka', desc: 'ServiceNow’s own Kafka cluster behind Stream Connect (hermes-internal); VAMP’s producer publishes straight to it over the Stream Connect endpoint' }),
+  harrow('carries'),
+  card({ kicker: 'ServiceNow · Stream Connect', title: 'Topic sn_usem_vamp_inbound', desc: 'already created on dev: cluster name snc.usem.sn_streamconnect.sn_usem_vamp_inbound, 16 partitions, USEM namespace, JSON, at-least-once delivery', chips: ['sys_kafka_topic', 'sys_kafka_subscription'] }),
   harrow('aliased into the scope'),
   card({ kicker: 'ServiceNow · Stream Connect', title: 'Topic alias + Kafka stream', desc: 'scope x_boar_bofa_usem_1; the stream binds alias and consumer: initial offset, concurrency, run-as integration user', chips: ['sys_sc_topic_alias', 'sys_kafka_stream'] }),
 ].join('') })}

@@ -1,6 +1,7 @@
 # SNOWUSEMTP-2125 — VAMP findings into Application Vulnerability Response (POC)
 
-Story (25 Sep): Kafka consumer for VAMP findings from Confluent Kafka, import set / transform map into
+Story (25 Sep): Kafka consumer for VAMP findings (the story text says Confluent Kafka; **Mihir 25 Sep: the bus is Hermes,
+ServiceNow's own Stream Connect Kafka, at all places; Mohammad's document has Confluent wrong**), import set / transform map into
 `sn_vul_pen_test_assessment_request`, `sn_vul_app_vulnerable_item`, `sn_vul_app_vul_entry`, using the OOB script
 includes of the integration framework; no flows. Drop-box incident **INC0010038** (`d759c5ad93670fd0e3aef0aefaba1096`),
 which also holds Mohammad's design document *Vulnerability Stream Bridge* (27 Aug, CDP IVR over Kafka into the import

@@ -251,6 +251,9 @@ Follow it without being asked again.
 - Log checks: `syslog.sys_created_on` has one-second resolution, so a check block starts with `gs.sleep(1100)` before
   taking its start time and reads only lines at or after it. ProducerV2 is absent on the PDI:
   `new sn_ih_kafka.ProducerV2()` throws `undefined is not a function.`
+- **Kafka bus at the client is Hermes** (ServiceNow's own Stream Connect cluster, `hermes-internal`; topics `snc.usem.sn_streamconnect.<name>`),
+  never Confluent or another external cluster: Mohammad's *Vulnerability Stream Bridge* document (INC0010038) has that wrong,
+  Mihir corrected it 25 Sep. Producers publish straight to the Hermes topic; no mirroring step in any diagram.
 - VAMP inbound (SNOWUSEMTP-1639, `stories/1639-vamp-inbound/`, drop-box INC0010013): consume `sn_usem_vamp_inbound` into
   an import set and transform (no flows), modelled on Mohammad's CDP IVR inbound (1615). Waiting for the payload; 16
   questions with plain explanations posted 23 Sep; blockers 1, 2, 5, 6, plus 7-9 if the story creates/updates AVITs, 12
