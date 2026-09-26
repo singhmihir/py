@@ -206,6 +206,40 @@ WEEK_6 = dict(ending=date(2026, 9, 19), days=[
         'related records, on insert and on update. V1.6 delivered.'),
 ])
 
+WEEK_7 = dict(ending=date(2026, 9, 26), days=[
+    day(date(2026, 9, 21), 8, 0, 8, 0, 'Documentation', 'SNOWUSEMTP-895',
+        'Documentation - SNOWUSEMTP-895: completed the CMDB team demo deck on the Qualys CI lookup rules from the client run: '
+        'for every rule, what it looks for, how the script works and when it declines, one example dedicated to the rule '
+        'and step-by-step pages linking every record and filter on the development instance, driven by a read-only trace '
+        'script; text boxes sized to the page in the Bank of America palette. Also started SNOWUSEMTP-1624, the consequence '
+        'outbound payload to CDP, built in the consequence application with validation and error handling (V1.2).'),
+    day(date(2026, 9, 22), 8, 0, 8, 0, 'Configurations', 'SNOWUSEMTP-1804',
+        'Configurations - SNOWUSEMTP-1804: reworked the VAMP outbound payload to the JSON structure names of the mapping '
+        'sheet, covering all remediation task types, with one property holding the sections and fields as in the CDP payloads, '
+        'payload validation before the send and the Kafka story comment standard (V2.0). Reviewed the four Kafka outbound '
+        'script sets (SNOWUSEMTP-1625, the Kafka producer, SNOWUSEMTP-1624 and SNOWUSEMTP-1804) and fixed and re-tested the '
+        'findings of the review.'),
+    day(date(2026, 9, 23), 8, 0, 8, 0, 'Configurations', 'SNOWUSEMTP-1624',
+        'Configurations - SNOWUSEMTP-1624 / SNOWUSEMTP-1625: merged the Kafka producers into one script include called by the '
+        'business rules on consequences, remediation tasks and vulnerable items, with the topic property chosen by the '
+        'record\'s table, a synchronous send and the Kafka response shown on the record; restored the missing-field and '
+        'payload messages in the processors. Delivered producer V1.5, consequence outbound V1.5 and VAMP outbound V2.3, each '
+        'tested and previewed on import. Began SNOWUSEMTP-1639 with an analysis of the CDP IVR inbound build and the '
+        'questions for the VAMP team, with the blockers marked.'),
+    day(date(2026, 9, 24), 8, 0, 8, 0, 'Documentation', 'SNOWUSEMTP-1639',
+        'Documentation - SNOWUSEMTP-1639: produced the architecture overview of the CDP IVR inbound build (Kafka topic, '
+        'stream, script consumer, import set, transform map and Detection API, with a link to every record on the '
+        'development instance) and a companion document explaining the three transform map scripts step by step, from the '
+        'staging row through host matching and the Detection API to the vulnerable item, with the questions the team is '
+        'likely to raise answered from the code.'),
+    day(date(2026, 9, 25), 8, 0, 8, 0, 'Design', 'SNOWUSEMTP-2125',
+        'Design - SNOWUSEMTP-2125: designed the architecture for bringing VAMP findings into Application Vulnerability '
+        'Response over Hermes: script consumer and import set feeding a transform map whose scripts call the out-of-box AVR '
+        'import API for the application release, application vulnerability entry and application vulnerable item, with the '
+        'pen test assessment request handled by a lookup-or-create since no out-of-box API covers it. Delivered the diagram '
+        'with the table of out-of-box code used, not used and not usable.'),
+])
+
 FILES = [
     dict(file='BofA_USEM_Timecard_10Aug21Aug_2026.xlsx', weeks=[WEEK_1, WEEK_2],
          notes_footer='Week ending 15-Aug carries a single Project line Mon to Thu and a Sick line on Fri 14-Aug (9.00h). '
@@ -257,6 +291,18 @@ FILES = [
              'Week ending 19-Sep: Mon to Fri 8.00h on the India Kolkata worked line; weekly 40.00, Worked 40.00, Absence 0.00.',
              'Mapping rule: SN Project + SN Training reconcile to Deloitte Worked; SN Sick reconciles to Deloitte Absence; daily and weekly totals are identical.',
              'Activity notes are drawn from the engagement work on SNOWUSEMTP-895 (Qualys CI lookup rules and the load balancer refinements), SNOWUSEMTP-1552 (deferral kept on scanner reopen), SNOWUSEMTP-1825 (ignored CI classes) and SNOWUSEMTP-1804 (VAMP outbound payload).',
+         ]),
+    dict(file='BofA_USEM_Timecard_21Sep25Sep_2026.xlsx', weeks=[WEEK_7],
+         notes_footer='Week ending 26-Sep carries a single Project line Mon to Fri (8.00h each). See the Reconciliation sheet for the '
+                      'line-by-line tie-out; the Deloitte columns hold the planned 8.00h per day until the approved T&E is available.',
+         recon_intro='Deloitte is the system of record. Every daily and weekly total below is computed live and must read MATCH. '
+                     'SN Project + SN Training = Deloitte Worked. SN Sick = Deloitte Absence. The Deloitte columns hold the planned '
+                     '8.00h per day for the week ending 26-Sep; replace them with the approved T&E figures when available.',
+         recon_notes=[
+             'Source of record: Deloitte T&E timesheet, week ending 26-Sep-2026 (Deloitte columns entered as the planned 8.00h per day; confirm against the approved timesheet).',
+             'Week ending 26-Sep: Mon to Fri 8.00h on the India Kolkata worked line; weekly 40.00, Worked 40.00, Absence 0.00.',
+             'Mapping rule: SN Project + SN Training reconcile to Deloitte Worked; SN Sick reconciles to Deloitte Absence; daily and weekly totals are identical.',
+             'Activity notes are drawn from the engagement work on SNOWUSEMTP-895 (lookup rules demo deck), SNOWUSEMTP-1624 and SNOWUSEMTP-1625 (consequence outbound and the merged Kafka producer), SNOWUSEMTP-1804 (VAMP outbound), SNOWUSEMTP-1639 (VAMP inbound analysis) and SNOWUSEMTP-2125 (VAMP into Application Vulnerability Response).',
          ]),
 ]
 
