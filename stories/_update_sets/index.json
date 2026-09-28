@@ -560,5 +560,14 @@
    "client scope and application sys_id: importable on the client instance as is; the client receives the record XML too",
    "topic property empty, for the client to fill"
   ]
+ },
+ {
+  "name": "SNOWUSEMTP-2021_MS_AVIT Verification ID History_V1.0",
+  "app": "global",
+  "rows": 4,
+  "exported": 4,
+  "file": "SNOWUSEMTP-2021_MS_AVIT_Verification_ID_History_V1.0.xml",
+  "created": "2026-09-28 10:34:26",
+  "scrub": []
  }
 ]

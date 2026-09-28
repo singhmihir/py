@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?><unload unload_date="2026-09-28 10:34:27">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Global">global</application>
+<application_name>Global</application_name>
+<application_scope>global</application_scope>
+<application_version/>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>Keeps every verification ID VAMP sends for an application vulnerable item: u_verification_id becomes a multi-line field (string, 4000) and a before rule adds each new ID on its own line under the earlier ones as "&lt;ID&gt; (MM-dd-yyyy)", oldest first, never twice. BOFA_SI_VerificationIdHistory.recordVerification(sourceAvitId, verificationId) finds the items by Source AVIT ID for the inbound integration.</description>
+<inserted/>
+<name>SNOWUSEMTP-2021_MS_AVIT Verification ID History_V1.0</name>
+<origin_sys_id/>
+<parent display_value=""/>
+<release_date/>
+<remote_base_update_set display_value=""/>
+<remote_parent_id/>
+<remote_sys_id>08dca8e293638714e3aef0aefaba1071</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_class_name>sys_remote_update_set</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-28 10:34:26</sys_created_on>
+<sys_id>463d2c2693638714e3aef0aefaba10bb</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-28 10:34:26</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_dictionary_sn_vul_app_vulnerable_item_u_verification_id</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update&gt;&lt;sys_dictionary action="INSERT_OR_UPDATE" element="u_verification_id" table="sn_vul_app_vulnerable_item"&gt;&lt;active&gt;true&lt;/active&gt;&lt;array&gt;false&lt;/array&gt;&lt;attributes/&gt;&lt;audit&gt;false&lt;/audit&gt;&lt;calculation&gt;&lt;![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]&gt;&lt;/calculation&gt;&lt;choice/&gt;&lt;choice_field/&gt;&lt;choice_table/&gt;&lt;column_label&gt;Verification ID&lt;/column_label&gt;&lt;comments/&gt;&lt;create_roles/&gt;&lt;default_value/&gt;&lt;defaultsort/&gt;&lt;delete_roles/&gt;&lt;dependent/&gt;&lt;dependent_on_field/&gt;&lt;display&gt;false&lt;/display&gt;&lt;dynamic_creation&gt;false&lt;/dynamic_creation&gt;&lt;dynamic_creation_script/&gt;&lt;dynamic_default_value/&gt;&lt;dynamic_ref_qual/&gt;&lt;element&gt;u_verification_id&lt;/element&gt;&lt;element_reference&gt;false&lt;/element_reference&gt;&lt;foreign_database/&gt;&lt;formula/&gt;&lt;function_definition/&gt;&lt;function_field&gt;false&lt;/function_field&gt;&lt;internal_type display_value="String"&gt;string&lt;/internal_type&gt;&lt;mandatory&gt;false&lt;/mandatory&gt;&lt;max_length&gt;4000&lt;/max_length&gt;&lt;name&gt;sn_vul_app_vulnerable_item&lt;/name&gt;&lt;next_element/&gt;&lt;primary&gt;false&lt;/primary&gt;&lt;read_only&gt;false&lt;/read_only&gt;&lt;read_only_option/&gt;&lt;read_roles/&gt;&lt;reference/&gt;&lt;reference_cascade_rule/&gt;&lt;reference_floats&gt;false&lt;/reference_floats&gt;&lt;reference_key/&gt;&lt;reference_qual/&gt;&lt;reference_qual_condition/&gt;&lt;reference_type/&gt;&lt;spell_check&gt;false&lt;/spell_check&gt;&lt;staged&gt;false&lt;/staged&gt;&lt;sys_class_name&gt;sys_dictionary&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-28 10:32:39&lt;/sys_created_on&gt;&lt;sys_id&gt;84dca8e293638714e3aef0aefaba1076&lt;/sys_id&gt;&lt;sys_name&gt;Verification ID&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_dictionary_sn_vul_app_vulnerable_item_u_verification_id&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-28 10:32:39&lt;/sys_updated_on&gt;&lt;table_reference&gt;false&lt;/table_reference&gt;&lt;text_index&gt;false&lt;/text_index&gt;&lt;unique&gt;false&lt;/unique&gt;&lt;use_dependent_field&gt;false&lt;/use_dependent_field&gt;&lt;use_dynamic_default&gt;false&lt;/use_dynamic_default&gt;&lt;use_reference_qualifier&gt;simple&lt;/use_reference_qualifier&gt;&lt;virtual&gt;false&lt;/virtual&gt;&lt;virtual_type&gt;script&lt;/virtual_type&gt;&lt;widget/&gt;&lt;write_roles/&gt;&lt;xml_view&gt;false&lt;/xml_view&gt;&lt;/sys_dictionary&gt;&lt;/record_update&gt;</payload>
+<payload_hash>-794203308</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-2021_MS_AVIT Verification ID History_V1.0">463d2c2693638714e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-28 10:34:26</sys_created_on>
+<sys_id>0e3d2c2693638714e3aef0aefaba10bb</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0e792e93e0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-28 10:34:26</sys_updated_on>
+<table>sn_vul_app_vulnerable_item</table>
+<target_name>Application Vulnerable Item.Verification ID</target_name>
+<type>Dictionary</type>
+<update_domain>global</update_domain>
+<update_guid>4cdca8e246638714416e80135266fec0</update_guid>
+<update_guid_history>4cdca8e246638714416e80135266fec0:-794203308</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_documentation_sn_vul_app_vulnerable_item_u_verification_id_en</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_documentation element="u_verification_id" label="Verification ID" language="en" table="sn_vul_app_vulnerable_item"><sys_documentation action="INSERT_OR_UPDATE"><element>u_verification_id</element><help/><hint/><label>Verification ID</label><language>en</language><name>sn_vul_app_vulnerable_item</name><plural>Verification IDs</plural><sys_class_name>sys_documentation</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-28 10:32:39</sys_created_on><sys_id>84dca8e293638714e3aef0aefaba109e</sys_id><sys_mod_count>0</sys_mod_count><sys_name>Verification ID</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_documentation_sn_vul_app_vulnerable_item_u_verification_id_en</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-28 10:32:39</sys_updated_on><url/><url_target/></sys_documentation></sys_documentation></record_update>]]></payload>
+<payload_hash>1737189769</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-2021_MS_AVIT Verification ID History_V1.0">463d2c2693638714e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-28 10:34:26</sys_created_on>
+<sys_id>0e3d2c2693638714e3aef0aefaba10bc</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0e792ea400000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-28 10:34:26</sys_updated_on>
+<table>sn_vul_app_vulnerable_item</table>
+<target_name>Application Vulnerable Item.Verification ID</target_name>
+<type>Field Label</type>
+<update_domain>global</update_domain>
+<update_guid>d0dca8e2d26387147c964620dddd75c5</update_guid>
+<update_guid_history>d0dca8e2d26387147c964620dddd75c5:1737189769</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_68dca8e293638714e3aef0aefaba10cd</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;true&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;sn_vul_app_vulnerable_item&lt;/collection&gt;&lt;condition/&gt;&lt;description&gt;Keeps the Verification ID history: a single new ID is added under the earlier ones with the date (SNOWUSEMTP-2021).&lt;/description&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="sn_vul_app_vulnerable_item"&gt;u_verification_idVALCHANGES^EQ&lt;item endquery="false" field="u_verification_id" goto="false" newquery="false" operator="VALCHANGES" or="false" value=""/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;BOFA_BR_AVIT_VerificationIdHistory&lt;/name&gt;&lt;order&gt;1000&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous /*null when async*/) {
+    if (current.isActionAborted())
+        return;
+    new BOFA_SI_VerificationIdHistory().appendToHistory(current, previous);
+})(current, previous);
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-28 10:32:41&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;68dca8e293638714e3aef0aefaba10cd&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA_BR_AVIT_VerificationIdHistory&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_68dca8e293638714e3aef0aefaba10cd&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-28 10:32:41&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;before&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=68dca8e293638714e3aef0aefaba10cd"/&gt;&lt;/record_update&gt;</payload>
+<payload_hash>1042017800</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-2021_MS_AVIT Verification ID History_V1.0">463d2c2693638714e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-28 10:34:26</sys_created_on>
+<sys_id>423d2c2693638714e3aef0aefaba10bd</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0e792eedc0000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-28 10:34:26</sys_updated_on>
+<table>sn_vul_app_vulnerable_item</table>
+<target_name>BOFA_BR_AVIT_VerificationIdHistory</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_guid>2cdce8e2e2638714ee01b2edde7d2b2c</update_guid>
+<update_guid_history>2cdce8e2e2638714ee01b2edde7d2b2c:1042017800</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_54dca8e293638714e3aef0aefaba10c7</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;global.BOFA_SI_VerificationIdHistory&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;Verification ID history on the application vulnerable item (SNOWUSEMTP-2021).&lt;/description&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;BOFA_SI_VerificationIdHistory&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[var BOFA_SI_VerificationIdHistory = Class.create();
+BOFA_SI_VerificationIdHistory.prototype = {
+
+    /**
+     * Configuration: the application vulnerable item table, its Verification ID history field, the
+     * date format stamped on each entry and the pattern of a stamped entry.
+     * @returns {void}
+     */
+    initialize: function() {
+        this.TABLE = 'sn_vul_app_vulnerable_item';
+        this.FIELD = 'u_verification_id';
+        this.SOURCE_AVIT_ID = 'source_avit_id';
+        this.DATE_FORMAT = 'MM-dd-yyyy';
+        this.STAMPED_ENTRY = / \(\d{2}-\d{2}-\d{4}\)$/;
+    },
+
+    /**
+     * Records a verification ID received from VAMP on every application vulnerable item carrying the
+     * Source AVIT ID; the before rule on the table adds it under the earlier ones with the date.
+     * @param {String} sourceAvitId - the Source AVIT ID named by the verification record, e.g. VMP-7781
+     * @param {String} verificationId - the verification ID, e.g. VER-622
+     * @returns {Number} the number of application vulnerable items updated
+     */
+    recordVerification: function(sourceAvitId, verificationId) {
+        var updated = 0;
+        try {
+            sourceAvitId = String(sourceAvitId || '').trim();
+            verificationId = String(verificationId || '').trim();
+            if (!sourceAvitId)
+                throw new Error('no Source AVIT ID was given');
+            if (!verificationId)
+                throw new Error('no verification ID was given');
+            var avit = new GlideRecord(this.TABLE);
+            avit.addQuery(this.SOURCE_AVIT_ID, sourceAvitId);
+            avit.query();
+            while (avit.next()) {
+                avit.setValue(this.FIELD, verificationId);
+                avit.update();
+                updated++;
+            }
+            if (!updated)
+                throw new Error('no application vulnerable item has this Source AVIT ID');
+        } catch (e) {
+            gs.error(this.type + ': verification ID ' + verificationId + ' not recorded for ' + this.TABLE + ' source_avit_id ' +
+                sourceAvitId + ' - ' + (e.message || e));
+        }
+        return updated;
+    },
+
+    /**
+     * Keeps the Verification ID history when a single new ID is written to the field: the earlier
+     * entries stay in order and the new ID is added on the next line as "&lt;ID&gt; (&lt;MM-dd-yyyy&gt;)". An ID
+     * already in the history is not added again; a value holding several lines or a stamped entry is
+     * an edit of the history and is left as written.
+     * @param {GlideRecord} current - the application vulnerable item being saved
+     * @param {GlideRecord} previous - the record before the save; null on insert
+     * @returns {void}
+     */
+    appendToHistory: function(current, previous) {
+        var incoming = String(current.getValue(this.FIELD) || '').trim();
+        if (!incoming || incoming.indexOf('\n') &gt; -1 || this.STAMPED_ENTRY.test(incoming))
+            return;
+        var history = previous ? String(previous.getValue(this.FIELD) || '') : '';
+        var entries = history ? history.split('\n') : [];
+        for (var i = 0; i &lt; entries.length; i++) {
+            if (entries[i] == incoming || entries[i].indexOf(incoming + ' (') == 0) {
+                current.setValue(this.FIELD, history);
+                return;
+            }
+        }
+        entries.push(incoming + ' (' + new GlideDate().getByFormat(this.DATE_FORMAT) + ')');
+        current.setValue(this.FIELD, entries.join('\n'));
+    },
+
+    type: 'BOFA_SI_VerificationIdHistory'
+};
+]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-28 10:32:40&lt;/sys_created_on&gt;&lt;sys_id&gt;54dca8e293638714e3aef0aefaba10c7&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;BOFA_SI_VerificationIdHistory&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_54dca8e293638714e3aef0aefaba10c7&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-28 10:32:40&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<payload_hash>1781752248</payload_hash>
+<remote_update_set display_value="SNOWUSEMTP-2021_MS_AVIT Verification ID History_V1.0">463d2c2693638714e3aef0aefaba10bb</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2026-09-28 10:34:26</sys_created_on>
+<sys_id>4e3d2c2693638714e3aef0aefaba10c9</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_recorded_at>1a0e792ee320000001</sys_recorded_at>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2026-09-28 10:34:26</sys_updated_on>
+<table/>
+<target_name>BOFA_SI_VerificationIdHistory</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_guid>a8dca8e29363871441e9db6c71e4d5cb</update_guid>
+<update_guid_history>a8dca8e29363871441e9db6c71e4d5cb:1781752248</update_guid_history>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>
