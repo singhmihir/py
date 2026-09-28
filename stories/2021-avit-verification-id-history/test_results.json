@@ -1,8 +1,8 @@
 [
  {
   "run": 1,
-  "passed": 23,
-  "total": 23,
+  "passed": 25,
+  "total": 25,
   "checks": [
    {
     "name": "1 first ID on an empty field: 1 item updated",
@@ -13,32 +13,32 @@
    {
     "name": "1 first ID stored with the date",
     "ok": true,
-    "got": "VER-501 (09-28-2026)",
-    "want": "VER-501 (09-28-2026)"
+    "got": "VER-501 (<stamp>)",
+    "want": "VER-501 (<stamp>)"
    },
    {
     "name": "2 second ID below the first",
     "ok": true,
-    "got": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)",
-    "want": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)"
+    "got": "VER-501 (<stamp>)\nVER-622 (<stamp>)",
+    "want": "VER-501 (<stamp>)\nVER-622 (<stamp>)"
    },
    {
     "name": "3 same ID delivered again: not added twice",
     "ok": true,
-    "got": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)",
-    "want": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)"
+    "got": "VER-501 (<stamp>)\nVER-622 (<stamp>)",
+    "want": "VER-501 (<stamp>)\nVER-622 (<stamp>)"
    },
    {
     "name": "4 third ID, spaces trimmed, oldest stays on top",
     "ok": true,
-    "got": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)\nVER-790 (09-28-2026)",
-    "want": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)\nVER-790 (09-28-2026)"
+    "got": "VER-501 (<stamp>)\nVER-622 (<stamp>)\nVER-790 (<stamp>)",
+    "want": "VER-501 (<stamp>)\nVER-622 (<stamp>)\nVER-790 (<stamp>)"
    },
    {
     "name": "5 an earlier ID again: history unchanged",
     "ok": true,
-    "got": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)\nVER-790 (09-28-2026)",
-    "want": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)\nVER-790 (09-28-2026)"
+    "got": "VER-501 (<stamp>)\nVER-622 (<stamp>)\nVER-790 (<stamp>)",
+    "want": "VER-501 (<stamp>)\nVER-622 (<stamp>)\nVER-790 (<stamp>)"
    },
    {
     "name": "6 two items share a Source AVIT ID: both updated",
@@ -49,14 +49,14 @@
    {
     "name": "6 first item of the pair",
     "ok": true,
-    "got": "VER-900 (09-28-2026)",
-    "want": "VER-900 (09-28-2026)"
+    "got": "VER-900 (<stamp>)",
+    "want": "VER-900 (<stamp>)"
    },
    {
     "name": "6 second item of the pair",
     "ok": true,
-    "got": "VER-900 (09-28-2026)",
-    "want": "VER-900 (09-28-2026)"
+    "got": "VER-900 (<stamp>)",
+    "want": "VER-900 (<stamp>)"
    },
    {
     "name": "7 unknown Source AVIT ID: nothing updated",
@@ -73,8 +73,8 @@
    {
     "name": "8 empty verification ID: field unchanged",
     "ok": true,
-    "got": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)\nVER-790 (09-28-2026)",
-    "want": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)\nVER-790 (09-28-2026)"
+    "got": "VER-501 (<stamp>)\nVER-622 (<stamp>)\nVER-790 (<stamp>)",
+    "want": "VER-501 (<stamp>)\nVER-622 (<stamp>)\nVER-790 (<stamp>)"
    },
    {
     "name": "9 empty Source AVIT ID: nothing updated",
@@ -85,20 +85,26 @@
    {
     "name": "10 value from before the change (no date) kept on top",
     "ok": true,
-    "got": "VER-100\nVER-200 (09-28-2026)",
-    "want": "VER-100\nVER-200 (09-28-2026)"
+    "got": "VER-100\nVER-200 (<stamp>)",
+    "want": "VER-100\nVER-200 (<stamp>)"
    },
    {
     "name": "11 a user edits the history (several lines): left as written",
     "ok": true,
-    "got": "VER-100\nVER-200 (09-28-2026)\nVER-300 (09-01-2026)",
-    "want": "VER-100\nVER-200 (09-28-2026)\nVER-300 (09-01-2026)"
+    "got": "VER-100\nVER-200 (<stamp>)\nVER-300 (09-01-2026)",
+    "want": "VER-100\nVER-200 (<stamp>)\nVER-300 (09-01-2026)"
    },
    {
-    "name": "12 a user types one stamped entry: left as written",
+    "name": "12 a user types one stamped entry (date only): left as written",
     "ok": true,
     "got": "VER-555 (09-15-2026)",
     "want": "VER-555 (09-15-2026)"
+   },
+   {
+    "name": "12 a user types one stamped entry (date and time): left as written",
+    "ok": true,
+    "got": "VER-556 (09-15-2026 10:30:00)",
+    "want": "VER-556 (09-15-2026 10:30:00)"
    },
    {
     "name": "13 a user clears the field: stays empty",
@@ -109,14 +115,14 @@
    {
     "name": "14 new ID after the field was cleared",
     "ok": true,
-    "got": "VER-600 (09-28-2026)",
-    "want": "VER-600 (09-28-2026)"
+    "got": "VER-600 (<stamp>)",
+    "want": "VER-600 (<stamp>)"
    },
    {
     "name": "15 insert with an ID (no previous record)",
     "ok": true,
-    "got": "VER-700 (09-28-2026)",
-    "want": "VER-700 (09-28-2026)"
+    "got": "VER-700 (<stamp>)",
+    "want": "VER-700 (<stamp>)"
    },
    {
     "name": "16 rule: before, order 1000, insert and update, only when the field changes",
@@ -141,19 +147,25 @@
     "ok": true,
     "got": "2 BOFA_SI_VerificationIdHistory: verification ID  not recorded for sn_vul_app_vulnerable_item source_avit_id VMP-T2021-A - no verification ID was given\n2 BOFA_SI_VerificationIdHistory: verification ID VER-1 not recorded for sn_vul_app_vulnerable_item source_avit_id VMP-T2021-NONE - no application vulnerable item has this Source AVIT ID\n2 BOFA_SI_VerificationIdHistory: verification ID VER-2 not recorded for sn_vul_app_vulnerable_item source_avit_id  - no Source AVIT ID was given",
     "want": "2 BOFA_SI_VerificationIdHistory: verification ID  not recorded for sn_vul_app_vulnerable_item source_avit_id VMP-T2021-A - no verification ID was given\n2 BOFA_SI_VerificationIdHistory: verification ID VER-1 not recorded for sn_vul_app_vulnerable_item source_avit_id VMP-T2021-NONE - no application vulnerable item has this Source AVIT ID\n2 BOFA_SI_VerificationIdHistory: verification ID VER-2 not recorded for sn_vul_app_vulnerable_item source_avit_id  - no Source AVIT ID was given"
+   },
+   {
+    "name": "19 every stamp carries the date and time of this run",
+    "ok": true,
+    "got": "",
+    "want": ""
    }
   ],
   "logs": [
-   "2 BOFA_SI_VerificationIdHistory: verification ID VER-1 not recorded for sn_vul_app_vulnerable_item source_avit_id VMP-T2021-NONE - no application vulnerable item has this Source AVIT ID",
    "2 BOFA_SI_VerificationIdHistory: verification ID VER-2 not recorded for sn_vul_app_vulnerable_item source_avit_id  - no Source AVIT ID was given",
-   "2 BOFA_SI_VerificationIdHistory: verification ID  not recorded for sn_vul_app_vulnerable_item source_avit_id VMP-T2021-A - no verification ID was given"
+   "2 BOFA_SI_VerificationIdHistory: verification ID  not recorded for sn_vul_app_vulnerable_item source_avit_id VMP-T2021-A - no verification ID was given",
+   "2 BOFA_SI_VerificationIdHistory: verification ID VER-1 not recorded for sn_vul_app_vulnerable_item source_avit_id VMP-T2021-NONE - no application vulnerable item has this Source AVIT ID"
   ],
-  "sample": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)\nVER-790 (09-28-2026)"
+  "sample": "VER-501 (09-28-2026 16:22:02)\nVER-622 (09-28-2026 16:22:02)\nVER-790 (09-28-2026 16:22:02)"
  },
  {
   "run": 2,
-  "passed": 23,
-  "total": 23,
+  "passed": 25,
+  "total": 25,
   "checks": [
    {
     "name": "1 first ID on an empty field: 1 item updated",
@@ -164,32 +176,32 @@
    {
     "name": "1 first ID stored with the date",
     "ok": true,
-    "got": "VER-501 (09-28-2026)",
-    "want": "VER-501 (09-28-2026)"
+    "got": "VER-501 (<stamp>)",
+    "want": "VER-501 (<stamp>)"
    },
    {
     "name": "2 second ID below the first",
     "ok": true,
-    "got": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)",
-    "want": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)"
+    "got": "VER-501 (<stamp>)\nVER-622 (<stamp>)",
+    "want": "VER-501 (<stamp>)\nVER-622 (<stamp>)"
    },
    {
     "name": "3 same ID delivered again: not added twice",
     "ok": true,
-    "got": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)",
-    "want": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)"
+    "got": "VER-501 (<stamp>)\nVER-622 (<stamp>)",
+    "want": "VER-501 (<stamp>)\nVER-622 (<stamp>)"
    },
    {
     "name": "4 third ID, spaces trimmed, oldest stays on top",
     "ok": true,
-    "got": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)\nVER-790 (09-28-2026)",
-    "want": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)\nVER-790 (09-28-2026)"
+    "got": "VER-501 (<stamp>)\nVER-622 (<stamp>)\nVER-790 (<stamp>)",
+    "want": "VER-501 (<stamp>)\nVER-622 (<stamp>)\nVER-790 (<stamp>)"
    },
    {
     "name": "5 an earlier ID again: history unchanged",
     "ok": true,
-    "got": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)\nVER-790 (09-28-2026)",
-    "want": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)\nVER-790 (09-28-2026)"
+    "got": "VER-501 (<stamp>)\nVER-622 (<stamp>)\nVER-790 (<stamp>)",
+    "want": "VER-501 (<stamp>)\nVER-622 (<stamp>)\nVER-790 (<stamp>)"
    },
    {
     "name": "6 two items share a Source AVIT ID: both updated",
@@ -200,14 +212,14 @@
    {
     "name": "6 first item of the pair",
     "ok": true,
-    "got": "VER-900 (09-28-2026)",
-    "want": "VER-900 (09-28-2026)"
+    "got": "VER-900 (<stamp>)",
+    "want": "VER-900 (<stamp>)"
    },
    {
     "name": "6 second item of the pair",
     "ok": true,
-    "got": "VER-900 (09-28-2026)",
-    "want": "VER-900 (09-28-2026)"
+    "got": "VER-900 (<stamp>)",
+    "want": "VER-900 (<stamp>)"
    },
    {
     "name": "7 unknown Source AVIT ID: nothing updated",
@@ -224,8 +236,8 @@
    {
     "name": "8 empty verification ID: field unchanged",
     "ok": true,
-    "got": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)\nVER-790 (09-28-2026)",
-    "want": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)\nVER-790 (09-28-2026)"
+    "got": "VER-501 (<stamp>)\nVER-622 (<stamp>)\nVER-790 (<stamp>)",
+    "want": "VER-501 (<stamp>)\nVER-622 (<stamp>)\nVER-790 (<stamp>)"
    },
    {
     "name": "9 empty Source AVIT ID: nothing updated",
@@ -236,20 +248,26 @@
    {
     "name": "10 value from before the change (no date) kept on top",
     "ok": true,
-    "got": "VER-100\nVER-200 (09-28-2026)",
-    "want": "VER-100\nVER-200 (09-28-2026)"
+    "got": "VER-100\nVER-200 (<stamp>)",
+    "want": "VER-100\nVER-200 (<stamp>)"
    },
    {
     "name": "11 a user edits the history (several lines): left as written",
     "ok": true,
-    "got": "VER-100\nVER-200 (09-28-2026)\nVER-300 (09-01-2026)",
-    "want": "VER-100\nVER-200 (09-28-2026)\nVER-300 (09-01-2026)"
+    "got": "VER-100\nVER-200 (<stamp>)\nVER-300 (09-01-2026)",
+    "want": "VER-100\nVER-200 (<stamp>)\nVER-300 (09-01-2026)"
    },
    {
-    "name": "12 a user types one stamped entry: left as written",
+    "name": "12 a user types one stamped entry (date only): left as written",
     "ok": true,
     "got": "VER-555 (09-15-2026)",
     "want": "VER-555 (09-15-2026)"
+   },
+   {
+    "name": "12 a user types one stamped entry (date and time): left as written",
+    "ok": true,
+    "got": "VER-556 (09-15-2026 10:30:00)",
+    "want": "VER-556 (09-15-2026 10:30:00)"
    },
    {
     "name": "13 a user clears the field: stays empty",
@@ -260,14 +278,14 @@
    {
     "name": "14 new ID after the field was cleared",
     "ok": true,
-    "got": "VER-600 (09-28-2026)",
-    "want": "VER-600 (09-28-2026)"
+    "got": "VER-600 (<stamp>)",
+    "want": "VER-600 (<stamp>)"
    },
    {
     "name": "15 insert with an ID (no previous record)",
     "ok": true,
-    "got": "VER-700 (09-28-2026)",
-    "want": "VER-700 (09-28-2026)"
+    "got": "VER-700 (<stamp>)",
+    "want": "VER-700 (<stamp>)"
    },
    {
     "name": "16 rule: before, order 1000, insert and update, only when the field changes",
@@ -292,13 +310,19 @@
     "ok": true,
     "got": "2 BOFA_SI_VerificationIdHistory: verification ID  not recorded for sn_vul_app_vulnerable_item source_avit_id VMP-T2021-A - no verification ID was given\n2 BOFA_SI_VerificationIdHistory: verification ID VER-1 not recorded for sn_vul_app_vulnerable_item source_avit_id VMP-T2021-NONE - no application vulnerable item has this Source AVIT ID\n2 BOFA_SI_VerificationIdHistory: verification ID VER-2 not recorded for sn_vul_app_vulnerable_item source_avit_id  - no Source AVIT ID was given",
     "want": "2 BOFA_SI_VerificationIdHistory: verification ID  not recorded for sn_vul_app_vulnerable_item source_avit_id VMP-T2021-A - no verification ID was given\n2 BOFA_SI_VerificationIdHistory: verification ID VER-1 not recorded for sn_vul_app_vulnerable_item source_avit_id VMP-T2021-NONE - no application vulnerable item has this Source AVIT ID\n2 BOFA_SI_VerificationIdHistory: verification ID VER-2 not recorded for sn_vul_app_vulnerable_item source_avit_id  - no Source AVIT ID was given"
+   },
+   {
+    "name": "19 every stamp carries the date and time of this run",
+    "ok": true,
+    "got": "",
+    "want": ""
    }
   ],
   "logs": [
    "2 BOFA_SI_VerificationIdHistory: verification ID  not recorded for sn_vul_app_vulnerable_item source_avit_id VMP-T2021-A - no verification ID was given",
-   "2 BOFA_SI_VerificationIdHistory: verification ID VER-1 not recorded for sn_vul_app_vulnerable_item source_avit_id VMP-T2021-NONE - no application vulnerable item has this Source AVIT ID",
-   "2 BOFA_SI_VerificationIdHistory: verification ID VER-2 not recorded for sn_vul_app_vulnerable_item source_avit_id  - no Source AVIT ID was given"
+   "2 BOFA_SI_VerificationIdHistory: verification ID VER-2 not recorded for sn_vul_app_vulnerable_item source_avit_id  - no Source AVIT ID was given",
+   "2 BOFA_SI_VerificationIdHistory: verification ID VER-1 not recorded for sn_vul_app_vulnerable_item source_avit_id VMP-T2021-NONE - no application vulnerable item has this Source AVIT ID"
   ],
-  "sample": "VER-501 (09-28-2026)\nVER-622 (09-28-2026)\nVER-790 (09-28-2026)"
+  "sample": "VER-501 (09-28-2026 16:22:04)\nVER-622 (09-28-2026 16:22:04)\nVER-790 (09-28-2026 16:22:04)"
  }
 ]

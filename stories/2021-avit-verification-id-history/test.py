@@ -8,10 +8,20 @@ from snui import SNUI
 
 TEST = r'''
 var SI = new BOFA_SI_VerificationIdHistory();
-var out = {checks: [], today: new GlideDate().getByFormat('MM-dd-yyyy')};
-var D = ' (' + out.today + ')';
+var out = {checks: [], stamps: []};
+var D = ' (<stamp>)';
+var STAMP = / \((\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2})\)$/;
+var runStart = new GlideDateTime();
+// each stamped line must carry the date and time of this run (session time zone); it is then compared as <stamp>
+function stamped(line) {
+    var m = STAMP.exec(line); if (!m) return line;
+    var t = new GlideDateTime(); t.setDisplayValue(m[1], 'MM-dd-yyyy HH:mm:ss');
+    var secs = (t.getNumericValue() - runStart.getNumericValue()) / 1000;
+    if (secs < -1 || secs > 300) out.stamps.push('out of range: ' + line);
+    return line.replace(STAMP, ' (<stamp>)');
+}
 function check(name, got, want) { out.checks.push({name: name, ok: got === want, got: got, want: want}); }
-function field(id) { var g = new GlideRecord('sn_vul_app_vulnerable_item'); g.get(id); return g.getValue('u_verification_id') || ''; }
+function field(id) { var g = new GlideRecord('sn_vul_app_vulnerable_item'); g.get(id); return (g.getValue('u_verification_id') || '').split('\n').map(stamped).join('\n'); }
 function force(id, values) { var g = new GlideRecord('sn_vul_app_vulnerable_item'); g.get(id); for (var k in values) g.setValue(k, values[k]); g.setWorkflow(false); g.update(); }
 function write(id, value) { var g = new GlideRecord('sn_vul_app_vulnerable_item'); g.get(id); g.setValue('u_verification_id', value); g.update(); }
 
@@ -53,7 +63,10 @@ try {
     write(B1, 'VER-100\nVER-200' + D + '\nVER-300 (09-01-2026)');
     check('11 a user edits the history (several lines): left as written', field(B1), 'VER-100\nVER-200' + D + '\nVER-300 (09-01-2026)');
     write(B2, 'VER-555 (09-15-2026)');
-    check('12 a user types one stamped entry: left as written', field(B2), 'VER-555 (09-15-2026)');
+    check('12 a user types one stamped entry (date only): left as written', field(B2), 'VER-555 (09-15-2026)');
+    write(B2, 'VER-556 (09-15-2026 10:30:00)');
+    var typed = new GlideRecord('sn_vul_app_vulnerable_item'); typed.get(B2);
+    check('12 a user types one stamped entry (date and time): left as written', typed.getValue('u_verification_id'), 'VER-556 (09-15-2026 10:30:00)');
     write(B2, '');
     check('13 a user clears the field: stays empty', field(B2), '');
     write(B2, 'VER-600');
@@ -62,7 +75,7 @@ try {
     // insert: no previous record
     var n = new GlideRecord('sn_vul_app_vulnerable_item'); n.initialize(); n.setValue('u_verification_id', 'VER-700');
     SI.appendToHistory(n, null);
-    check('15 insert with an ID (no previous record)', n.getValue('u_verification_id'), 'VER-700' + D);
+    check('15 insert with an ID (no previous record)', stamped(n.getValue('u_verification_id')), 'VER-700' + D);
 
     // the rule honours an aborted save
     var br = new GlideRecord('sys_script'); br.addQuery('name', 'BOFA_BR_AVIT_VerificationIdHistory'); br.query(); br.next();
@@ -82,7 +95,8 @@ try {
                 '2 BOFA_SI_VerificationIdHistory: verification ID VER-2 not recorded for sn_vul_app_vulnerable_item source_avit_id  - no Source AVIT ID was given'];
     // lines written within one second come back in either order
     check('18 the three error lines, one per refusal', logs.slice().sort().join('\n'), want.slice().sort().join('\n'));
-    out.sample = field(A);
+    var raw = new GlideRecord('sn_vul_app_vulnerable_item'); raw.get(A); out.sample = raw.getValue('u_verification_id');
+    check('19 every stamp carries the date and time of this run', out.stamps.join('; '), '');
 } finally {
     for (var i = 0; i < ids.length; i++) force(ids[i], {source_avit_id: orig[ids[i]].source_avit_id, u_verification_id: ''});
     out.restored = ids.map(function(i) { var g = new GlideRecord('sn_vul_app_vulnerable_item'); g.get(i); return g.getValue('number') + ' ' + (g.getValue('source_avit_id') || '') + ' [' + (g.getValue('u_verification_id') || '') + ']'; });

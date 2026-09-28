@@ -7,9 +7,9 @@ HERE = os.path.dirname(os.path.abspath(__file__)); BASE = os.path.dirname(os.pat
 sys.path.insert(0, os.path.join(BASE, 'tools'))
 from snui import SNUI
 
-NAME = 'SNOWUSEMTP-2021_MS_AVIT Verification ID History_V1.0'
+NAME = 'SNOWUSEMTP-2021_MS_AVIT Verification ID History_V1.1'
 DESC = ('Keeps every verification ID VAMP sends for an application vulnerable item: u_verification_id becomes a multi-line field '
-        '(string, 4000) and a before rule adds each new ID on its own line under the earlier ones as "<ID> (MM-dd-yyyy)", oldest '
+        '(string, 4000) and a before rule adds each new ID on its own line under the earlier ones as "<ID> (MM-dd-yyyy HH:mm:ss)", oldest '
         'first, never twice. BOFA_SI_VerificationIdHistory.recordVerification(sourceAvitId, verificationId) finds the items by Source '
         'AVIT ID for the inbound integration.')
 SI_NAME = 'BOFA_SI_VerificationIdHistory'
@@ -18,6 +18,8 @@ SI = open(os.path.join(HERE, SI_NAME + '.js')).read()
 BR = open(os.path.join(HERE, BR_NAME + '.js')).read()
 ST_PATH = os.path.join(HERE, 'state.json')
 ST = json.load(open(ST_PATH)) if os.path.exists(ST_PATH) else {}
+if ST.get('name') != NAME:  # a new version starts its own set
+    ST = dict(ST, set='')
 
 ui = SNUI(); ui.app('global')
 d = ui.js('''var o = {rows: []};
@@ -45,6 +47,8 @@ br.setValue('script', %(br)s);
 br.setValue('description', 'Keeps the Verification ID history: a single new ID is added under the earlier ones with the date (SNOWUSEMTP-2021).');
 br.isNewRecord() ? br.insert() : br.update(); o.br = br.getUniqueValue();
 
+var um = new GlideUpdateManager2(); um.saveRecord(f); um.saveRecord(si); um.saveRecord(br);
+var doc = new GlideRecord('sys_documentation'); doc.addQuery('name', 'sn_vul_app_vulnerable_item'); doc.addQuery('element', 'u_verification_id'); doc.addQuery('language', 'en'); doc.query(); if (doc.next()) um.saveRecord(doc);
 var ux = new GlideRecord('sys_update_xml'); ux.addQuery('update_set', o.set); ux.orderBy('sys_created_on'); ux.query();
 while (ux.next()) o.rows.push(ux.getValue('type') + ' | ' + ux.getValue('name') + ' | ' + ux.getValue('action') + ' | ' + ux.application.getDisplayValue());
 var cur = new GlideRecord('sys_dictionary'); cur.get(o.field); o.max_length = cur.getValue('max_length');

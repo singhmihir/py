@@ -3,7 +3,8 @@ BOFA_SI_VerificationIdHistory.prototype = {
 
     /**
      * Configuration: the application vulnerable item table, its Verification ID history field, the
-     * date format stamped on each entry and the pattern of a stamped entry.
+     * date and time formats stamped on each entry (time zone of the session saving the record) and the
+     * pattern of a stamped entry.
      * @returns {void}
      */
     initialize: function() {
@@ -11,12 +12,13 @@ BOFA_SI_VerificationIdHistory.prototype = {
         this.FIELD = 'u_verification_id';
         this.SOURCE_AVIT_ID = 'source_avit_id';
         this.DATE_FORMAT = 'MM-dd-yyyy';
-        this.STAMPED_ENTRY = / \(\d{2}-\d{2}-\d{4}\)$/;
+        this.TIME_FORMAT = 'HH:mm:ss';
+        this.STAMPED_ENTRY = / \(\d{2}-\d{2}-\d{4}( \d{2}:\d{2}:\d{2})?\)$/;
     },
 
     /**
      * Records a verification ID received from VAMP on every application vulnerable item carrying the
-     * Source AVIT ID; the before rule on the table adds it under the earlier ones with the date.
+     * Source AVIT ID; the before rule on the table adds it under the earlier ones with the date and time.
      * @param {String} sourceAvitId - the Source AVIT ID named by the verification record, e.g. VMP-7781
      * @param {String} verificationId - the verification ID, e.g. VER-622
      * @returns {Number} the number of application vulnerable items updated
@@ -49,7 +51,7 @@ BOFA_SI_VerificationIdHistory.prototype = {
 
     /**
      * Keeps the Verification ID history when a single new ID is written to the field: the earlier
-     * entries stay in order and the new ID is added on the next line as "<ID> (<MM-dd-yyyy>)". An ID
+     * entries stay in order and the new ID is added on the next line as "<ID> (MM-dd-yyyy HH:mm:ss)". An ID
      * already in the history is not added again; a value holding several lines or a stamped entry is
      * an edit of the history and is left as written.
      * @param {GlideRecord} current - the application vulnerable item being saved
@@ -68,7 +70,9 @@ BOFA_SI_VerificationIdHistory.prototype = {
                 return;
             }
         }
-        entries.push(incoming + ' (' + new GlideDate().getByFormat(this.DATE_FORMAT) + ')');
+        var now = new GlideDateTime();
+        entries.push(incoming + ' (' + now.getLocalDate().getByFormat(this.DATE_FORMAT) + ' ' +
+            now.getLocalTime().getByFormat(this.TIME_FORMAT) + ')');
         current.setValue(this.FIELD, entries.join('\n'));
     },
 
