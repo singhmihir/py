@@ -48,6 +48,11 @@ Follow it without being asked again.
 - **Size is part of the deliverable**: a deck he cannot open or show has not been delivered. One worked
   example per rule unless he asks for more; keep the fuller data in the repository for a later build.
 - No unrequested work alongside a change (no diagrams or documents he did not ask for).
+- **Out-of-box changes (28 Sep): edit the out-of-box record directly** (UI Builder page JSON, choice lists), no
+  variants, copies or new records built to stay upgrade safe; server logic goes into an override in the script include
+  meant for it (e.g. `sn_vul.ChangeMgmt` over `ChangeMgmtBase`). Keep the build small. For such platform edits he may
+  apply them himself on bofadev from a build-steps Word document (where, what to paste, a background script as the
+  exact alternative) instead of an update set export.
 
 ## Explanation artifacts (decks, walkthrough documents)
 - Shape he approved: per rule, pages for *what it looks for*, *how the script works* (numbered steps in
@@ -207,6 +212,15 @@ Follow it without being asked again.
   `stories/qualys-ci-lookup-rules/README.md`. Rule 750 `USEM IP Outside Hardware Match` (28 Sep, from the client's Shazzam
   "IP in CMDB" logic on INC0010039): address alone in vCenter, cluster VIP (-> its cluster), IP phone, imaging hardware;
   exactly one CI; Mihir's choices: cluster not node server, no name check, order 750.
+- VR Create Change (28 Sep, `stories/vr-workspace-expedited-change/`): workspace dialog = page `59061b92b7072010aed5b064ce11a92c`
+  (`change_type` now-select, static items); classic form = `sn_vul_action_create_cr` (choices from `change_request.type`);
+  both call `sn_vul.ChangeMgmt.actionCreateChange` -> `createNewChangeRequest` (unknown type -> `newNormal()`). On a
+  change-model instance the model's record preset sets the type on insert and presets cannot change afterwards; create a
+  typed change with `global.ChangeRequest.newChange(<model sys_id>)`. OOB `actionCreateChange` checks `change.isValid()`
+  (table, not record), so an empty id links an empty change: stop earlier. Create Change button needs plugin
+  `sn_sow_chg` (client has it, PDI not). Global scripts cannot delete `sn_vul_*` rows (cross-scope; use the Table API);
+  deleting a change runs rules that assign a global `o`. Copy Model (`STTRMModel.copy`) leaves the copy inactive. The
+  client has its own Expedited change model (value `expedited`).
 - Ignore classes (SNOWUSEMTP-1825, `stories/ignore-ci-classes/`): `sn_sec_cmn.ignoreCIClass` (scope sn_sec_cmn, set
   `..._MS_Ignore CI Classes for Lookup Rules_V1.0` in that scope) now carries the story's 19 classes on top of the five OOB
   ones; the platform compares exact class names (`_checkCIIgnored`, no hierarchy). `cmdb_ci_lb` on the list removes the

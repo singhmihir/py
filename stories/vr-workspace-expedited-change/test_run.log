@@ -1,0 +1,19 @@
+ok   run1 dialog offers Standard, Normal, Emergency, Expedited | ["Standard", "Normal", "Emergency", "Expedited"]
+ok   run1 Expedited selected: template picker hidden, implementation plan shown, create enabled | {"selected": "Expedited", "templateShown": false, "implementationShown": true, "createEnabled": true, "error": null}
+ok   run1 Standard still shows the template picker and hides the implementation plan | {"templateShown": true, "implementationShown": false, "error": null}
+ok   run1 AVUL0010093: dialog Expedited -> staging "expedited" finished, one change of type expedited on the Expedited model, linked | {"staging": [{"type": "expedited", "status": "finished"}], "changes": [{"number": "CHG0030028", "type": "expedited", "model": "Expedited", "state": "New", "linked": true}], "links": 1, "state": "10"}
+ok   run1 AVUL0010037: dialog Normal -> one Normal change on the Normal model, linked | {"staging": [{"type": "normal", "status": "finished"}], "changes": [{"number": "CHG0030029", "type": "normal", "model": "Normal", "state": "New", "linked": true}], "links": 1, "state": "10"}
+ok   run1 AVUL0010008: classic form path -> the same Expedited change | {"staging_type": "expedited", "status": "finished", "change": "CHG0030030", "type": "expedited", "model": "Expedited", "errors": []}
+ok   run1 AVUL0010031: no Expedited model -> nothing created or linked, task untouched, status error, one error line | {"staging_type": "expedited", "status": "error", "change": "", "type": "", "model": "", "errors": ["ChangeMgmt: change creation failed for sn_vul_action_create_cr 9949296a93ab8714e3aef0aefaba1090 - no active change model presets type expedited"], "task": {"staging": [{"type": "expedited", "status": "new"}], "changes": [], "links": 0, "state": "1"}}
+   cleanup: {"changes": 3, "links": 7, "staging": 4}
+ok   run2 dialog offers Standard, Normal, Emergency, Expedited | ["Standard", "Normal", "Emergency", "Expedited"]
+ok   run2 Expedited selected: template picker hidden, implementation plan shown, create enabled | {"selected": "Expedited", "templateShown": false, "implementationShown": true, "createEnabled": true, "error": null}
+ok   run2 Standard still shows the template picker and hides the implementation plan | {"templateShown": true, "implementationShown": false, "error": null}
+ok   run2 AVUL0010037: dialog Expedited -> staging "expedited" finished, one change of type expedited on the Expedited model, linked | {"staging": [{"type": "expedited", "status": "finished"}], "changes": [{"number": "CHG0030031", "type": "expedited", "model": "Expedited", "state": "New", "linked": true}], "links": 1, "state": "10"}
+ok   run2 AVUL0010093: dialog Normal -> one Normal change on the Normal model, linked | {"staging": [{"type": "normal", "status": "finished"}], "changes": [{"number": "CHG0030032", "type": "normal", "model": "Normal", "state": "New", "linked": true}], "links": 1, "state": "10"}
+ok   run2 AVUL0010031: classic form path -> the same Expedited change | {"staging_type": "expedited", "status": "finished", "change": "CHG0030033", "type": "expedited", "model": "Expedited", "errors": []}
+ok   run2 AVUL0010008: no Expedited model -> nothing created or linked, task untouched, status error, one error line | {"staging_type": "expedited", "status": "error", "change": "", "type": "", "model": "", "errors": ["ChangeMgmt: change creation failed for sn_vul_action_create_cr 089aade293eb8714e3aef0aefaba1005 - no active change model presets type expedited"], "task": {"staging": [{"type": "expedited", "status": "new"}], "changes": [], "links": 0, "state": "1"}}
+   cleanup: {"changes": 3, "links": 7, "staging": 4}
+
+ALL AS EXPECTED: 14 of 14 as expected
+exit 0

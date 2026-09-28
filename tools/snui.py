@@ -25,10 +25,16 @@ class SNUI:
             raise RuntimeError('set SN_USER and SN_PASSWORD in the environment')
         self.s = requests.Session()
         self.s.verify = CA if os.path.exists(CA) else True
-        r = self.s.post(INST + '/login.do', data={
-            'user_name': user, 'user_password': pw,
-            'sys_action': 'sysverb_login', 'sysparm_login_url': 'welcome.do',
-            'remember_me': 'true', 'screensize': '1920x1080'})
+        for attempt in range(4):  # the local proxy resets a handshake now and then
+            try:
+                r = self.s.post(INST + '/login.do', data={
+                    'user_name': user, 'user_password': pw,
+                    'sys_action': 'sysverb_login', 'sysparm_login_url': 'welcome.do',
+                    'remember_me': 'true', 'screensize': '1920x1080'})
+                break
+            except requests.exceptions.ConnectionError:
+                if attempt == 3:
+                    raise
         r.raise_for_status()
         if 'logged in' not in r.text.lower() and 'glide_user_activity' not in str(self.s.cookies):
             chk = self.s.get(INST + '/sys.scripts.do')
