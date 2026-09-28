@@ -204,7 +204,9 @@ Follow it without being asked again.
   Rhino/GlideRecord trap: `'' + gr.getValue(f)` is the string "null" for an empty field and `addQuery(f, 'null')` selects the
   empty values; coerce with `|| ''` first. Rule 430 on the client instance reads the IP field and must be
   set back to DNS by their administrator. **Never change a lookup rule without asking him first.** Full state in
-  `stories/qualys-ci-lookup-rules/README.md`.
+  `stories/qualys-ci-lookup-rules/README.md`. Rule 750 `USEM IP Outside Hardware Match` (28 Sep, from the client's Shazzam
+  "IP in CMDB" logic on INC0010039): address alone in vCenter, cluster VIP (-> its cluster), IP phone, imaging hardware;
+  exactly one CI; Mihir's choices: cluster not node server, no name check, order 750.
 - Ignore classes (SNOWUSEMTP-1825, `stories/ignore-ci-classes/`): `sn_sec_cmn.ignoreCIClass` (scope sn_sec_cmn, set
   `..._MS_Ignore CI Classes for Lookup Rules_V1.0` in that scope) now carries the story's 19 classes on top of the five OOB
   ones; the platform compares exact class names (`_checkCIIgnored`, no hierarchy). `cmdb_ci_lb` on the list removes the

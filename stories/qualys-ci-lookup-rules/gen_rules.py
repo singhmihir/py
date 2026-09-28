@@ -471,7 +471,7 @@ def class_pref_chain(os_text, cls, label):
     ])
 
 
-POLISHED = {'350', '410', '415', '455', '460', '700', '705', '730', '740'}   # re-issued 15 Sep with the aligned layout; the rest keep their delivered text
+POLISHED = {'350', '410', '415', '455', '460', '700', '705', '730', '740', '750'}   # re-issued 15 Sep with the aligned layout; the rest keep their delivered text
 TRAIL = re.compile(r'^(\s*)(\S.*?\S)\s*// (.*)$')
 
 
@@ -1443,6 +1443,70 @@ def rule_460():
         CLOSE]
     return write('460', 'USEM Load Balancer Service Match', h + '\n' + '\n'.join(body))
 RULES.append(rule_460)
+
+
+def rule_750():
+    ip = '10.44.18.25'
+    payload = {"ID": "91402286", "IP": ip, "TRACKING_METHOD": "IP", "DNS": "sqlclu01.bankofamerica.com",
+               "OS": "Windows Server 2019 Standard 64 bit Edition Version 1809"}
+    h = header('USEM IP Outside Hardware Match',
+        'Some addresses belong to CIs the CMDB keeps outside the Hardware tree: a vCenter (an Application class), a cluster virtual IP, an IP Phone or an Imaging Hardware device (scanners and the like). The address rules search hardware records, adapters and IP Address records only, so a host scanned on such an address stays unmatched. This rule looks the scanned address up in exactly those four classes, as the Discovery status enrichment (Shazzam) does for its "IP in CMDB" column: the one CI found on the address is the match, and a cluster virtual IP stands for its cluster.',
+        payload, 'IP', ip, 'the OS',
+        'the sys_id of the one vCenter, IP Phone or Imaging Hardware CI carrying the address, or of the cluster whose virtual IP carries it; null when none or two different CIs carry it, when a virtual IP names no cluster, or when a server or desktop OS is scanned on a phone or imaging address.',
+        'the cluster "SQLCLU01": its virtual IP record "SQLCLU01-VIP" carries "10.44.18.25"; the Windows Server fingerprint is the node answering on the address and rules nothing out for a cluster.',
+        'USEM IP Layered Match and the other address rules found no hardware record, adapter or IP Address record carrying the address (or declined what they found), and every name rule before them declined.',
+        'hosts whose address is carried only by a vCenter, a cluster virtual IP, an IP phone or an imaging device; phones and scanners named in DNS were already taken by USEM Device Name Match.',
+        'USEM FQDN Name Broad Match, then the platform\'s own rules.')
+    body = [OPEN, CHECK, ip_prep(ip), IGNORE_BLOCK,
+        stage('The scanned OS may rule out a phone or an imaging device',
+              'A phone or a scanner reports no OS to an unauthenticated scan, or an embedded Linux kernel, "Unknown OS" or a vendor name. An OS that clearly names a server or desktop system (Windows, ESXi, AIX, Solaris, HP-UX) scanned on a phone or imaging address means the address now belongs to another machine, so those two classes are not counted; a Linux kernel fingerprint and anything mentioning a phone are accepted, as in USEM Device Name Match. A vCenter and a cluster answer with the OS of the machine behind the address, so the OS rules nothing out for them.',
+              'the sample reports Windows Server 2019, which would rule out a phone or an imaging device on "10.44.18.25"; the virtual IP found there is still counted.'),
+        CLASSFOR,
+        "    var os = ('' + (sourcePayload.OS || '')).toLowerCase();",
+        '    var pref = classFor(os);',
+        "    var notDevice = !!pref && pref != 'cmdb_ci_linux_server' && os.indexOf('phone') == -1;",
+        stage('Search the four classes outside the Hardware tree on the address',
+              'Each class is searched on ip_address, sub-classes included, with the ignored classes left out. A vCenter, a phone or an imaging device is the CI itself; a cluster virtual IP stands for the cluster it names, because the node answering on a virtual address changes with every failover while the cluster does not. A virtual IP that names no cluster leaves the address unexplained and the rule declines.',
+              'cmdb_ci_cluster_vip holds "SQLCLU01-VIP" on "10.44.18.25" naming the cluster "SQLCLU01", so found holds that cluster; the vCenter, phone and imaging classes hold nothing on the address.'),
+        "    var classes = [                               // viaCluster: the record stands for its cluster; device: phone or imaging",
+        "        {table: 'cmdb_ci_vcenter', viaCluster: false, device: false},",
+        "        {table: 'cmdb_ci_cluster_vip', viaCluster: true, device: false},",
+        "        {table: 'cmdb_ci_ip_phone', viaCluster: false, device: true},",
+        "        {table: 'cmdb_ci_imaging_hardware', viaCluster: false, device: true}",
+        '    ];',
+        '    var found = [], unnamed = false;',
+        '    for (var i = 0; i < classes.length; i++) {',
+        '        if (classes[i].device && notDevice)       // a server or desktop OS on a device address',
+        '            continue;',
+        '        var gr = new GlideRecord(classes[i].table);',
+        '        if (!gr.isValid())                        // class not installed here, try the next one',
+        '            continue;',
+        "        gr.addQuery('ip_address', ip);",
+        '        if (ignore)',
+        "            gr.addQuery('sys_class_name', 'NOT IN', ignore);",
+        '        gr.query();',
+        '        while (gr.next()) {',
+        "            var id = classes[i].viaCluster ? (gr.getValue('cluster') || '') : gr.getUniqueValue();",
+        '            if (!id)',
+        '                unnamed = true;',
+        '            else if (found.indexOf(id) == -1)',
+        '                found.push(id);',
+        '        }',
+        '    }',
+        stage('Exactly one CI on the address, or none',
+              'One CI is the match, however many records led to it (two virtual IP records of one cluster name the same cluster). Two different CIs on one address, a virtual IP without a cluster, or a cluster of an ignored class leave the address ambiguous and the rule declines, so nothing is guessed.',
+              'found holds the one cluster "SQLCLU01", which is not an ignored class, so its sys_id is returned. Were a vCenter also on "10.44.18.25", found would hold two CIs and the rule would decline.'),
+        '    if (unnamed || found.length != 1)',
+        '        return null;',
+        "    var ci = new GlideRecord('cmdb_ci');",
+        "    ci.addQuery('sys_id', found[0]);",
+        '    if (ignore)',
+        "        ci.addQuery('sys_class_name', 'NOT IN', ignore);",
+        '    ci.query();',
+        '    return ci.next() ? found[0] : null;',
+        CLOSE]
+    return write('750', 'USEM IP Outside Hardware Match', h + '\n' + '\n'.join(body))
+RULES.append(rule_750)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,39 @@
+fixtures: 19 records, 19 created, 0 already present
+ok   run1 cluster VIP, scanned as the Windows node answering -> the cluster, not the node's server | chain 750 FIX750-SQLCLU01 [cmdb_ci_cluster] | 750 alone -> FIX750-SQLCLU01 [cmdb_ci_cluster]
+ok   run1 the same VIP with no DNS and no OS -> the cluster (address alone) | chain 750 FIX750-SQLCLU01 [cmdb_ci_cluster] | 750 alone -> FIX750-SQLCLU01 [cmdb_ci_cluster]
+ok   run1 a VIP that names no cluster -> declined | chain (no match)  | 750 alone -> -
+ok   run1 two VIP records of one cluster on the address -> that cluster | chain 750 FIX750-SQLCLU02 [cmdb_ci_cluster] | 750 alone -> FIX750-SQLCLU02 [cmdb_ci_cluster]
+ok   run1 VIPs of two different clusters on one address -> declined | chain (no match)  | 750 alone -> -
+ok   run1 vCenter on the address, scanned as VMware Photon OS -> the vCenter | chain 750 FIX750-VC01 [cmdb_ci_vcenter] | 750 alone -> FIX750-VC01 [cmdb_ci_vcenter]
+ok   run1 the vCenter scanned under another DNS name -> still the vCenter (address alone, no name check) | chain 750 FIX750-VC01 [cmdb_ci_vcenter] | 750 alone -> FIX750-VC01 [cmdb_ci_vcenter]
+ok   run1 the vCenter scanned as Windows Server -> still the vCenter (the OS rules nothing out for it) | chain 750 FIX750-VC01 [cmdb_ci_vcenter] | 750 alone -> FIX750-VC01 [cmdb_ci_vcenter]
+ok   run1 IP phone on the address, no DNS, no OS -> the phone | chain 750 FIX750-PHONE01 [cmdb_ci_ip_phone] | 750 alone -> FIX750-PHONE01 [cmdb_ci_ip_phone]
+ok   run1 the phone scanned under a DNS name no phone carries -> the phone (address alone) | chain 750 FIX750-PHONE01 [cmdb_ci_ip_phone] | 750 alone -> FIX750-PHONE01 [cmdb_ci_ip_phone]
+ok   run1 the phone scanned as "Linux 2.x" (embedded Linux) -> the phone | chain 750 FIX750-PHONE01 [cmdb_ci_ip_phone] | 750 alone -> FIX750-PHONE01 [cmdb_ci_ip_phone]
+ok   run1 a Windows 10 host on the phone's address -> declined (the address now belongs to another machine) | chain (no match)  | 750 alone -> -
+ok   run1 two phones on one address -> declined | chain (no match)  | 750 alone -> -
+ok   run1 imaging device on the address -> the device | chain 750 FIX750-SCAN01 [cmdb_ci_imaging_hardware] | 750 alone -> FIX750-SCAN01 [cmdb_ci_imaging_hardware]
+ok   run1 a phone and a vCenter on one address -> declined | chain (no match)  | 750 alone -> -
+ok   run1 a Linux server and a vCenter on one address, Red Hat scanned -> the address rule for the server wins first | chain 700 FIX750-SRV60 [cmdb_ci_linux_server] | 750 alone -> FIX750-VC60 [cmdb_ci_vcenter]
+ok   run1 nothing outside the Hardware tree on the address -> declined | chain (no match)  | 750 alone -> -
+ok   run1 loopback address -> declined | chain (no match)  | 750 alone -> -
+ok   run2 cluster VIP, scanned as the Windows node answering -> the cluster, not the node's server | chain 750 FIX750-SQLCLU01 [cmdb_ci_cluster] | 750 alone -> FIX750-SQLCLU01 [cmdb_ci_cluster]
+ok   run2 the same VIP with no DNS and no OS -> the cluster (address alone) | chain 750 FIX750-SQLCLU01 [cmdb_ci_cluster] | 750 alone -> FIX750-SQLCLU01 [cmdb_ci_cluster]
+ok   run2 a VIP that names no cluster -> declined | chain (no match)  | 750 alone -> -
+ok   run2 two VIP records of one cluster on the address -> that cluster | chain 750 FIX750-SQLCLU02 [cmdb_ci_cluster] | 750 alone -> FIX750-SQLCLU02 [cmdb_ci_cluster]
+ok   run2 VIPs of two different clusters on one address -> declined | chain (no match)  | 750 alone -> -
+ok   run2 vCenter on the address, scanned as VMware Photon OS -> the vCenter | chain 750 FIX750-VC01 [cmdb_ci_vcenter] | 750 alone -> FIX750-VC01 [cmdb_ci_vcenter]
+ok   run2 the vCenter scanned under another DNS name -> still the vCenter (address alone, no name check) | chain 750 FIX750-VC01 [cmdb_ci_vcenter] | 750 alone -> FIX750-VC01 [cmdb_ci_vcenter]
+ok   run2 the vCenter scanned as Windows Server -> still the vCenter (the OS rules nothing out for it) | chain 750 FIX750-VC01 [cmdb_ci_vcenter] | 750 alone -> FIX750-VC01 [cmdb_ci_vcenter]
+ok   run2 IP phone on the address, no DNS, no OS -> the phone | chain 750 FIX750-PHONE01 [cmdb_ci_ip_phone] | 750 alone -> FIX750-PHONE01 [cmdb_ci_ip_phone]
+ok   run2 the phone scanned under a DNS name no phone carries -> the phone (address alone) | chain 750 FIX750-PHONE01 [cmdb_ci_ip_phone] | 750 alone -> FIX750-PHONE01 [cmdb_ci_ip_phone]
+ok   run2 the phone scanned as "Linux 2.x" (embedded Linux) -> the phone | chain 750 FIX750-PHONE01 [cmdb_ci_ip_phone] | 750 alone -> FIX750-PHONE01 [cmdb_ci_ip_phone]
+ok   run2 a Windows 10 host on the phone's address -> declined (the address now belongs to another machine) | chain (no match)  | 750 alone -> -
+ok   run2 two phones on one address -> declined | chain (no match)  | 750 alone -> -
+ok   run2 imaging device on the address -> the device | chain 750 FIX750-SCAN01 [cmdb_ci_imaging_hardware] | 750 alone -> FIX750-SCAN01 [cmdb_ci_imaging_hardware]
+ok   run2 a phone and a vCenter on one address -> declined | chain (no match)  | 750 alone -> -
+ok   run2 a Linux server and a vCenter on one address, Red Hat scanned -> the address rule for the server wins first | chain 700 FIX750-SRV60 [cmdb_ci_linux_server] | 750 alone -> FIX750-VC60 [cmdb_ci_vcenter]
+ok   run2 nothing outside the Hardware tree on the address -> declined | chain (no match)  | 750 alone -> -
+ok   run2 loopback address -> declined | chain (no match)  | 750 alone -> -
+
+ALL AS EXPECTED: 36 of 36 as expected

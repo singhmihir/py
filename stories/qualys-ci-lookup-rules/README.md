@@ -553,3 +553,24 @@ not). Checked on a render of the new pages.
 Delivered size (21 Sep, evening): one example per rule (`deck_demo/demo_data_one.json`, the first example of each rule
 from `demo_data.json`; rebuild with `node deck_demo/build_demo_deck.js deck_demo/demo_data_one.json "<pptx>"`): 116 slides,
 222 links. The three-example data stays in `demo_data.json` for a fuller build.
+
+## Shazzam logic and rule 750 (set "Qualys CI Lookup Rules IP Outside Hardware Match" V1.0, 28 Sep)
+Mihir attached the client's business rule "Discovery - Async Shazzam Status Update" (BOFA Discovery, async after insert
+on `shazzam_status`, gated by `bofa.shazzam.br_enabled`) to INC0010039. Its "IP in CMDB" column takes the first record of:
+hardware on the address; vCenter (`cmdb_ci_vcenter`, an Application class); cluster VIP (`cmdb_ci_cluster_vip`, the node's
+server, else the cluster); imaging hardware; IP phone; IP Address record -> adapter -> CI; DNS first label as a hardware name
+(its "-vip" strip is a no-op). The rest of the rule (targeted list, exclusion, DDI subnet and location, tech domain,
+discrepancy task) is not CI lookup. Already in the chain, stricter: 700/705, 740/730, 400/410. Missing: vCenter, cluster VIP,
+and phones / imaging hardware by address (415 finds them by name only; the platform's 900/920 find any class by fqdn/name).
+
+Mihir's decisions (28 Sep): cluster VIP -> the cluster (not the node's server); address alone, no name check; all four classes;
+order 750 (after 740, before 850). Rule **750 USEM IP Outside Hardware Match** (`gen_rules.py` rule_750, field IP): searches the
+four classes on ip_address, ignored classes left out; a VIP stands for its `cluster`; exactly one distinct CI or decline (two CIs,
+a VIP without a cluster); a server or desktop OS on a phone or imaging address is not counted (as in 415); the returned CI
+re-checked against the ignore list. `build_rules_v10.py` / `state_v10.json` deploy; `test_750.py` (19 marked fixtures, 18 cases,
+twice, 36 of 36, `test_750_run.log`; `remove` deletes them); `export_rules.py state_v10.json` exported, upload proof 1 of 1,
+archived. Regression with 750 in the chain: `test_inc_sep15.py` 32, `test_v6.py` 50, `test_v5.py` 36, `test_v3.py` 36,
+`test_lb_member.py` 58, `test_evidence.py` 350 of 356: the 3 Linux-on-balancer items (x2) that the `cmdb_ci_lb` ignore class
+of SNOWUSEMTP-1825 removes, as expected since 17 Sep; nothing from 750. Behaviour change on the client: a cluster VIP whose
+record carries the scanned FQDN (platform rule 900 -> the VIP record) now gets the cluster from 750.
+`Shazzam Logic and the Qualys CI Lookup Rules.docx` (`build_shazzam_doc.js`, 3 pages), the set and the script on INC0010039.
