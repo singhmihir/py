@@ -1,4 +1,4 @@
-# VR workspace: Expedited change from Create Change
+# VR workspace: Expedited change from Create Change (VUL, AVUL, CVUL, CRG)
 
 Request (28 Sep): creating a change from an application remediation task (AVUL) in the workspace offers no Expedited type,
 the classic form does; add it and make it work. Mihir's direction after a first build with a page variant: no variants or
@@ -46,6 +46,28 @@ Notes: Chrome's parallel connections through the local proxy fail (ERR_TOO_MANY_
 request through Playwright four at a time, on the proxy named in HTTPS_PROXY (its port changes between containers); a
 global script cannot delete `sn_vul_*` rows (cross-scope policy), so staging records go through the Table API; deleting a
 change runs rules that assign a global `o`, so test scripts name their result objects otherwise.
+
+## 29 Sep: every remediation task type
+Mihir asked for CVUL and CRG too (VUL and AVUL share the Vulnerability Response dialog and code).
+- Dialogs: containers `fd9d6e2953021110501fddeeff7b1296` *Modal - Container Create Change Request default*
+  (Containers app), Configuration Compliance `996c1f486db42110f877388cdecc4b6f` *Modal - CC Create Change Request*
+  (sn_vulc); both had standard, normal, emergency as static items and special-case only `standard`. The delivered script
+  `Add Expedited to Create Change Dialog.js` changes the dialog of the application selected in the picker
+  (`gs.getCurrentApplicationId()` in a background script is the picker's application), one run per application.
+- Code: `sn_vul_container.ChangeMgmt` is an empty extension of its `ChangeMgmtBase` -> the same override
+  (`ChangeMgmt (Containers).js`; its base fills `implementation_plan` from the staging record). `sn_vulc.ChangeMgmt` is
+  the full out-of-box code with no extension and builds the change with `new GlideRecordSecure('change_request')` and
+  `type` set from the staging record -> two in-place edits (`cc_edits.json`: guard at the top of `actionCreateChange`,
+  first line of `createNewChangeRequest`). The model lookup lives once in `sn_vul.ChangeMgmt.getExpeditedChangeModel()`.
+  All three button conditions call `sn_vul.ChangeMgmt().isITSMAdvancedPluginActive()`, so the one PDI stand-in covers them.
+- Batch on the PDI: parent Global (Type choice) + children Vulnerability Response, Containers, Configuration Compliance
+  (2 rows each: page and script include). The container and CC staging tables refuse deletes (ACL): test staging rows stay.
+- Out of box, in the container and CC dialogs, choosing Standard and then another type leaves Create disabled (also with
+  Normal); not part of this change, noted in the guide.
+- 28 Sep 15:42 UTC the user admin removed the Emergency item from the VR dialog by hand (Default set, after the guide was
+  attached); restored 29 Sep in the VR child set, and method B of the guide now warns to only add.
+- Tests: `test.py` runs the three types side by side (browser: Expedited submitted, Normal submitted, Standard then
+  Expedited; classic path; no-model error), twice.
 
 ## Delivery (28 Sep)
 Mihir applies the change by hand on bofadev (no update set import). On INC0010004: `VR Workspace Expedited Change -

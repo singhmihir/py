@@ -1,0 +1,12 @@
+[
+ {
+  "where": "actionCreateChange",
+  "find": "    actionCreateChange: function(actionCreate) {\n",
+  "replace": "    actionCreateChange: function(actionCreate) {\n        if (actionCreate.getValue(\"change_request_type\") === \"expedited\" && !new sn_vul.ChangeMgmt().getExpeditedChangeModel()) {\n            gs.error(\"ChangeMgmt: change creation failed for sn_vulc_action_create_cr \" + actionCreate.getUniqueValue() + \" - no active change model presets type expedited\");\n            actionCreate.error_message = gs.getMessage(\"No active change model presets the Expedited type.\");\n            actionCreate.status = this.TRG_CR_STATUS.ERROR;\n            return null;\n        }\n"
+ },
+ {
+  "where": "createNewChangeRequest",
+  "find": "    createNewChangeRequest: function(actionCreate, parentId) {\n        var change = new GlideRecordSecure(\"change_request\");\n",
+  "replace": "    createNewChangeRequest: function(actionCreate, parentId) {\n        var change = actionCreate.getValue(\"change_request_type\") === \"expedited\" ?\n            global.ChangeRequest.newChange(new sn_vul.ChangeMgmt().getExpeditedChangeModel()).getGlideRecord() :\n            new GlideRecordSecure(\"change_request\");\n"
+ }
+]

@@ -1,9 +1,28 @@
 {
  "parent": "5314a96293ab8714e3aef0aefaba109a",
- "set": "8ae85566932b8714e3aef0aefaba102b",
  "name": "SNOWUSEMTP_MS_VR Workspace Expedited Change_V1.0",
- "child_name": "SNOWUSEMTP_MS_VR Workspace Expedited Change - Vulnerability Response_V1.0",
+ "children": {
+  "vr": "8ae85566932b8714e3aef0aefaba102b",
+  "cvul": "9b30243e93e70b14e3aef0aefaba1018",
+  "crg": "d730243e93e70b14e3aef0aefaba101a"
+ },
+ "child_names": {
+  "vr": "SNOWUSEMTP_MS_VR Workspace Expedited Change - Vulnerability Response_V1.0",
+  "cvul": "SNOWUSEMTP_MS_VR Workspace Expedited Change - Containers_V1.0",
+  "crg": "SNOWUSEMTP_MS_VR Workspace Expedited Change - Configuration Compliance_V1.0"
+ },
+ "scopes": {
+  "vr": "054cdcc2ff200200158bffffffffff94",
+  "cvul": "2e42728ac8933010ba48c8fb8b6cf08a",
+  "crg": "29691e1f0212471dad08668c1e39932b"
+ },
+ "defaults": {
+  "vr": "756b39a6939e4314e3aef0aefaba10b8",
+  "cvul": "4b006cfa93e70b14e3aef0aefaba101a",
+  "crg": "ae829cf0930e8b10e3aef0aefaba1031"
+ },
+ "global_default_set": "7dba58ecf54403100a22c0b3dfa151af",
+ "set": "8ae85566932b8714e3aef0aefaba102b",
  "scope": "054cdcc2ff200200158bffffffffff94",
- "default_set": "756b39a6939e4314e3aef0aefaba10b8",
- "global_default_set": "7dba58ecf54403100a22c0b3dfa151af"
+ "default_set": "756b39a6939e4314e3aef0aefaba10b8"
 }

@@ -220,7 +220,11 @@ Follow it without being asked again.
   (table, not record), so an empty id links an empty change: stop earlier. Create Change button needs plugin
   `sn_sow_chg` (client has it, PDI not). Global scripts cannot delete `sn_vul_*` rows (cross-scope; use the Table API);
   deleting a change runs rules that assign a global `o`. Copy Model (`STTRMModel.copy`) leaves the copy inactive. The
-  client has its own Expedited change model (value `expedited`).
+  client has its own Expedited change model (value `expedited`). 29 Sep, all task types: containers dialog
+  `fd9d6e2953021110501fddeeff7b1296` + `sn_vul_container.ChangeMgmt` (empty extension -> override); CC dialog
+  `996c1f486db42110f877388cdecc4b6f` + `sn_vulc.ChangeMgmt` (full OOB code, no extension -> two in-place edits); model
+  lookup shared in `sn_vul.ChangeMgmt.getExpeditedChangeModel()`. On 28 Sep someone as admin deleted Emergency from the VR
+  dialog while hand-editing Composition: check the other items after any hand edit of a page.
 - Ignore classes (SNOWUSEMTP-1825, `stories/ignore-ci-classes/`): `sn_sec_cmn.ignoreCIClass` (scope sn_sec_cmn, set
   `..._MS_Ignore CI Classes for Lookup Rules_V1.0` in that scope) now carries the story's 19 classes on top of the five OOB
   ones; the platform compares exact class names (`_checkCIIgnored`, no hierarchy). `cmdb_ci_lb` on the list removes the
